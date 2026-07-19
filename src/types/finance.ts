@@ -18,11 +18,18 @@ export interface CartifyItem extends ExpenseEntry {
     isVatable?: boolean; // True for standard 12% VAT, False for VAT-exempt (raw produce/meat/fish)
 }
 
-// Budget configuration for the global app
 export type BudgetPeriod = 'weekly' | 'monthly' | '3-months' | '6-months' | 'annually';
 
+export interface BudgetCategory {
+    id: string;
+    name: string;
+    icon: string; // Component or identifier name
+    color: string; // e.g., '#30D158'
+    targetAmount: number; // Stored natively in canonical Monthly PHP
+}
+
 export interface BudgetConfig {
-    targetAmount: number; // Target amount in PHP
-    period: BudgetPeriod;
+    targetAmount: number; // Global target amount in canonical Monthly PHP
+    period: BudgetPeriod; // Current selected display period
     jarAllowedPercentage: number; // Percentage of targetAmount allowed for extra spend
 }

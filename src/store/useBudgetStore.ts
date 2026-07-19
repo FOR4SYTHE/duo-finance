@@ -1,25 +1,50 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { BudgetConfig, BudgetPeriod } from '@/types/finance';
+import { BudgetConfig, BudgetPeriod, BudgetCategory } from '@/types/finance';
 
 interface BudgetState {
     config: BudgetConfig;
+    categories: BudgetCategory[];
     setBudget: (amount: number, period: BudgetPeriod) => void;
     setJarPercentage: (percentage: number) => void;
+    addCategory: (category: Omit<BudgetCategory, 'id'>) => void;
+    updateCategory: (id: string, updates: Partial<BudgetCategory>) => void;
+    removeCategory: (id: string) => void;
 }
+
+const DEFAULT_CATEGORIES: BudgetCategory[] = [
+    { id: '1', name: 'Rent', icon: 'Home', color: '#30D158', targetAmount: 18000 },
+    { id: '2', name: 'Groceries', icon: 'ShoppingBag', color: '#E8A33D', targetAmount: 9000 },
+    { id: '3', name: 'Utilities', icon: 'Zap', color: '#0A84FF', targetAmount: 3500 },
+    { id: '4', name: 'Bills', icon: 'CreditCard', color: '#FF453A', targetAmount: 2000 },
+    { id: '5', name: 'Kids Tuition', icon: 'GraduationCap', color: '#BF5AF2', targetAmount: 5000 },
+];
 
 export const useBudgetStore = create<BudgetState>()(
     persist(
         (set) => ({
             config: {
-                targetAmount: 30000, // Default 30k PHP
+                targetAmount: 40000, // Adjusted default to roughly match categories
                 period: 'monthly',
-                jarAllowedPercentage: 20 // Default 20%
+                jarAllowedPercentage: 20
             },
+            categories: DEFAULT_CATEGORIES,
             setBudget: (targetAmount: number, period: BudgetPeriod) => 
                 set((state) => ({ config: { ...state.config, targetAmount, period } })),
             setJarPercentage: (percentage: number) => 
-                set((state) => ({ config: { ...state.config, jarAllowedPercentage: percentage } }))
+                set((state) => ({ config: { ...state.config, jarAllowedPercentage: percentage } })),
+            addCategory: (category) => 
+                set((state) => ({ 
+                    categories: [...state.categories, { ...category, id: Math.random().toString(36).substring(7) }] 
+                })),
+            updateCategory: (id, updates) => 
+                set((state) => ({
+                    categories: state.categories.map(c => c.id === id ? { ...c, ...updates } : c)
+                })),
+            removeCategory: (id) => 
+                set((state) => ({
+                    categories: state.categories.filter(c => c.id !== id)
+                }))
         }),
         {
             name: 'duo-budget-storage'
