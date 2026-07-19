@@ -52,20 +52,20 @@ export function PriceEntryModal({ isOpen, onClose, onConfirm, title }: PriceEntr
     return (
         <AnimatePresence>
             {isOpen && (
-                <>
+                <div className="absolute inset-0 z-[100] flex flex-col justify-end pointer-events-none">
                     <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto"
                     />
                     <motion.div 
                         initial={{ y: "100%" }}
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed bottom-0 left-0 right-0 bg-[#111] rounded-t-[32px] p-6 z-50 border-t border-white/10 sm:max-w-[400px] sm:mx-auto sm:left-auto sm:right-auto sm:w-full"
+                        className="relative w-full bg-[#111] rounded-t-[32px] p-6 border-t border-white/10 pointer-events-auto mt-auto flex flex-col pb-[calc(env(safe-area-inset-bottom)+24px)]"
                     >
                         <div className="flex justify-between items-center mb-6">
                             <span className="text-white/70 font-medium">{title}</span>
@@ -105,7 +105,7 @@ export function PriceEntryModal({ isOpen, onClose, onConfirm, title }: PriceEntr
                             Confirm Price
                         </button>
                     </motion.div>
-                </>
+                </div>
             )}
         </AnimatePresence>
     );

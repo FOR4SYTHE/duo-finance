@@ -48,6 +48,8 @@ If a UI change can't honestly clear all four, it goes back for another pass befo
 
 **Color nuance — "one hero color moment," not a colorful app.** The restraint principle above still holds, but restraint isn't the same as monochrome. Premium fintech references (Apple Wallet-style card stacks, colorful gradient payment cards against a neutral dark shell) get their luxury feel from *one* saturated, deliberate color moment per screen — a single hero card or focal element — while everything surrounding it stays neutral and quiet. Apply that here: the neutral dark palette from Section 2 is the shell for 95% of the UI; a single hero element per screen (the main budget-health card on Home, for instance) can carry a richer, more saturated color tied to meaning (status/category), as long as the chrome around it doesn't compete. Curved, soft-edged cards; circular icon-buttons with a label beneath (not text-in-a-pill buttons); and a floating, rounded/capsule-shaped bottom navigation bar are all part of this same visual language — lean into all three.
 
+**Responsive & adaptive layout — non-negotiable.** The "phone frame" bezel used in early design mockups/screenshots was a presentation device for reviewing designs — it must never be a hardcoded container in the shipped app. Every screen must fluidly adapt to whatever viewport it's actually running in: real mobile browsers (using `100dvh` and safe-area-inset padding, not a fixed pixel height), and desktop web (content reflows sensibly — e.g. a centered, comfortably-read column — rather than either stretching edge-to-edge or staying trapped in a tiny mobile-width box on a wide screen). Nothing should ever require scrolling to reveal a primary action (like a "Start Trip" or "Confirm" button) that should be visible without scrolling on a normal device viewport. Any modal or overlay must be a true full-screen layer with correct stacking (above the persistent bottom nav, not bleeding through it), and any floating action button must be positioned relative to the app's content container, not raw browser/viewport coordinates. Test and confirm this at more than one viewport size, not just the sandbox's default render.
+
 ---
 
 ## 3. Tech Stack
@@ -112,9 +114,9 @@ The everyday counterpart to a savings piggy bank, but for outgoing spend: instea
 
 **Start a trip:** one primary button. Ask two things only: budget amount (numeric keypad, same style as the calculator), and a single toggle — Simple or Organized.
 
-**Simple mode (default, "lazy" path):** no categories, no pre-planning. A big running total ("₱2,000 left / R533 left") at the top. Adding an item is exactly: tap "+", type price, done. This is the primary, fastest path and must never require more taps than this.
+**Simple mode (default, "lazy" path):** no categories, no pre-planning, **and no category UI of any kind, ever** — this is the key distinction from Unplanned below. A big running total ("₱2,000 left / R533 left") at the top. Adding an item is exactly: tap "+", type price, done. This is the primary, fastest path and must never require more taps than this, and must never surface a category picker, chip, or grouping — that complexity belongs entirely to Organized mode.
 
-**Organized mode** splits into two further sub-modes, chosen at trip start:
+**Organized mode** splits into two further sub-modes, chosen at trip start. Both sub-modes of Organized must visibly and functionally differ from Simple — if an Organized mode screen looks identical to Simple, something is wrong; category selection must always be present and required in both Organized sub-modes below:
 
 - **Unplanned (organized-on-the-fly):** no pre-trip list. Pick a top-level category (Groceries, Clothes, Furniture, etc. — large tappable icons, not a dropdown). Inside, a persistent "current subcategory" chip (e.g. "Dairy") tags every price entered until changed. Switching subcategory is a single tap → icon grid → tap — it must never interrupt or gate the act of adding a price.
 

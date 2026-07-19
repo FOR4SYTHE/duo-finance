@@ -8,13 +8,14 @@ import { Activity, Plus, ShoppingCart, Trash2, ArrowUpDown } from "lucide-react"
 import { motion, useAnimation, PanInfo } from "framer-motion";
 
 export function LiveTripTracker() {
-    const { items, budget, mode, updateItemPrice, incrementQuantity, decrementQuantity, removeItem, addItem } = useCartifyStore();
+    const { items, budget, mode, activeCategory, setActiveCategory, updateItemPrice, incrementQuantity, decrementQuantity, removeItem, addItem } = useCartifyStore();
     const { exchangeRate } = useCurrencyStore();
     
     const [sortAsc, setSortAsc] = useState(false);
     const [activeEditId, setActiveEditId] = useState<string | null>(null);
     const [isAddingNew, setIsAddingNew] = useState(false);
     const [newItemName, setNewItemName] = useState("");
+    const [isSwitchingCategory, setIsSwitchingCategory] = useState(false);
 
     const totalSpent = items.reduce((acc, item) => acc + item.amount, 0);
     const remaining = budget - totalSpent;
@@ -34,10 +35,8 @@ export function LiveTripTracker() {
 
     const sortedItems = useMemo(() => {
         return [...items].sort((a, b) => {
-            // Unpriced items go to bottom by default
             if (a.status === 'still-need' && b.status === 'in-cart') return 1;
             if (a.status === 'in-cart' && b.status === 'still-need') return -1;
-            // Then sort by price
             return sortAsc ? a.amount - b.amount : b.amount - a.amount;
         });
     }, [items, sortAsc]);
@@ -47,17 +46,48 @@ export function LiveTripTracker() {
             updateItemPrice(activeEditId, price);
             setActiveEditId(null);
         } else if (isAddingNew && newItemName) {
-            addItem(newItemName, 'Unplanned', price, 1);
+            addItem(newItemName, mode === 'unplanned' ? activeCategory || undefined : undefined, price, 1);
             setIsAddingNew(false);
             setNewItemName("");
         }
     };
 
+    const categories = ["Groceries", "Clothes", "Furniture", "Electronics", "Pharmacy", "Hardware"];
+
+    if (mode === 'unplanned' && (!activeCategory || isSwitchingCategory)) {
+        return (
+            <div className="flex flex-col w-full h-full relative z-20 pt-4">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-white text-xl font-medium tracking-tight">Pick a Category</h2>
+                    {activeCategory && (
+                        <button onClick={() => setIsSwitchingCategory(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                            <span className="text-white text-xs">✕</span>
+                        </button>
+                    )}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                    {categories.map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => {
+                                setActiveCategory(cat);
+                                setIsSwitchingCategory(false);
+                            }}
+                            className="p-6 rounded-[24px] bg-white/[0.03] border border-white/[0.05] flex flex-col items-center justify-center gap-3 hover:bg-white/[0.08] active:scale-95 transition-all"
+                        >
+                            <span className="text-white text-sm font-medium">{cat}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col w-full h-full relative z-20 overflow-y-auto no-scrollbar pb-24">
             
             {/* Active Trip Hero Card */}
-            <div className={`relative w-full rounded-[32px] p-6 mb-8 overflow-hidden border transition-colors duration-500 ${isOverBudget ? 'bg-red-500/10 border-red-500/20 shadow-[0_0_60px_rgba(239,68,68,0.1)]' : 'bg-black/40 border-white/[0.05] shadow-[0_0_60px_rgba(255,255,255,0.02)]'}`}>
+            <div className={`relative w-full rounded-[32px] p-6 mb-4 overflow-hidden border transition-colors duration-500 ${isOverBudget ? 'bg-red-500/10 border-red-500/20 shadow-[0_0_60px_rgba(239,68,68,0.1)]' : 'bg-black/40 border-white/[0.05] shadow-[0_0_60px_rgba(255,255,255,0.02)]'}`}>
                 <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-white/[0.1] flex items-center justify-center">
@@ -98,6 +128,19 @@ export function LiveTripTracker() {
                 </div>
             </div>
 
+            {mode === 'unplanned' && activeCategory && (
+                <div className="flex items-center justify-between px-2 mb-4">
+                    <span className="text-white/40 text-xs uppercase tracking-widest font-semibold">Active Tag</span>
+                    <button 
+                        onClick={() => setIsSwitchingCategory(true)}
+                        className="bg-[#30D158]/10 border border-[#30D158]/30 px-4 py-1.5 rounded-full flex items-center gap-2 hover:bg-[#30D158]/20 transition-colors"
+                    >
+                        <span className="text-[#30D158] text-xs font-bold">{activeCategory}</span>
+                        <span className="w-4 h-4 rounded-full bg-[#30D158]/20 flex items-center justify-center text-[#30D158] text-[10px]">▼</span>
+                    </button>
+                </div>
+            )}
+
             {/* Cart Items List */}
             <div className="flex flex-col gap-4 flex-1">
                 <div className="flex justify-between items-center mb-2 px-1">
@@ -131,12 +174,14 @@ export function LiveTripTracker() {
             </div>
 
             {/* Add Item FAB */}
-            <button 
-                onClick={() => setIsAddingNew(true)}
-                className="fixed bottom-24 right-6 w-[60px] h-[60px] rounded-full bg-white text-black shadow-[0_8px_30px_rgba(255,255,255,0.2)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-40"
-            >
-                <Plus className="w-8 h-8" strokeWidth={2} />
-            </button>
+            <div className="sticky bottom-6 flex justify-end px-2 mt-auto pointer-events-none z-40">
+                <button 
+                    onClick={() => setIsAddingNew(true)}
+                    className="w-[60px] h-[60px] rounded-full bg-white text-black shadow-[0_8px_30px_rgba(255,255,255,0.2)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all pointer-events-auto"
+                >
+                    <Plus className="w-8 h-8" strokeWidth={2} />
+                </button>
+            </div>
 
             {/* Modals */}
             <PriceEntryModal 
