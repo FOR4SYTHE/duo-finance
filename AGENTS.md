@@ -110,11 +110,20 @@ The everyday counterpart to a savings piggy bank, but for outgoing spend: instea
 
 ### 4.4 Cartify — Shopping Trip Budget Tracker (Phase 4)
 
-**Start a trip:** one primary button. Ask two things only: budget amount (numeric keypad, same style as the calculator), and a single toggle — Simple or Categorized.
+**Start a trip:** one primary button. Ask two things only: budget amount (numeric keypad, same style as the calculator), and a single toggle — Simple or Organized.
 
-**Simple mode (default):** no categories. A big running total ("₱2,000 left / R533 left") at the top. Adding an item is exactly: tap "+", type price, done. This is the primary, fastest path and must never require more taps than this.
+**Simple mode (default, "lazy" path):** no categories, no pre-planning. A big running total ("₱2,000 left / R533 left") at the top. Adding an item is exactly: tap "+", type price, done. This is the primary, fastest path and must never require more taps than this.
 
-**Categorized mode:** pick a top-level category (Groceries, Clothes, Furniture, etc. — large tappable icons, not a dropdown). Inside, a persistent "current subcategory" chip (e.g. "Dairy") tags every price entered until changed. Switching subcategory is a single tap → icon grid → tap — it must never interrupt or gate the act of adding a price.
+**Organized mode** splits into two further sub-modes, chosen at trip start:
+
+- **Unplanned (organized-on-the-fly):** no pre-trip list. Pick a top-level category (Groceries, Clothes, Furniture, etc. — large tappable icons, not a dropdown). Inside, a persistent "current subcategory" chip (e.g. "Dairy") tags every price entered until changed. Switching subcategory is a single tap → icon grid → tap — it must never interrupt or gate the act of adding a price.
+
+- **Planned (pre-listed):** before the trip even starts, the user builds a shopping list — categories and/or specific items they intend to buy, no prices yet — plus the trip budget. At the store, this becomes a live list of tappable rows:
+  - Unpriced/"still need" items are visually distinct (e.g. dimmed/outlined) from priced/"in cart" items.
+  - Tapping an unpriced item opens the same price-entry keypad used elsewhere in the app; confirming a price moves that item into the "in cart" state and it starts counting against the budget.
+  - Each priced item gets a **+ / − stepper**: **+** adds another unit at the same price (fast path for buying multiples; tapping the row itself lets you edit the price if it differs). **−** decrements the quantity; if it reaches zero, the item reverts to its unpriced "still need" state rather than disappearing — it stays on the list so it can be logged again without rebuilding it.
+  - **Swipe left** on any item (priced or not) fully removes it from the list entirely — this is the only action that deletes the item outright, distinct from `−` which only decrements/reverts it.
+  - An always-available "+" floating action button lets the user log an item that wasn't on the original pre-trip list, for anything unplanned that comes up mid-trip.
 
 **Budget health display:**
 - Color gradient (green → amber ~80% → red at/over), not a binary indicator.
@@ -126,7 +135,7 @@ The everyday counterpart to a savings piggy bank, but for outgoing spend: instea
 - In categorized mode, surface which *category* is the biggest contributor to the overage, not just a single item.
 - Optional v2: a single end-of-trip LLM call sending the item list + prices + budget, asking for 2–3 short plain-language suggestions — call this once per trip on request, never per item, to stay cheap.
 
-**Preference persistence:** Simple vs. Categorized should be a saved per-user preference, not a per-trip prompt — the couple may prefer different modes.
+**Preference persistence:** Simple vs. Organized (and Planned vs. Unplanned within Organized) should be a saved per-user preference, not a per-trip prompt — the couple may prefer different modes.
 
 ### 4.5 Shopping Scanner (Phase 5 — build last, scope carefully)
 
