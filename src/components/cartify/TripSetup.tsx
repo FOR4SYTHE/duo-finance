@@ -114,14 +114,14 @@ export function TripSetup() {
                 ))}
             </div>
 
-            {/* Numpad (Condensed) */}
-            <div className="grid grid-cols-3 gap-2 mb-4">
+            {/* Numpad */}
+            <div className="flex-1 grid grid-cols-3 gap-3 mb-6 min-h-[250px]">
                 {buttons.map((btn) => (
                     <button
                         key={btn.label}
                         onClick={() => btn.label === "⌫" ? deleteLast() : appendInput(btn.label)}
                         className={`
-                            h-[56px] rounded-[16px] flex items-center justify-center text-[22px] font-light transition-all duration-150 bg-white/[0.03] hover:bg-white/[0.08] active:scale-[0.96] active:bg-white/[0.1] border border-white/[0.02] backdrop-blur-md
+                            h-full w-full rounded-[20px] flex items-center justify-center text-[24px] font-light transition-all duration-200 bg-white/[0.05] hover:bg-white/[0.1] active:scale-[0.96] border border-white/[0.02]
                             ${btn.type === "num" ? "text-white" : "text-white/50"}
                         `}
                     >

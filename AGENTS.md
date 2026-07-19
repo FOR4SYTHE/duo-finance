@@ -114,7 +114,7 @@ The everyday counterpart to a savings piggy bank, but for outgoing spend: instea
 
 **Start a trip:** one primary button. Ask two things only: budget amount (numeric keypad, same style as the calculator), and a single toggle — Simple or Organized.
 
-**Simple mode (default, "lazy" path):** no categories, no pre-planning, **and no category UI of any kind, ever** — this is the key distinction from Unplanned below. A big running total ("₱2,000 left / R533 left") at the top. Adding an item is exactly: tap "+", type price, done. This is the primary, fastest path and must never require more taps than this, and must never surface a category picker, chip, or grouping — that complexity belongs entirely to Organized mode.
+**Simple mode (default, "lazy" path):** no categories, no pre-planning, **and no category UI of any kind, ever** — this is the key distinction from Unplanned below. Screen structure, top to bottom: the trip budget/remaining-total header, a persistent large numeric keypad (no modal — the keypad lives directly on this screen, sized to fill the available space with no dead space around it), and a big "Add" (+) button beneath the keypad. The loop is: type an amount, tap Add, it commits to the running list and chips off the budget, keypad resets to 0, ready for the next item immediately. The running list of logged items sits below/behind this, always visible. This is the fastest, lowest-friction path and must never require more taps than type-amount-then-Add.
 
 **Organized mode** splits into two further sub-modes, chosen at trip start. Both sub-modes of Organized must visibly and functionally differ from Simple — if an Organized mode screen looks identical to Simple, something is wrong; category selection must always be present and required in both Organized sub-modes below:
 
@@ -138,6 +138,14 @@ The everyday counterpart to a savings piggy bank, but for outgoing spend: instea
 - Optional v2: a single end-of-trip LLM call sending the item list + prices + budget, asking for 2–3 short plain-language suggestions — call this once per trip on request, never per item, to stay cheap.
 
 **Preference persistence:** Simple vs. Organized (and Planned vs. Unplanned within Organized) should be a saved per-user preference, not a per-trip prompt — the couple may prefer different modes.
+
+**VAT breakdown & digital receipt.** PH context that shapes this feature: the standard VAT rate is 12%, and unprocessed/raw agricultural and marine food products (fresh produce, meat, fish, rice, etc.) are VAT-exempt even after simple preparation like freezing or drying; processed/packaged goods are taxed at the full 12%. Critically, **PH shelf prices are VAT-inclusive** — the price the user types in already contains the tax, it is not added on top at checkout. This means VAT display here is informational/transparency, not an extra cost that could push the trip over budget by itself.
+
+- Tag each item VAT-exempt or VATable (12%) — infer a sensible default from category where available (raw produce/meat/fish/rice → exempt, everything else → VATable), with a manual override for edge cases.
+- VAT-per-item for VATable items = `price × (12/112)` (backed out of the tax-inclusive price, not added to it).
+- Show a running "Est. VAT included: ₱X / RY" as a quiet secondary figure near the budget total — this must never subtract from or affect the remaining-budget math, since it's already inside the prices entered.
+- **"Done Shopping"** (available per category section, and for the trip as a whole) generates a polished digital receipt: itemized list, VAT-exempt subtotal, VATable subtotal, VAT amount, grand total, always dual currency. Style this as a premium receipt within the existing dark design system — dashed or perforated divider details, generous tabular alignment for the numbers — not a literal skeuomorphic white paper mockup, which would clash with the rest of the app.
+- If the trip is over budget at "Done Shopping," surface the existing rule-based over-budget suggestions (above) on the receipt screen — the warning is about the total exceeding budget, not about VAT causing an overage, since VAT is not an additional charge on top of what was entered.
 
 ### 4.5 Shopping Scanner (Phase 5 — build last, scope carefully)
 

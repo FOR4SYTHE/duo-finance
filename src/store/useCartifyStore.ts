@@ -11,17 +11,21 @@ interface CartifyState {
     budget: number; // in PHP
     items: CartifyItem[];
     activeCategory: string | null;
+    isReceiptView: boolean;
     
     // Actions
     startTrip: (budget: number, mode: CartifyMode) => void;
     finishBuildingList: () => void;
     endTrip: () => void;
+    showReceipt: () => void;
+    hideReceipt: () => void;
     setActiveCategory: (category: string | null) => void;
     
     // Item Actions
     addPlannedItem: (name: string, category?: string) => void;
     addItem: (name: string, category: string | undefined, price: number, quantity?: number) => void;
     updateItemPrice: (id: string, price: number) => void;
+    toggleItemVatable: (id: string) => void;
     incrementQuantity: (id: string) => void;
     decrementQuantity: (id: string) => void;
     removeItem: (id: string) => void;
@@ -43,6 +47,7 @@ export const useCartifyStore = create<CartifyState>()(
             budget: 0,
             items: [],
             activeCategory: null,
+            isReceiptView: false,
 
             startTrip: (budget, mode) => set({ 
                 isActive: true, 
@@ -61,12 +66,17 @@ export const useCartifyStore = create<CartifyState>()(
                 budget: 0, 
                 mode: 'simple', 
                 items: [], 
-                activeCategory: null 
+                activeCategory: null,
+                isReceiptView: false
             }),
+
+            showReceipt: () => set({ isReceiptView: true }),
+            hideReceipt: () => set({ isReceiptView: false }),
 
             setActiveCategory: (category) => set({ activeCategory: category }),
 
             addPlannedItem: (name, category) => {
+                const isVatable = !category?.match(/produce|meat|fish|rice/i);
                 const newItem: CartifyItem = {
                     id: generateId(),
                     name,
@@ -76,12 +86,14 @@ export const useCartifyStore = create<CartifyState>()(
                     amount: 0,
                     currency: 'PHP',
                     status: 'still-need',
+                    isVatable,
                     timestamp: Date.now()
                 };
                 set({ items: [...get().items, newItem] });
             },
 
             addItem: (name, category, price, quantity = 1) => {
+                const isVatable = !category?.match(/produce|meat|fish|rice/i);
                 const newItem: CartifyItem = {
                     id: generateId(),
                     name,
@@ -91,6 +103,7 @@ export const useCartifyStore = create<CartifyState>()(
                     amount: price * quantity,
                     currency: 'PHP',
                     status: 'in-cart',
+                    isVatable,
                     timestamp: Date.now()
                 };
                 set({ items: [...get().items, newItem] });
@@ -111,6 +124,14 @@ export const useCartifyStore = create<CartifyState>()(
                         }
                         return item;
                     })
+                }));
+            },
+
+            toggleItemVatable: (id) => {
+                set((state) => ({
+                    items: state.items.map(item => 
+                        item.id === id ? { ...item, isVatable: !item.isVatable } : item
+                    )
                 }));
             },
 

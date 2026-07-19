@@ -14,4 +14,5 @@ export interface CartifyItem extends ExpenseEntry {
     unitPrice: number; // Single item price (null if unpriced/still-need)
     quantity: number;
     status: 'still-need' | 'in-cart';
+    isVatable?: boolean; // True for standard 12% VAT, False for VAT-exempt (raw produce/meat/fish)
 }

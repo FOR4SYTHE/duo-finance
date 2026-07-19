@@ -4,10 +4,11 @@ import { useCartifyStore } from "@/store/useCartifyStore";
 import { TripSetup } from "@/components/cartify/TripSetup";
 import { PlannedListBuilder } from "@/components/cartify/PlannedListBuilder";
 import { LiveTripTracker } from "@/components/cartify/LiveTripTracker";
+import { ReceiptView } from "@/components/cartify/ReceiptView";
 import { MoreHorizontal } from "lucide-react";
 
 export default function CartifyPage() {
-    const { isActive, isBuildingList, endTrip } = useCartifyStore();
+    const { isActive, isBuildingList, isReceiptView, endTrip } = useCartifyStore();
 
     return (
         <div className="flex flex-col w-full h-full px-6 pt-12 pb-8 relative">
@@ -15,7 +16,7 @@ export default function CartifyPage() {
             {/* Header Area */}
             <div className="flex justify-between items-center mb-8 relative z-20 shrink-0">
                 <h1 className="text-3xl text-white font-light tracking-tight">Cartify</h1>
-                {isActive && (
+                {isActive && !isReceiptView && (
                     <button 
                         onClick={() => {
                             if (window.confirm("Are you sure you want to end this trip?")) {
@@ -32,7 +33,9 @@ export default function CartifyPage() {
 
             {/* Smart Container Rendering */}
             <div className="flex-1 overflow-hidden flex flex-col relative z-20">
-                {!isActive ? (
+                {isReceiptView ? (
+                    <ReceiptView />
+                ) : !isActive ? (
                     <TripSetup />
                 ) : isBuildingList ? (
                     <PlannedListBuilder />

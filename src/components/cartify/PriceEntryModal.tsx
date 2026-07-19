@@ -82,13 +82,13 @@ export function PriceEntryModal({ isOpen, onClose, onConfirm, title }: PriceEntr
                         </div>
 
                         {/* Numpad */}
-                        <div className="grid grid-cols-3 gap-3 mb-6">
+                        <div className="flex-1 grid grid-cols-3 gap-3 mb-6 min-h-[250px]">
                             {buttons.map((btn) => (
                                 <button
                                     key={btn.label}
                                     onClick={() => btn.label === "⌫" ? deleteLast() : appendInput(btn.label)}
                                     className={`
-                                        h-[64px] rounded-[20px] flex items-center justify-center text-[24px] font-light transition-all duration-200 bg-white/[0.05] hover:bg-white/[0.1] active:scale-[0.96] border border-white/[0.02]
+                                        h-full w-full rounded-[20px] flex items-center justify-center text-[24px] font-light transition-all duration-200 bg-white/[0.05] hover:bg-white/[0.1] active:scale-[0.96] border border-white/[0.02]
                                         ${btn.type === "num" ? "text-white" : "text-white/50"}
                                     `}
                                 >
