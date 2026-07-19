@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useCartifyStore, CartifyMode } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
-import { Delete, ChevronRight, Check, ArrowUpDown } from "lucide-react";
-import { motion } from "framer-motion";
+import { Delete, ChevronRight, Check, ArrowUpDown, ShoppingCart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function TripSetup() {
     const { startTrip } = useCartifyStore();
@@ -135,11 +135,79 @@ export function TripSetup() {
                     whileTap={{ scale: parseFloat(displayValue) > 0 ? 0.96 : 1 }}
                     onClick={handleConfirm}
                     disabled={parseFloat(displayValue) <= 0}
-                    className="w-full h-[64px] rounded-full bg-white text-black font-semibold text-base tracking-wide flex items-center justify-between px-6 hover:opacity-90 disabled:opacity-50 disabled:bg-white/20 disabled:text-white/50 transition-colors duration-300 shadow-[0_0_30px_rgba(255,255,255,0.15)] group"
+                    className={`w-full h-[64px] rounded-full font-semibold text-base tracking-wide flex items-center justify-between px-6 transition-all duration-500 group overflow-hidden relative ${
+                        parseFloat(displayValue) > 0 
+                            ? 'bg-white text-black hover:bg-gray-100 shadow-[0_8px_30px_rgba(255,255,255,0.15)] border-none' 
+                            : 'bg-white/5 text-white/40 border border-white/10'
+                    }`}
                 >
-                    <span className="pl-2">Start Trip</span>
-                    <div className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center group-hover:bg-black/20 group-disabled:bg-transparent transition-colors">
-                        <ChevronRight className="w-4 h-4" strokeWidth={2.5} />
+                    {/* Glossy sheen effect on hover when active */}
+                    {parseFloat(displayValue) > 0 && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-50 group-hover:translate-x-full transition-all duration-700 ease-out -skew-x-12" />
+                    )}
+                    
+                    <div className="pl-2 relative overflow-hidden h-[24px] w-48 flex items-center">
+                        <AnimatePresence mode="wait">
+                            {parseFloat(displayValue) > 0 ? (
+                                <motion.span
+                                    key="active-text"
+                                    initial={{ y: 20, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    exit={{ y: -20, opacity: 0 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    className="absolute inset-0 flex items-center"
+                                >
+                                    Start Trip
+                                </motion.span>
+                            ) : (
+                                <motion.span
+                                    key="disabled-text"
+                                    initial={{ y: 20, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    exit={{ y: -20, opacity: 0 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    className="absolute inset-0 flex items-center"
+                                >
+                                    Set Budget
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-500 relative overflow-hidden ${
+                        parseFloat(displayValue) > 0 ? 'bg-black/5 group-hover:bg-black/10' : 'bg-white/5'
+                    }`}>
+                        <AnimatePresence mode="wait">
+                            {parseFloat(displayValue) > 0 ? (
+                                <motion.div
+                                    key="cart-icon"
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0, opacity: 0 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    className="absolute inset-0 w-full h-full"
+                                >
+                                    {/* The Adhamuxi-style double-icon rolling trick */}
+                                    <div className="absolute inset-0 flex items-center justify-center transition-transform duration-[600ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-10">
+                                        <ShoppingCart className="w-4 h-4 text-black" strokeWidth={2.5} />
+                                    </div>
+                                    <div className="absolute inset-0 flex items-center justify-center -translate-x-10 transition-transform duration-[600ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-0">
+                                        <ShoppingCart className="w-4 h-4 text-black" strokeWidth={2.5} />
+                                    </div>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="arrow-icon"
+                                    initial={{ x: -20, opacity: 0 }}
+                                    animate={{ x: 0, opacity: 1 }}
+                                    exit={{ x: 20, opacity: 0 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    className="absolute"
+                                >
+                                    <ChevronRight className="w-4 h-4 text-white/40" strokeWidth={2.5} />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </motion.button>
             </div>
