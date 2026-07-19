@@ -35,7 +35,7 @@ export function RelocationEstimator({ onUseEstimate }: RelocationEstimatorProps)
     };
 
     return (
-        <div className="w-full rounded-[32px] p-6 mb-8 bg-white/[0.02] border border-white/[0.03] relative z-20 overflow-hidden">
+        <div className="w-full rounded-[32px] p-6 mb-8 bg-white/[0.02] border border-white/[0.03] relative z-20">
             <div className="flex justify-between items-start mb-6">
                 <div className="flex flex-col">
                     <span className="text-white font-medium">Relocation Estimator</span>
