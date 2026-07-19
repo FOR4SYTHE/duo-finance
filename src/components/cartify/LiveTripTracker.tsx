@@ -181,7 +181,12 @@ export function LiveTripTracker() {
                         <div key={item.id} className="bg-[#111] border border-white/[0.05] rounded-[16px] p-3 flex justify-between items-center shrink-0">
                             <span className="text-white text-sm">{item.name}</span>
                             <div className="flex items-center gap-4">
-                                <span className="text-white font-medium">₱{item.amount.toLocaleString()}</span>
+                                <div className="flex flex-col items-end">
+                                    <span className="text-white font-medium text-sm">₱{item.amount.toLocaleString()}</span>
+                                    <span className="text-white/40 text-[10px] uppercase tracking-wider">
+                                        ≈ R{(item.amount * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                    </span>
+                                </div>
                                 <button onClick={() => removeItem(item.id)} className="text-red-500/50 hover:text-red-500 p-1">
                                     <Trash2 className="w-4 h-4" />
                                 </button>
@@ -195,9 +200,14 @@ export function LiveTripTracker() {
 
                 {/* Persistent Keypad Area */}
                 <div className="w-full flex flex-col shrink-0">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                        <span className="text-3xl text-white/40">₱</span>
-                        <span className="text-5xl text-white font-light tracking-tight">{simpleDisplayValue}</span>
+                    <div className="flex flex-col items-center justify-center gap-1 mb-4">
+                        <div className="flex items-center gap-2">
+                            <span className="text-3xl text-white/40">₱</span>
+                            <span className="text-5xl text-white font-light tracking-tight">{simpleDisplayValue}</span>
+                        </div>
+                        <span className="text-white/40 text-sm font-medium tracking-wide">
+                            ≈ R{(Number(simpleDisplayValue || 0) * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        </span>
                     </div>
 
                     <div className="flex-1 min-h-[220px] grid grid-cols-3 gap-3 mb-4">
