@@ -1,26 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Settings2, PiggyBank, AlertTriangle } from "lucide-react";
+import { Plus, Settings2, PiggyBank, AlertTriangle, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { QuickLogModal } from "@/components/jar/QuickLogModal";
+import { JarLockedModal } from "@/components/jar/JarLockedModal";
 
 export default function SpendJarPage() {
   const { config } = useBudgetStore();
   const { entries, addExpense } = useSpendStore();
   const { exchangeRate } = useCurrencyStore();
   
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [isLockedModalOpen, setIsLockedModalOpen] = useState(false);
 
-  // Calculate totals
+  // Calculate totals based on allowed percentage
   const totalSpent = entries.reduce((sum, entry) => sum + entry.amount, 0);
-  const remainingBudget = config.targetAmount - totalSpent;
-  const percentage = Math.min((totalSpent / config.targetAmount) * 100, 100);
-  const isOverBudget = totalSpent > config.targetAmount;
-  const isNearingCap = percentage >= 85 && !isOverBudget;
+  const allowedSpend = config.targetAmount * ((config.jarAllowedPercentage || 20) / 100);
+  const remainingAllowed = allowedSpend - totalSpent;
+  const percentage = Math.min((totalSpent / allowedSpend) * 100, 100);
+  
+  const isLocked = totalSpent >= allowedSpend;
+  const isNearingCap = percentage >= 85 && !isLocked;
 
   // Visuals for ring
   let ringColor = "#30D158"; // Green
@@ -40,8 +44,35 @@ export default function SpendJarPage() {
 
   const handleLogSpend = (amount: number, note: string) => {
       addExpense(amount, 'PHP', undefined, note);
-      setIsModalOpen(false);
+      setIsLogModalOpen(false);
   };
+
+  const handleMainAction = () => {
+      if (isLocked) {
+          setIsLockedModalOpen(true);
+      } else {
+          setIsLogModalOpen(true);
+      }
+  };
+
+  // Compute cumulative color for logs
+  // Entries are newest first, so we reverse to process oldest to newest, then reverse back
+  let runningTotal = 0;
+  const logsWithColor = [...entries].reverse().map(entry => {
+      runningTotal += entry.amount;
+      const perc = (runningTotal / allowedSpend) * 100;
+      let colorClass = "text-[#30D158]"; // Green
+      let bgClass = "bg-[#30D158]/10";
+      
+      if (perc >= 90) {
+          colorClass = "text-[#FF453A]";
+          bgClass = "bg-[#FF453A]/10";
+      } else if (perc >= 75) {
+          colorClass = "text-[#E8A33D]";
+          bgClass = "bg-[#E8A33D]/10";
+      }
+      return { ...entry, colorClass, bgClass };
+  }).reverse();
 
   return (
     <div className="flex flex-col w-full h-full px-6 pt-12 pb-8 overflow-y-auto no-scrollbar">
@@ -57,7 +88,7 @@ export default function SpendJarPage() {
       {/* Hero Jar Progress */}
       <div className="relative z-20 w-full flex flex-col items-center justify-center py-10 mb-4 shrink-0">
         <div className="relative w-64 h-64 flex items-center justify-center">
-          <svg className="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+          <svg className="absolute inset-0 w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 100 100">
             {/* Background Track */}
             <circle 
               cx="50" cy="50" r={radius} 
@@ -76,7 +107,7 @@ export default function SpendJarPage() {
               initial={{ strokeDashoffset: circumference }}
               animate={{ strokeDashoffset, stroke: ringColor }}
               transition={{ duration: 1, ease: "easeOut" }}
-              style={{ filter: `drop-shadow(0 0 12px ${ringGlow})` }}
+              style={{ filter: `drop-shadow(0 0 16px ${ringGlow})` }}
             />
           </svg>
           
@@ -96,7 +127,7 @@ export default function SpendJarPage() {
               style={{ backgroundColor: `${ringColor}33`, borderColor: `${ringColor}4D` }}
             >
               <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: ringColor }}>
-                {percentage.toFixed(1)}% of Budget
+                {percentage.toFixed(1)}% OF ALLOWED
               </span>
             </div>
           </div>
@@ -104,39 +135,53 @@ export default function SpendJarPage() {
       </div>
 
       {/* Smart Warning */}
-      {(isNearingCap || isOverBudget) && (
+      {(isNearingCap || isLocked) && (
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className={`w-full rounded-[24px] p-4 mb-8 flex items-start gap-3 border ${
-            isOverBudget 
+            isLocked 
               ? 'bg-[#FF453A]/10 border-[#FF453A]/30' 
               : 'bg-[#E8A33D]/10 border-[#E8A33D]/30'
           }`}
         >
-          <AlertTriangle className={`w-5 h-5 mt-0.5 shrink-0 ${isOverBudget ? 'text-[#FF453A]' : 'text-[#E8A33D]'}`} />
+          <AlertTriangle className={`w-5 h-5 mt-0.5 shrink-0 ${isLocked ? 'text-[#FF453A]' : 'text-[#E8A33D]'}`} />
           <div className="flex flex-col">
-            <span className={`font-semibold mb-1 ${isOverBudget ? 'text-[#FF453A]' : 'text-[#E8A33D]'}`}>
-              {isOverBudget ? 'Budget Exceeded' : 'Approaching Cap'}
+            <span className={`font-semibold mb-1 ${isLocked ? 'text-[#FF453A]' : 'text-[#E8A33D]'}`}>
+              {isLocked ? 'Limit Reached' : 'Approaching Limit'}
             </span>
             <span className="text-white/70 text-sm leading-relaxed">
-              {isOverBudget 
-                ? `You have exceeded your ${config.period} budget by ₱${Math.abs(remainingBudget).toLocaleString()}.` 
-                : `You only have ₱${remainingBudget.toLocaleString()} left for the rest of the ${config.period === 'monthly' ? 'month' : 'week'}.`
+              {isLocked 
+                ? `You have maxed out your allowed extra spend for the ${config.period}.` 
+                : `You only have ₱${remainingAllowed.toLocaleString()} left in your allowed extra spend.`
               }
             </span>
           </div>
         </motion.div>
       )}
 
-      {/* Quick Add Log Button */}
+      {/* Action Button */}
       <div className="relative z-20 w-full mb-8 shrink-0">
         <button 
-          onClick={() => setIsModalOpen(true)}
-          className="w-full h-[68px] rounded-full bg-white text-black font-semibold text-lg tracking-wide flex items-center justify-center gap-3 hover:bg-gray-100 active:scale-[0.98] transition-all duration-300 group"
+          onClick={handleMainAction}
+          className={`w-full h-[68px] rounded-full font-semibold text-lg tracking-wide flex items-center justify-center gap-3 transition-all duration-300 active:scale-[0.98]
+            ${isLocked 
+                ? "bg-[#FF453A]/10 text-[#FF453A] border border-[#FF453A]/30 hover:bg-[#FF453A]/20" 
+                : "bg-white text-black hover:bg-gray-100"
+            }
+          `}
         >
-          <Plus className="w-6 h-6" strokeWidth={2.5} />
-          <span>Quick Log Spend</span>
+          {isLocked ? (
+              <>
+                  <Lock className="w-5 h-5" strokeWidth={2.5} />
+                  <span>Jar Locked</span>
+              </>
+          ) : (
+              <>
+                  <Plus className="w-6 h-6" strokeWidth={2.5} />
+                  <span>Quick Log Spend</span>
+              </>
+          )}
         </button>
       </div>
 
@@ -144,14 +189,17 @@ export default function SpendJarPage() {
       <div className="flex flex-col gap-4 relative z-20 flex-1">
         <div className="flex justify-between items-center mb-2 px-1">
           <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Recent Drops ({entries.length})</h2>
-          <span className="text-white/30 text-[10px] uppercase font-bold tracking-wider">Target: ₱{config.targetAmount.toLocaleString()}</span>
+          <div className="flex flex-col items-end">
+            <span className="text-white/30 text-[10px] uppercase font-bold tracking-wider">Allowed: ₱{allowedSpend.toLocaleString()}</span>
+            <span className="text-white/20 text-[9px] uppercase font-bold tracking-wider">({config.jarAllowedPercentage || 20}% of ₱{config.targetAmount.toLocaleString()})</span>
+          </div>
         </div>
         
-        {entries.map((entry) => (
+        {logsWithColor.map((entry) => (
           <div key={entry.id} className="w-full bg-white/[0.02] border border-white/[0.03] rounded-[24px] p-4 flex items-center justify-between group">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-white/[0.05] flex items-center justify-center">
-                <PiggyBank className="w-5 h-5 text-white/50" />
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${entry.bgClass}`}>
+                <PiggyBank className={`w-5 h-5 ${entry.colorClass}`} />
               </div>
               <div className="flex flex-col">
                 <span className="text-white font-medium mb-0.5">{entry.note || "Quick Log"}</span>
@@ -161,7 +209,7 @@ export default function SpendJarPage() {
               </div>
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-white font-medium">₱{entry.amount.toLocaleString()}</span>
+              <span className={`font-medium ${entry.colorClass}`}>₱{entry.amount.toLocaleString()}</span>
               <span className="text-white/40 text-[10px] uppercase tracking-wider">R{(entry.amount * exchangeRate).toFixed(0)}</span>
             </div>
           </div>
@@ -175,9 +223,17 @@ export default function SpendJarPage() {
       </div>
 
       <QuickLogModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isLogModalOpen}
+        onClose={() => setIsLogModalOpen(false)}
         onConfirm={handleLogSpend}
+      />
+
+      <JarLockedModal
+        isOpen={isLockedModalOpen}
+        onClose={() => setIsLockedModalOpen(false)}
+        totalSpent={totalSpent}
+        targetAmount={config.targetAmount}
+        period={config.period}
       />
     </div>
   );

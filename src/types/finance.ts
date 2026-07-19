@@ -24,4 +24,5 @@ export type BudgetPeriod = 'weekly' | 'monthly' | '3-months' | '6-months' | 'ann
 export interface BudgetConfig {
     targetAmount: number; // Target amount in PHP
     period: BudgetPeriod;
+    jarAllowedPercentage: number; // Percentage of targetAmount allowed for extra spend
 }
