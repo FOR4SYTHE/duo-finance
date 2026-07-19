@@ -50,9 +50,9 @@ export function ReceiptView() {
     }
 
     return (
-        <div className="flex flex-col w-full h-full relative z-20 pb-24 px-4 overflow-y-auto no-scrollbar">
+        <div className="flex flex-col w-full h-full relative z-20 overflow-y-auto no-scrollbar">
             
-            <div className="flex items-center justify-between mb-8 pt-4">
+            <div className="flex items-center justify-between mb-6 pt-4 px-4 shrink-0">
                 <button onClick={hideReceipt} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
                     <ChevronLeft className="w-5 h-5 text-white" />
                 </button>
@@ -60,103 +60,141 @@ export function ReceiptView() {
                 <div className="w-10 h-10" />
             </div>
 
-            <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full bg-[#111] rounded-[32px] border border-white/10 overflow-hidden flex flex-col relative"
-            >
-                {/* Receipt Header */}
-                <div className="flex flex-col items-center pt-10 pb-6 px-6 border-b border-dashed border-white/20">
-                    <div className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-                        <Receipt className="w-6 h-6 text-white/70" />
-                    </div>
-                    <span className="text-white/40 text-xs font-semibold tracking-widest uppercase mb-2">Trip Receipt</span>
-                    <h2 className="text-white text-4xl font-light tracking-tight mb-2">
-                        ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                    </h2>
-                    <span className="text-white/50 font-medium tracking-wide">
-                        ≈ R{(totalSpent * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                    </span>
-                    
-                    {isOverBudget ? (
-                        <div className="mt-4 flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-1.5 rounded-full">
-                            <AlertTriangle className="w-4 h-4 text-red-500" />
-                            <span className="text-red-500 text-xs font-bold uppercase tracking-wider">Over by ₱{overage.toLocaleString()}</span>
-                        </div>
-                    ) : (
-                        <div className="mt-4 flex items-center gap-2 bg-[#30D158]/10 border border-[#30D158]/20 px-4 py-1.5 rounded-full">
-                            <CheckCircle2 className="w-4 h-4 text-[#30D158]" />
-                            <span className="text-[#30D158] text-xs font-bold uppercase tracking-wider">Under Budget</span>
-                        </div>
-                    )}
-                </div>
-
-                {/* Over Budget Suggestions */}
-                {isOverBudget && suggestions.length > 0 && (
-                    <div className="px-6 py-6 border-b border-dashed border-white/20 bg-red-500/5">
-                        <span className="text-red-500/80 text-xs font-bold uppercase tracking-widest mb-3 block">Observations</span>
-                        <ul className="flex flex-col gap-2">
-                            {suggestions.map((s, i) => (
-                                <li key={i} className="text-white/70 text-sm leading-relaxed flex gap-2">
-                                    <span className="text-red-500">•</span> {s}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-
-                {/* Itemized List */}
-                <div className="flex flex-col gap-4 px-6 py-8 border-b border-dashed border-white/20">
-                    <span className="text-white/40 text-xs font-bold uppercase tracking-widest mb-2 block">Itemized</span>
-                    {items.filter(i => i.status === 'in-cart').map(item => (
-                        <div key={item.id} className="flex justify-between items-start">
-                            <div className="flex flex-col">
-                                <span className="text-white/90 text-sm font-medium">{item.name} {item.quantity > 1 ? `(x${item.quantity})` : ''}</span>
-                                {item.category && <span className="text-white/40 text-xs">{item.category} {!item.isVatable && '• Exempt'}</span>}
+            <div className="flex-1 px-4 pb-24 flex flex-col">
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="w-full bg-[#fcfcfc] rounded-t-[32px] overflow-hidden flex flex-col relative shadow-[0_20px_60px_rgba(255,255,255,0.05)] mx-auto mt-2"
+                >
+                    {/* Receipt Header */}
+                    <div className="flex flex-col items-center pt-10 pb-6 px-6 relative">
+                        <div className="mb-4 text-4xl">🎉</div>
+                        <h2 className="text-black text-[2.5rem] font-medium tracking-tight mb-2">
+                            ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        </h2>
+                        <span className="text-black/40 font-medium tracking-wide">
+                            ≈ R{(totalSpent * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        </span>
+                        
+                        {isOverBudget ? (
+                            <div className="mt-6 flex items-center gap-2 bg-red-50 text-red-600 px-4 py-1.5 rounded-full border border-red-100">
+                                <AlertTriangle className="w-4 h-4" />
+                                <span className="text-xs font-bold uppercase tracking-wider">Over Budget</span>
                             </div>
-                            <span className="text-white/80 font-medium font-mono text-sm">₱{item.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                        </div>
-                    ))}
-                    {items.length === 0 && (
-                        <span className="text-white/30 text-sm text-center block">No items purchased.</span>
-                    )}
-                </div>
+                        ) : (
+                            <div className="mt-6 flex items-center gap-2 bg-[#30D158]/10 text-[#28a745] px-4 py-1.5 rounded-full border border-[#30D158]/20">
+                                <CheckCircle2 className="w-4 h-4" />
+                                <span className="text-xs font-bold uppercase tracking-wider">Under Budget</span>
+                            </div>
+                        )}
+                    </div>
 
-                {/* VAT Breakdown */}
-                <div className="flex flex-col gap-3 px-6 py-8 bg-white/[0.02]">
-                    <span className="text-white/40 text-xs font-bold uppercase tracking-widest mb-2 block">Tax Breakdown</span>
-                    
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="text-white/50">VAT-Exempt Sales</span>
-                        <span className="text-white/70 font-mono">₱{vatExemptSubtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                    {/* The Ticket Cutout Divider */}
+                    <div className="relative w-full flex items-center justify-center h-8 my-2">
+                        <div className="absolute left-[-16px] w-8 h-8 rounded-full bg-[#050505]" />
+                        <div className="absolute right-[-16px] w-8 h-8 rounded-full bg-[#050505]" />
+                        <div className="w-full mx-6 border-b-2 border-dashed border-black/10" />
                     </div>
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="text-white/50">VATable Sales (Net)</span>
-                        <span className="text-white/70 font-mono">₱{vatableNet.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+
+                    {/* Budget & Calculation */}
+                    <div className="px-6 py-6 flex flex-col gap-4 border-b-2 border-dashed border-black/10">
+                        <div className="flex justify-between items-center text-sm font-medium text-black/50">
+                            <span>Target Budget</span>
+                            <span className="text-black/70 font-mono">₱{budget.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        </div>
+                        {isOverBudget ? (
+                            <div className="flex justify-between items-center text-sm font-bold text-red-500">
+                                <span>Amount over budget</span>
+                                <span className="font-mono">₱{overage.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                            </div>
+                        ) : (
+                            <div className="flex justify-between items-center text-sm font-bold text-[#28a745]">
+                                <span>Amount saved</span>
+                                <span className="font-mono">₱{(budget - totalSpent).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                            </div>
+                        )}
                     </div>
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="text-white/50">VAT Amount (12%)</span>
-                        <span className="text-white/70 font-mono">₱{vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+
+                    {/* Over Budget Suggestions */}
+                    {isOverBudget && suggestions.length > 0 && (
+                        <div className="px-6 py-6 border-b-2 border-dashed border-black/10 bg-red-50/50">
+                            <span className="text-red-500/80 text-xs font-bold uppercase tracking-widest mb-3 block">Observations</span>
+                            <ul className="flex flex-col gap-2">
+                                {suggestions.map((s, i) => (
+                                    <li key={i} className="text-black/70 text-sm leading-relaxed flex gap-2">
+                                        <span className="text-red-500">•</span> {s}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* Itemized List */}
+                    <div className="flex flex-col gap-4 px-6 py-8 border-b-2 border-dashed border-black/10">
+                        <span className="text-black/30 text-xs font-bold uppercase tracking-widest mb-2 block">Itemized</span>
+                        {items.filter(i => i.status === 'in-cart').map(item => (
+                            <div key={item.id} className="flex justify-between items-start">
+                                <div className="flex flex-col">
+                                    <span className="text-black/90 text-sm font-medium">{item.name} {item.quantity > 1 ? `(x${item.quantity})` : ''}</span>
+                                    {item.category && <span className="text-black/40 text-xs">{item.category} {!item.isVatable && '• Exempt'}</span>}
+                                </div>
+                                <span className="text-black/80 font-medium font-mono text-sm">₱{item.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                            </div>
+                        ))}
+                        {items.length === 0 && (
+                            <span className="text-black/30 text-sm text-center block">No items purchased.</span>
+                        )}
                     </div>
-                    
-                    <div className="w-full h-px bg-white/10 my-2" />
-                    
-                    <div className="flex justify-between items-center">
-                        <span className="text-white/80 font-medium">Grand Total</span>
-                        <span className="text-white font-mono font-medium">₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+
+                    {/* VAT Breakdown */}
+                    <div className="flex flex-col gap-3 px-6 pt-8 pb-10 bg-black/[0.02]">
+                        <span className="text-black/30 text-xs font-bold uppercase tracking-widest mb-2 block">Tax Breakdown</span>
+                        
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-black/50">VAT-Exempt Sales</span>
+                            <span className="text-black/70 font-mono">₱{vatExemptSubtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-black/50">VATable Sales (Net)</span>
+                            <span className="text-black/70 font-mono">₱{vatableNet.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-black/50">VAT Amount (12%)</span>
+                            <span className="text-black/70 font-mono">₱{vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        </div>
+                        
+                        <div className="w-full h-px bg-black/10 my-2" />
+                        
+                        <div className="flex justify-between items-center">
+                            <span className="text-black/80 font-medium">Grand Total</span>
+                            <span className="text-black font-mono font-medium text-lg">₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        </div>
                     </div>
-                </div>
+
+                    {/* Bottom Ticket Serration using repeated radial gradients masking */}
+                    <div 
+                        className="w-full h-4 bg-[#fcfcfc]"
+                        style={{
+                            maskImage: 'radial-gradient(circle at 10px 10px, transparent 10px, black 11px)',
+                            maskSize: '20px 20px',
+                            maskRepeat: 'repeat-x',
+                            WebkitMaskImage: 'radial-gradient(circle at 10px 10px, transparent 10px, black 11px)',
+                            WebkitMaskSize: '20px 20px',
+                            WebkitMaskRepeat: 'repeat-x'
+                        }}
+                    />
+                </motion.div>
 
                 {/* Finish Action */}
-                <div className="p-6">
+                <div className="mt-8 mb-4">
                     <button
                         onClick={endTrip}
-                        className="w-full h-[60px] rounded-full bg-white text-black font-semibold text-base tracking-wide flex items-center justify-center hover:bg-white/90 active:scale-[0.98] transition-all duration-300"
+                        className="w-full h-[60px] rounded-full bg-white text-black font-semibold text-base tracking-wide flex items-center justify-center hover:bg-white/90 active:scale-[0.98] shadow-[0_8px_30px_rgba(255,255,255,0.1)] transition-all duration-300"
                     >
                         Finish & Clear Trip
                     </button>
                 </div>
-            </motion.div>
+            </div>
         </div>
     );
 }
