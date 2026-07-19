@@ -19,6 +19,8 @@ export async function POST(req: Request) {
         );
     }
 
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
     try {
         const body = await req.json();
         const { currentCategories } = body;
@@ -40,7 +42,7 @@ Return ONLY a valid JSON array of objects with the keys "name", "icon", and "col
 `;
 
         const response = await ai.models.generateContent({
-            model: 'gemini-3.5-flash',
+            model: 'gemini-1.5-flash',
             contents: prompt,
             config: {
                 temperature: 0.7,
@@ -58,7 +60,7 @@ Return ONLY a valid JSON array of objects with the keys "name", "icon", and "col
     } catch (error: any) {
         console.error("AI Suggestion Error:", error);
         return NextResponse.json(
-            { error: 'Failed to generate AI suggestions.' }, 
+            { error: error.message || 'Failed to generate AI suggestions.' }, 
             { status: 500 }
         );
     }

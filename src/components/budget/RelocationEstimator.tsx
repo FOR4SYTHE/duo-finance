@@ -65,15 +65,15 @@ export function RelocationEstimator({ onUseEstimate }: RelocationEstimatorProps)
                         </AnimatePresence>
                     </div>
 
-                    <div className="flex items-center gap-4 ml-auto">
+                    <div className="flex items-center gap-4 ml-auto shrink-0">
                         <button 
                             onClick={() => { setAdults(Math.max(1, adults - 1)); setEstimate(null); }}
-                            className="w-8 h-8 rounded-full bg-white/[0.05] flex items-center justify-center text-white/50 hover:bg-white/[0.1] hover:text-white transition-colors"
+                            className="w-8 h-8 rounded-full bg-white/[0.05] flex items-center justify-center text-white/50 hover:bg-white/[0.1] hover:text-white transition-colors shrink-0"
                         >-</button>
-                        <span className="text-white font-medium w-4 text-center">{adults}</span>
+                        <span className="text-white font-medium w-4 text-center shrink-0">{adults}</span>
                         <button 
                             onClick={() => { setAdults(adults + 1); setEstimate(null); }}
-                            className="w-8 h-8 rounded-full bg-white/[0.1] flex items-center justify-center text-white hover:bg-white/[0.15] transition-colors"
+                            className="w-8 h-8 rounded-full bg-white/[0.1] flex items-center justify-center text-white hover:bg-white/[0.15] transition-colors shrink-0"
                         >+</button>
                     </div>
                 </div>

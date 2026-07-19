@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown, Plus, Edit2 } from "lucide-react";
 import * as Icons from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,10 +24,15 @@ export default function BudgetPage() {
   const { config, categories, setBudget, updateCategory } = useBudgetStore();
   const { exchangeRate } = useCurrencyStore();
   
+  const [isHydrated, setIsHydrated] = useState(false);
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [isHeroModalOpen, setIsHeroModalOpen] = useState(false);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
+
+  useEffect(() => {
+      setIsHydrated(true);
+  }, []);
 
   // Computed Values
   const { displayTarget, displayAllocated, displayUnallocated } = calculateAllocations(config, categories);
@@ -58,10 +63,12 @@ export default function BudgetPage() {
       }
   };
 
+  if (!isHydrated) return null; // Avoid Zustand hydration mismatch flash
+
   const activePeriodLabel = PERIODS.find(p => p.value === config.period)?.label || 'Monthly';
 
   return (
-    <div className="flex flex-col w-full h-full px-6 pt-12 pb-8 overflow-y-auto no-scrollbar">
+    <div className="flex flex-col w-full pb-8 pt-12 px-6">
       
       {/* Header */}
       <div className="flex justify-between items-center mb-6 relative z-30 shrink-0">
