@@ -1,9 +1,3 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
-
 # AGENTS.md — Couple Budget & Currency App
 
 > Handoff/build guide for AI coding agents (Gemini, Antigravity, Cursor, etc).
@@ -52,6 +46,8 @@ Before reporting any UI work as done, self-check it against this list — if any
 
 If a UI change can't honestly clear all four, it goes back for another pass before being marked complete.
 
+**Color nuance — "one hero color moment," not a colorful app.** The restraint principle above still holds, but restraint isn't the same as monochrome. Premium fintech references (Apple Wallet-style card stacks, colorful gradient payment cards against a neutral dark shell) get their luxury feel from *one* saturated, deliberate color moment per screen — a single hero card or focal element — while everything surrounding it stays neutral and quiet. Apply that here: the neutral dark palette from Section 2 is the shell for 95% of the UI; a single hero element per screen (the main budget-health card on Home, for instance) can carry a richer, more saturated color tied to meaning (status/category), as long as the chrome around it doesn't compete. Curved, soft-edged cards; circular icon-buttons with a label beneath (not text-in-a-pill buttons); and a floating, rounded/capsule-shaped bottom navigation bar are all part of this same visual language — lean into all three.
+
 ---
 
 ## 3. Tech Stack
@@ -69,7 +65,23 @@ If a UI change can't honestly clear all four, it goes back for another pass befo
 
 ## 4. Feature Specs
 
-### 4.1 Calculator + Live Currency Converter (Phase 1 — build first)
+### 4.0 App Shell — Home & Navigation (build this scaffold first, across all sections)
+
+Right now only the Calculator exists in isolation, with no context for what pressing "Confirm Amount" leads to. Before going deeper on any single feature, build the navigational shell that makes the whole app legible as one product — every section reachable, even before it's functional.
+
+**Bottom navigation:** a floating, rounded/capsule-shaped bar (not a flat edge-to-edge bar) with icon + label for: Home, Calculator, Budget, Spend Jar, Cartify. The active tab gets a filled pill highlight behind its icon. Keep the Shopping Scanner (4.5) off the tab bar entirely for now — it doesn't exist yet, and a dead tab undercuts the premium feel. Surface it instead as a "Coming soon" tile on Home.
+
+**Home screen:**
+- Header: a simple greeting + notification icon, understated (not a big focal element).
+- Hero card: an overall household budget-health snapshot for the active period, dual currency, using the green→amber→red status language — this is the one screen-level element allowed the richer "hero color moment" treatment described in Section 2.
+- Quick actions row: circular icon-buttons with a label beneath, matching the reference pattern exactly — Calculate, Log Spend (routes into Spend Jar's quick-add), Start Trip (routes into Cartify), Scan (visually present but disabled/locked with a "coming soon" state).
+- Section cards below, one per feature area (Budgeting, Spend Jar, Cartify, Scanner) — tapping any of them navigates to that section's screen.
+
+**Scaffolding rule:** sections other than the Calculator do not need working logic yet — static or mock data is completely fine at this stage. But the "no bland UI" strict rule from Section 2 applies in full to every placeholder screen too. A scaffolded screen should look like a real, premium screen with sample data in it, not a gray "coming soon" box. The point of this phase is to see the whole app's shape and feel, so every placeholder needs to actually look finished even though it isn't wired up.
+
+**Context this creates:** once this shell exists, the Calculator's "Confirm Amount" action has a clear destination — it's the shared amount-entry UI referenced in 4.3, so confirming there should read naturally as "log this amount," not float with no explanation.
+
+### 4.1 Calculator + Live Currency Converter (Phase 1)
 
 - Standard four-function calculator (+ %), nothing scientific.
 - As the user types and after `=`, show the result in the primary currency, with a secondary line beneath showing the live converted amount in the other currency (e.g. `999 PHP` → `R266.67`).
@@ -126,13 +138,14 @@ The everyday counterpart to a savings piggy bank, but for outgoing spend: instea
 
 ## 5. Build Order
 
-1. Calculator + currency converter (dual PHP/ZAR display, swappable, correctly recalculated in both directions) — the smallest complete, useful thing.
-2. Budgeting Module — categories, periods, move-in cost estimator (planning/target-setting only at this stage).
-3. Spend Jar — the shared expense-entries data model, quick-add flow, and period accumulation. This is simpler than Cartify and unlocks it, so build it first.
-4. Cartify — shopping trip tracker built on the same expense-entries model as Spend Jar, Simple mode first, then Categorized.
-5. Shopping scanner — scoped per the note above; treat as a stretch/polish feature, not core v1.
+1. **App Shell (4.0) — build this next.** Home screen, bottom navigation, and premium-looking placeholder screens for every section. Nothing beyond the Calculator needs to be functional yet, but everything needs to be reachable and look finished.
+2. Calculator + currency converter (dual PHP/ZAR display, swappable, correctly recalculated in both directions) — already underway; finish polishing this alongside the shell since it's the reference implementation for the design system.
+3. Budgeting Module — categories, periods, move-in cost estimator (planning/target-setting only at this stage).
+4. Spend Jar — the shared expense-entries data model, quick-add flow, and period accumulation. This is simpler than Cartify and unlocks it, so build it first.
+5. Cartify — shopping trip tracker built on the same expense-entries model as Spend Jar, Simple mode first, then Categorized.
+6. Shopping scanner — scoped per the note above; treat as a stretch/polish feature, not core v1.
 
-Do not start Phase 5 work until Phases 1–4 are solid and usable end to end.
+Do not start full functionality on Phase 3 onward until the App Shell (step 1) is in place — seeing the whole app's shape first is the point of this reordering.
 
 ---
 
