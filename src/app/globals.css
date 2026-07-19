@@ -1,29 +1,41 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0B0E14;
+  --color-card: #161B24;
+  --color-foreground: #F5F6F8;
+  --color-muted: #8A93A3;
+  --color-accent: #E8A33D;
+  
+  /* Status Colors */
+  --color-status-good: #4ADE80;
+  --color-status-warn: #E8A33D;
+  --color-status-danger: #F0654B;
+}
 
 @layer base {
-  :root {
-    --background: #fafafa;
-    --foreground: #000000;
-    --card: #ffffff;
-    --border: #e5e5e5;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --background: #000000;
-      --foreground: #ffffff;
-      --card: #0a0a0a;
-      --border: #1a1a1a;
-    }
-  }
-
   body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+  }
+}
+
+@layer utilities {
+  .hero-number {
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+  }
+  
+  .glow-warn {
+    box-shadow: inset 0 0 120px -20px rgba(232, 163, 61, 0.15);
+  }
+  
+  .glow-danger {
+    box-shadow: inset 0 0 120px -20px rgba(240, 101, 75, 0.15);
   }
 }
