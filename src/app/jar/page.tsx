@@ -53,7 +53,7 @@ export default function SpendJarPage() {
 
       {/* Quick Add Log Button */}
       <div className="relative z-20 w-full mb-8">
-        <button className="w-full h-[68px] rounded-full bg-white text-black font-semibold text-lg tracking-wide flex items-center justify-center gap-3 hover:opacity-90 active:scale-[0.98] transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)] group">
+        <button className="w-full h-[68px] rounded-full bg-white text-black font-semibold text-lg tracking-wide flex items-center justify-center gap-3 hover:bg-gray-100 active:scale-[0.98] transition-all duration-300 group">
           <Plus className="w-6 h-6" strokeWidth={2.5} />
           <span>Quick Log Spend</span>
         </button>

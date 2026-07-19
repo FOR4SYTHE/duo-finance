@@ -260,13 +260,22 @@ export function LiveTripTracker() {
             <div className="flex flex-col gap-4 flex-1">
                 <div className="flex justify-between items-center mb-2 px-1">
                     <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Scanned Items ({items.length})</h2>
-                    <button 
-                        onClick={() => setSortAsc(!sortAsc)}
-                        className="flex items-center gap-1 bg-white/[0.05] hover:bg-white/[0.1] px-2 py-1 rounded-full transition-colors"
-                    >
-                        <span className="text-white/70 text-[10px] uppercase tracking-wider font-bold">Sort: Price</span>
-                        <ArrowUpDown className="w-3 h-3 text-white/70" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button 
+                            onClick={() => setIsAddingNew(true)}
+                            className="flex items-center gap-1.5 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.05] active:scale-[0.98] px-3 py-1.5 rounded-full transition-all text-white text-[10px] font-bold uppercase tracking-wider"
+                        >
+                            <Plus className="w-3.5 h-3.5 text-[#30D158]" />
+                            <span>Add Item</span>
+                        </button>
+                        <button 
+                            onClick={() => setSortAsc(!sortAsc)}
+                            className="flex items-center gap-1 bg-white/[0.05] hover:bg-white/[0.1] px-2.5 py-1.5 rounded-full transition-colors"
+                        >
+                            <span className="text-white/70 text-[10px] uppercase tracking-wider font-bold">Sort</span>
+                            <ArrowUpDown className="w-3 h-3 text-white/70" />
+                        </button>
+                    </div>
                 </div>
 
                 {sortedItems.map((item) => (
@@ -282,20 +291,14 @@ export function LiveTripTracker() {
                 ))}
                 
                 {items.length === 0 && (
-                    <div className="text-center py-10 opacity-40">
-                        <span className="text-sm">List is empty. Tap + to add items.</span>
-                    </div>
+                    <button 
+                        onClick={() => setIsAddingNew(true)}
+                        className="w-full border-2 border-dashed border-white/10 hover:border-white/20 rounded-[24px] p-6 flex flex-col items-center justify-center gap-2 bg-white/[0.01] hover:bg-white/[0.03] transition-all text-white/40 text-sm font-medium py-10"
+                    >
+                        <Plus className="w-6 h-6 text-[#30D158]" />
+                        <span>Add First Item</span>
+                    </button>
                 )}
-            </div>
-
-            {/* Add Item FAB */}
-            <div className="sticky bottom-6 flex justify-end px-2 mt-auto pointer-events-none z-40">
-                <button 
-                    onClick={() => setIsAddingNew(true)}
-                    className="w-[60px] h-[60px] rounded-full bg-white text-black shadow-[0_8px_30px_rgba(255,255,255,0.2)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all pointer-events-auto"
-                >
-                    <Plus className="w-8 h-8" strokeWidth={2} />
-                </button>
             </div>
 
             {/* Modals */}
