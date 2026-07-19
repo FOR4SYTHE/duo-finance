@@ -1,100 +1,184 @@
-import { Plus, Settings2, PiggyBank } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Plus, Settings2, PiggyBank, AlertTriangle } from "lucide-react";
+import { motion } from "framer-motion";
+import { useBudgetStore } from "@/store/useBudgetStore";
+import { useSpendStore } from "@/store/useSpendStore";
+import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { QuickLogModal } from "@/components/jar/QuickLogModal";
 
 export default function SpendJarPage() {
+  const { config } = useBudgetStore();
+  const { entries, addExpense } = useSpendStore();
+  const { exchangeRate } = useCurrencyStore();
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Calculate totals
+  const totalSpent = entries.reduce((sum, entry) => sum + entry.amount, 0);
+  const remainingBudget = config.targetAmount - totalSpent;
+  const percentage = Math.min((totalSpent / config.targetAmount) * 100, 100);
+  const isOverBudget = totalSpent > config.targetAmount;
+  const isNearingCap = percentage >= 85 && !isOverBudget;
+
+  // Visuals for ring
+  let ringColor = "#30D158"; // Green
+  let ringGlow = "rgba(48,209,88,0.6)";
+  if (percentage >= 75 && percentage < 90) {
+    ringColor = "#E8A33D"; // Amber
+    ringGlow = "rgba(232,163,61,0.6)";
+  } else if (percentage >= 90) {
+    ringColor = "#FF453A"; // Red
+    ringGlow = "rgba(255,69,58,0.6)";
+  }
+
+  // SVG parameters
+  const radius = 42;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  const handleLogSpend = (amount: number, note: string) => {
+      addExpense(amount, 'PHP', undefined, note);
+      setIsModalOpen(false);
+  };
+
   return (
-    <div className="flex flex-col w-full h-full px-6 pt-12 pb-8">
+    <div className="flex flex-col w-full h-full px-6 pt-12 pb-8 overflow-y-auto no-scrollbar">
       
       {/* Header */}
-      <div className="flex justify-between items-center mb-8 relative z-20">
+      <div className="flex justify-between items-center mb-8 relative z-20 shrink-0">
         <h1 className="text-3xl text-white font-light tracking-tight">Spend Jar</h1>
         <button className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors">
           <Settings2 className="w-5 h-5 text-white/70" />
         </button>
       </div>
 
-      {/* Hero Jar Progress (Apple Fitness-style thick ring) */}
-      <div className="relative z-20 w-full flex flex-col items-center justify-center py-10 mb-8">
-        
-        {/* SVG Ring */}
+      {/* Hero Jar Progress */}
+      <div className="relative z-20 w-full flex flex-col items-center justify-center py-10 mb-4 shrink-0">
         <div className="relative w-64 h-64 flex items-center justify-center">
           <svg className="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
             {/* Background Track */}
             <circle 
-              cx="50" cy="50" r="42" 
+              cx="50" cy="50" r={radius} 
               fill="transparent" 
               stroke="rgba(255,255,255,0.05)" 
               strokeWidth="8"
             />
             {/* Progress Fill */}
-            <circle 
-              cx="50" cy="50" r="42" 
+            <motion.circle 
+              cx="50" cy="50" r={radius} 
               fill="transparent" 
-              stroke="#E8A33D" 
+              stroke={ringColor} 
               strokeWidth="8" 
               strokeLinecap="round"
-              strokeDasharray="264"
-              strokeDashoffset="75" /* ~70% filled */
-              className="drop-shadow-[0_0_12px_rgba(232,163,61,0.6)]"
+              strokeDasharray={circumference}
+              initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset, stroke: ringColor }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              style={{ filter: `drop-shadow(0 0 12px ${ringGlow})` }}
             />
           </svg>
           
           {/* Inner Content */}
-          <div className="flex flex-col items-center justify-center text-center">
-            <span className="text-white/50 text-xs font-semibold tracking-widest uppercase mb-2">Spent this month</span>
-            <span className="text-4xl font-light text-white tracking-tight mb-1">₱22,500</span>
-            <span className="text-white/60 font-medium tracking-wide text-sm mb-4">≈ R6,000</span>
-            <div className="bg-[#E8A33D]/20 px-3 py-1 rounded-full border border-[#E8A33D]/30">
-              <span className="text-[#E8A33D] text-[10px] uppercase tracking-widest font-bold">70% of Budget</span>
+          <div className="flex flex-col items-center justify-center text-center z-10">
+            <span className="text-white/50 text-xs font-semibold tracking-widest uppercase mb-2">
+              Spent {config.period === 'monthly' ? 'this month' : 'this week'}
+            </span>
+            <span className="text-4xl font-light text-white tracking-tight mb-1">
+              ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+            </span>
+            <span className="text-white/60 font-medium tracking-wide text-sm mb-4">
+              ≈ R{(totalSpent * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+            </span>
+            <div 
+              className="px-3 py-1 rounded-full border transition-colors duration-500"
+              style={{ backgroundColor: `${ringColor}33`, borderColor: `${ringColor}4D` }}
+            >
+              <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: ringColor }}>
+                {percentage.toFixed(1)}% of Budget
+              </span>
             </div>
           </div>
         </div>
-        
       </div>
 
+      {/* Smart Warning */}
+      {(isNearingCap || isOverBudget) && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`w-full rounded-[24px] p-4 mb-8 flex items-start gap-3 border ${
+            isOverBudget 
+              ? 'bg-[#FF453A]/10 border-[#FF453A]/30' 
+              : 'bg-[#E8A33D]/10 border-[#E8A33D]/30'
+          }`}
+        >
+          <AlertTriangle className={`w-5 h-5 mt-0.5 shrink-0 ${isOverBudget ? 'text-[#FF453A]' : 'text-[#E8A33D]'}`} />
+          <div className="flex flex-col">
+            <span className={`font-semibold mb-1 ${isOverBudget ? 'text-[#FF453A]' : 'text-[#E8A33D]'}`}>
+              {isOverBudget ? 'Budget Exceeded' : 'Approaching Cap'}
+            </span>
+            <span className="text-white/70 text-sm leading-relaxed">
+              {isOverBudget 
+                ? `You have exceeded your ${config.period} budget by ₱${Math.abs(remainingBudget).toLocaleString()}.` 
+                : `You only have ₱${remainingBudget.toLocaleString()} left for the rest of the ${config.period === 'monthly' ? 'month' : 'week'}.`
+              }
+            </span>
+          </div>
+        </motion.div>
+      )}
+
       {/* Quick Add Log Button */}
-      <div className="relative z-20 w-full mb-8">
-        <button className="w-full h-[68px] rounded-full bg-white text-black font-semibold text-lg tracking-wide flex items-center justify-center gap-3 hover:bg-gray-100 active:scale-[0.98] transition-all duration-300 group">
+      <div className="relative z-20 w-full mb-8 shrink-0">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="w-full h-[68px] rounded-full bg-white text-black font-semibold text-lg tracking-wide flex items-center justify-center gap-3 hover:bg-gray-100 active:scale-[0.98] transition-all duration-300 group"
+        >
           <Plus className="w-6 h-6" strokeWidth={2.5} />
           <span>Quick Log Spend</span>
         </button>
       </div>
 
-      {/* Recent Entries Mock */}
+      {/* Recent Entries Feed */}
       <div className="flex flex-col gap-4 relative z-20 flex-1">
-        <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase mb-2 px-1">Recent Drops</h2>
+        <div className="flex justify-between items-center mb-2 px-1">
+          <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Recent Drops ({entries.length})</h2>
+          <span className="text-white/30 text-[10px] uppercase font-bold tracking-wider">Target: ₱{config.targetAmount.toLocaleString()}</span>
+        </div>
         
-        <div className="w-full bg-white/[0.02] border border-white/[0.03] rounded-[24px] p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-white/[0.05] flex items-center justify-center">
-              <span className="text-white text-lg">🍔</span>
+        {entries.map((entry) => (
+          <div key={entry.id} className="w-full bg-white/[0.02] border border-white/[0.03] rounded-[24px] p-4 flex items-center justify-between group">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-white/[0.05] flex items-center justify-center">
+                <PiggyBank className="w-5 h-5 text-white/50" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-white font-medium mb-0.5">{entry.note || "Quick Log"}</span>
+                <span className="text-white/50 text-xs tracking-wide">
+                  {new Date(entry.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-white font-medium mb-0.5">Din Tai Fung</span>
-              <span className="text-white/50 text-xs tracking-wide">Food • Today, 1:30 PM</span>
+            <div className="flex flex-col items-end">
+              <span className="text-white font-medium">₱{entry.amount.toLocaleString()}</span>
+              <span className="text-white/40 text-[10px] uppercase tracking-wider">R{(entry.amount * exchangeRate).toFixed(0)}</span>
             </div>
           </div>
-          <div className="flex flex-col items-end">
-            <span className="text-white font-medium">₱1,450</span>
-            <span className="text-white/40 text-[10px] uppercase tracking-wider">R386</span>
-          </div>
-        </div>
+        ))}
 
-        <div className="w-full bg-white/[0.02] border border-white/[0.03] rounded-[24px] p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-white/[0.05] flex items-center justify-center">
-              <span className="text-white text-lg">🚖</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-white font-medium mb-0.5">Grab Ride</span>
-              <span className="text-white/50 text-xs tracking-wide">Transport • Yesterday</span>
-            </div>
+        {entries.length === 0 && (
+          <div className="text-center py-10 opacity-40">
+            <span className="text-sm">No expenses logged yet.</span>
           </div>
-          <div className="flex flex-col items-end">
-            <span className="text-white font-medium">₱350</span>
-            <span className="text-white/40 text-[10px] uppercase tracking-wider">R93</span>
-          </div>
-        </div>
+        )}
       </div>
+
+      <QuickLogModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleLogSpend}
+      />
     </div>
   );
 }
