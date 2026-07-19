@@ -8,14 +8,16 @@ import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { QuickLogModal } from "@/components/jar/QuickLogModal";
 import { JarLockedModal } from "@/components/jar/JarLockedModal";
+import { JarSettingsModal } from "@/components/jar/JarSettingsModal";
 
 export default function SpendJarPage() {
   const { config } = useBudgetStore();
-  const { entries, addExpense } = useSpendStore();
+  const { entries, addExpense, clearEntries } = useSpendStore();
   const { exchangeRate } = useCurrencyStore();
   
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isLockedModalOpen, setIsLockedModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   // Calculate totals based on allowed percentage
   const totalSpent = entries.reduce((sum, entry) => sum + entry.amount, 0);
@@ -29,10 +31,10 @@ export default function SpendJarPage() {
   // Visuals for ring
   let ringColor = "#30D158"; // Green
   let ringGlow = "rgba(48,209,88,0.6)";
-  if (percentage >= 75 && percentage < 90) {
+  if (percentage >= 50 && percentage < 70) {
     ringColor = "#E8A33D"; // Amber
     ringGlow = "rgba(232,163,61,0.6)";
-  } else if (percentage >= 90) {
+  } else if (percentage >= 70) {
     ringColor = "#FF453A"; // Red
     ringGlow = "rgba(255,69,58,0.6)";
   }
@@ -64,10 +66,10 @@ export default function SpendJarPage() {
       let colorClass = "text-[#30D158]"; // Green
       let bgClass = "bg-[#30D158]/10";
       
-      if (perc >= 90) {
+      if (perc >= 70) {
           colorClass = "text-[#FF453A]";
           bgClass = "bg-[#FF453A]/10";
-      } else if (perc >= 75) {
+      } else if (perc >= 50) {
           colorClass = "text-[#E8A33D]";
           bgClass = "bg-[#E8A33D]/10";
       }
@@ -79,8 +81,20 @@ export default function SpendJarPage() {
       
       {/* Header */}
       <div className="flex justify-between items-center mb-8 relative z-20 shrink-0">
-        <h1 className="text-3xl text-white font-light tracking-tight">Spend Jar</h1>
-        <button className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors">
+        <div className="flex items-center gap-3">
+            <h1 className="text-3xl text-white font-light tracking-tight">Spend Jar</h1>
+            {/* Temporary Reset Button */}
+            <button 
+                onClick={() => clearEntries()} 
+                className="px-2 py-1 bg-white/5 text-white/50 rounded-md text-[10px] uppercase font-bold tracking-wider hover:bg-white/10 hover:text-white transition-colors border border-white/10"
+            >
+                Reset Logs
+            </button>
+        </div>
+        <button 
+          onClick={() => setIsSettingsModalOpen(true)}
+          className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors"
+        >
           <Settings2 className="w-5 h-5 text-white/70" />
         </button>
       </div>
@@ -123,11 +137,11 @@ export default function SpendJarPage() {
               ≈ R{(totalSpent * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
             </span>
             <div 
-              className="px-3 py-1 rounded-full border transition-colors duration-500"
+              className="px-2.5 py-0.5 rounded-full border transition-colors duration-500 w-fit mx-auto mt-1"
               style={{ backgroundColor: `${ringColor}33`, borderColor: `${ringColor}4D` }}
             >
-              <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: ringColor }}>
-                {percentage.toFixed(1)}% OF ALLOWED
+              <span className="text-[9px] uppercase tracking-widest font-bold" style={{ color: ringColor }}>
+                {percentage.toFixed(0)}% OF ALLOWED
               </span>
             </div>
           </div>
@@ -234,6 +248,11 @@ export default function SpendJarPage() {
         totalSpent={totalSpent}
         targetAmount={config.targetAmount}
         period={config.period}
+      />
+
+      <JarSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
       />
     </div>
   );

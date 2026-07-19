@@ -6,6 +6,7 @@ interface SpendState {
     entries: ExpenseEntry[];
     addExpense: (amount: number, currency: 'PHP' | 'ZAR', category?: string, note?: string) => void;
     removeExpense: (id: string) => void;
+    clearEntries: () => void;
 }
 
 export const useSpendStore = create<SpendState>()(
@@ -27,7 +28,9 @@ export const useSpendStore = create<SpendState>()(
 
             removeExpense: (id) => set((state) => ({
                 entries: state.entries.filter(e => e.id !== id)
-            }))
+            })),
+
+            clearEntries: () => set({ entries: [] })
         }),
         {
             name: 'duo-spend-storage'
