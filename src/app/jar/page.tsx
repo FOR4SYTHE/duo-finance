@@ -9,6 +9,7 @@ import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { QuickLogModal } from "@/components/jar/QuickLogModal";
 import { JarLockedModal } from "@/components/jar/JarLockedModal";
 import { JarSettingsModal } from "@/components/jar/JarSettingsModal";
+import { LogAnimationOverlay } from "@/components/jar/LogAnimationOverlay";
 
 export default function SpendJarPage() {
   const { config } = useBudgetStore();
@@ -18,6 +19,7 @@ export default function SpendJarPage() {
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isLockedModalOpen, setIsLockedModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [animationType, setAnimationType] = useState<'happy' | 'worried' | 'scared' | null>(null);
 
   // Calculate totals based on allowed percentage
   const totalSpent = entries.reduce((sum, entry) => sum + entry.amount, 0);
@@ -45,6 +47,15 @@ export default function SpendJarPage() {
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   const handleLogSpend = (amount: number, note: string) => {
+      // Calculate new percentage to trigger corresponding animation
+      const newTotal = totalSpent + amount;
+      const newPercentage = (newTotal / allowedSpend) * 100;
+      
+      let type: 'happy' | 'worried' | 'scared' = 'happy';
+      if (newPercentage >= 70) type = 'scared';
+      else if (newPercentage >= 50) type = 'worried';
+      
+      setAnimationType(type);
       addExpense(amount, 'PHP', undefined, note);
       setIsLogModalOpen(false);
   };
@@ -253,6 +264,11 @@ export default function SpendJarPage() {
       <JarSettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
+      />
+
+      <LogAnimationOverlay 
+        type={animationType}
+        onComplete={() => setAnimationType(null)}
       />
     </div>
   );
