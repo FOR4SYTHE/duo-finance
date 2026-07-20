@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useCartifyStore } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { PriceEntryModal } from "./PriceEntryModal";
-import { Activity, Plus, ShoppingCart, Trash2, ArrowUpDown, ReceiptText, Delete, ShoppingBag, Shirt, Armchair, Laptop, Pill, Wrench } from "lucide-react";
+import { Activity, Plus, ShoppingCart, Trash2, ArrowUpDown, ReceiptText, Delete, ShoppingBag, Shirt, Armchair, Laptop, Pill, Wrench, Milk, Egg, Croissant, Cookie, Drumstick, Fish, Carrot, Apple, CupSoda, Coffee, Beer, Wine, Pizza, Cake, Banana, Cherry, Grape, Package } from "lucide-react";
 import { motion, useAnimation, PanInfo } from "framer-motion";
 
 export function LiveTripTracker() {
@@ -359,6 +359,67 @@ export function LiveTripTracker() {
     );
 }
 
+const getItemArt = (name: string) => {
+    const n = name.toLowerCase();
+    
+    if (n.match(/milk|dairy|cheese|bear brand|nido|alaska|birch tree|magnolia|eden|cheez whiz|kraft|yakult|dutch mill|chuckie/)) 
+        return { icon: Milk, color: 'from-blue-500/20 to-blue-500/5', text: 'text-blue-400' };
+    
+    if (n.includes('egg')) 
+        return { icon: Egg, color: 'from-yellow-500/20 to-yellow-500/5', text: 'text-yellow-400' };
+    
+    if (n.match(/bread|bakery|toast|pastry|gardenia|marby|julies|goldilocks|red ribbon/)) 
+        return { icon: Croissant, color: 'from-orange-500/20 to-orange-500/5', text: 'text-orange-400' };
+    
+    if (n.match(/snack|chip|cookie|biscuit|lays|piattos|nova|roller coaster|oishi|jack n jill|doritos|cheetos|pringles|chippy|vcut|tortillos|boy bawang|chicharron|skyflakes|fita|rebisco|hansel|oreo|nissin/)) 
+        return { icon: Cookie, color: 'from-amber-500/20 to-amber-500/5', text: 'text-amber-400' };
+    
+    if (n.match(/meat|chicken|beef|pork|purefoods|tender juicy|hotdog|sausage|cdo|pampanga's best|san miguel|spam|argentina/)) 
+        return { icon: Drumstick, color: 'from-red-500/20 to-red-500/5', text: 'text-red-400' };
+    
+    if (n.match(/fish|seafood|tuna|sardines|century|555|mega|ligo|san marino/)) 
+        return { icon: Fish, color: 'from-cyan-500/20 to-cyan-500/5', text: 'text-cyan-400' };
+    
+    if (n.match(/veg|carrot|salad|cabbage|onion|garlic|tomato|potato|mushroom/)) 
+        return { icon: Carrot, color: 'from-green-500/20 to-green-500/5', text: 'text-green-400' };
+    
+    if (n.match(/fruit|apple|berry|mango|orange|lemon|calamansi/)) 
+        return { icon: Apple, color: 'from-rose-500/20 to-rose-500/5', text: 'text-rose-400' };
+    
+    if (n.match(/soda|drink|juice|water|coke|coca|pepsi|sprite|royal|fanta|mountain dew|7up|rc cola|c2|gatorade|pocari|del monte|zest-o|minute maid|tang|eight o'clock|mineral|nature's spring|absolute|summit/)) 
+        return { icon: CupSoda, color: 'from-sky-500/20 to-sky-500/5', text: 'text-sky-400' };
+    
+    if (n.match(/coffee|tea|nescafe|kopiko|great taste|san mig|lipton|twinings|starbucks/)) 
+        return { icon: Coffee, color: 'from-amber-700/20 to-amber-700/5', text: 'text-amber-500' };
+    
+    if (n.match(/beer|alcohol|san miguel pale|red horse|smb|heineken|tiger|soju/)) 
+        return { icon: Beer, color: 'from-yellow-400/20 to-yellow-400/5', text: 'text-yellow-400' };
+        
+    if (n.match(/wine|liquor|brandy|emperador|tanduay|fundador/)) 
+        return { icon: Wine, color: 'from-fuchsia-500/20 to-fuchsia-500/5', text: 'text-fuchsia-400' };
+    
+    if (n.match(/oil|sauce|liquid|datu puti|silver swan|mang tomas|ufc|heinz|knorr|maggi|golden fiesta|baguio|nutriasia|mama sita|vinegar|soy sauce|ketchup|mayo/)) 
+        return { icon: Droplets, color: 'from-amber-400/20 to-amber-400/5', text: 'text-amber-300' };
+    
+    if (n.match(/pizza|fast food|jollibee|mcdonalds|kfc|chowking|lucky me|payless|pancit canton|noodles/)) 
+        return { icon: Pizza, color: 'from-orange-600/20 to-orange-600/5', text: 'text-orange-500' };
+    
+    if (n.match(/cake|dessert|ice cream|selecta|nestle|dirty ice cream/)) 
+        return { icon: Cake, color: 'from-pink-500/20 to-pink-500/5', text: 'text-pink-400' };
+        
+    if (n.match(/candy|sweet|chocolate|milo|toblerone|cadbury|hershey|goya|maxx|snow mint|cloud 9|flat tops|curly tops|choco mucho|beng beng|stick-o|nutella/)) 
+        return { icon: Candy, color: 'from-purple-500/20 to-purple-500/5', text: 'text-purple-400' };
+    
+    if (n.includes('banana')) return { icon: Banana, color: 'from-yellow-300/20 to-yellow-300/5', text: 'text-yellow-300' };
+    if (n.includes('cherry')) return { icon: Cherry, color: 'from-red-600/20 to-red-600/5', text: 'text-red-500' };
+    if (n.includes('grape')) return { icon: Grape, color: 'from-purple-600/20 to-purple-600/5', text: 'text-purple-500' };
+
+    if (n.match(/soap|shampoo|conditioner|safeguard|dove|palmolive|pantene|sunsilk|creamsilk|head & shoulders|rexona|kojiesan|detergent|surf|tide|ariel|pride|downy|champion|zonrox|joy|toothpaste|colgate|close up|tissue|wipes|diaper/))
+        return { icon: Droplets, color: 'from-cyan-400/20 to-cyan-400/5', text: 'text-cyan-300' };
+
+    return { icon: Package, color: 'from-gray-500/20 to-gray-500/5', text: 'text-gray-400' };
+};
+
 function SwipeableCartItem({ item, exchangeRate, onEdit, onIncrement, onDecrement, onDelete }: any) {
     const { toggleItemVatable } = useCartifyStore();
     const controls = useAnimation();
@@ -394,18 +455,29 @@ function SwipeableCartItem({ item, exchangeRate, onEdit, onIncrement, onDecremen
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-4 flex-1" onClick={isStillNeed ? onEdit : undefined}>
                         {!isStillNeed && (
-                            <div className="flex flex-col items-center gap-1 bg-white/[0.05] p-1 rounded-full border border-white/[0.02]">
-                                <button onClick={onIncrement} className="w-6 h-6 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20">
+                            <div className="flex flex-col items-center gap-1 bg-white/[0.05] p-1 rounded-full border border-white/[0.02] shrink-0">
+                                <button onClick={onIncrement} className="w-6 h-6 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 transition-colors">
                                     <Plus className="w-3 h-3 text-white" />
                                 </button>
                                 <span className="text-white text-xs font-bold w-6 text-center">{item.quantity}</span>
-                                <button onClick={onDecrement} className="w-6 h-6 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/20">
+                                <button onClick={onDecrement} className="w-6 h-6 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/20 transition-colors">
                                     <span className="w-3 h-0.5 bg-white rounded-full" />
                                 </button>
                             </div>
                         )}
                         
-                        <div className="flex flex-col flex-1" onClick={!isStillNeed ? onEdit : undefined}>
+                        {(() => {
+                            const Art = getItemArt(item.name);
+                            const Icon = Art.icon;
+                            return (
+                                <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center border border-white/5 relative overflow-hidden bg-gradient-to-br ${Art.color} shadow-lg ml-1`}>
+                                    <div className="absolute inset-0 opacity-20 bg-white/10 mix-blend-overlay" />
+                                    <Icon className={`w-5 h-5 ${Art.text} drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]`} strokeWidth={1.5} />
+                                </div>
+                            );
+                        })()}
+
+                        <div className="flex flex-col flex-1 pl-1" onClick={!isStillNeed ? onEdit : undefined}>
                             <span className={`font-medium mb-0.5 ${isStillNeed ? 'text-white/60' : 'text-white'}`}>{item.name}</span>
                             <span className="text-white/40 text-xs tracking-wide">
                                 {isStillNeed ? 'Tap to set price' : `₱${item.unitPrice.toLocaleString()} each`}
