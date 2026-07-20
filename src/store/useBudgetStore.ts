@@ -18,6 +18,9 @@ interface BudgetState {
     setBudget: (targetAmount: number, period: BudgetPeriod) => void;
     setJarPercentage: (pct: number) => void;
     setRunwayMultiplier: (multiplier: number) => void;
+    setCardSkin: (skin: string) => void;
+    setCardName: (name: string) => void;
+    setActiveMonth: (month: string) => void;
     addCategory: (category: Omit<BudgetCategory, 'id'>) => void;
     updateCategory: (id: string, updates: Partial<BudgetCategory>) => void;
     updateCategoriesTarget: (updates: { id: string, targetAmount: number }[]) => void;
@@ -76,7 +79,10 @@ export const useBudgetStore = create<BudgetState>()(
                 targetAmount: 0,
                 period: 'monthly',
                 jarAllowedPercentage: 0,
-                runwayMultiplier: 3
+                runwayMultiplier: 3,
+                cardSkin: 'default-dark',
+                cardName: 'BL',
+                activeMonth: new Date().toISOString().slice(0, 7) // "YYYY-MM" format
             },
             categories: DEFAULT_CATEGORIES,
             goals: DEFAULT_GOALS,
@@ -92,6 +98,12 @@ export const useBudgetStore = create<BudgetState>()(
                     const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
                     return { config: newConfig, goals };
                 }),
+            setCardSkin: (skin: string) =>
+                set((state) => ({ config: { ...state.config, cardSkin: skin } })),
+            setCardName: (name: string) =>
+                set((state) => ({ config: { ...state.config, cardName: name } })),
+            setActiveMonth: (month: string) =>
+                set((state) => ({ config: { ...state.config, activeMonth: month } })),
             addCategory: (category) => 
                 set((state) => {
                     const defaultMatch = DEFAULT_CATEGORIES.find(d => d.name.toLowerCase() === category.name.toLowerCase());
@@ -196,6 +208,15 @@ export const useBudgetStore = create<BudgetState>()(
                         return cat;
                     });
                 }
+                
+                // Ensure config has all required fields, including activeMonth
+                if (!merged.config) {
+                    merged.config = currentState.config;
+                } else if (!merged.config.activeMonth) {
+                    merged.config.activeMonth = new Date().toISOString().slice(0, 7);
+                }
+                if (!merged.config.cardSkin) merged.config.cardSkin = 'default-dark';
+                if (!merged.config.cardName) merged.config.cardName = 'BL';
                 if (!persistedState.goals) {
                     merged.goals = DEFAULT_GOALS;
                 } else {

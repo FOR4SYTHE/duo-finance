@@ -40,4 +40,7 @@ export interface BudgetConfig {
     period: BudgetPeriod; // Current selected display period
     jarAllowedPercentage: number; // Percentage of targetAmount allowed for extra spend
     runwayMultiplier?: number; // For Emergency Runway calculator
+    cardSkin?: string; // Selected skin for the hero card
+    cardName?: string; // Custom name for the hero card
+    activeMonth?: string; // "YYYY-MM" for filtering expenses
 }
