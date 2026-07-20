@@ -330,7 +330,7 @@ export default function BudgetPage() {
           <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Target Allocations</h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 pb-6">
+        <div className="grid grid-cols-2 gap-4 pb-6">
             {categories.map((cat) => {
                 const Icon = (Icons as any)[cat.icon] || Icons.HelpCircle;
                 const catTarget = getDisplayValue(cat.targetAmount, config.period);
@@ -347,40 +347,49 @@ export default function BudgetPage() {
                                 setEditingCategory(cat);
                             }
                         }}
-                        className="rounded-[24px] p-4 flex flex-col cursor-pointer transition-colors active:scale-[0.98] border border-white/5"
+                        className="rounded-[28px] p-5 flex flex-col justify-between cursor-pointer transition-all active:scale-[0.97] hover:brightness-110 group relative overflow-hidden min-h-[160px]"
                         style={{ 
-                            backgroundColor: `${cat.color}11`, // very soft tint
-                            borderColor: `${cat.color}22`
+                            background: `linear-gradient(145deg, ${cat.color}15 0%, ${cat.color}05 100%)`,
+                            boxShadow: `inset 0 1px 1px rgba(255,255,255,0.08), 0 12px 32px rgba(0,0,0,0.3), inset 0 0 0 1px ${cat.color}15`,
                         }}
                     >
-                        <div className="flex justify-between items-start mb-4">
+                        {/* Soft light burst on hover */}
+                        <div className="absolute -top-12 -right-12 w-32 h-32 blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ backgroundColor: cat.color }} />
+                        
+                        <div className="flex justify-between items-start mb-5 relative z-10">
                             <div 
-                                className="w-10 h-10 rounded-full flex items-center justify-center"
-                                style={{ backgroundColor: `${cat.color}22` }}
+                                className="w-11 h-11 rounded-full flex items-center justify-center relative"
+                                style={{ 
+                                    backgroundColor: `${cat.color}25`,
+                                    boxShadow: `0 8px 16px ${cat.color}20, inset 0 1px 1px rgba(255,255,255,0.15)`,
+                                    border: `1px solid ${cat.color}30`
+                                }}
                             >
-                                <Icon className="w-5 h-5" style={{ color: cat.color }} />
+                                <Icon className="w-5 h-5 relative z-10" style={{ color: cat.color }} />
                             </div>
                             <button 
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setMenuCategory(cat);
                                 }}
-                                className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.02] hover:bg-white/[0.1] text-white/40 hover:text-white transition-colors -mt-1 -mr-1"
+                                className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.03] hover:bg-white/[0.1] text-white/30 hover:text-white transition-colors border border-white/5"
                             >
-                                <Icons.MoreVertical className="w-4 h-4" />
+                                <Icons.MoreHorizontal className="w-4 h-4" />
                             </button>
                         </div>
-                        <span className="text-white font-medium mb-1 drop-shadow-sm">{cat.name}</span>
-                        {catTarget > 0 ? (
-                            <>
-                                <span className="text-white/90 font-semibold mb-0.5">₱{catTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                                <span className="text-white/50 text-[10px] uppercase tracking-wider">
-                                    ≈ R{(catTarget * exchangeRate).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                </span>
-                            </>
-                        ) : (
-                            <span className="text-white/30 text-sm font-medium mt-0.5">Set amount</span>
-                        )}
+                        <div className="relative z-10 flex flex-col">
+                            <span className="text-white/80 font-medium text-[15px] mb-1.5 tracking-wide">{cat.name}</span>
+                            {catTarget > 0 ? (
+                                <>
+                                    <span className="text-white font-semibold text-xl tracking-tight mb-0.5">₱{catTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                    <span className="text-white/40 text-[11px] font-medium tracking-wider">
+                                        ≈ R{(catTarget * exchangeRate).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                    </span>
+                                </>
+                            ) : (
+                                <span className="text-white/30 text-sm font-medium mt-0.5 tracking-wide">Set amount</span>
+                            )}
+                        </div>
                     </div>
                 );
             })}
@@ -388,10 +397,17 @@ export default function BudgetPage() {
             {/* Add Category Tile */}
             <div 
                 onClick={() => setIsAddCategoryOpen(true)}
-                className="bg-white/[0.01] border border-white/[0.05] border-dashed rounded-[24px] p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-white/[0.03] transition-colors text-white/30 hover:text-white/60 min-h-[140px]"
+                className="rounded-[28px] p-5 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-white/[0.04] active:scale-[0.97] min-h-[160px] relative overflow-hidden"
+                style={{
+                    background: 'rgba(255,255,255,0.01)',
+                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
+                }}
             >
-                <Plus className="w-8 h-8 mb-2" />
-                <span className="text-xs font-medium uppercase tracking-widest">Add Category</span>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/[0.02] pointer-events-none" />
+                <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/[0.03] mb-3 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-white/[0.05]">
+                    <Plus className="w-5 h-5 text-white/40" />
+                </div>
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-white/30">Add Category</span>
             </div>
         </div>
       </div>
