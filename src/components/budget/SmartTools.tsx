@@ -343,7 +343,7 @@ function FxVolatilityContent() {
             const start = '2024-05-01';
             const end = '2024-06-01';
 
-            const url = `https://api.frankfurter.app/${start}..${end}?from=ZAR&to=PHP`;
+            const url = `https://api.frankfurter.dev/v1/${start}..${end}?base=ZAR&symbols=PHP`;
             const res = await fetch(url);
             if (!res.ok) {
                 const text = await res.text();
