@@ -5,28 +5,32 @@ import { BudgetConfig, BudgetPeriod, BudgetCategory } from '@/types/finance';
 interface BudgetState {
     config: BudgetConfig;
     categories: BudgetCategory[];
-    setBudget: (amount: number, period: BudgetPeriod) => void;
-    setJarPercentage: (percentage: number) => void;
+    setBudget: (targetAmount: number, period: BudgetPeriod) => void;
+    setJarPercentage: (pct: number) => void;
     addCategory: (category: Omit<BudgetCategory, 'id'>) => void;
     updateCategory: (id: string, updates: Partial<BudgetCategory>) => void;
     removeCategory: (id: string) => void;
+    _hasHydrated: boolean;
+    setHasHydrated: (state: boolean) => void;
 }
 
 const DEFAULT_CATEGORIES: BudgetCategory[] = [
-    { id: '1', name: 'Rent', icon: 'Home', color: '#30D158', targetAmount: 18000 },
-    { id: '2', name: 'Groceries', icon: 'ShoppingBag', color: '#E8A33D', targetAmount: 9000 },
-    { id: '3', name: 'Utilities', icon: 'Zap', color: '#0A84FF', targetAmount: 3500 },
-    { id: '4', name: 'Bills', icon: 'CreditCard', color: '#FF453A', targetAmount: 2000 },
-    { id: '5', name: 'Kids Tuition', icon: 'GraduationCap', color: '#BF5AF2', targetAmount: 5000 },
+    { id: '1', name: 'Rent', icon: 'Home', color: '#30D158', targetAmount: 0 },
+    { id: '2', name: 'Groceries', icon: 'ShoppingBag', color: '#E8A33D', targetAmount: 0 },
+    { id: '3', name: 'Utilities', icon: 'Zap', color: '#0A84FF', targetAmount: 0 },
+    { id: '4', name: 'Bills', icon: 'CreditCard', color: '#FF453A', targetAmount: 0 },
+    { id: '5', name: 'Kids Tuition', icon: 'GraduationCap', color: '#BF5AF2', targetAmount: 0 },
 ];
 
 export const useBudgetStore = create<BudgetState>()(
     persist(
         (set) => ({
+            _hasHydrated: false,
+            setHasHydrated: (state) => set({ _hasHydrated: state }),
             config: {
-                targetAmount: 40000, // Adjusted default to roughly match categories
+                targetAmount: 0,
                 period: 'monthly',
-                jarAllowedPercentage: 20
+                jarAllowedPercentage: 0
             },
             categories: DEFAULT_CATEGORIES,
             setBudget: (targetAmount: number, period: BudgetPeriod) => 
@@ -47,7 +51,12 @@ export const useBudgetStore = create<BudgetState>()(
                 }))
         }),
         {
-            name: 'duo-budget-storage'
+            name: 'duo-budget-storage',
+            onRehydrateStorage: () => (state) => {
+                if (state) {
+                    state.setHasHydrated(true);
+                }
+            }
         }
     )
 );

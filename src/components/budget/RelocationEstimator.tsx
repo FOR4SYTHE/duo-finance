@@ -44,14 +44,14 @@ export function RelocationEstimator({ onUseEstimate }: RelocationEstimatorProps)
             </div>
 
             <div className="flex flex-col gap-4 relative">
-                <div className="flex justify-between items-center bg-black/40 rounded-2xl p-4">
+                <div className="flex flex-wrap justify-between items-center bg-black/40 rounded-2xl p-4 gap-4">
                     <div className="flex items-center gap-3">
                         <Users className="w-4 h-4 text-white/40" />
                         <span className="text-white/70 text-sm">Adults</span>
                     </div>
 
                     {/* Abstract Illustrated Row */}
-                    <div className="flex flex-1 items-end gap-1.5 px-4 justify-end opacity-40">
+                    <div className="hidden sm:flex flex-1 items-end gap-1.5 px-4 justify-end opacity-40">
                         <AnimatePresence mode="popLayout">
                             {Array.from({ length: adults }).map((_, i) => (
                                 <motion.div
@@ -81,13 +81,13 @@ export function RelocationEstimator({ onUseEstimate }: RelocationEstimatorProps)
                 <div className="relative">
                     <div 
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        className="flex justify-between items-center bg-black/40 rounded-2xl p-4 cursor-pointer hover:bg-black/60 transition-colors"
+                        className="flex flex-wrap justify-between items-center bg-black/40 rounded-2xl p-4 gap-4 cursor-pointer hover:bg-black/60 transition-colors"
                     >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 shrink-0">
                             <MapPin className="w-4 h-4 text-white/40" />
                             <span className="text-white/70 text-sm">Target Area</span>
                         </div>
-                        <div className="flex items-center gap-2 text-white">
+                        <div className="flex items-center gap-2 text-white shrink-0">
                             <span className="font-medium text-sm">{area}</span>
                             <ChevronDown className="w-4 h-4 text-white/50" />
                         </div>
@@ -123,7 +123,7 @@ export function RelocationEstimator({ onUseEstimate }: RelocationEstimatorProps)
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={handleCalculate}
-                            className="w-full mt-2 h-14 rounded-full bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.05] text-white font-medium transition-all text-sm"
+                            className="w-full mt-2 min-h-[56px] py-4 rounded-full bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.05] text-white font-medium transition-all text-sm"
                         >
                             Calculate Estimate
                         </motion.button>
@@ -148,7 +148,7 @@ export function RelocationEstimator({ onUseEstimate }: RelocationEstimatorProps)
                                     onUseEstimate(estimate.rent, estimate.utilities);
                                     setEstimate(null); // Reset after using
                                 }}
-                                className="w-full mt-2 h-14 rounded-full bg-white text-black hover:bg-gray-200 font-semibold transition-all text-sm"
+                                className="w-full mt-2 min-h-[56px] py-4 rounded-full bg-white text-black hover:bg-gray-200 font-semibold transition-all text-sm"
                             >
                                 Use this estimate
                             </button>

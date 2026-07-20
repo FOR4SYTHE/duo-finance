@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { BudgetPeriod, BudgetCategory } from "@/types/finance";
-import { RelocationEstimator } from "@/components/budget/RelocationEstimator";
+import { SmartTools } from "@/components/budget/SmartTools";
 import { AmountInputModal } from "@/components/budget/AmountInputModal";
 import { AddCategorySheet } from "@/components/budget/AddCategorySheet";
 import { getDisplayValue, getCanonicalValue, calculateAllocations } from "@/utils/budgetMath";
@@ -21,18 +21,13 @@ const PERIODS: { value: BudgetPeriod; label: string }[] = [
 ];
 
 export default function BudgetPage() {
-  const { config, categories, setBudget, updateCategory } = useBudgetStore();
+  const { config, categories, setBudget, updateCategory, _hasHydrated } = useBudgetStore();
   const { exchangeRate } = useCurrencyStore();
   
-  const [isHydrated, setIsHydrated] = useState(false);
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [isHeroModalOpen, setIsHeroModalOpen] = useState(false);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
-
-  useEffect(() => {
-      setIsHydrated(true);
-  }, []);
 
   // Computed Values
   const { displayTarget, displayAllocated, displayUnallocated } = calculateAllocations(config, categories);
@@ -63,7 +58,22 @@ export default function BudgetPage() {
       }
   };
 
-  if (!isHydrated) return null; // Avoid Zustand hydration mismatch flash
+  if (!_hasHydrated) {
+      return (
+          <div className="flex flex-col w-full pb-8 pt-12 px-6">
+              <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-3xl text-white font-light tracking-tight">Budget</h1>
+                  <div className="w-24 h-9 bg-white/[0.04] rounded-full animate-pulse" />
+              </div>
+              <div className="w-full rounded-[24px] aspect-[1.58/1] bg-white/[0.02] border border-white/[0.03] animate-pulse mb-8" />
+              <div className="w-full rounded-[32px] h-32 bg-white/[0.02] border border-white/[0.03] animate-pulse mb-8" />
+              <div className="grid grid-cols-2 gap-3 pb-6">
+                  <div className="rounded-[24px] h-32 bg-white/[0.02] border border-white/[0.03] animate-pulse" />
+                  <div className="rounded-[24px] h-32 bg-white/[0.02] border border-white/[0.03] animate-pulse" />
+              </div>
+          </div>
+      );
+  }
 
   const activePeriodLabel = PERIODS.find(p => p.value === config.period)?.label || 'Monthly';
 
@@ -137,24 +147,52 @@ export default function BudgetPage() {
                     </span>
 
                     <div className="flex items-center gap-2 text-xs">
-                        <div className="w-2 h-2 rounded-full bg-[#30D158] shadow-[0_0_8px_rgba(48,209,88,0.5)]" />
-                        <span className="text-white/60">
-                            Allocated: ₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})} of ₱{displayTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}
-                        </span>
-                        <span className="text-white/30 mx-1">·</span>
-                        <span className="text-white/40">₱{displayUnallocated.toLocaleString(undefined, {maximumFractionDigits: 0})} unallocated</span>
+                        {displayAllocated > displayTarget ? (
+                            <>
+                                <div className="w-2 h-2 rounded-full bg-[#FF453A] shadow-[0_0_8px_rgba(255,69,58,0.5)] shrink-0" />
+                                <span className="text-white/60">
+                                    Allocated: ₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                </span>
+                                <span className="text-white/30 mx-1">·</span>
+                                <span className="text-[#FF453A] font-medium">Over-allocated by ₱{(displayAllocated - displayTarget).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                            </>
+                        ) : (
+                            <>
+                                <div className="w-2 h-2 rounded-full bg-[#30D158] shadow-[0_0_8px_rgba(48,209,88,0.5)] shrink-0" />
+                                <span className="text-white/60">
+                                    Allocated: ₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})} of ₱{displayTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                </span>
+                                <span className="text-white/30 mx-1">·</span>
+                                <span className="text-white/40">₱{displayUnallocated.toLocaleString(undefined, {maximumFractionDigits: 0})} unallocated</span>
+                            </>
+                        )}
                     </div>
+                    {/* Discretionary Spend Jar Allocation */}
+                    {displayUnallocated > 0 && config.jarAllowedPercentage !== undefined && (
+                        <div 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                const current = config.jarAllowedPercentage;
+                                const next = current === 0 ? 20 : current === 20 ? 50 : current === 50 ? 100 : 0;
+                                useBudgetStore.getState().setJarPercentage(next);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/5 hover:bg-white/10 transition-colors cursor-pointer mt-1 self-start"
+                        >
+                            <span className="text-white/50 text-[10px] uppercase tracking-wider font-semibold">Spend Jar Allowance:</span>
+                            <span className="text-white font-medium text-xs">{config.jarAllowedPercentage}%</span>
+                        </div>
+                    )}
                 </div>
                 
                 {/* Monogram Mark */}
-                <div className="flex items-center justify-center w-10 h-6 border border-white/20 rounded-md bg-white/5">
+                <div className="flex items-center justify-center w-10 h-6 border border-white/20 rounded-md bg-white/5 shrink-0 ml-4">
                     <span className="text-[10px] font-bold text-white/40 italic tracking-wider">BL</span>
                 </div>
             </div>
         </div>
       </div>
 
-      <RelocationEstimator onUseEstimate={handleUseEstimate} />
+      <SmartTools />
 
       {/* Category Bento Grid */}
       <div className="flex flex-col relative z-20 flex-1">

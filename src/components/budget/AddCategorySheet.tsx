@@ -24,38 +24,7 @@ const PRESETS = [
 
 export function AddCategorySheet({ isOpen, onClose }: AddCategorySheetProps) {
     const { categories, addCategory, config } = useBudgetStore();
-    const [view, setView] = useState<'presets' | 'ai' | 'manual'>('presets');
-    const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
-    const [isAiLoading, setIsAiLoading] = useState(false);
-    
     const [selectedDraft, setSelectedDraft] = useState<any | null>(null);
-
-    const handleSuggestAI = async () => {
-        setView('ai');
-        setIsAiLoading(true);
-        setAiSuggestions([]);
-        try {
-            const res = await fetch('/api/suggest-categories', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ currentCategories: categories })
-            });
-            if (!res.ok) throw new Error('API failed');
-            const data = await res.json();
-            if (data.suggestions) {
-                setAiSuggestions(data.suggestions);
-            } else {
-                throw new Error('Invalid response');
-            }
-        } catch (error) {
-            console.error(error);
-            // Fallback gracefully
-            alert("AI suggestion failed. Falling back to presets.");
-            setView('presets');
-        } finally {
-            setIsAiLoading(false);
-        }
-    };
 
     const handleSelectDraft = (draft: any) => {
         setSelectedDraft(draft);
@@ -67,15 +36,10 @@ export function AddCategorySheet({ isOpen, onClose }: AddCategorySheetProps) {
                 name: selectedDraft.name,
                 icon: selectedDraft.icon,
                 color: selectedDraft.color || '#30D158',
-                targetAmount: amount // We assume canonical monthly logic is handled here or caller side. 
-                // Wait, if amount is typed, it's relative to the active period. 
-                // In page.tsx, we converted to canonical monthly before saving. 
-                // We should do that here as well if AmountInputModal returns the active period amount.
+                targetAmount: amount
             });
             setSelectedDraft(null);
             onClose();
-            // reset view for next time
-            setTimeout(() => setView('presets'), 300);
         }
     };
 
@@ -131,45 +95,12 @@ export function AddCategorySheet({ isOpen, onClose }: AddCategorySheetProps) {
                             </button>
                         </div>
 
-                        {view === 'presets' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4 overflow-y-auto no-scrollbar">
-                                <button 
-                                    onClick={handleSuggestAI}
-                                    className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-gradient-to-r from-purple-500/20 to-blue-500/20 hover:from-purple-500/30 hover:to-blue-500/30 border border-purple-500/20 text-white font-medium transition-all"
-                                >
-                                    <Sparkles className="w-4 h-4 text-purple-400" />
-                                    <span>✨ Suggest with AI</span>
-                                </button>
-                                
-                                <div className="mt-2">
-                                    <span className="text-white/40 text-xs font-semibold uppercase tracking-widest">Common Categories</span>
-                                    {renderList(PRESETS)}
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {view === 'ai' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col flex-1">
-                                {isAiLoading ? (
-                                    <div className="flex flex-col items-center justify-center py-12 gap-4">
-                                        <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-                                        <span className="text-white/50 text-sm">Analyzing budget gaps...</span>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col gap-4">
-                                        <button 
-                                            onClick={() => setView('presets')}
-                                            className="text-white/50 text-sm self-start hover:text-white mb-2"
-                                        >
-                                            ← Back to presets
-                                        </button>
-                                        <span className="text-white/40 text-xs font-semibold uppercase tracking-widest">AI Suggestions</span>
-                                        {renderList(aiSuggestions)}
-                                    </div>
-                                )}
-                            </motion.div>
-                        )}
-
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4 overflow-y-auto no-scrollbar">
+                            <div className="mt-2">
+                                <span className="text-white/40 text-xs font-semibold uppercase tracking-widest">Common Categories</span>
+                                {renderList(PRESETS)}
+                            </div>
+                        </motion.div>
                     </motion.div>
                 </div>
             )}
