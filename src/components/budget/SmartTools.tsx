@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Calculator, Target, Activity, Sparkles, AlertCircle, Calendar, MoreVertical, Plus, HelpCircle } from "lucide-react";
+import { Calculator, Target, Activity, TrendingUp, AlertCircle, Calendar, MoreVertical, Plus, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBudgetStore } from "../../store/useBudgetStore";
 import { useCurrencyStore } from "../../store/useCurrencyStore";
@@ -20,23 +20,26 @@ export const GROCERY_SEASONAL_BUFFER = 0.08; // 8% grocery buffer
 // SHARED COMPONENTS
 // ==========================================
 
-function PillTabRow({ tabs, activeTab, onSelect }: { tabs: { id: string, icon: any, label: string }[], activeTab: string | null, onSelect: (id: string) => void }) {
+function PillTabRow({ tabs, activeTab, onSelect }: { tabs: any[], activeTab: string | null, onSelect: (id: string) => void }) {
     return (
         <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-2 w-full shrink-0">
-            {tabs.map(tab => (
-                <button
-                    key={tab.id}
-                    onClick={() => onSelect(activeTab === tab.id ? '' : tab.id)}
-                    className={`flex items-center gap-1.5 px-3 py-2.5 rounded-full whitespace-nowrap transition-all text-sm shrink-0 border ${
-                        activeTab === tab.id
-                            ? 'bg-white text-black font-medium border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]' 
-                            : 'bg-white/[0.03] text-white/60 border-white/[0.05] hover:bg-white/[0.08] hover:text-white'
-                    }`}
-                >
-                    {tab.icon}
-                    <span>{tab.label}</span>
-                </button>
-            ))}
+            {tabs.map(tab => {
+                const isActive = activeTab === tab.id;
+                return (
+                    <button
+                        key={tab.id}
+                        onClick={() => onSelect(isActive ? '' : tab.id)}
+                        className={`flex items-center gap-1.5 px-3 py-2.5 rounded-full whitespace-nowrap transition-all duration-300 text-sm shrink-0 border ${
+                            isActive
+                                ? `font-medium ${tab.activeClass}` 
+                                : `bg-white/[0.02] text-white/50 border-white/[0.05] hover:bg-white/[0.05] ${tab.hoverClass}`
+                        }`}
+                    >
+                        {tab.icon}
+                        <span>{tab.label}</span>
+                    </button>
+                );
+            })}
         </div>
     );
 }
@@ -500,10 +503,34 @@ export function SmartTools() {
     const [activeTool, setActiveTool] = useState<string | null>(null);
 
     const TABS = [
-        { id: 'runway', icon: <Activity className="w-4 h-4" />, label: 'Runway' },
-        { id: 'goals', icon: <Target className="w-4 h-4" />, label: 'Goals' },
-        { id: 'guard', icon: <Sparkles className="w-4 h-4" />, label: 'Inflation Guard' },
-        { id: 'allocation', icon: <Calculator className="w-4 h-4" />, label: 'Salary Split' },
+        { 
+            id: 'runway', 
+            icon: <Activity className="w-4 h-4" />, 
+            label: 'Runway',
+            activeClass: 'bg-[#0A84FF]/10 text-[#0A84FF] border-[#0A84FF]/30',
+            hoverClass: 'hover:text-[#0A84FF] hover:border-[#0A84FF]/30'
+        },
+        { 
+            id: 'goals', 
+            icon: <Target className="w-4 h-4" />, 
+            label: 'Goals',
+            activeClass: 'bg-[#30D158]/10 text-[#30D158] border-[#30D158]/30',
+            hoverClass: 'hover:text-[#30D158] hover:border-[#30D158]/30'
+        },
+        { 
+            id: 'guard', 
+            icon: <TrendingUp className="w-4 h-4" />, 
+            label: 'Inflation Guard',
+            activeClass: 'bg-[#E8A33D]/10 text-[#E8A33D] border-[#E8A33D]/30',
+            hoverClass: 'hover:text-[#E8A33D] hover:border-[#E8A33D]/30'
+        },
+        { 
+            id: 'allocation', 
+            icon: <Calculator className="w-4 h-4" />, 
+            label: 'Salary Split',
+            activeClass: 'bg-[#BF5AF2]/10 text-[#BF5AF2] border-[#BF5AF2]/30',
+            hoverClass: 'hover:text-[#BF5AF2] hover:border-[#BF5AF2]/30'
+        },
     ];
 
     return (
