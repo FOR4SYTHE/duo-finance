@@ -349,6 +349,7 @@ function SalaryAllocationContent() {
     const [needsPct, setNeedsPct] = useState<number>(50);
     const [wantsPct, setWantsPct] = useState<number>(30);
     const [savingsPct, setSavingsPct] = useState<number>(20);
+    const [expandedInfo, setExpandedInfo] = useState<string | null>(null);
 
     const SMART_PRESETS = [
         { label: 'Metro (50/30/20)', needs: 50, wants: 30, savings: 20 },
@@ -549,25 +550,94 @@ function SalaryAllocationContent() {
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-3 pt-2 border-t border-white/[0.05]">
                         <div className="flex flex-col gap-2">
                             <span className="text-white/40 text-[10px] uppercase tracking-wider font-semibold">Suggested Allocations (PHP)</span>
-                            <div className="flex justify-between text-xs border-b border-white/5 pb-2">
-                                <span className="text-white/60">Rent (60% of Needs)</span>
-                                <span className="text-white font-medium">₱{formatCurrency(rentAllocation)}</span>
+                            <div className="flex flex-col border-b border-white/5 pb-2">
+                                <div className="flex justify-between text-xs">
+                                    <button onClick={() => setExpandedInfo(expandedInfo === 'rent' ? null : 'rent')} className="text-white/60 flex items-center gap-1.5 hover:text-white transition-colors outline-none text-left">
+                                        Rent (60% of Needs) <Icons.Info className="w-3 h-3 opacity-60 shrink-0" />
+                                    </button>
+                                    <span className="text-white font-medium">₱{formatCurrency(rentAllocation)}</span>
+                                </div>
+                                <AnimatePresence>
+                                    {expandedInfo === 'rent' && (
+                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                                            <p className="text-white/40 text-[10px] bg-white/[0.02] p-2.5 rounded-lg mt-2 leading-relaxed border border-white/5">
+                                                Housing costs typically shouldn't exceed 30% of total income. Modeled here as 60% of your essential Needs bucket.
+                                            </p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
-                            <div className="flex justify-between text-xs border-b border-white/5 pb-2">
-                                <span className="text-white/60">Groceries (25% of Needs)</span>
-                                <span className="text-white font-medium">₱{formatCurrency(groceriesAllocation)}</span>
+
+                            <div className="flex flex-col border-b border-white/5 pb-2">
+                                <div className="flex justify-between text-xs">
+                                    <button onClick={() => setExpandedInfo(expandedInfo === 'groceries' ? null : 'groceries')} className="text-white/60 flex items-center gap-1.5 hover:text-white transition-colors outline-none text-left">
+                                        Groceries (25% of Needs) <Icons.Info className="w-3 h-3 opacity-60 shrink-0" />
+                                    </button>
+                                    <span className="text-white font-medium">₱{formatCurrency(groceriesAllocation)}</span>
+                                </div>
+                                <AnimatePresence>
+                                    {expandedInfo === 'groceries' && (
+                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                                            <p className="text-white/40 text-[10px] bg-white/[0.02] p-2.5 rounded-lg mt-2 leading-relaxed border border-white/5">
+                                                Food and household supplies. This makes up 25% of your essentials.
+                                            </p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
-                            <div className="flex justify-between text-xs border-b border-white/5 pb-2">
-                                <span className="text-white/60">Utilities (15% of Needs)</span>
-                                <span className="text-white font-medium">₱{formatCurrency(utilitiesAllocation)}</span>
+
+                            <div className="flex flex-col border-b border-white/5 pb-2">
+                                <div className="flex justify-between text-xs">
+                                    <button onClick={() => setExpandedInfo(expandedInfo === 'utilities' ? null : 'utilities')} className="text-white/60 flex items-center gap-1.5 hover:text-white transition-colors outline-none text-left">
+                                        Utilities (15% of Needs) <Icons.Info className="w-3 h-3 opacity-60 shrink-0" />
+                                    </button>
+                                    <span className="text-white font-medium">₱{formatCurrency(utilitiesAllocation)}</span>
+                                </div>
+                                <AnimatePresence>
+                                    {expandedInfo === 'utilities' && (
+                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                                            <p className="text-white/40 text-[10px] bg-white/[0.02] p-2.5 rounded-lg mt-2 leading-relaxed border border-white/5">
+                                                Electricity, water, internet, and phone bills. Modeled as 15% of your essentials.
+                                            </p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
-                            <div className="flex justify-between text-xs border-b border-white/5 pb-2">
-                                <span className="text-white/60">Unallocated - Discretionary (Wants)</span>
-                                <span className="text-[#0A84FF] font-semibold">₱{formatCurrency(wantsAmount)}</span>
+
+                            <div className="flex flex-col border-b border-white/5 pb-2">
+                                <div className="flex justify-between text-xs">
+                                    <button onClick={() => setExpandedInfo(expandedInfo === 'wants' ? null : 'wants')} className="text-white/60 flex items-center gap-1.5 hover:text-white transition-colors outline-none text-left">
+                                        Unallocated - Discretionary (Wants) <Icons.Info className="w-3 h-3 opacity-60 shrink-0" />
+                                    </button>
+                                    <span className="text-[#0A84FF] font-semibold">₱{formatCurrency(wantsAmount)}</span>
+                                </div>
+                                <AnimatePresence>
+                                    {expandedInfo === 'wants' && (
+                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                                            <p className="text-white/40 text-[10px] bg-white/[0.02] p-2.5 rounded-lg mt-2 leading-relaxed border border-white/5">
+                                                Non-essentials like dining out, entertainment, and shopping. This is your guilt-free spending money.
+                                            </p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
-                            <div className="flex justify-between text-xs pb-1">
-                                <span className="text-white/60">Emergency Savings target</span>
-                                <span className="text-[#BF5AF2] font-semibold">₱{formatCurrency(savingsAmount)}</span>
+
+                            <div className="flex flex-col pb-1">
+                                <div className="flex justify-between text-xs">
+                                    <button onClick={() => setExpandedInfo(expandedInfo === 'savings' ? null : 'savings')} className="text-white/60 flex items-center gap-1.5 hover:text-white transition-colors outline-none text-left">
+                                        Emergency Savings target <Icons.Info className="w-3 h-3 opacity-60 shrink-0" />
+                                    </button>
+                                    <span className="text-[#BF5AF2] font-semibold">₱{formatCurrency(savingsAmount)}</span>
+                                </div>
+                                <AnimatePresence>
+                                    {expandedInfo === 'savings' && (
+                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                                            <p className="text-white/40 text-[10px] bg-white/[0.02] p-2.5 rounded-lg mt-2 leading-relaxed border border-white/5">
+                                                Target monthly contribution to build your emergency runway and long-term investments.
+                                            </p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
                     </motion.div>
