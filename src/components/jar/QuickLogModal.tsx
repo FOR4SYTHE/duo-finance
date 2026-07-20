@@ -65,7 +65,7 @@ export function QuickLogModal({ isOpen, onClose, onConfirm }: QuickLogModalProps
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onClick={onClose}
                         className="absolute inset-0 bg-black/60 backdrop-blur-md"
                     />
                     
