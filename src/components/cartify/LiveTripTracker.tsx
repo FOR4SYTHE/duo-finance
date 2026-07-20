@@ -408,7 +408,7 @@ const getItemArt = (name: string) => {
         return { icon: Cake, color: 'from-pink-500/20 to-pink-500/5', text: 'text-pink-400' };
         
     if (n.match(/candy|sweet|chocolate|milo|toblerone|cadbury|hershey|goya|maxx|snow mint|cloud 9|flat tops|curly tops|choco mucho|beng beng|stick-o|nutella/)) 
-        return { icon: Candy, color: 'from-purple-500/20 to-purple-500/5', text: 'text-purple-400' };
+        return { icon: Cookie, color: 'from-purple-500/20 to-purple-500/5', text: 'text-purple-400' };
     
     if (n.includes('banana')) return { icon: Banana, color: 'from-yellow-300/20 to-yellow-300/5', text: 'text-yellow-300' };
     if (n.includes('cherry')) return { icon: Cherry, color: 'from-red-600/20 to-red-600/5', text: 'text-red-500' };
