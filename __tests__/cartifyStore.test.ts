@@ -1,70 +1,93 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useCartifyStore } from '../src/store/useCartifyStore';
-import assert from 'assert';
 
-async function runTests() {
-    console.log("Running Cartify Store Tests...");
-    const store = useCartifyStore.getState();
+describe('Cartify Store tests', () => {
+    beforeEach(() => {
+        useCartifyStore.getState().endTrip();
+    });
 
-    // Reset store before tests
-    store.endTrip();
+    it('should setup mode and budget correctly', () => {
+        const store = useCartifyStore.getState();
+        store.startTrip(1000, 'planned');
+        const state = useCartifyStore.getState();
+        expect(state.isActive).toBe(true);
+        expect(state.mode).toBe('planned');
+        expect(state.budget).toBe(1000);
+        expect(state.isBuildingList).toBe(true);
+    });
 
-    // 1. Test Mode & Budget Setup
-    store.startTrip(1000, 'planned');
-    let state = useCartifyStore.getState();
-    assert.strictEqual(state.isActive, true, "Trip should be active");
-    assert.strictEqual(state.mode, 'planned', "Mode should be planned");
-    assert.strictEqual(state.budget, 1000, "Budget should be 1000");
-    assert.strictEqual(state.isBuildingList, true, "Should be building list in planned mode");
+    it('should add planned items in still-need status', () => {
+        const store = useCartifyStore.getState();
+        store.startTrip(1000, 'planned');
+        store.addPlannedItem('Milk', 'Dairy');
+        const state = useCartifyStore.getState();
+        expect(state.items.length).toBe(1);
+        expect(state.items[0].name).toBe('Milk');
+        expect(state.items[0].status).toBe('still-need');
+        expect(state.items[0].unitPrice).toBe(0);
+        expect(state.items[0].quantity).toBe(0);
+        expect(state.items[0].amount).toBe(0);
+    });
 
-    // 2. Test addPlannedItem (still-need status)
-    store.addPlannedItem('Milk', 'Dairy');
-    state = useCartifyStore.getState();
-    assert.strictEqual(state.items.length, 1, "Should have 1 item");
-    
-    const milkId = state.items[0].id;
-    assert.strictEqual(state.items[0].name, 'Milk', "Item name should be Milk");
-    assert.strictEqual(state.items[0].status, 'still-need', "Item should be still-need");
-    assert.strictEqual(state.items[0].unitPrice, 0, "Price should be 0");
-    assert.strictEqual(state.items[0].quantity, 0, "Quantity should be 0");
-    assert.strictEqual(state.items[0].amount, 0, "Amount should be 0");
+    it('should update item price and transition to in-cart', () => {
+        const store = useCartifyStore.getState();
+        store.startTrip(1000, 'planned');
+        store.addPlannedItem('Milk', 'Dairy');
+        let state = useCartifyStore.getState();
+        const milkId = state.items[0].id;
+        
+        store.updateItemPrice(milkId, 150);
+        state = useCartifyStore.getState();
+        expect(state.items[0].status).toBe('in-cart');
+        expect(state.items[0].unitPrice).toBe(150);
+        expect(state.items[0].quantity).toBe(1);
+        expect(state.items[0].amount).toBe(150);
+    });
 
-    // 3. Test updateItemPrice (transition from still-need to in-cart)
-    store.updateItemPrice(milkId, 150);
-    state = useCartifyStore.getState();
-    assert.strictEqual(state.items[0].status, 'in-cart', "Status should transition to in-cart");
-    assert.strictEqual(state.items[0].unitPrice, 150, "Unit price should be 150");
-    assert.strictEqual(state.items[0].quantity, 1, "Quantity should jump to 1");
-    assert.strictEqual(state.items[0].amount, 150, "Amount should be 150");
+    it('should increment and decrement quantity correctly', () => {
+        const store = useCartifyStore.getState();
+        store.startTrip(1000, 'planned');
+        store.addPlannedItem('Milk', 'Dairy');
+        let state = useCartifyStore.getState();
+        const milkId = state.items[0].id;
+        
+        store.updateItemPrice(milkId, 150);
+        store.incrementQuantity(milkId);
+        state = useCartifyStore.getState();
+        expect(state.items[0].quantity).toBe(2);
+        expect(state.items[0].amount).toBe(300);
 
-    // 4. Test Stepper Math (increment)
-    store.incrementQuantity(milkId);
-    state = useCartifyStore.getState();
-    assert.strictEqual(state.items[0].quantity, 2, "Quantity should be 2");
-    assert.strictEqual(state.items[0].amount, 300, "Amount should be unitPrice * quantity (300)");
+        store.decrementQuantity(milkId);
+        state = useCartifyStore.getState();
+        expect(state.items[0].quantity).toBe(1);
+        expect(state.items[0].amount).toBe(150);
+    });
 
-    // 5. Test Stepper Math (decrement)
-    store.decrementQuantity(milkId);
-    state = useCartifyStore.getState();
-    assert.strictEqual(state.items[0].quantity, 1, "Quantity should be 1");
-    assert.strictEqual(state.items[0].amount, 150, "Amount should be 150");
+    it('should handle zero-quantity reversion logic correctly', () => {
+        const store = useCartifyStore.getState();
+        store.startTrip(1000, 'planned');
+        store.addPlannedItem('Milk', 'Dairy');
+        let state = useCartifyStore.getState();
+        const milkId = state.items[0].id;
+        
+        store.updateItemPrice(milkId, 150);
+        store.decrementQuantity(milkId);
+        state = useCartifyStore.getState();
+        expect(state.items[0].quantity).toBe(0);
+        expect(state.items[0].status).toBe('still-need');
+        expect(state.items[0].unitPrice).toBe(0);
+        expect(state.items[0].amount).toBe(0);
+    });
 
-    // 6. Test 0-quantity revert logic
-    store.decrementQuantity(milkId);
-    state = useCartifyStore.getState();
-    assert.strictEqual(state.items[0].quantity, 0, "Quantity should be 0");
-    assert.strictEqual(state.items[0].status, 'still-need', "Should revert to still-need");
-    assert.strictEqual(state.items[0].unitPrice, 0, "Unit price should clear to 0");
-    assert.strictEqual(state.items[0].amount, 0, "Amount should clear to 0");
-
-    // 7. Test removeItem
-    store.removeItem(milkId);
-    state = useCartifyStore.getState();
-    assert.strictEqual(state.items.length, 0, "Item should be removed completely");
-
-    console.log("All tests passed! 🎉");
-}
-
-runTests().catch(err => {
-    console.error("Test failed:", err);
-    process.exit(1);
+    it('should remove items correctly', () => {
+        const store = useCartifyStore.getState();
+        store.startTrip(1000, 'planned');
+        store.addPlannedItem('Milk', 'Dairy');
+        let state = useCartifyStore.getState();
+        const milkId = state.items[0].id;
+        
+        store.removeItem(milkId);
+        state = useCartifyStore.getState();
+        expect(state.items.length).toBe(0);
+    });
 });

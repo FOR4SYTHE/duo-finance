@@ -1,10 +1,16 @@
 "use client";
-import { useState, useEffect } from "react";
-import { MapPin, Calculator, TrendingUp, Activity, Users, ChevronDown, Baby, Sparkles, Search, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Calculator, TrendingUp, Activity, Sparkles, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useBudgetStore } from "@/store/useBudgetStore";
-import { useCurrencyStore } from "@/store/useCurrencyStore";
-import { COST_DATA, AREAS, Area, PH_INFLATION_RATE } from "@/utils/costData";
+import { useBudgetStore } from "../../store/useBudgetStore";
+import { useCurrencyStore } from "../../store/useCurrencyStore";
+
+// ==========================================
+// STATIC CONSTANTS
+// ==========================================
+export const PH_INFLATION_RATE = 0.05; // 5% annual PH inflation
+export const UTILITY_SEASONAL_BUFFER = 0.25; // 25% utility buffer
+export const GROCERY_SEASONAL_BUFFER = 0.08; // 8% grocery buffer
 
 // ==========================================
 // SHARED COMPONENTS
@@ -12,12 +18,12 @@ import { COST_DATA, AREAS, Area, PH_INFLATION_RATE } from "@/utils/costData";
 
 function PillTabRow({ tabs, activeTab, onSelect }: { tabs: { id: string, icon: any, label: string }[], activeTab: string | null, onSelect: (id: string) => void }) {
     return (
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 -mx-6 px-6 mask-linear-fade w-[calc(100%+48px)]">
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-2 w-full shrink-0 sm:justify-between sm:overflow-visible sm:pb-0">
             {tabs.map(tab => (
                 <button
                     key={tab.id}
                     onClick={() => onSelect(activeTab === tab.id ? '' : tab.id)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap transition-all text-sm shrink-0 border ${
+                    className={`flex items-center gap-1.5 px-3 py-2.5 rounded-full whitespace-nowrap transition-all text-sm shrink-0 border ${
                         activeTab === tab.id
                             ? 'bg-white text-black font-medium border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]' 
                             : 'bg-white/[0.03] text-white/60 border-white/[0.05] hover:bg-white/[0.08] hover:text-white'
@@ -64,235 +70,97 @@ function ToolCardShell({ children, isLoading, error, onRetry, title }: { childre
     );
 }
 
-// -----------------------------------------
-// Target Area Search Component
-// -----------------------------------------
-function TargetAreaSearch({ onCostDataResolved }: { onCostDataResolved: (data: any, areaName: string) => void }) {
-    const [search, setSearch] = useState('');
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    // Filter curated areas
-    const filteredAreas = AREAS.filter(a => a.toLowerCase().includes(search.toLowerCase()));
-
-    const handleSelectCurated = (area: Area) => {
-        setSearch(area);
-        setIsDropdownOpen(false);
-        setError(null);
-        onCostDataResolved(COST_DATA[area], area);
-    };
-
-    const handleSearchAI = async () => {
-        if (!search.trim()) return;
-        setIsDropdownOpen(false);
-        setIsLoading(true);
-        setError(null);
-        try {
-            const res = await fetch('/api/estimate-area', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: search })
-            });
-            const json = await res.json();
-            if (!res.ok) throw new Error(json.error || 'Failed to estimate area.');
-            
-            // Format check
-            if (typeof json.baseRent !== 'number') throw new Error('Invalid AI response structure.');
-            
-            onCostDataResolved(json, search);
-        } catch (err: any) {
-            setError(err.message || 'No estimate for this area yet.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <div className="flex flex-col gap-2 relative z-20 w-full">
-            <div className="flex items-center gap-3 bg-black/40 rounded-2xl p-4 border border-white/5 focus-within:border-white/20 transition-colors w-full">
-                <MapPin className="w-4 h-4 text-white/40 shrink-0" />
-                <input 
-                    type="text" 
-                    value={search} 
-                    onChange={e => { setSearch(e.target.value); setIsDropdownOpen(true); setError(null); }}
-                    onFocus={() => setIsDropdownOpen(true)}
-                    placeholder="Search target area (e.g. Makati, Cebu)"
-                    className="bg-transparent border-none outline-none text-white text-sm w-full font-medium"
-                />
-            </div>
-            
-            <AnimatePresence>
-                {isDropdownOpen && search && (
-                    <motion.div 
-                        initial={{ opacity: 0, height: 0 }} 
-                        animate={{ opacity: 1, height: 'auto' }} 
-                        exit={{ opacity: 0, height: 0 }} 
-                        className="w-full bg-[#1A1A1A] border border-white/10 rounded-2xl overflow-hidden mt-1 shadow-inner"
-                    >
-                        {filteredAreas.length > 0 ? (
-                            filteredAreas.map(a => (
-                                <button key={a} onClick={() => handleSelectCurated(a as Area)} className="w-full text-left px-4 py-3 text-sm text-white/70 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0">{a}</button>
-                            ))
-                        ) : (
-                            <button onClick={handleSearchAI} className="w-full flex items-center gap-2 px-4 py-4 text-sm text-white hover:bg-white/5 transition-colors group">
-                                <Search className="w-4 h-4 text-white/40 group-hover:text-purple-400 transition-colors" />
-                                <span>Search web for "{search}" estimates</span>
-                            </button>
-                        )}
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {isLoading && (
-                <div className="flex items-center gap-2 text-white/50 text-xs px-2 mt-1">
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    <span>Analyzing cost data for {search}...</span>
-                </div>
-            )}
-            
-            {error && (
-                <div className="text-[#FF453A] text-xs px-2 mt-1 font-medium bg-[#FF453A]/10 p-2 rounded-lg border border-[#FF453A]/20">
-                    {error}
-                </div>
-            )}
-        </div>
-    );
-}
-
 // ==========================================
-// TOOLS
+// TOOL CONTENTS
 // ==========================================
 
-function MoveInEstimatorContent() {
-    const [adults, setAdults] = useState(2);
-    const [costData, setCostData] = useState<any | null>(null);
-    const [areaName, setAreaName] = useState<string>('');
+// 1. Emergency Runway Component
+function EmergencyRunwayContent() {
+    const { categories, savedSoFar, setSavedSoFar } = useBudgetStore();
+    const { exchangeRate } = useCurrencyStore();
+    const [multiplier, setMultiplier] = useState(3);
 
-    const handleResolved = (data: any, name: string) => {
-        setCostData(data);
-        setAreaName(name);
-    };
+    // Sum of all categories' target amounts (which are stored natively as monthly targets)
+    const monthlyBaseline = categories.reduce((sum, cat) => sum + cat.targetAmount, 0);
+    const targetRunway = monthlyBaseline * multiplier;
 
-    const extraAdults = Math.max(0, adults - 1);
-    const rent = costData ? costData.baseRent + (costData.rentPerExtraAdult * extraAdults) : 0;
-    
-    // One-time Move-in Lump Sum
-    const totalMoveIn = costData ? (
-        (rent * costData.depositMonths) + 
-        (rent * costData.advanceRentMonths) + 
-        costData.starterFurniture
-    ) : 0;
+    const progressPct = targetRunway > 0 ? Math.min(100, (savedSoFar / targetRunway) * 100) : 0;
+    const remainingAmount = Math.max(0, targetRunway - savedSoFar);
 
     return (
-        <ToolCardShell title="One-Time Move-In Cost">
+        <ToolCardShell title="Emergency Runway Calculator">
             <div className="flex justify-between items-center border border-white/5 rounded-2xl p-4">
-                <div className="flex items-center gap-3">
-                    <Users className="w-4 h-4 text-white/40" />
-                    <span className="text-white/70 text-sm">Adults</span>
+                <div className="flex flex-col">
+                    <span className="text-white/70 text-sm font-medium">Runway Duration</span>
+                    <span className="text-white/40 text-[10px]">Monthly baseline: ₱{monthlyBaseline.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
-                    <button onClick={() => setAdults(Math.max(1, adults - 1))} className="w-8 h-8 rounded-full bg-white/[0.05] flex items-center justify-center text-white/50 hover:bg-white/[0.1] hover:text-white transition-colors">-</button>
-                    <span className="text-white font-medium w-4 text-center">{adults}</span>
-                    <button onClick={() => setAdults(adults + 1)} className="w-8 h-8 rounded-full bg-white/[0.1] flex items-center justify-center text-white hover:bg-white/[0.15] transition-colors">+</button>
-                </div>
-            </div>
-
-            <TargetAreaSearch onCostDataResolved={handleResolved} />
-
-            {costData && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2 pt-4 border-t border-white/[0.05] flex flex-col gap-4">
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="text-white/50">Deposit ({costData.depositMonths} mo)</span>
-                        <span className="text-white">₱{(rent * costData.depositMonths).toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="text-white/50">Advance Rent ({costData.advanceRentMonths} mo)</span>
-                        <span className="text-white">₱{(rent * costData.advanceRentMonths).toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="text-white/50">Starter Furniture</span>
-                        <span className="text-white">₱{costData.starterFurniture.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between items-center pt-2 border-t border-white/5">
-                        <span className="text-white/70 font-semibold uppercase tracking-wider text-xs">Total Setup</span>
-                        <span className="text-white font-medium text-lg">₱{totalMoveIn.toLocaleString()}</span>
-                    </div>
-                </motion.div>
-            )}
-        </ToolCardShell>
-    );
-}
-
-function SmartBudgetEstimatorContent() {
-    const { setBudget } = useBudgetStore();
-    const [adults, setAdults] = useState(2);
-    const [kids, setKids] = useState(0);
-    const [costData, setCostData] = useState<any | null>(null);
-
-    const handleResolved = (data: any) => setCostData(data);
-
-    const extraAdults = Math.max(0, adults - 1);
-    const rent = costData ? costData.baseRent + (costData.rentPerExtraAdult * extraAdults) : 0;
-    const utilities = costData ? costData.baseUtilities + (costData.utilPerExtraAdult * extraAdults) : 0;
-    const food = costData ? costData.baseFood + (costData.foodPerExtraAdult * extraAdults) + (costData.baseFood * costData.kidFoodMultiplier * kids) : 0;
-    const misc = costData ? costData.baseMisc + (costData.miscPerExtraAdult * extraAdults) : 0;
-    
-    const targetMonthly = rent + utilities + food + misc;
-
-    return (
-        <ToolCardShell title="Ongoing Monthly Budget">
-            <div className="flex flex-col gap-4 border border-white/5 rounded-2xl p-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Users className="w-4 h-4 text-white/40" />
-                        <span className="text-white/70 text-sm">Adults</span>
-                    </div>
-                    <div className="flex items-center gap-4 shrink-0">
-                        <button onClick={() => setAdults(Math.max(1, adults - 1))} className="w-8 h-8 rounded-full bg-white/[0.05] flex items-center justify-center text-white/50 hover:bg-white/[0.1] hover:text-white shrink-0">-</button>
-                        <span className="text-white font-medium w-4 text-center">{adults}</span>
-                        <button onClick={() => setAdults(adults + 1)} className="w-8 h-8 rounded-full bg-white/[0.1] flex items-center justify-center text-white hover:bg-white/[0.15] shrink-0">+</button>
-                    </div>
-                </div>
-                <div className="flex items-center justify-between border-t border-white/5 pt-4">
-                    <div className="flex items-center gap-3">
-                        <Baby className="w-4 h-4 text-white/40" />
-                        <span className="text-white/70 text-sm">Kids</span>
-                    </div>
-                    <div className="flex items-center gap-4 shrink-0">
-                        <button onClick={() => setKids(Math.max(0, kids - 1))} className="w-8 h-8 rounded-full bg-white/[0.05] flex items-center justify-center text-white/50 hover:bg-white/[0.1] hover:text-white shrink-0">-</button>
-                        <span className="text-white font-medium w-4 text-center">{kids}</span>
-                        <button onClick={() => setKids(kids + 1)} className="w-8 h-8 rounded-full bg-white/[0.1] flex items-center justify-center text-white hover:bg-white/[0.15] shrink-0">+</button>
-                    </div>
-                </div>
-            </div>
-
-            <TargetAreaSearch onCostDataResolved={handleResolved} />
-
-            {costData && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2 pt-4 border-t border-white/[0.05] flex flex-col gap-4">
-                    <div className="flex justify-between items-center text-sm text-white/60">
-                        <span>Rent: ₱{rent.toLocaleString()}</span>
-                        <span>Util: ₱{utilities.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm text-white/60">
-                        <span>Food: ₱{food.toLocaleString()}</span>
-                        <span>Misc: ₱{misc.toLocaleString()}</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center pt-2 border-t border-white/5">
-                        <span className="text-white/70 font-semibold uppercase tracking-wider text-xs">Monthly Target</span>
-                        <span className="text-white font-medium text-lg">₱{targetMonthly.toLocaleString()}</span>
-                    </div>
-                    <button onClick={() => setBudget(targetMonthly, 'monthly')} className="w-full mt-2 min-h-[56px] py-4 rounded-full bg-white text-black hover:bg-gray-200 font-semibold transition-all text-sm">
-                        Use this target
+                    <button 
+                        onClick={() => setMultiplier(Math.max(3, multiplier - 1))} 
+                        className="w-8 h-8 rounded-full bg-white/[0.05] flex items-center justify-center text-white/50 hover:bg-white/[0.1] hover:text-white transition-colors"
+                    >
+                        -
                     </button>
-                </motion.div>
-            )}
+                    <span className="text-white font-medium w-16 text-center text-sm">{multiplier} Months</span>
+                    <button 
+                        onClick={() => setMultiplier(Math.min(6, multiplier + 1))} 
+                        className="w-8 h-8 rounded-full bg-white/[0.1] flex items-center justify-center text-white hover:bg-white/[0.15] transition-colors"
+                    >
+                        +
+                    </button>
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+                <div className="flex justify-between items-center text-xs">
+                    <span className="text-white/50 uppercase tracking-wider font-semibold">Saved So Far</span>
+                    <span className="text-white/40">≈ ZAR {(savedSoFar * exchangeRate).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                </div>
+                <div className="flex items-center gap-3 bg-black/40 rounded-2xl p-4 border border-white/5 focus-within:border-white/20 transition-colors w-full">
+                    <span className="text-white/40 text-sm font-medium">₱</span>
+                    <input 
+                        type="number" 
+                        value={savedSoFar || ''} 
+                        onChange={e => setSavedSoFar(Number(e.target.value))}
+                        placeholder="Enter current savings..."
+                        className="bg-transparent border-none outline-none text-white text-sm w-full font-medium"
+                    />
+                </div>
+            </div>
+
+            <div className="mt-2 pt-4 border-t border-white/[0.05] flex flex-col gap-3">
+                <div className="flex justify-between items-baseline">
+                    <span className="text-white/50 text-xs font-medium">Target ({multiplier} mo)</span>
+                    <div className="text-right">
+                        <span className="text-white font-semibold">₱{targetRunway.toLocaleString()}</span>
+                        <span className="text-white/40 text-xs block">≈ R{(targetRunway * exchangeRate).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                    </div>
+                </div>
+
+                {targetRunway > 0 && (
+                    <div className="flex flex-col gap-1.5 mt-1">
+                        <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                            <div 
+                                className="bg-[#30D158] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(48,209,88,0.5)]" 
+                                style={{ width: `${progressPct}%` }}
+                            />
+                        </div>
+                        <div className="flex justify-between text-[11px] text-white/50">
+                            <span>{progressPct.toFixed(0)}% Saved</span>
+                            {remainingAmount > 0 ? (
+                                <span>₱{remainingAmount.toLocaleString()} remaining</span>
+                            ) : (
+                                <span className="text-[#30D158] font-medium">Runway Fully Funded! 🎉</span>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
         </ToolCardShell>
     );
 }
 
+// 2. Inflation Outlook Component (Unchanged from original)
 function InflationOutlookContent() {
     const { config } = useBudgetStore();
     const { exchangeRate } = useCurrencyStore();
@@ -324,86 +192,278 @@ function InflationOutlookContent() {
     );
 }
 
-function FxVolatilityContent() {
-    const { config, setBudget } = useBudgetStore();
-    const current = config.targetAmount || 0;
-    
-    const [loading, setLoading] = useState(false);
-    const [data, setData] = useState<{ high: number, low: number, diffPct: number } | null>(null);
-    const [error, setError] = useState<string | null>(null);
+// 3. Grocery & Utility Inflation Guard Component
+function InflationGuardContent() {
+    const { categories, updateCategory, config, setBudget } = useBudgetStore();
+    const { exchangeRate } = useCurrencyStore();
+    const [applied, setApplied] = useState(false);
 
-    const handleFetch = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            // Last 30 days based on a real past date to avoid future 404s in sandbox
-            // In a real app this would just be new Date(). But safely grabbing a fixed window for demo, 
-            // or we use today's actual real-world date. Let's use 2024-01-01 to 2024-01-31 to be 100% safe.
-            // Wait, Frankfurter API goes up to the current real world date. We will use a strict past window.
-            const start = '2024-05-01';
-            const end = '2024-06-01';
+    const utilsCategory = categories.find(c => c.name.toLowerCase() === 'utilities');
+    const groceriesCategory = categories.find(c => c.name.toLowerCase() === 'groceries');
 
-            const url = `https://api.frankfurter.dev/v1/${start}..${end}?base=ZAR&symbols=PHP`;
-            const res = await fetch(url);
-            if (!res.ok) {
-                const text = await res.text();
-                throw new Error(`Frankfurter API Error (${res.status}): ${text.slice(0, 50)}`);
-            }
-            const json = await res.json();
-            
-            if (!json.rates || Object.keys(json.rates).length === 0) {
-                 throw new Error("No rate data returned for this period.");
-            }
+    const utilsTarget = utilsCategory?.targetAmount || 0;
+    const groceriesTarget = groceriesCategory?.targetAmount || 0;
 
-            const rates = Object.values(json.rates).map((r: any) => r.PHP) as number[];
-            const high = Math.max(...rates);
-            const low = Math.min(...rates);
-            const diffPct = ((high - low) / low);
-            setData({ high, low, diffPct });
-        } catch (e: any) {
-            // Surface REAL error message per requirements
-            setError(e.message || 'Failed to fetch rates due to a network or URL error.');
-        } finally {
-            setLoading(false);
+    const suggestedUtilsBuffer = utilsTarget * UTILITY_SEASONAL_BUFFER;
+    const suggestedGroceriesBuffer = groceriesTarget * GROCERY_SEASONAL_BUFFER;
+    const totalSuggestedBuffer = suggestedUtilsBuffer + suggestedGroceriesBuffer;
+
+    const handleApplyBuffers = () => {
+        if (utilsCategory) {
+            updateCategory(utilsCategory.id, { targetAmount: utilsTarget + suggestedUtilsBuffer });
         }
+        if (groceriesCategory) {
+            updateCategory(groceriesCategory.id, { targetAmount: groceriesTarget + suggestedGroceriesBuffer });
+        }
+        // Scale the main target budget to fit these changes
+        setBudget(config.targetAmount + totalSuggestedBuffer, config.period);
+        setApplied(true);
+        setTimeout(() => setApplied(false), 2000);
     };
 
-    const suggestedBufferPct = data ? Math.max(0.02, Math.ceil(data.diffPct * 100) / 100) : 0.03; 
-    const suggestedTotal = current * (1 + suggestedBufferPct);
+    return (
+        <ToolCardShell title="Grocery & Utility Seasonal Buffers">
+            <p className="text-white/60 text-xs leading-relaxed">
+                Applies buffer margins based on PH dry-season heating demands and food inflation cycles.
+            </p>
+
+            <div className="flex flex-col gap-3 mt-2">
+                <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2.5">
+                    <div className="flex flex-col">
+                        <span className="text-white/70 font-medium">Utilities (Meralco peak)</span>
+                        <span className="text-white/40 text-[10px]">Current: ₱{utilsTarget.toLocaleString()}</span>
+                    </div>
+                    <span className="text-[#E8A33D] font-semibold">+₱{suggestedUtilsBuffer.toLocaleString()} (25%)</span>
+                </div>
+
+                <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2.5">
+                    <div className="flex flex-col">
+                        <span className="text-white/70 font-medium">Groceries (Supply volatility)</span>
+                        <span className="text-white/40 text-[10px]">Current: ₱{groceriesTarget.toLocaleString()}</span>
+                    </div>
+                    <span className="text-[#E8A33D] font-semibold">+₱{suggestedGroceriesBuffer.toLocaleString()} (8%)</span>
+                </div>
+
+                <div className="flex justify-between items-baseline pt-1">
+                    <span className="text-white/80 font-medium text-xs uppercase tracking-wider">Suggested Buffer</span>
+                    <div className="text-right">
+                        <span className="text-[#E8A33D] font-semibold text-lg">₱{totalSuggestedBuffer.toLocaleString()}</span>
+                        <span className="text-white/40 text-xs block">≈ R{(totalSuggestedBuffer * exchangeRate).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                    </div>
+                </div>
+
+                <div className="flex items-start gap-2 bg-white/[0.03] border border-white/5 p-3.5 rounded-xl mt-1">
+                    <AlertCircle className="w-4 h-4 text-white/40 shrink-0 mt-0.5" />
+                    <p className="text-white/40 text-[10px] leading-relaxed">
+                        Food-price inflation is highly volatile due to supply chain variance; this 8% buffer is a placeholder estimate. The 25% utility buffer is sourced from historical Meralco peak cooling demand reports during dry hot-season months.
+                    </p>
+                </div>
+
+                <button 
+                    onClick={handleApplyBuffers}
+                    disabled={totalSuggestedBuffer === 0 || applied}
+                    className={`w-full min-h-[52px] py-3.5 rounded-full font-semibold transition-all text-sm mt-1 border ${
+                        applied 
+                            ? 'bg-[#30D158] text-white border-transparent' 
+                            : 'bg-white text-black hover:bg-gray-200 border-transparent disabled:opacity-40 disabled:pointer-events-none'
+                    }`}
+                >
+                    {applied ? "Buffers Applied! ✓" : "Apply Seasonal Buffers"}
+                </button>
+            </div>
+        </ToolCardShell>
+    );
+}
+
+// 4. Salary Auto-Allocation Component
+function SalaryAllocationContent() {
+    const { categories, updateCategoriesTarget, setBudget, setSavedSoFar } = useBudgetStore();
+    const { exchangeRate } = useCurrencyStore();
+    
+    const [income, setIncome] = useState<number>(0);
+    const [needsPct, setNeedsPct] = useState<number>(50);
+    const [wantsPct, setWantsPct] = useState<number>(30);
+    const [applied, setApplied] = useState(false);
+
+    const savingsPct = Math.max(0, 100 - needsPct - wantsPct);
+
+    // Dynamic calculations
+    const needsAmount = income * (needsPct / 100);
+    const wantsAmount = income * (wantsPct / 100);
+    const savingsAmount = income * (savingsPct / 100);
+
+    // Map needs proportionally to Rent (60%), Groceries (25%), Utilities (15%)
+    const rentAllocation = needsAmount * 0.60;
+    const groceriesAllocation = needsAmount * 0.25;
+    const utilitiesAllocation = needsAmount * 0.15;
+
+    // SVG Donut calculation
+    const radius = 40;
+    const strokeWidth = 10;
+    const circ = 2 * Math.PI * radius; // ~251.3
+
+    const needsDash = (circ * needsPct) / 100;
+    const wantsDash = (circ * wantsPct) / 100;
+    const savingsDash = (circ * savingsPct) / 100;
+
+    const handleUseAllocations = () => {
+        const rentCat = categories.find(c => c.name.toLowerCase() === 'rent');
+        const groceriesCat = categories.find(c => c.name.toLowerCase() === 'groceries');
+        const utilitiesCat = categories.find(c => c.name.toLowerCase() === 'utilities');
+        const billsCat = categories.find(c => c.name.toLowerCase() === 'bills');
+
+        const updates: { id: string, targetAmount: number }[] = [];
+        if (rentCat) updates.push({ id: rentCat.id, targetAmount: rentAllocation });
+        if (groceriesCat) updates.push({ id: groceriesCat.id, targetAmount: groceriesAllocation });
+        if (utilitiesCat) updates.push({ id: utilitiesCat.id, targetAmount: utilitiesAllocation });
+        if (billsCat) updates.push({ id: billsCat.id, targetAmount: 0 }); // reset bills target to 0 since Wants is discretionary
+
+        // Update bulk allocations in store
+        updateCategoriesTarget(updates);
+
+        // Put computed Savings directly into Runway savings target
+        setSavedSoFar(savingsAmount);
+
+        // Target budget = Expenses budget (Needs + Wants)
+        setBudget(needsAmount + wantsAmount, 'monthly');
+
+        setApplied(true);
+        setTimeout(() => setApplied(false), 2000);
+    };
 
     return (
-        <ToolCardShell title="ZAR/PHP FX Volatility" isLoading={loading} error={error} onRetry={handleFetch}>
-            {!data ? (
-                <>
-                    <p className="text-white/60 text-sm leading-relaxed mb-2">
-                        Analyze recent exchange rates to suggest a safety buffer against volatility.
-                    </p>
-                    <button onClick={handleFetch} className="w-full mt-2 min-h-[56px] py-4 rounded-full bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.05] text-white font-medium transition-all text-sm">
-                        Analyze 30-Day Volatility
-                    </button>
-                </>
-            ) : (
-                <div className="flex flex-col gap-4">
-                    <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
-                        <span className="text-white/50">30-Day Low</span>
-                        <span className="text-white">₱{data.low.toFixed(2)}</span>
+        <ToolCardShell title="Salary Auto-Allocation">
+            <div className="flex flex-col gap-4">
+                {/* Income Input */}
+                <div className="flex flex-col gap-2">
+                    <span className="text-white/50 text-xs uppercase tracking-wider font-semibold">Monthly Combined Income</span>
+                    <div className="flex items-center gap-3 bg-black/40 rounded-2xl p-4 border border-white/5 focus-within:border-white/20 transition-colors w-full">
+                        <span className="text-white/40 text-sm font-medium">₱</span>
+                        <input 
+                            type="number" 
+                            value={income || ''} 
+                            onChange={e => setIncome(Number(e.target.value))}
+                            placeholder="Enter combined income..."
+                            className="bg-transparent border-none outline-none text-white text-sm w-full font-medium"
+                        />
                     </div>
-                    <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
-                        <span className="text-white/50">30-Day High</span>
-                        <span className="text-white">₱{data.high.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm font-medium pt-2 border-b border-white/5 pb-4">
-                        <span className="text-[#E8A33D]">Suggested Buffer</span>
-                        <span className="text-[#E8A33D]">{(suggestedBufferPct * 100).toFixed(1)}%</span>
-                    </div>
-                    <button 
-                        onClick={() => setBudget(suggestedTotal, config.period)} 
-                        className="w-full min-h-[56px] py-4 rounded-full bg-[#E8A33D] text-black hover:bg-[#D99536] font-semibold transition-all text-sm"
-                    >
-                        Apply +{(suggestedBufferPct * 100).toFixed(1)}% Buffer
-                    </button>
                 </div>
-            )}
+
+                {/* Donut and Sliders Layout */}
+                {income > 0 && (
+                    <div className="flex flex-col sm:flex-row gap-6 items-center bg-white/[0.02] border border-white/5 p-4 rounded-2xl">
+                        {/* Donut Chart */}
+                        <div className="relative w-28 h-28 shrink-0">
+                            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                {/* Needs */}
+                                <circle 
+                                    cx="50" cy="50" r={radius}
+                                    fill="transparent" stroke="#30D158" strokeWidth={strokeWidth}
+                                    strokeDasharray={`${needsDash} ${circ - needsDash}`}
+                                    strokeDashoffset="0"
+                                />
+                                {/* Wants */}
+                                <circle 
+                                    cx="50" cy="50" r={radius}
+                                    fill="transparent" stroke="#0A84FF" strokeWidth={strokeWidth}
+                                    strokeDasharray={`${wantsDash} ${circ - wantsDash}`}
+                                    strokeDashoffset={-needsDash}
+                                />
+                                {/* Savings */}
+                                <circle 
+                                    cx="50" cy="50" r={radius}
+                                    fill="transparent" stroke="#BF5AF2" strokeWidth={strokeWidth}
+                                    strokeDasharray={`${savingsDash} ${circ - savingsDash}`}
+                                    strokeDashoffset={-(needsDash + wantsDash)}
+                                />
+                            </svg>
+                            <div className="absolute inset-0 flex flex-col justify-center items-center text-center">
+                                <span className="text-[10px] text-white/40 uppercase font-semibold">Savings</span>
+                                <span className="text-sm font-bold text-white">{savingsPct}%</span>
+                            </div>
+                        </div>
+
+                        {/* Split Adjusters */}
+                        <div className="flex-1 w-full flex flex-col gap-3">
+                            <div className="flex flex-col gap-1">
+                                <div className="flex justify-between text-xs font-semibold text-white/70">
+                                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#30D158]"/> Needs</span>
+                                    <span>{needsPct}%</span>
+                                </div>
+                                <input 
+                                    type="range" min="0" max="100" value={needsPct}
+                                    onChange={e => {
+                                        const nextNeeds = Number(e.target.value);
+                                        setNeedsPct(nextNeeds);
+                                        // Adjust Wants if needed to not exceed 100
+                                        if (nextNeeds + wantsPct > 100) {
+                                            setWantsPct(100 - nextNeeds);
+                                        }
+                                    }}
+                                    className="w-full accent-white h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                                />
+                            </div>
+
+                            <div className="flex flex-col gap-1">
+                                <div className="flex justify-between text-xs font-semibold text-white/70">
+                                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#0A84FF]"/> Wants</span>
+                                    <span>{wantsPct}%</span>
+                                </div>
+                                <input 
+                                    type="range" min="0" max={100 - needsPct} value={wantsPct}
+                                    onChange={e => setWantsPct(Number(e.target.value))}
+                                    className="w-full accent-white h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                                />
+                            </div>
+
+                            <div className="flex justify-between text-xs font-semibold text-white/40 border-t border-white/5 pt-2">
+                                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#BF5AF2]"/> Savings</span>
+                                <span>{savingsPct}%</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Split Details Breakdown */}
+                {income > 0 && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-3 pt-2 border-t border-white/[0.05]">
+                        <div className="flex flex-col gap-2">
+                            <span className="text-white/40 text-[10px] uppercase tracking-wider font-semibold">Suggested Allocations (PHP)</span>
+                            <div className="flex justify-between text-xs border-b border-white/5 pb-2">
+                                <span className="text-white/60">Rent (60% of Needs)</span>
+                                <span className="text-white font-medium">₱{rentAllocation.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-xs border-b border-white/5 pb-2">
+                                <span className="text-white/60">Groceries (25% of Needs)</span>
+                                <span className="text-white font-medium">₱{groceriesAllocation.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-xs border-b border-white/5 pb-2">
+                                <span className="text-white/60">Utilities (15% of Needs)</span>
+                                <span className="text-white font-medium">₱{utilitiesAllocation.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-xs border-b border-white/5 pb-2">
+                                <span className="text-white/60">Unallocated - Discretionary (Wants)</span>
+                                <span className="text-[#0A84FF] font-semibold">₱{wantsAmount.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-xs pb-1">
+                                <span className="text-white/60">Emergency Savings target</span>
+                                <span className="text-[#BF5AF2] font-semibold">₱{savingsAmount.toLocaleString()}</span>
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={handleUseAllocations}
+                            className={`w-full min-h-[52px] py-3.5 rounded-full font-semibold transition-all text-sm border mt-2 ${
+                                applied 
+                                    ? 'bg-[#30D158] text-white border-transparent' 
+                                    : 'bg-white text-black hover:bg-gray-200 border-transparent'
+                            }`}
+                        >
+                            {applied ? "Allocations applied! ✓" : "Use these allocations"}
+                        </button>
+                    </motion.div>
+                )}
+            </div>
         </ToolCardShell>
     );
 }
@@ -415,10 +475,10 @@ export function SmartTools() {
     const [activeTool, setActiveTool] = useState<string | null>(null);
 
     const TABS = [
-        { id: 'relocation', icon: <MapPin className="w-4 h-4" />, label: 'Move-in' },
-        { id: 'smart_budget', icon: <Calculator className="w-4 h-4" />, label: 'Estimator' },
+        { id: 'runway', icon: <Activity className="w-4 h-4" />, label: 'Runway' },
         { id: 'inflation', icon: <TrendingUp className="w-4 h-4" />, label: 'Inflation' },
-        { id: 'fx', icon: <Activity className="w-4 h-4" />, label: 'FX Buffer' },
+        { id: 'guard', icon: <Sparkles className="w-4 h-4" />, label: 'Inflation Guard' },
+        { id: 'allocation', icon: <Calculator className="w-4 h-4" />, label: 'Salary Split' },
     ];
 
     return (
@@ -433,10 +493,10 @@ export function SmartTools() {
             <PillTabRow tabs={TABS} activeTab={activeTool} onSelect={setActiveTool} />
 
             <AnimatePresence mode="wait">
-                {activeTool === 'relocation' && <MoveInEstimatorContent key="relocation" />}
-                {activeTool === 'smart_budget' && <SmartBudgetEstimatorContent key="smart_budget" />}
+                {activeTool === 'runway' && <EmergencyRunwayContent key="runway" />}
                 {activeTool === 'inflation' && <InflationOutlookContent key="inflation" />}
-                {activeTool === 'fx' && <FxVolatilityContent key="fx" />}
+                {activeTool === 'guard' && <InflationGuardContent key="guard" />}
+                {activeTool === 'allocation' && <SalaryAllocationContent key="allocation" />}
             </AnimatePresence>
         </div>
     );

@@ -5,10 +5,13 @@ import { BudgetConfig, BudgetPeriod, BudgetCategory } from '@/types/finance';
 interface BudgetState {
     config: BudgetConfig;
     categories: BudgetCategory[];
+    savedSoFar: number;
+    setSavedSoFar: (amount: number) => void;
     setBudget: (targetAmount: number, period: BudgetPeriod) => void;
     setJarPercentage: (pct: number) => void;
     addCategory: (category: Omit<BudgetCategory, 'id'>) => void;
     updateCategory: (id: string, updates: Partial<BudgetCategory>) => void;
+    updateCategoriesTarget: (updates: { id: string, targetAmount: number }[]) => void;
     removeCategory: (id: string) => void;
     
     // Sub-category operations
@@ -56,6 +59,8 @@ export const useBudgetStore = create<BudgetState>()(
                 jarAllowedPercentage: 0
             },
             categories: DEFAULT_CATEGORIES,
+            savedSoFar: 0,
+            setSavedSoFar: (amount: number) => set({ savedSoFar: amount }),
             setBudget: (targetAmount: number, period: BudgetPeriod) => 
                 set((state) => ({ config: { ...state.config, targetAmount, period } })),
             setJarPercentage: (percentage: number) => 
@@ -67,6 +72,13 @@ export const useBudgetStore = create<BudgetState>()(
             updateCategory: (id, updates) => 
                 set((state) => ({
                     categories: state.categories.map(c => c.id === id ? { ...c, ...updates } : c)
+                })),
+            updateCategoriesTarget: (updates) =>
+                set((state) => ({
+                    categories: state.categories.map(c => {
+                        const match = updates.find(u => u.id === c.id);
+                        return match ? { ...c, targetAmount: match.targetAmount } : c;
+                    })
                 })),
             removeCategory: (id) => 
                 set((state) => ({
