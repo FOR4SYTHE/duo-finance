@@ -40,12 +40,12 @@ export function AddGoalSheet({ isOpen, onClose }: AddGoalSheetProps) {
         <>
             <AnimatePresence>
                 {isOpen && (
-                    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+                    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4" onClick={(e) => e.stopPropagation()}>
                         <motion.div 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            onClick={onClose}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                             className="absolute inset-0 bg-black/60 backdrop-blur-md"
                         />
                         
@@ -54,16 +54,16 @@ export function AddGoalSheet({ isOpen, onClose }: AddGoalSheetProps) {
                             animate={{ y: 0 }}
                             exit={{ y: "100%" }}
                             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-6 relative z-10 flex flex-col max-h-[90dvh]"
+                            className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-6 relative z-10 flex flex-col max-h-[90dvh] overflow-hidden"
                         >
-                            <div className="flex justify-between items-center mb-6">
+                            <div className="flex justify-between items-center mb-6 shrink-0">
                                 <h3 className="text-white font-medium">Create Goal</h3>
-                                <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white">
+                                <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white shrink-0">
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
 
-                            <div className="flex flex-col gap-4 overflow-y-auto no-scrollbar">
+                            <div className="flex flex-col gap-4 overflow-y-auto no-scrollbar min-h-0 pb-2">
                                 <div className="flex flex-col gap-2">
                                     <label className="text-white/50 text-xs font-semibold uppercase tracking-wider">Goal Name</label>
                                     <input 
@@ -104,11 +104,13 @@ export function AddGoalSheet({ isOpen, onClose }: AddGoalSheetProps) {
                                         className="bg-black/40 border border-white/5 outline-none text-white text-sm px-4 py-3 rounded-2xl focus:border-white/20 transition-colors"
                                     />
                                 </div>
-
+                            </div>
+                            
+                            <div className="shrink-0 pt-4 mt-auto">
                                 <button 
                                     disabled={!name.trim()}
                                     onClick={() => setIsAmountModalOpen(true)}
-                                    className="w-full mt-4 h-14 rounded-full bg-white text-black font-semibold tracking-wide disabled:opacity-50 disabled:bg-white/10 disabled:text-white/50 transition-colors"
+                                    className="w-full h-14 rounded-full bg-white text-black font-semibold tracking-wide disabled:opacity-50 disabled:bg-white/10 disabled:text-white/50 transition-colors"
                                 >
                                     Set Target Amount
                                 </button>
@@ -177,12 +179,12 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
         <>
             <AnimatePresence>
                 {isOpen && goal && (
-                    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+                    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4" onClick={(e) => e.stopPropagation()}>
                         <motion.div 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            onClick={onClose}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                             className="absolute inset-0 bg-black/60 backdrop-blur-md"
                         />
                         
@@ -191,16 +193,16 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
                             animate={{ y: 0 }}
                             exit={{ y: "100%" }}
                             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-6 relative z-10 flex flex-col max-h-[90dvh]"
+                            className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-6 relative z-10 flex flex-col max-h-[90dvh] overflow-hidden"
                         >
-                            <div className="flex justify-between items-center mb-6">
+                            <div className="flex justify-between items-center mb-6 shrink-0">
                                 <h3 className="text-white font-medium">Edit Goal</h3>
-                                <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white">
+                                <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white shrink-0">
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
 
-                            <div className="flex flex-col gap-4 overflow-y-auto no-scrollbar">
+                            <div className="flex flex-col gap-4 overflow-y-auto no-scrollbar min-h-0 pb-2">
                                 <div className="flex flex-col gap-2">
                                     <label className="text-white/50 text-xs font-semibold uppercase tracking-wider">Goal Name</label>
                                     <input 
@@ -241,25 +243,25 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
                                         className="bg-black/40 border border-white/5 outline-none text-white text-sm px-4 py-3 rounded-2xl focus:border-white/20 transition-colors"
                                     />
                                 </div>
+                            </div>
 
-                                <div className="flex gap-3 mt-4">
+                            <div className="flex gap-3 mt-auto shrink-0 pt-4">
+                                <button 
+                                    disabled={!name.trim()}
+                                    onClick={handleSaveWithoutAmountChange}
+                                    className="flex-1 h-14 rounded-full bg-white/[0.05] border border-white/10 text-white font-semibold tracking-wide disabled:opacity-50 transition-colors"
+                                >
+                                    Save Details
+                                </button>
+                                {goal.name !== 'Emergency Fund' && (
                                     <button 
                                         disabled={!name.trim()}
-                                        onClick={handleSaveWithoutAmountChange}
-                                        className="flex-1 h-14 rounded-full bg-white/[0.05] border border-white/10 text-white font-semibold tracking-wide disabled:opacity-50 transition-colors"
+                                        onClick={() => setIsAmountModalOpen(true)}
+                                        className="flex-1 h-14 rounded-full bg-white text-black font-semibold tracking-wide disabled:opacity-50 transition-colors"
                                     >
-                                        Save Details
+                                        Edit Target
                                     </button>
-                                    {goal.name !== 'Emergency Fund' && (
-                                        <button 
-                                            disabled={!name.trim()}
-                                            onClick={() => setIsAmountModalOpen(true)}
-                                            className="flex-1 h-14 rounded-full bg-white text-black font-semibold tracking-wide disabled:opacity-50 transition-colors"
-                                        >
-                                            Edit Target
-                                        </button>
-                                    )}
-                                </div>
+                                )}
                             </div>
                         </motion.div>
                     </div>
@@ -289,12 +291,12 @@ export function GoalMenuSheet({ isOpen, onClose, goalId, onEdit }: { isOpen: boo
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+                <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4" onClick={(e) => e.stopPropagation()}>
                     <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                         className="absolute inset-0 bg-black/60 backdrop-blur-md"
                     />
                     
@@ -346,15 +348,15 @@ export function GoalMenuSheet({ isOpen, onClose, goalId, onEdit }: { isOpen: boo
                                     <Edit3 className="w-5 h-5 text-white/70" />
                                     <span className="font-medium">Edit Goal Details</span>
                                 </button>
-                                {!isEmergency && (
-                                    <button 
-                                        onClick={() => setConfirmDelete(true)}
-                                        className="flex items-center gap-3 w-full p-4 rounded-2xl bg-[#FF453A]/5 hover:bg-[#FF453A]/10 border border-[#FF453A]/10 transition-colors text-left text-[#FF453A]"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
+                                <button 
+                                    onClick={() => setConfirmDelete(true)}
+                                    className="flex items-center gap-3 w-full p-4 rounded-2xl transition-colors text-left bg-[#FF453A]/5 hover:bg-[#FF453A]/10 border border-[#FF453A]/10 text-[#FF453A]"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                    <div className="flex flex-col">
                                         <span className="font-medium">Delete Goal</span>
-                                    </button>
-                                )}
+                                    </div>
+                                </button>
                             </div>
                         )}
                     </motion.div>

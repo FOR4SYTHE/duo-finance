@@ -51,7 +51,9 @@ export function AmountInputModal({ isOpen, onClose, onConfirm, title, initialAmo
         }
     };
 
-    const handleConfirm = () => {
+    const handleConfirm = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
         if (phpAmount >= 0) {
             onConfirm(phpAmount);
             setDisplayValue("0");
@@ -68,12 +70,12 @@ export function AmountInputModal({ isOpen, onClose, onConfirm, title, initialAmo
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+                <div className="fixed inset-0 z-[110] flex items-end justify-center sm:items-center sm:p-4" onClick={(e) => e.stopPropagation()}>
                     <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                         className="absolute inset-0 bg-black/60 backdrop-blur-md"
                     />
                     
@@ -82,40 +84,43 @@ export function AmountInputModal({ isOpen, onClose, onConfirm, title, initialAmo
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-6 relative z-10 flex flex-col max-h-[90dvh]"
+                        className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-5 relative z-10 flex flex-col max-h-[95dvh] overflow-hidden"
                     >
-                        <div className="flex justify-between items-center mb-8">
+                        <div className="flex justify-between items-center mb-4 shrink-0">
                             <h3 className="text-white font-medium">Edit {title}</h3>
                             <button 
-                                onClick={onClose}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
                                 className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white"
                             >
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
 
-                        <div className="flex flex-col items-center justify-center mb-8">
-                            <div className="text-[3.5rem] leading-none text-white flex items-baseline justify-center gap-1 font-light tracking-tight">
-                                <span className="text-2xl text-white/40">{isPhpPrimary ? '₱' : 'R'}</span>
+                        <div className="flex flex-col items-center justify-center mb-4 shrink-0">
+                            <div className="text-[2.75rem] leading-none text-white flex items-baseline justify-center gap-1 font-light tracking-tight">
+                                <span className="text-xl text-white/40">{isPhpPrimary ? '₱' : 'R'}</span>
                                 <span>{displayValue || "0"}</span>
                             </div>
-                            <span className="text-white/40 font-medium tracking-wide mt-1 text-sm">
+                            <span className="text-white/40 font-medium tracking-wide mt-1 text-xs">
                                 ≈ {targetCurrency === 'PHP' ? '₱' : 'R'}{convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                             </span>
                         </div>
 
                         {/* Numpad */}
-                        <div className="flex-1 grid grid-cols-3 gap-3 mb-6 min-h-[250px]">
+                        <div className="flex-1 grid grid-cols-3 gap-2 mb-4 min-h-[200px]">
                             {buttons.map((btn) => (
                                 <button
                                     key={btn.label}
-                                    onClick={() => btn.label === "⌫" ? deleteLast() : appendInput(btn.label)}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        btn.label === "⌫" ? deleteLast() : appendInput(btn.label);
+                                    }}
                                     className={`
-                                        h-full w-full rounded-[20px] flex items-center justify-center text-[24px] font-light transition-all duration-200 bg-white/[0.05] hover:bg-white/[0.1] active:scale-[0.96] border border-white/[0.02]
+                                        h-full w-full rounded-[16px] flex items-center justify-center text-[20px] font-light transition-all duration-200 bg-white/[0.05] hover:bg-white/[0.1] active:scale-[0.96] border border-white/[0.02]
                                         ${btn.type === "num" ? "text-white" : "text-white/50"}
                                     `}
-                                >
-                                    {btn.label === "⌫" ? <Delete className="w-5 h-5" strokeWidth={1.5} /> : btn.label}
+                                >  {btn.label === "⌫" ? <Delete className="w-5 h-5" strokeWidth={1.5} /> : btn.label}
                                 </button>
                             ))}
                         </div>
@@ -123,7 +128,7 @@ export function AmountInputModal({ isOpen, onClose, onConfirm, title, initialAmo
                         <button
                             onClick={handleConfirm}
                             disabled={phpAmount < 0}
-                            className="w-full h-[64px] rounded-full bg-white text-black font-semibold text-base tracking-wide flex items-center justify-center gap-2 hover:bg-gray-100 disabled:opacity-50 disabled:bg-white/10 disabled:text-white/40 transition-all duration-300 active:scale-[0.98]"
+                            className="w-full h-[54px] rounded-full bg-white text-black font-semibold text-sm tracking-wide flex items-center justify-center gap-2 hover:bg-gray-100 disabled:opacity-50 disabled:bg-white/10 disabled:text-white/40 transition-all duration-300 active:scale-[0.98] shrink-0"
                         >
                             Save {isPhpPrimary ? '₱' : 'R'}{numericValue.toLocaleString()}
                         </button>

@@ -140,37 +140,47 @@ export default function BudgetPage() {
 
         <div className="flex flex-col relative z-10 w-full mt-auto">
             <div className="text-[2.75rem] leading-none text-white flex items-baseline gap-1 font-medium tracking-tight mb-2 drop-shadow-md">
-                <span className="text-2xl text-white/50 font-normal">₱</span>
-                <span>{displayTarget.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                {displayTarget > 0 ? (
+                    <>
+                        <span className="text-2xl text-white/50 font-normal">₱</span>
+                        <span>{displayTarget.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                    </>
+                ) : (
+                    <span className="text-[1.75rem] text-white/40 font-medium tracking-tight">Set target budget</span>
+                )}
             </div>
             
             <div className="flex justify-between items-end w-full">
                 <div className="flex flex-col gap-3">
-                    <span className="text-white/50 font-medium tracking-wide text-sm">
-                        ≈ R{(displayTarget * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
-                    </span>
+                    {displayTarget > 0 && (
+                        <span className="text-white/50 font-medium tracking-wide text-sm">
+                            ≈ R{(displayTarget * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                        </span>
+                    )}
 
-                    <div className="flex items-center gap-2 text-xs">
-                        {displayAllocated > displayTarget ? (
-                            <>
-                                <div className="w-2 h-2 rounded-full bg-[#FF453A] shadow-[0_0_8px_rgba(255,69,58,0.5)] shrink-0" />
-                                <span className="text-white/60">
-                                    Allocated: ₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                </span>
-                                <span className="text-white/30 mx-1">·</span>
-                                <span className="text-[#FF453A] font-medium">Over-allocated by ₱{(displayAllocated - displayTarget).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                            </>
-                        ) : (
-                            <>
-                                <div className="w-2 h-2 rounded-full bg-[#30D158] shadow-[0_0_8px_rgba(48,209,88,0.5)] shrink-0" />
-                                <span className="text-white/60">
-                                    Allocated: ₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})} of ₱{displayTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                </span>
-                                <span className="text-white/30 mx-1">·</span>
-                                <span className="text-white/40">₱{displayUnallocated.toLocaleString(undefined, {maximumFractionDigits: 0})} unallocated</span>
-                            </>
-                        )}
-                    </div>
+                    {(displayTarget > 0 || displayAllocated > 0) && (
+                        <div className="flex items-center gap-2 text-xs">
+                            {displayAllocated > displayTarget ? (
+                                <>
+                                    <div className="w-2 h-2 rounded-full bg-[#FF453A] shadow-[0_0_8px_rgba(255,69,58,0.5)] shrink-0" />
+                                    <span className="text-white/60">
+                                        Allocated: ₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                    </span>
+                                    <span className="text-white/30 mx-1">·</span>
+                                    <span className="text-[#FF453A] font-medium">Over by ₱{(displayAllocated - displayTarget).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="w-2 h-2 rounded-full bg-[#30D158] shadow-[0_0_8px_rgba(48,209,88,0.5)] shrink-0" />
+                                    <span className="text-white/60">
+                                        Allocated: ₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})} of ₱{displayTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                    </span>
+                                    <span className="text-white/30 mx-1">·</span>
+                                    <span className="text-white/40">₱{displayUnallocated.toLocaleString(undefined, {maximumFractionDigits: 0})} unallocated</span>
+                                </>
+                            )}
+                        </div>
+                    )}
                     {/* Discretionary Spend Jar Allocation */}
                     {displayUnallocated > 0 && config.jarAllowedPercentage !== undefined && (
                         <div 
@@ -245,10 +255,16 @@ export default function BudgetPage() {
                             </button>
                         </div>
                         <span className="text-white font-medium mb-1 drop-shadow-sm">{cat.name}</span>
-                        <span className="text-white/90 font-semibold mb-0.5">₱{catTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                        <span className="text-white/50 text-[10px] uppercase tracking-wider">
-                            ≈ R{(catTarget * exchangeRate).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                        </span>
+                        {catTarget > 0 ? (
+                            <>
+                                <span className="text-white/90 font-semibold mb-0.5">₱{catTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                <span className="text-white/50 text-[10px] uppercase tracking-wider">
+                                    ≈ R{(catTarget * exchangeRate).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                </span>
+                            </>
+                        ) : (
+                            <span className="text-white/30 text-sm font-medium mt-0.5">Set amount</span>
+                        )}
                     </div>
                 );
             })}

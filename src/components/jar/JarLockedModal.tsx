@@ -18,12 +18,12 @@ export function JarLockedModal({ isOpen, onClose, totalSpent, targetAmount, peri
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+                <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4">
                     <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                         className="absolute inset-0 bg-black/60 backdrop-blur-md"
                     />
                     

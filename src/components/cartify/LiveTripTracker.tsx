@@ -317,7 +317,7 @@ export function LiveTripTracker() {
 
             {/* Simple New Item Name Modal */}
             {isAddingNew && !newItemName && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
                     <div className="bg-[#111] border border-white/10 rounded-[32px] p-6 w-full max-w-[360px]">
                         <h3 className="text-white font-medium mb-4">Add Item</h3>
                         <input 

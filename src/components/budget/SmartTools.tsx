@@ -103,7 +103,9 @@ function EmergencyRunwayContent() {
             <div className="flex justify-between items-center border border-white/5 rounded-2xl p-4">
                 <div className="flex flex-col">
                     <span className="text-white/70 text-sm font-medium">Runway Duration</span>
-                    <span className="text-white/40 text-[10px]">Monthly baseline: ₱{formatCurrency(monthlyBaseline)}</span>
+                    <span className="text-white/40 text-[10px]">
+                        {monthlyBaseline > 0 ? `Monthly baseline: ₱${formatCurrency(monthlyBaseline)}` : 'Set allocations first'}
+                    </span>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
                     <button 
@@ -146,9 +148,15 @@ function EmergencyRunwayContent() {
             <div className="mt-2 pt-4 border-t border-white/[0.05] flex flex-col gap-3">
                 <div className="flex justify-between items-baseline">
                     <span className="text-white/50 text-xs font-medium">Target ({multiplier} mo)</span>
-                    <div className="text-right">
-                        <span className="text-white font-semibold">₱{formatCurrency(targetRunway)}</span>
-                        <span className="text-white/40 text-xs block">≈ R{formatCurrency(targetRunway * exchangeRate)}</span>
+                    <div className="text-right flex flex-col items-end justify-center">
+                        {targetRunway > 0 ? (
+                            <>
+                                <span className="text-white font-semibold">₱{formatCurrency(targetRunway)}</span>
+                                <span className="text-white/40 text-xs block">≈ R{formatCurrency(targetRunway * exchangeRate)}</span>
+                            </>
+                        ) : (
+                            <span className="text-white/40 text-[11px] font-medium">Pending allocations</span>
+                        )}
                     </div>
                 </div>
 
@@ -222,22 +230,31 @@ function GoalsContent() {
                                             <div className="text-[#30D158] text-sm font-medium">{progress.toFixed(0)}%</div>
                                         </>
                                     ) : (
-                                        <div className="text-white/40 text-xs mb-1">Set a target to track progress</div>
+                                        <button onClick={() => setEditGoalId(goal.id)} className="text-white/40 hover:text-white transition-colors text-[10px] mb-1 underline underline-offset-2">Set target to track</button>
                                     )}
                                 </div>
                             </div>
                             
-                            {goal.targetAmount > 0 && (
-                                <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mt-1">
-                                    <div className="bg-[#30D158] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(48,209,88,0.5)]" style={{ width: `${progress}%` }} />
-                                </div>
-                            )}
+                            <div className="w-full bg-white/5 h-2 rounded-full mt-1 relative border border-white/[0.02] mb-3">
+                                {goal.targetAmount > 0 && (
+                                    <>
+                                        <div className="bg-[#30D158] h-full rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(48,209,88,0.4)]" style={{ width: `${progress}%` }} />
+                                        {/* Star UI Tracker */}
+                                        <div 
+                                            className="absolute top-1/2 -translate-y-1/2 -ml-2.5 transition-all duration-500 flex items-center justify-center w-5 h-5 bg-[#30D158] rounded-full shadow-[0_0_12px_rgba(48,209,88,0.8)] border border-[#111]"
+                                            style={{ left: `${progress}%` }}
+                                        >
+                                            <Icons.Sparkles className="w-3 h-3 text-[#111]" />
+                                        </div>
+                                    </>
+                                )}
+                            </div>
 
                             <button 
                                 onClick={() => setAddMoneyGoalId(goal.id)}
                                 className="mt-2 w-full py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.05] text-white/70 text-xs font-semibold tracking-wide transition-colors"
                             >
-                                + Add Money
+                                + Log Savings
                             </button>
                         </div>
                     );
@@ -685,7 +702,7 @@ export function SmartTools() {
     ];
 
     return (
-        <div className="w-full rounded-[32px] p-6 mb-8 bg-white/[0.02] border border-white/[0.03] relative z-20 flex flex-col">
+        <div className="w-full rounded-[32px] p-6 mb-8 bg-white/[0.02] border border-white/[0.03] relative z-30 flex flex-col">
             <div className="flex justify-between items-start mb-6">
                 <div className="flex flex-col">
                     <span className="text-white font-medium">Smart Tools</span>

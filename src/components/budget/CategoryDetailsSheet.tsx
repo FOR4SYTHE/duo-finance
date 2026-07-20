@@ -55,12 +55,12 @@ export function CategoryDetailsSheet({ isOpen, onClose, categoryId }: CategoryDe
         <>
             <AnimatePresence>
                 {isOpen && category && (
-                    <div className="fixed inset-0 z-40 flex items-end sm:items-center sm:justify-center">
+                    <div className="fixed inset-0 z-[100] flex items-end sm:items-center sm:justify-center">
                         <motion.div 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            onClick={onClose}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                         />
                         
