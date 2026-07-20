@@ -46,13 +46,7 @@ function PillTabRow({ tabs, activeTab, onSelect }: { tabs: any[], activeTab: str
 
 function ToolCardShell({ children, isLoading, error, onRetry, title }: { children: React.ReactNode, isLoading?: boolean, error?: string | null, onRetry?: () => void, title?: string }) {
     return (
-        <motion.div 
-            initial={{ opacity: 0, height: 0, marginTop: 0 }} 
-            animate={{ opacity: 1, height: 'auto', marginTop: 16 }} 
-            exit={{ opacity: 0, height: 0, marginTop: 0 }} 
-            transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-            className="overflow-hidden w-full"
-        >
+        <div className="w-full">
             <div className="bg-black/40 rounded-2xl p-6 flex flex-col gap-4 border border-white/5 relative z-10">
                 {title && <h3 className="text-white/70 font-medium text-sm tracking-wide">{title}</h3>}
                 
@@ -73,7 +67,7 @@ function ToolCardShell({ children, isLoading, error, onRetry, title }: { childre
                     children
                 )}
             </div>
-        </motion.div>
+        </div>
     );
 }
 
@@ -715,22 +709,63 @@ export function SmartTools() {
     ];
 
     return (
-        <div className="w-full rounded-[32px] p-6 mb-8 bg-white/[0.02] border border-white/[0.03] relative z-30 flex flex-col">
-            <div className="flex justify-between items-start mb-6">
-                <div className="flex flex-col">
-                    <span className="text-white font-medium">Smart Tools</span>
-                    <span className="text-white/50 text-xs tracking-wide">Planning & projections</span>
+        <div className="w-full rounded-[32px] relative z-30 mb-8 overflow-hidden p-[1px] group shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+            {/* The traveling light (Conic gradient border) */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1500px] h-[1500px] bg-[conic-gradient(from_0deg,transparent_60%,rgba(255,255,255,0.05)_80%,rgba(255,255,255,0.5)_100%)] animate-[spin_5s_linear_infinite] z-0 opacity-70 group-hover:opacity-100 transition-opacity duration-700" />
+            
+            {/* The card body */}
+            <div className="relative z-10 w-full h-full rounded-[31px] p-6 bg-[#0a0a0a] flex flex-col shadow-[inset_0_1px_1px_rgba(255,255,255,0.03)]">
+                <div className="flex justify-between items-start mb-6 relative z-10">
+                    <div className="flex flex-col">
+                        <span className="text-white font-medium">Smart Tools</span>
+                        <span className="text-white/50 text-xs tracking-wide">Planning & projections</span>
+                    </div>
+                </div>
+
+                <div className="relative z-10">
+                    <PillTabRow tabs={TABS} activeTab={activeTool} onSelect={setActiveTool} />
+                </div>
+
+                <div className="relative z-10">
+                    {/* Outer: height open/close — only fires when activeTool goes null ↔ non-null */}
+                    <AnimatePresence>
+                        {activeTool && (
+                            <motion.div
+                                key="tool-container"
+                                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                                className="overflow-hidden w-full"
+                            >
+                                {/* Inner: quick crossfade between tool contents */}
+                                <AnimatePresence mode="wait">
+                                    {activeTool === 'runway' && (
+                                        <motion.div key="runway" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                                            <EmergencyRunwayContent />
+                                        </motion.div>
+                                    )}
+                                    {activeTool === 'goals' && (
+                                        <motion.div key="goals" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                                            <GoalsContent />
+                                        </motion.div>
+                                    )}
+                                    {activeTool === 'guard' && (
+                                        <motion.div key="guard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                                            <InflationGuardContent />
+                                        </motion.div>
+                                    )}
+                                    {activeTool === 'allocation' && (
+                                        <motion.div key="allocation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                                            <SalaryAllocationContent />
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
-
-            <PillTabRow tabs={TABS} activeTab={activeTool} onSelect={setActiveTool} />
-
-            <AnimatePresence mode="wait">
-                {activeTool === 'runway' && <EmergencyRunwayContent key="runway" />}
-                {activeTool === 'goals' && <GoalsContent key="goals" />}
-                {activeTool === 'guard' && <InflationGuardContent key="guard" />}
-                {activeTool === 'allocation' && <SalaryAllocationContent key="allocation" />}
-            </AnimatePresence>
         </div>
     );
 }
