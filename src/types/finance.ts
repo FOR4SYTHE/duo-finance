@@ -39,4 +39,5 @@ export interface BudgetConfig {
     targetAmount: number; // Global target amount in canonical Monthly PHP
     period: BudgetPeriod; // Current selected display period
     jarAllowedPercentage: number; // Percentage of targetAmount allowed for extra spend
+    runwayMultiplier?: number; // For Emergency Runway calculator
 }

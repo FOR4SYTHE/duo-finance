@@ -2,13 +2,22 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { BudgetConfig, BudgetPeriod, BudgetCategory } from '@/types/finance';
 
+export interface Goal {
+    id: string;
+    name: string;
+    icon: string;
+    targetAmount: number;
+    targetDate?: string;
+    savedAmount: number;
+}
+
 interface BudgetState {
     config: BudgetConfig;
     categories: BudgetCategory[];
-    savedSoFar: number;
-    setSavedSoFar: (amount: number) => void;
+    goals: Goal[];
     setBudget: (targetAmount: number, period: BudgetPeriod) => void;
     setJarPercentage: (pct: number) => void;
+    setRunwayMultiplier: (multiplier: number) => void;
     addCategory: (category: Omit<BudgetCategory, 'id'>) => void;
     updateCategory: (id: string, updates: Partial<BudgetCategory>) => void;
     updateCategoriesTarget: (updates: { id: string, targetAmount: number }[]) => void;
@@ -18,6 +27,12 @@ interface BudgetState {
     updateSubCategory: (categoryId: string, subId: string, amount: number) => void;
     addSubCategory: (categoryId: string, name: string) => void;
     removeSubCategory: (categoryId: string, subId: string) => void;
+
+    // Goals operations
+    addGoal: (goal: Omit<Goal, 'id'>) => void;
+    updateGoal: (id: string, updates: Partial<Goal>) => void;
+    removeGoal: (id: string) => void;
+    addMoneyToGoal: (id: string, amount: number) => void;
 
     _hasHydrated: boolean;
     setHasHydrated: (state: boolean) => void;
@@ -48,6 +63,10 @@ const DEFAULT_CATEGORIES: BudgetCategory[] = [
     { id: '5', name: 'Kids Tuition', icon: 'GraduationCap', color: '#BF5AF2', targetAmount: 0 },
 ];
 
+const DEFAULT_GOALS: Goal[] = [
+    { id: 'goal-1', name: 'Emergency Fund', icon: 'ShieldAlert', targetAmount: 0, savedAmount: 0 }
+];
+
 export const useBudgetStore = create<BudgetState>()(
     persist(
         (set) => ({
@@ -56,45 +75,69 @@ export const useBudgetStore = create<BudgetState>()(
             config: {
                 targetAmount: 0,
                 period: 'monthly',
-                jarAllowedPercentage: 0
+                jarAllowedPercentage: 0,
+                runwayMultiplier: 3
             },
             categories: DEFAULT_CATEGORIES,
-            savedSoFar: 0,
-            setSavedSoFar: (amount: number) => set({ savedSoFar: amount }),
+            goals: DEFAULT_GOALS,
             setBudget: (targetAmount: number, period: BudgetPeriod) => 
                 set((state) => ({ config: { ...state.config, targetAmount, period } })),
             setJarPercentage: (percentage: number) => 
                 set((state) => ({ config: { ...state.config, jarAllowedPercentage: percentage } })),
+            setRunwayMultiplier: (multiplier: number) =>
+                set((state) => {
+                    const newConfig = { ...state.config, runwayMultiplier: multiplier };
+                    const monthlyBaseline = state.categories.reduce((sum, cat) => sum + cat.targetAmount, 0);
+                    const targetRunway = monthlyBaseline * multiplier;
+                    const goals = state.goals.map(g => g.name === 'Emergency Fund' ? { ...g, targetAmount: targetRunway } : g);
+                    return { config: newConfig, goals };
+                }),
             addCategory: (category) => 
                 set((state) => ({ 
                     categories: [...state.categories, { ...category, id: Math.random().toString(36).substring(7) }] 
                 })),
             updateCategory: (id, updates) => 
-                set((state) => ({
-                    categories: state.categories.map(c => c.id === id ? { ...c, ...updates } : c)
-                })),
+                set((state) => {
+                    const newCats = state.categories.map(c => c.id === id ? { ...c, ...updates } : c);
+                    const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
+                    const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
+                    const goals = state.goals.map(g => g.name === 'Emergency Fund' ? { ...g, targetAmount: targetRunway } : g);
+                    return { categories: newCats, goals };
+                }),
             updateCategoriesTarget: (updates) =>
-                set((state) => ({
-                    categories: state.categories.map(c => {
+                set((state) => {
+                    const newCats = state.categories.map(c => {
                         const match = updates.find(u => u.id === c.id);
                         return match ? { ...c, targetAmount: match.targetAmount } : c;
-                    })
-                })),
+                    });
+                    const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
+                    const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
+                    const goals = state.goals.map(g => g.name === 'Emergency Fund' ? { ...g, targetAmount: targetRunway } : g);
+                    return { categories: newCats, goals };
+                }),
             removeCategory: (id) => 
-                set((state) => ({
-                    categories: state.categories.filter(c => c.id !== id)
-                })),
+                set((state) => {
+                    const newCats = state.categories.filter(c => c.id !== id);
+                    const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
+                    const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
+                    const goals = state.goals.map(g => g.name === 'Emergency Fund' ? { ...g, targetAmount: targetRunway } : g);
+                    return { categories: newCats, goals };
+                }),
 
             // Sub-category operations
             updateSubCategory: (categoryId, subId, amount) => 
-                set((state) => ({
-                    categories: state.categories.map(c => {
+                set((state) => {
+                    const newCats = state.categories.map(c => {
                         if (c.id !== categoryId || !c.subCategories) return c;
                         const newSub = c.subCategories.map(s => s.id === subId ? { ...s, amount } : s);
                         const newTargetAmount = newSub.reduce((acc, curr) => acc + curr.amount, 0);
                         return { ...c, subCategories: newSub, targetAmount: newTargetAmount };
-                    })
-                })),
+                    });
+                    const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
+                    const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
+                    const goals = state.goals.map(g => g.name === 'Emergency Fund' ? { ...g, targetAmount: targetRunway } : g);
+                    return { categories: newCats, goals };
+                }),
             addSubCategory: (categoryId, name) => 
                 set((state) => ({
                     categories: state.categories.map(c => {
@@ -104,13 +147,35 @@ export const useBudgetStore = create<BudgetState>()(
                     })
                 })),
             removeSubCategory: (categoryId, subId) =>
-                set((state) => ({
-                    categories: state.categories.map(c => {
+                set((state) => {
+                    const newCats = state.categories.map(c => {
                         if (c.id !== categoryId || !c.subCategories) return c;
                         const newSub = c.subCategories.filter(s => s.id !== subId);
                         const newTargetAmount = newSub.reduce((acc, curr) => acc + curr.amount, 0);
                         return { ...c, subCategories: newSub, targetAmount: newTargetAmount };
-                    })
+                    });
+                    const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
+                    const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
+                    const goals = state.goals.map(g => g.name === 'Emergency Fund' ? { ...g, targetAmount: targetRunway } : g);
+                    return { categories: newCats, goals };
+                }),
+
+            // Goals operations
+            addGoal: (goal) => 
+                set((state) => ({ 
+                    goals: [...state.goals, { ...goal, id: Math.random().toString(36).substring(7), savedAmount: 0 }] 
+                })),
+            updateGoal: (id, updates) => 
+                set((state) => ({
+                    goals: state.goals.map(g => g.id === id ? { ...g, ...updates } : g)
+                })),
+            removeGoal: (id) => 
+                set((state) => ({
+                    goals: state.goals.filter(g => g.id !== id)
+                })),
+            addMoneyToGoal: (id, amount) =>
+                set((state) => ({
+                    goals: state.goals.map(g => g.id === id ? { ...g, savedAmount: g.savedAmount + amount } : g)
                 }))
         }),
         {
@@ -125,6 +190,9 @@ export const useBudgetStore = create<BudgetState>()(
                         }
                         return cat;
                     });
+                }
+                if (!persistedState.goals) {
+                    merged.goals = DEFAULT_GOALS;
                 }
                 return merged;
             },

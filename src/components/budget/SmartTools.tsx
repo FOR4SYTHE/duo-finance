@@ -1,9 +1,13 @@
 "use client";
-import { useState } from "react";
-import { Calculator, TrendingUp, Activity, Sparkles, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Calculator, Target, Activity, Sparkles, AlertCircle, Calendar, MoreVertical, Plus, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBudgetStore } from "../../store/useBudgetStore";
 import { useCurrencyStore } from "../../store/useCurrencyStore";
+import { formatCurrency } from "@/lib/format";
+import * as Icons from "lucide-react";
+import { AddGoalSheet, EditGoalSheet, GoalMenuSheet } from "./GoalSheets";
+import { AmountInputModal } from "./AmountInputModal";
 
 // ==========================================
 // STATIC CONSTANTS
@@ -18,7 +22,7 @@ export const GROCERY_SEASONAL_BUFFER = 0.08; // 8% grocery buffer
 
 function PillTabRow({ tabs, activeTab, onSelect }: { tabs: { id: string, icon: any, label: string }[], activeTab: string | null, onSelect: (id: string) => void }) {
     return (
-        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-2 w-full shrink-0 sm:justify-between sm:overflow-visible sm:pb-0">
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-2 w-full shrink-0">
             {tabs.map(tab => (
                 <button
                     key={tab.id}
@@ -76,9 +80,13 @@ function ToolCardShell({ children, isLoading, error, onRetry, title }: { childre
 
 // 1. Emergency Runway Component
 function EmergencyRunwayContent() {
-    const { categories, savedSoFar, setSavedSoFar } = useBudgetStore();
+    const { categories, goals, config, setRunwayMultiplier, updateGoal } = useBudgetStore();
     const { exchangeRate } = useCurrencyStore();
-    const [multiplier, setMultiplier] = useState(3);
+    
+    const multiplier = config.runwayMultiplier || 3;
+
+    const emergencyGoal = goals.find(g => g.name === 'Emergency Fund');
+    const savedSoFar = emergencyGoal?.savedAmount || 0;
 
     // Sum of all categories' target amounts (which are stored natively as monthly targets)
     const monthlyBaseline = categories.reduce((sum, cat) => sum + cat.targetAmount, 0);
@@ -92,18 +100,18 @@ function EmergencyRunwayContent() {
             <div className="flex justify-between items-center border border-white/5 rounded-2xl p-4">
                 <div className="flex flex-col">
                     <span className="text-white/70 text-sm font-medium">Runway Duration</span>
-                    <span className="text-white/40 text-[10px]">Monthly baseline: ₱{monthlyBaseline.toLocaleString()}</span>
+                    <span className="text-white/40 text-[10px]">Monthly baseline: ₱{formatCurrency(monthlyBaseline)}</span>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
                     <button 
-                        onClick={() => setMultiplier(Math.max(3, multiplier - 1))} 
+                        onClick={() => setRunwayMultiplier(Math.max(3, multiplier - 1))} 
                         className="w-8 h-8 rounded-full bg-white/[0.05] flex items-center justify-center text-white/50 hover:bg-white/[0.1] hover:text-white transition-colors"
                     >
                         -
                     </button>
                     <span className="text-white font-medium w-16 text-center text-sm">{multiplier} Months</span>
                     <button 
-                        onClick={() => setMultiplier(Math.min(6, multiplier + 1))} 
+                        onClick={() => setRunwayMultiplier(Math.min(6, multiplier + 1))} 
                         className="w-8 h-8 rounded-full bg-white/[0.1] flex items-center justify-center text-white hover:bg-white/[0.15] transition-colors"
                     >
                         +
@@ -114,14 +122,18 @@ function EmergencyRunwayContent() {
             <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-center text-xs">
                     <span className="text-white/50 uppercase tracking-wider font-semibold">Saved So Far</span>
-                    <span className="text-white/40">≈ ZAR {(savedSoFar * exchangeRate).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                    <span className="text-white/40">≈ ZAR {formatCurrency(savedSoFar * exchangeRate)}</span>
                 </div>
                 <div className="flex items-center gap-3 bg-black/40 rounded-2xl p-4 border border-white/5 focus-within:border-white/20 transition-colors w-full">
                     <span className="text-white/40 text-sm font-medium">₱</span>
                     <input 
                         type="number" 
                         value={savedSoFar || ''} 
-                        onChange={e => setSavedSoFar(Number(e.target.value))}
+                        onChange={e => {
+                            if (emergencyGoal) {
+                                updateGoal(emergencyGoal.id, { savedAmount: Number(e.target.value) });
+                            }
+                        }}
                         placeholder="Enter current savings..."
                         className="bg-transparent border-none outline-none text-white text-sm w-full font-medium"
                     />
@@ -132,8 +144,8 @@ function EmergencyRunwayContent() {
                 <div className="flex justify-between items-baseline">
                     <span className="text-white/50 text-xs font-medium">Target ({multiplier} mo)</span>
                     <div className="text-right">
-                        <span className="text-white font-semibold">₱{targetRunway.toLocaleString()}</span>
-                        <span className="text-white/40 text-xs block">≈ R{(targetRunway * exchangeRate).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                        <span className="text-white font-semibold">₱{formatCurrency(targetRunway)}</span>
+                        <span className="text-white/40 text-xs block">≈ R{formatCurrency(targetRunway * exchangeRate)}</span>
                     </div>
                 </div>
 
@@ -148,7 +160,7 @@ function EmergencyRunwayContent() {
                         <div className="flex justify-between text-[11px] text-white/50">
                             <span>{progressPct.toFixed(0)}% Saved</span>
                             {remainingAmount > 0 ? (
-                                <span>₱{remainingAmount.toLocaleString()} remaining</span>
+                                <span>₱{formatCurrency(remainingAmount)} remaining</span>
                             ) : (
                                 <span className="text-[#30D158] font-medium">Runway Fully Funded! 🎉</span>
                             )}
@@ -160,43 +172,118 @@ function EmergencyRunwayContent() {
     );
 }
 
-// 2. Inflation Outlook Component (Unchanged from original)
-function InflationOutlookContent() {
-    const { config } = useBudgetStore();
-    const { exchangeRate } = useCurrencyStore();
-    const current = config.targetAmount || 0;
+// 2. Goals Component (Replaces Inflation Outlook)
+function GoalsContent() {
+    const { goals, addMoneyToGoal } = useBudgetStore();
+    const { exchangeRate, primaryCurrency } = useCurrencyStore();
     
-    const in6Months = current * (1 + PH_INFLATION_RATE * 0.5);
-    const in12Months = current * (1 + PH_INFLATION_RATE);
+    const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
+    const [menuGoalId, setMenuGoalId] = useState<string | null>(null);
+    const [editGoalId, setEditGoalId] = useState<string | null>(null);
+    const [addMoneyGoalId, setAddMoneyGoalId] = useState<string | null>(null);
 
     return (
-        <ToolCardShell title="Inflation Projection">
-            <p className="text-white/60 text-sm leading-relaxed mb-2">
-                Projected budget needed to maintain current buying power, assuming {PH_INFLATION_RATE * 100}% annual PH inflation.
-            </p>
-            <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                <span className="text-white/70 font-medium">In 6 months</span>
-                <div className="text-right">
-                    <div className="text-white font-medium">₱{in6Months.toLocaleString(undefined, {maximumFractionDigits:0})}</div>
-                    <div className="text-white/40 text-xs">≈ R{(in6Months * exchangeRate).toLocaleString(undefined, {maximumFractionDigits:0})}</div>
-                </div>
+        <ToolCardShell title="Savings Goals">
+            <div className="flex flex-col gap-4">
+                {goals.map(goal => {
+                    const progress = goal.targetAmount > 0 ? Math.min(100, (goal.savedAmount / goal.targetAmount) * 100) : 0;
+                    const Icon = (Icons as any)[goal.icon] || HelpCircle;
+
+                    return (
+                        <div key={goal.id} className="bg-white/[0.03] rounded-2xl p-4 border border-white/5 flex flex-col gap-3">
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-2 text-white/70">
+                                    <Icon className="w-4 h-4" />
+                                    <span className="font-medium text-sm">{goal.name}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {goal.targetDate && <span className="text-white/40 text-xs flex items-center gap-1"><Calendar className="w-3 h-3"/> {new Date(goal.targetDate).toLocaleDateString()}</span>}
+                                    <button 
+                                        onClick={() => setMenuGoalId(goal.id)}
+                                        className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 transition-colors"
+                                    >
+                                        <MoreVertical className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div className="flex justify-between items-end">
+                                <div>
+                                    <div className="text-white font-semibold">₱{formatCurrency(goal.savedAmount)}</div>
+                                    <div className="text-white/40 text-xs">≈ R{formatCurrency(goal.savedAmount * exchangeRate)}</div>
+                                </div>
+                                <div className="text-right">
+                                    {goal.targetAmount > 0 ? (
+                                        <>
+                                            <div className="text-white/50 text-xs mb-1">Target: ₱{formatCurrency(goal.targetAmount)}</div>
+                                            <div className="text-[#30D158] text-sm font-medium">{progress.toFixed(0)}%</div>
+                                        </>
+                                    ) : (
+                                        <div className="text-white/40 text-xs mb-1">Set a target to track progress</div>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {goal.targetAmount > 0 && (
+                                <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mt-1">
+                                    <div className="bg-[#30D158] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(48,209,88,0.5)]" style={{ width: `${progress}%` }} />
+                                </div>
+                            )}
+
+                            <button 
+                                onClick={() => setAddMoneyGoalId(goal.id)}
+                                className="mt-2 w-full py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.05] text-white/70 text-xs font-semibold tracking-wide transition-colors"
+                            >
+                                + Add Money
+                            </button>
+                        </div>
+                    );
+                })}
+
+                <button 
+                    onClick={() => setIsAddGoalOpen(true)}
+                    className="flex items-center gap-3 w-full p-4 rounded-2xl border border-dashed border-white/20 text-white/50 hover:text-white hover:border-white/40 hover:bg-white/[0.02] transition-colors justify-center"
+                >
+                    <Plus className="w-4 h-4" />
+                    <span className="text-sm font-medium tracking-wide">Add New Goal</span>
+                </button>
             </div>
-            <div className="flex justify-between items-center">
-                <span className="text-white/70 font-medium">In 12 months</span>
-                <div className="text-right">
-                    <div className="text-white font-medium">₱{in12Months.toLocaleString(undefined, {maximumFractionDigits:0})}</div>
-                    <div className="text-white/40 text-xs">≈ R{(in12Months * exchangeRate).toLocaleString(undefined, {maximumFractionDigits:0})}</div>
-                </div>
-            </div>
+
+            <AddGoalSheet isOpen={isAddGoalOpen} onClose={() => setIsAddGoalOpen(false)} />
+            
+            <GoalMenuSheet 
+                isOpen={!!menuGoalId} 
+                onClose={() => setMenuGoalId(null)} 
+                goalId={menuGoalId} 
+                onEdit={() => { setEditGoalId(menuGoalId); setMenuGoalId(null); }}
+            />
+            
+            <EditGoalSheet 
+                isOpen={!!editGoalId} 
+                onClose={() => setEditGoalId(null)} 
+                goalId={editGoalId} 
+            />
+
+            <AmountInputModal
+                isOpen={!!addMoneyGoalId}
+                onClose={() => setAddMoneyGoalId(null)}
+                title={`Add to ${goals.find(g => g.id === addMoneyGoalId)?.name || 'Goal'}`}
+                initialAmount={0}
+                onConfirm={(amountPHP) => {
+                    if (addMoneyGoalId && amountPHP > 0) {
+                        addMoneyToGoal(addMoneyGoalId, amountPHP);
+                    }
+                    setAddMoneyGoalId(null);
+                }}
+            />
         </ToolCardShell>
     );
 }
 
 // 3. Grocery & Utility Inflation Guard Component
 function InflationGuardContent() {
-    const { categories, updateCategory, config, setBudget } = useBudgetStore();
+    const { categories } = useBudgetStore();
     const { exchangeRate } = useCurrencyStore();
-    const [applied, setApplied] = useState(false);
 
     const utilsCategory = categories.find(c => c.name.toLowerCase() === 'utilities');
     const groceriesCategory = categories.find(c => c.name.toLowerCase() === 'groceries');
@@ -208,19 +295,6 @@ function InflationGuardContent() {
     const suggestedGroceriesBuffer = groceriesTarget * GROCERY_SEASONAL_BUFFER;
     const totalSuggestedBuffer = suggestedUtilsBuffer + suggestedGroceriesBuffer;
 
-    const handleApplyBuffers = () => {
-        if (utilsCategory) {
-            updateCategory(utilsCategory.id, { targetAmount: utilsTarget + suggestedUtilsBuffer });
-        }
-        if (groceriesCategory) {
-            updateCategory(groceriesCategory.id, { targetAmount: groceriesTarget + suggestedGroceriesBuffer });
-        }
-        // Scale the main target budget to fit these changes
-        setBudget(config.targetAmount + totalSuggestedBuffer, config.period);
-        setApplied(true);
-        setTimeout(() => setApplied(false), 2000);
-    };
-
     return (
         <ToolCardShell title="Grocery & Utility Seasonal Buffers">
             <p className="text-white/60 text-xs leading-relaxed">
@@ -231,24 +305,24 @@ function InflationGuardContent() {
                 <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2.5">
                     <div className="flex flex-col">
                         <span className="text-white/70 font-medium">Utilities (Meralco peak)</span>
-                        <span className="text-white/40 text-[10px]">Current: ₱{utilsTarget.toLocaleString()}</span>
+                        <span className="text-white/40 text-[10px]">Current: ₱{formatCurrency(utilsTarget)}</span>
                     </div>
-                    <span className="text-[#E8A33D] font-semibold">+₱{suggestedUtilsBuffer.toLocaleString()} (25%)</span>
+                    <span className="text-[#E8A33D] font-semibold">+₱{formatCurrency(suggestedUtilsBuffer)} (25%)</span>
                 </div>
 
                 <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2.5">
                     <div className="flex flex-col">
                         <span className="text-white/70 font-medium">Groceries (Supply volatility)</span>
-                        <span className="text-white/40 text-[10px]">Current: ₱{groceriesTarget.toLocaleString()}</span>
+                        <span className="text-white/40 text-[10px]">Current: ₱{formatCurrency(groceriesTarget)}</span>
                     </div>
-                    <span className="text-[#E8A33D] font-semibold">+₱{suggestedGroceriesBuffer.toLocaleString()} (8%)</span>
+                    <span className="text-[#E8A33D] font-semibold">+₱{formatCurrency(suggestedGroceriesBuffer)} (8%)</span>
                 </div>
 
                 <div className="flex justify-between items-baseline pt-1">
                     <span className="text-white/80 font-medium text-xs uppercase tracking-wider">Suggested Buffer</span>
                     <div className="text-right">
-                        <span className="text-[#E8A33D] font-semibold text-lg">₱{totalSuggestedBuffer.toLocaleString()}</span>
-                        <span className="text-white/40 text-xs block">≈ R{(totalSuggestedBuffer * exchangeRate).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                        <span className="text-[#E8A33D] font-semibold text-lg">₱{formatCurrency(totalSuggestedBuffer)}</span>
+                        <span className="text-white/40 text-xs block">≈ R{formatCurrency(totalSuggestedBuffer * exchangeRate)}</span>
                     </div>
                 </div>
 
@@ -258,18 +332,6 @@ function InflationGuardContent() {
                         Food-price inflation is highly volatile due to supply chain variance; this 8% buffer is a placeholder estimate. The 25% utility buffer is sourced from historical Meralco peak cooling demand reports during dry hot-season months.
                     </p>
                 </div>
-
-                <button 
-                    onClick={handleApplyBuffers}
-                    disabled={totalSuggestedBuffer === 0 || applied}
-                    className={`w-full min-h-[52px] py-3.5 rounded-full font-semibold transition-all text-sm mt-1 border ${
-                        applied 
-                            ? 'bg-[#30D158] text-white border-transparent' 
-                            : 'bg-white text-black hover:bg-gray-200 border-transparent disabled:opacity-40 disabled:pointer-events-none'
-                    }`}
-                >
-                    {applied ? "Buffers Applied! ✓" : "Apply Seasonal Buffers"}
-                </button>
             </div>
         </ToolCardShell>
     );
@@ -277,13 +339,12 @@ function InflationGuardContent() {
 
 // 4. Salary Auto-Allocation Component
 function SalaryAllocationContent() {
-    const { categories, updateCategoriesTarget, setBudget, setSavedSoFar } = useBudgetStore();
+    const { categories, goals, updateCategoriesTarget, setBudget, addMoneyToGoal } = useBudgetStore();
     const { exchangeRate } = useCurrencyStore();
     
     const [income, setIncome] = useState<number>(0);
     const [needsPct, setNeedsPct] = useState<number>(50);
     const [wantsPct, setWantsPct] = useState<number>(30);
-    const [applied, setApplied] = useState(false);
 
     const savingsPct = Math.max(0, 100 - needsPct - wantsPct);
 
@@ -305,31 +366,6 @@ function SalaryAllocationContent() {
     const needsDash = (circ * needsPct) / 100;
     const wantsDash = (circ * wantsPct) / 100;
     const savingsDash = (circ * savingsPct) / 100;
-
-    const handleUseAllocations = () => {
-        const rentCat = categories.find(c => c.name.toLowerCase() === 'rent');
-        const groceriesCat = categories.find(c => c.name.toLowerCase() === 'groceries');
-        const utilitiesCat = categories.find(c => c.name.toLowerCase() === 'utilities');
-        const billsCat = categories.find(c => c.name.toLowerCase() === 'bills');
-
-        const updates: { id: string, targetAmount: number }[] = [];
-        if (rentCat) updates.push({ id: rentCat.id, targetAmount: rentAllocation });
-        if (groceriesCat) updates.push({ id: groceriesCat.id, targetAmount: groceriesAllocation });
-        if (utilitiesCat) updates.push({ id: utilitiesCat.id, targetAmount: utilitiesAllocation });
-        if (billsCat) updates.push({ id: billsCat.id, targetAmount: 0 }); // reset bills target to 0 since Wants is discretionary
-
-        // Update bulk allocations in store
-        updateCategoriesTarget(updates);
-
-        // Put computed Savings directly into Runway savings target
-        setSavedSoFar(savingsAmount);
-
-        // Target budget = Expenses budget (Needs + Wants)
-        setBudget(needsAmount + wantsAmount, 'monthly');
-
-        setApplied(true);
-        setTimeout(() => setApplied(false), 2000);
-    };
 
     return (
         <ToolCardShell title="Salary Auto-Allocation">
@@ -431,36 +467,25 @@ function SalaryAllocationContent() {
                             <span className="text-white/40 text-[10px] uppercase tracking-wider font-semibold">Suggested Allocations (PHP)</span>
                             <div className="flex justify-between text-xs border-b border-white/5 pb-2">
                                 <span className="text-white/60">Rent (60% of Needs)</span>
-                                <span className="text-white font-medium">₱{rentAllocation.toLocaleString()}</span>
+                                <span className="text-white font-medium">₱{formatCurrency(rentAllocation)}</span>
                             </div>
                             <div className="flex justify-between text-xs border-b border-white/5 pb-2">
                                 <span className="text-white/60">Groceries (25% of Needs)</span>
-                                <span className="text-white font-medium">₱{groceriesAllocation.toLocaleString()}</span>
+                                <span className="text-white font-medium">₱{formatCurrency(groceriesAllocation)}</span>
                             </div>
                             <div className="flex justify-between text-xs border-b border-white/5 pb-2">
                                 <span className="text-white/60">Utilities (15% of Needs)</span>
-                                <span className="text-white font-medium">₱{utilitiesAllocation.toLocaleString()}</span>
+                                <span className="text-white font-medium">₱{formatCurrency(utilitiesAllocation)}</span>
                             </div>
                             <div className="flex justify-between text-xs border-b border-white/5 pb-2">
                                 <span className="text-white/60">Unallocated - Discretionary (Wants)</span>
-                                <span className="text-[#0A84FF] font-semibold">₱{wantsAmount.toLocaleString()}</span>
+                                <span className="text-[#0A84FF] font-semibold">₱{formatCurrency(wantsAmount)}</span>
                             </div>
                             <div className="flex justify-between text-xs pb-1">
                                 <span className="text-white/60">Emergency Savings target</span>
-                                <span className="text-[#BF5AF2] font-semibold">₱{savingsAmount.toLocaleString()}</span>
+                                <span className="text-[#BF5AF2] font-semibold">₱{formatCurrency(savingsAmount)}</span>
                             </div>
                         </div>
-
-                        <button 
-                            onClick={handleUseAllocations}
-                            className={`w-full min-h-[52px] py-3.5 rounded-full font-semibold transition-all text-sm border mt-2 ${
-                                applied 
-                                    ? 'bg-[#30D158] text-white border-transparent' 
-                                    : 'bg-white text-black hover:bg-gray-200 border-transparent'
-                            }`}
-                        >
-                            {applied ? "Allocations applied! ✓" : "Use these allocations"}
-                        </button>
                     </motion.div>
                 )}
             </div>
@@ -476,7 +501,7 @@ export function SmartTools() {
 
     const TABS = [
         { id: 'runway', icon: <Activity className="w-4 h-4" />, label: 'Runway' },
-        { id: 'inflation', icon: <TrendingUp className="w-4 h-4" />, label: 'Inflation' },
+        { id: 'goals', icon: <Target className="w-4 h-4" />, label: 'Goals' },
         { id: 'guard', icon: <Sparkles className="w-4 h-4" />, label: 'Inflation Guard' },
         { id: 'allocation', icon: <Calculator className="w-4 h-4" />, label: 'Salary Split' },
     ];
@@ -494,7 +519,7 @@ export function SmartTools() {
 
             <AnimatePresence mode="wait">
                 {activeTool === 'runway' && <EmergencyRunwayContent key="runway" />}
-                {activeTool === 'inflation' && <InflationOutlookContent key="inflation" />}
+                {activeTool === 'goals' && <GoalsContent key="goals" />}
                 {activeTool === 'guard' && <InflationGuardContent key="guard" />}
                 {activeTool === 'allocation' && <SalaryAllocationContent key="allocation" />}
             </AnimatePresence>
