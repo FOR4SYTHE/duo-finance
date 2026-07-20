@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useCartifyStore } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { PriceEntryModal } from "./PriceEntryModal";
-import { Activity, Plus, ShoppingCart, Trash2, ArrowUpDown, ReceiptText, Delete } from "lucide-react";
+import { Activity, Plus, ShoppingCart, Trash2, ArrowUpDown, ReceiptText, Delete, ShoppingBag, Shirt, Armchair, Laptop, Pill, Wrench } from "lucide-react";
 import { motion, useAnimation, PanInfo } from "framer-motion";
 
 export function LiveTripTracker() {
@@ -59,7 +59,14 @@ export function LiveTripTracker() {
         }
     };
 
-    const categories = ["Groceries", "Clothes", "Furniture", "Electronics", "Pharmacy", "Hardware"];
+    const categories = [
+        { name: "Groceries", image: "/categories/groceries.png", color: "bg-[#8E9B90]" },
+        { name: "Clothes", image: "/categories/clothes.png", color: "bg-[#899BB4]" },
+        { name: "Furniture", image: "/categories/furniture.png", color: "bg-[#C49C73]" },
+        { name: "Electronics", image: "/categories/electronics.png", color: "bg-[#9A8EA6]" },
+        { name: "Pharmacy", image: "/categories/pharmacy.png", color: "bg-[#B38382]" },
+        { name: "Hardware", image: "/categories/hardware.png", color: "bg-[#8A939A]" },
+    ];
 
     if (mode === 'unplanned' && (!activeCategory || isSwitchingCategory)) {
         return (
@@ -67,24 +74,34 @@ export function LiveTripTracker() {
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-white text-xl font-medium tracking-tight">Pick a Category</h2>
                     {activeCategory && (
-                        <button onClick={() => setIsSwitchingCategory(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <button onClick={() => setIsSwitchingCategory(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
                             <span className="text-white text-xs">✕</span>
                         </button>
                     )}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                    {categories.map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => {
-                                setActiveCategory(cat);
-                                setIsSwitchingCategory(false);
-                            }}
-                            className="p-6 rounded-[24px] bg-white/[0.03] border border-white/[0.05] flex flex-col items-center justify-center gap-3 hover:bg-white/[0.08] active:scale-95 transition-all"
-                        >
-                            <span className="text-white text-sm font-medium">{cat}</span>
-                        </button>
-                    ))}
+                    {categories.map(cat => {
+                        return (
+                            <button
+                                key={cat.name}
+                                onClick={() => {
+                                    setActiveCategory(cat.name);
+                                    setIsSwitchingCategory(false);
+                                }}
+                                className="relative overflow-hidden p-5 rounded-[24px] bg-[#0A0A0A] border border-white/[0.05] flex flex-col items-start hover:bg-[#111] active:scale-[0.98] transition-all h-[120px] group"
+                            >
+                                <span className="text-white/90 font-medium text-[15px] relative z-10 tracking-wide drop-shadow-md">{cat.name}</span>
+                                
+                                {/* Glow Orb */}
+                                <div className={`absolute -right-6 -bottom-6 w-32 h-32 rounded-full ${cat.color} opacity-20 blur-[24px] transition-opacity duration-500 group-hover:opacity-40 pointer-events-none`} />
+                                
+                                {/* 3D Image */}
+                                <div className="absolute -right-4 -bottom-4 w-[110px] h-[110px] transition-transform duration-500 group-hover:scale-110 pointer-events-none mix-blend-screen opacity-90 group-hover:opacity-100">
+                                    <img src={cat.image} alt={cat.name} className="w-full h-full object-contain" />
+                                </div>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
         );
