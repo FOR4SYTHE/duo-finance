@@ -38,9 +38,8 @@ export function CategoryMenuSheet({ isOpen, onClose, category }: CategoryMenuShe
                     
                     <motion.div
                         initial={{ y: "100%" }}
-                        animate={{ y: 0 }}
-                        exit={{ y: "100%" }}
-                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                        animate={{ y: 0, transition: { type: "spring", damping: 28, stiffness: 300 } }}
+                        exit={{ y: "100%", transition: { type: "tween", duration: 0.2, ease: "easeIn" } }}
                         className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-6 relative z-10 flex flex-col"
                     >
                         <div className="flex justify-between items-center mb-6">

@@ -45,9 +45,8 @@ export function JarSettingsModal({ isOpen, onClose }: JarSettingsModalProps) {
                     />
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                        animate={{ opacity: 1, scale: 1, y: 0, transition: { type: "spring", damping: 28, stiffness: 300 } }}
+                        exit={{ opacity: 0, scale: 0.95, y: 20, transition: { type: "tween", duration: 0.2, ease: "easeIn" } }}
                         className="w-full max-w-md bg-[#1a1a1a] rounded-[32px] p-6 border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.5)] relative z-10"
                     >
                         <div className="flex justify-between items-center mb-8">
