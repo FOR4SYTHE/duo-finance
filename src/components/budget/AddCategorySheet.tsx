@@ -27,7 +27,7 @@ const DEFAULT_PRESETS = [
     { name: 'Groceries', icon: 'ShoppingBag', color: '#E8A33D' },
     { name: 'Utilities', icon: 'Zap', color: '#0A84FF' },
     { name: 'Bills', icon: 'CreditCard', color: '#FF453A' },
-    { name: 'Kids Tuition', icon: 'GraduationCap', color: '#BF5AF2' },
+    { name: 'Child Care', icon: 'GraduationCap', color: '#BF5AF2' },
 ];
 
 const ALL_PRESETS = [...DEFAULT_PRESETS, ...PRESETS];

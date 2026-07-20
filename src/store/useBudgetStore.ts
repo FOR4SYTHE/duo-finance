@@ -63,7 +63,15 @@ const DEFAULT_CATEGORIES: BudgetCategory[] = [
             { id: 'bill-5', name: 'Gym', amount: 0 },
         ]
     },
-    { id: '5', name: 'Kids Tuition', icon: 'GraduationCap', color: '#BF5AF2', targetAmount: 0 },
+    { 
+        id: '5', name: 'Child Care', icon: 'GraduationCap', color: '#BF5AF2', targetAmount: 0,
+        subCategories: [
+            { id: 'child-1', name: 'School Supplies', amount: 0 },
+            { id: 'child-2', name: 'Uniforms', amount: 0 },
+            { id: 'child-3', name: 'Field Trips/Activities', amount: 0 },
+            { id: 'child-4', name: 'Extracurricular', amount: 0 },
+        ]
+    },
 ];
 
 const DEFAULT_GOALS: Goal[] = [
@@ -202,8 +210,13 @@ export const useBudgetStore = create<BudgetState>()(
                 const merged = { ...currentState, ...persistedState };
                 if (persistedState.categories) {
                     merged.categories = persistedState.categories.map((cat: any) => {
+                        // Migration for Kids Tuition -> Child Care
+                        if (cat.name === 'Kids Tuition') {
+                            cat.name = 'Child Care';
+                        }
+                        
                         const defaultCat = DEFAULT_CATEGORIES.find(d => d.name === cat.name);
-                        if (defaultCat?.subCategories && !cat.subCategories) {
+                        if (defaultCat?.subCategories && (!cat.subCategories || cat.subCategories.length === 0)) {
                             return { ...cat, subCategories: defaultCat.subCategories };
                         }
                         return cat;
