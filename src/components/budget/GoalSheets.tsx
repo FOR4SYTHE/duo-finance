@@ -209,8 +209,9 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
                                         type="text" 
                                         value={name} 
                                         onChange={e => setName(e.target.value)}
+                                        disabled={goalId === 'goal-1'}
                                         placeholder="e.g. Dream Vacation"
-                                        className="bg-black/40 border border-white/5 outline-none text-white text-sm px-4 py-3 rounded-2xl focus:border-white/20 transition-colors"
+                                        className="bg-black/40 border border-white/5 outline-none text-white text-sm px-4 py-3 rounded-2xl focus:border-white/20 transition-colors disabled:opacity-50"
                                     />
                                 </div>
 
@@ -253,7 +254,7 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
                                 >
                                     Save Details
                                 </button>
-                                {goal.name !== 'Emergency Fund' && (
+                                {goalId !== 'goal-1' && (
                                     <button 
                                         disabled={!name.trim()}
                                         onClick={() => setIsAmountModalOpen(true)}
@@ -286,7 +287,7 @@ export function GoalMenuSheet({ isOpen, onClose, goalId, onEdit }: { isOpen: boo
 
     if (!goal || !isOpen) return null;
 
-    const isEmergency = goal.name === 'Emergency Fund';
+    const isEmergency = goal.id === 'goal-1';
 
     return (
         <AnimatePresence>
@@ -348,15 +349,17 @@ export function GoalMenuSheet({ isOpen, onClose, goalId, onEdit }: { isOpen: boo
                                     <Edit3 className="w-5 h-5 text-white/70" />
                                     <span className="font-medium">Edit Goal Details</span>
                                 </button>
-                                <button 
-                                    onClick={() => setConfirmDelete(true)}
-                                    className="flex items-center gap-3 w-full p-4 rounded-2xl transition-colors text-left bg-[#FF453A]/5 hover:bg-[#FF453A]/10 border border-[#FF453A]/10 text-[#FF453A]"
-                                >
-                                    <Trash2 className="w-5 h-5" />
-                                    <div className="flex flex-col">
-                                        <span className="font-medium">Delete Goal</span>
-                                    </div>
-                                </button>
+                                {!isEmergency && (
+                                    <button 
+                                        onClick={() => setConfirmDelete(true)}
+                                        className="flex items-center gap-3 w-full p-4 rounded-2xl transition-colors text-left bg-[#FF453A]/5 hover:bg-[#FF453A]/10 border border-[#FF453A]/10 text-[#FF453A]"
+                                    >
+                                        <Trash2 className="w-5 h-5" />
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">Delete Goal</span>
+                                        </div>
+                                    </button>
+                                )}
                             </div>
                         )}
                     </motion.div>

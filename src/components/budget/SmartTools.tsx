@@ -81,14 +81,14 @@ function ToolCardShell({ children, isLoading, error, onRetry, title }: { childre
 // TOOL CONTENTS
 // ==========================================
 
-// 1. Emergency Runway Component
 function EmergencyRunwayContent() {
+    const [isLogging, setIsLogging] = useState(false);
     const { categories, goals, config, setRunwayMultiplier, updateGoal } = useBudgetStore();
     const { exchangeRate } = useCurrencyStore();
     
     const multiplier = config.runwayMultiplier || 3;
 
-    const emergencyGoal = goals.find(g => g.name === 'Emergency Fund');
+    const emergencyGoal = goals.find(g => g.id === 'goal-1');
     const savedSoFar = emergencyGoal?.savedAmount || 0;
 
     // Sum of all categories' target amounts (which are stored natively as monthly targets)
@@ -100,11 +100,14 @@ function EmergencyRunwayContent() {
 
     return (
         <ToolCardShell title="Emergency Runway Calculator">
-            <div className="flex justify-between items-center border border-white/5 rounded-2xl p-4">
+            <p className="text-white/60 text-xs leading-relaxed">
+                Calculates your target emergency fund based on your actual monthly budget. Set your category targets (Rent, Groceries, etc.) first to see how much you need for a {multiplier}-month safety net.
+            </p>
+            <div className="flex justify-between items-center border border-white/5 rounded-2xl p-4 mt-2">
                 <div className="flex flex-col">
                     <span className="text-white/70 text-sm font-medium">Runway Duration</span>
                     <span className="text-white/40 text-[10px]">
-                        {monthlyBaseline > 0 ? `Monthly baseline: ₱${formatCurrency(monthlyBaseline)}` : 'Set allocations first'}
+                        {monthlyBaseline > 0 ? `Monthly baseline: ₱${formatCurrency(monthlyBaseline)}` : 'Category targets not set'}
                     </span>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
@@ -129,19 +132,17 @@ function EmergencyRunwayContent() {
                     <span className="text-white/50 uppercase tracking-wider font-semibold">Saved So Far</span>
                     <span className="text-white/40">≈ ZAR {formatCurrency(savedSoFar * exchangeRate)}</span>
                 </div>
-                <div className="flex items-center gap-3 bg-black/40 rounded-2xl p-4 border border-white/5 focus-within:border-white/20 transition-colors w-full">
-                    <span className="text-white/40 text-sm font-medium">₱</span>
-                    <input 
-                        type="number" 
-                        value={savedSoFar || ''} 
-                        onChange={e => {
-                            if (emergencyGoal) {
-                                updateGoal(emergencyGoal.id, { savedAmount: Number(e.target.value) });
-                            }
-                        }}
-                        placeholder="Enter current savings..."
-                        className="bg-transparent border-none outline-none text-white text-sm w-full font-medium"
-                    />
+                <div className="flex items-center gap-3 bg-black/40 rounded-2xl p-4 border border-white/5 w-full justify-between">
+                    <div className="flex items-center gap-1">
+                        <span className="text-white/40 text-sm font-medium">₱</span>
+                        <span className="text-white font-semibold text-lg">{formatCurrency(savedSoFar)}</span>
+                    </div>
+                    <button 
+                        onClick={() => setIsLogging(true)}
+                        className="px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.05] text-white/70 text-xs font-semibold tracking-wide transition-colors"
+                    >
+                        + Log Savings
+                    </button>
                 </div>
             </div>
 
@@ -155,7 +156,7 @@ function EmergencyRunwayContent() {
                                 <span className="text-white/40 text-xs block">≈ R{formatCurrency(targetRunway * exchangeRate)}</span>
                             </>
                         ) : (
-                            <span className="text-white/40 text-[11px] font-medium">Pending allocations</span>
+                            <span className="text-white/40 text-[11px] font-medium">Set category budgets to calculate</span>
                         )}
                     </div>
                 </div>
@@ -179,6 +180,18 @@ function EmergencyRunwayContent() {
                     </div>
                 )}
             </div>
+            <AmountInputModal 
+                isOpen={isLogging}
+                onClose={() => setIsLogging(false)}
+                onConfirm={(amount) => {
+                    if (emergencyGoal) {
+                        updateGoal(emergencyGoal.id, { savedAmount: savedSoFar + amount });
+                    }
+                    setIsLogging(false);
+                }}
+                title="Add to Emergency Fund"
+                initialAmount={0}
+            />
         </ToolCardShell>
     );
 }

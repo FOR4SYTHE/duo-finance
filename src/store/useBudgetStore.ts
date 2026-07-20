@@ -89,7 +89,7 @@ export const useBudgetStore = create<BudgetState>()(
                     const newConfig = { ...state.config, runwayMultiplier: multiplier };
                     const monthlyBaseline = state.categories.reduce((sum, cat) => sum + cat.targetAmount, 0);
                     const targetRunway = monthlyBaseline * multiplier;
-                    const goals = state.goals.map(g => g.name === 'Emergency Fund' ? { ...g, targetAmount: targetRunway } : g);
+                    const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
                     return { config: newConfig, goals };
                 }),
             addCategory: (category) => 
@@ -105,7 +105,7 @@ export const useBudgetStore = create<BudgetState>()(
                     const newCats = state.categories.map(c => c.id === id ? { ...c, ...updates } : c);
                     const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
                     const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
-                    const goals = state.goals.map(g => g.name === 'Emergency Fund' ? { ...g, targetAmount: targetRunway } : g);
+                    const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
                     return { categories: newCats, goals };
                 }),
             updateCategoriesTarget: (updates) =>
@@ -116,7 +116,7 @@ export const useBudgetStore = create<BudgetState>()(
                     });
                     const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
                     const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
-                    const goals = state.goals.map(g => g.name === 'Emergency Fund' ? { ...g, targetAmount: targetRunway } : g);
+                    const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
                     return { categories: newCats, goals };
                 }),
             removeCategory: (id) => 
@@ -124,7 +124,7 @@ export const useBudgetStore = create<BudgetState>()(
                     const newCats = state.categories.filter(c => c.id !== id);
                     const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
                     const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
-                    const goals = state.goals.map(g => g.name === 'Emergency Fund' ? { ...g, targetAmount: targetRunway } : g);
+                    const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
                     return { categories: newCats, goals };
                 }),
 
@@ -139,7 +139,7 @@ export const useBudgetStore = create<BudgetState>()(
                     });
                     const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
                     const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
-                    const goals = state.goals.map(g => g.name === 'Emergency Fund' ? { ...g, targetAmount: targetRunway } : g);
+                    const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
                     return { categories: newCats, goals };
                 }),
             addSubCategory: (categoryId, name) => 
@@ -160,7 +160,7 @@ export const useBudgetStore = create<BudgetState>()(
                     });
                     const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
                     const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
-                    const goals = state.goals.map(g => g.name === 'Emergency Fund' ? { ...g, targetAmount: targetRunway } : g);
+                    const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
                     return { categories: newCats, goals };
                 }),
 
@@ -174,9 +174,10 @@ export const useBudgetStore = create<BudgetState>()(
                     goals: state.goals.map(g => g.id === id ? { ...g, ...updates } : g)
                 })),
             removeGoal: (id) => 
-                set((state) => ({
-                    goals: state.goals.filter(g => g.id !== id)
-                })),
+                set((state) => {
+                    if (id === 'goal-1') return state; // Protect Emergency Fund from deletion
+                    return { goals: state.goals.filter(g => g.id !== id) };
+                }),
             addMoneyToGoal: (id, amount) =>
                 set((state) => ({
                     goals: state.goals.map(g => g.id === id ? { ...g, savedAmount: g.savedAmount + amount } : g)
@@ -197,7 +198,24 @@ export const useBudgetStore = create<BudgetState>()(
                 }
                 if (!persistedState.goals) {
                     merged.goals = DEFAULT_GOALS;
+                } else {
+                    const hasEmergency = persistedState.goals.some((g: any) => g.id === 'goal-1');
+                    if (!hasEmergency) {
+                        merged.goals = [DEFAULT_GOALS[0], ...persistedState.goals];
+                    }
                 }
+                
+                // Recalculate targetAmount for the emergency goal based on the loaded categories
+                if (merged.categories && merged.goals) {
+                    const monthlyBaseline = merged.categories.reduce((sum: any, cat: any) => sum + (cat.targetAmount || 0), 0);
+                    const multiplier = merged.config?.runwayMultiplier || 3;
+                    const targetRunway = monthlyBaseline * multiplier;
+                    
+                    merged.goals = merged.goals.map((g: any) => 
+                        g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g
+                    );
+                }
+
                 return merged;
             },
             onRehydrateStorage: () => (state) => {
