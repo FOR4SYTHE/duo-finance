@@ -85,7 +85,7 @@ export function AddCategorySheet({ isOpen, onClose }: AddCategorySheetProps) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                     />
                     
                     <motion.div
@@ -93,7 +93,7 @@ export function AddCategorySheet({ isOpen, onClose }: AddCategorySheetProps) {
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-6 relative z-10 flex flex-col max-h-[90dvh]"
+                        className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-6 relative z-10 flex flex-col max-h-[90dvh] will-change-transform"
                     >
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-white font-medium">Add Category</h3>

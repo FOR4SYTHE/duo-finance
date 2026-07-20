@@ -17,8 +17,8 @@ export function Navigation() {
   ];
 
   return (
-    <div className="absolute bottom-6 left-6 right-6 z-50">
-      <div className="bg-white/[0.05] backdrop-blur-2xl border border-white/[0.05] rounded-[28px] p-2 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+    <div className="absolute bottom-6 left-6 right-6 z-50 will-change-transform">
+      <div className="bg-white/[0.05] backdrop-blur-lg border border-white/[0.05] rounded-[28px] p-2 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href;
           const Icon = tab.icon;

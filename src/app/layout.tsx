@@ -36,7 +36,7 @@ export default function RootLayout({
           <div className="w-full max-w-xl mx-auto h-[100dvh] bg-[#000000] shadow-[0_0_80px_rgba(0,0,0,0.5)] flex flex-col relative overflow-hidden ring-0 z-10 border-x border-white/[0.02]">
             
             {/* The App Itself */}
-            <div className="relative z-10 w-full h-full flex flex-col overflow-y-auto no-scrollbar pb-[100px]">
+            <div className="w-full h-full flex flex-col overflow-y-auto no-scrollbar pb-[100px]">
                 {children}
             </div>
 

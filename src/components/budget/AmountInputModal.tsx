@@ -76,7 +76,7 @@ export function AmountInputModal({ isOpen, onClose, onConfirm, title, initialAmo
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                     />
                     
                     <motion.div
@@ -84,7 +84,7 @@ export function AmountInputModal({ isOpen, onClose, onConfirm, title, initialAmo
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-5 relative z-10 flex flex-col max-h-[95dvh] overflow-hidden"
+                        className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-5 relative z-10 flex flex-col max-h-[95dvh] overflow-hidden will-change-transform"
                     >
                         <div className="flex justify-between items-center mb-4 shrink-0">
                             <h3 className="text-white font-medium">Edit {title}</h3>

@@ -57,15 +57,15 @@ export function PriceEntryModal({ isOpen, onClose, onConfirm, title }: PriceEntr
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        className="absolute inset-0 bg-black/80 backdrop-blur-[2px]"
                     />
                     <motion.div 
                         initial={{ y: "100%" }}
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="relative w-full bg-[#111] rounded-t-[32px] p-6 border-t border-white/10 pointer-events-auto mt-auto flex flex-col pb-[calc(env(safe-area-inset-bottom)+24px)]"
+                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                        className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-5 relative z-10 flex flex-col max-h-[95dvh] overflow-hidden will-change-transform mt-auto pb-[calc(env(safe-area-inset-bottom)+24px)]"
                     >
                         <div className="flex justify-between items-center mb-6">
                             <span className="text-white/70 font-medium">{title}</span>
