@@ -53,7 +53,7 @@ export function TripSetup() {
     ];
 
     return (
-        <div className="flex flex-col w-full h-full relative z-20 flex-1">
+        <div className="flex flex-col w-full h-full relative z-20 flex-1 overflow-y-auto no-scrollbar pb-24 pt-2">
             <div className="flex justify-between items-center mb-4 px-1">
                 <span className="text-white/50 text-xs font-semibold tracking-widest uppercase">Trip Budget</span>
                 <button 
@@ -67,7 +67,7 @@ export function TripSetup() {
                 </button>
             </div>
             
-            <div className="flex flex-col items-center justify-center mb-4 min-h-[90px]">
+            <div className="flex flex-col items-center justify-center mb-4 min-h-[70px] shrink-0">
                 <div className="flex flex-col items-center">
                     <div className="text-[3.5rem] leading-none text-white flex items-baseline justify-center gap-1 font-light tracking-tight">
                         <span className="text-2xl text-white/40">{isPhpPrimary ? '₱' : 'R'}</span>
@@ -79,7 +79,7 @@ export function TripSetup() {
                 </div>
             </div>
 
-            <div className="flex flex-col gap-1.5 mb-6">
+            <div className="flex flex-col gap-1.5 mb-4 shrink-0">
                 <span className="text-white/50 text-[10px] font-semibold tracking-widest uppercase mb-0.5 px-1">Mode</span>
                 
                 {(['simple', 'unplanned', 'planned'] as CartifyMode[]).map(mode => (
@@ -115,7 +115,7 @@ export function TripSetup() {
             </div>
 
             {/* Numpad */}
-            <div className="flex-1 grid grid-cols-3 gap-3 mb-6 min-h-[250px]">
+            <div className="flex-1 grid grid-cols-3 gap-2 mb-4 min-h-[200px]">
                 {buttons.map((btn) => (
                     <button
                         key={btn.label}
