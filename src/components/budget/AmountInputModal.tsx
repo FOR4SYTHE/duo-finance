@@ -52,7 +52,7 @@ export function AmountInputModal({ isOpen, onClose, onConfirm, title, initialAmo
     };
 
     const handleConfirm = () => {
-        if (phpAmount > 0) {
+        if (phpAmount >= 0) {
             onConfirm(phpAmount);
             setDisplayValue("0");
         }
@@ -122,7 +122,7 @@ export function AmountInputModal({ isOpen, onClose, onConfirm, title, initialAmo
 
                         <button
                             onClick={handleConfirm}
-                            disabled={phpAmount <= 0}
+                            disabled={phpAmount < 0}
                             className="w-full h-[64px] rounded-full bg-white text-black font-semibold text-base tracking-wide flex items-center justify-center gap-2 hover:bg-gray-100 disabled:opacity-50 disabled:bg-white/10 disabled:text-white/40 transition-all duration-300 active:scale-[0.98]"
                         >
                             Save {isPhpPrimary ? '₱' : 'R'}{numericValue.toLocaleString()}

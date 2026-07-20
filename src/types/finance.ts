@@ -20,12 +20,19 @@ export interface CartifyItem extends ExpenseEntry {
 
 export type BudgetPeriod = 'weekly' | 'monthly' | '3-months' | '6-months' | 'annually';
 
+export interface BudgetSubCategory {
+    id: string;
+    name: string;
+    amount: number;
+}
+
 export interface BudgetCategory {
     id: string;
     name: string;
     icon: string; // Component or identifier name
     color: string; // e.g., '#30D158'
     targetAmount: number; // Stored natively in canonical Monthly PHP
+    subCategories?: BudgetSubCategory[];
 }
 
 export interface BudgetConfig {

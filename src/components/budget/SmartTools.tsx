@@ -12,7 +12,7 @@ import { COST_DATA, AREAS, Area, PH_INFLATION_RATE } from "@/utils/costData";
 
 function PillTabRow({ tabs, activeTab, onSelect }: { tabs: { id: string, icon: any, label: string }[], activeTab: string | null, onSelect: (id: string) => void }) {
     return (
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 -mx-2 px-2 mask-linear-fade w-full shrink-0">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 -mx-6 px-6 mask-linear-fade w-[calc(100%+48px)]">
             {tabs.map(tab => (
                 <button
                     key={tab.id}
@@ -33,7 +33,13 @@ function PillTabRow({ tabs, activeTab, onSelect }: { tabs: { id: string, icon: a
 
 function ToolCardShell({ children, isLoading, error, onRetry, title }: { children: React.ReactNode, isLoading?: boolean, error?: string | null, onRetry?: () => void, title?: string }) {
     return (
-        <motion.div initial={{ opacity: 0, height: 0, marginTop: 0 }} animate={{ opacity: 1, height: 'auto', marginTop: 16 }} exit={{ opacity: 0, height: 0, marginTop: 0 }} className="overflow-hidden w-full">
+        <motion.div 
+            initial={{ opacity: 0, height: 0, marginTop: 0 }} 
+            animate={{ opacity: 1, height: 'auto', marginTop: 16 }} 
+            exit={{ opacity: 0, height: 0, marginTop: 0 }} 
+            transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+            className="overflow-hidden w-full"
+        >
             <div className="bg-black/40 rounded-2xl p-6 flex flex-col gap-4 border border-white/5 relative z-10">
                 {title && <h3 className="text-white/70 font-medium text-sm tracking-wide">{title}</h3>}
                 
@@ -103,8 +109,8 @@ function TargetAreaSearch({ onCostDataResolved }: { onCostDataResolved: (data: a
     };
 
     return (
-        <div className="flex flex-col gap-2 relative z-20">
-            <div className="flex items-center gap-3 bg-black/40 rounded-2xl p-4 border border-white/5 focus-within:border-white/20 transition-colors">
+        <div className="flex flex-col gap-2 relative z-20 w-full">
+            <div className="flex items-center gap-3 bg-black/40 rounded-2xl p-4 border border-white/5 focus-within:border-white/20 transition-colors w-full">
                 <MapPin className="w-4 h-4 text-white/40 shrink-0" />
                 <input 
                     type="text" 
@@ -118,7 +124,12 @@ function TargetAreaSearch({ onCostDataResolved }: { onCostDataResolved: (data: a
             
             <AnimatePresence>
                 {isDropdownOpen && search && (
-                    <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute top-[calc(100%+4px)] left-0 w-full bg-[#1A1A1A] border border-white/10 rounded-2xl overflow-hidden z-30 shadow-2xl">
+                    <motion.div 
+                        initial={{ opacity: 0, height: 0 }} 
+                        animate={{ opacity: 1, height: 'auto' }} 
+                        exit={{ opacity: 0, height: 0 }} 
+                        className="w-full bg-[#1A1A1A] border border-white/10 rounded-2xl overflow-hidden mt-1 shadow-inner"
+                    >
                         {filteredAreas.length > 0 ? (
                             filteredAreas.map(a => (
                                 <button key={a} onClick={() => handleSelectCurated(a as Area)} className="w-full text-left px-4 py-3 text-sm text-white/70 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0">{a}</button>

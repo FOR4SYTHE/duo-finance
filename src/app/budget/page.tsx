@@ -10,6 +10,7 @@ import { BudgetPeriod, BudgetCategory } from "@/types/finance";
 import { SmartTools } from "@/components/budget/SmartTools";
 import { AmountInputModal } from "@/components/budget/AmountInputModal";
 import { AddCategorySheet } from "@/components/budget/AddCategorySheet";
+import { CategoryDetailsSheet } from "@/components/budget/CategoryDetailsSheet";
 import { getDisplayValue, getCanonicalValue, calculateAllocations } from "@/utils/budgetMath";
 
 const PERIODS: { value: BudgetPeriod; label: string }[] = [
@@ -28,6 +29,7 @@ export default function BudgetPage() {
   const [isHeroModalOpen, setIsHeroModalOpen] = useState(false);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
+  const [detailsCategory, setDetailsCategory] = useState<BudgetCategory | null>(null);
 
   // Computed Values
   const { displayTarget, displayAllocated, displayUnallocated } = calculateAllocations(config, categories);
@@ -208,7 +210,15 @@ export default function BudgetPage() {
                 return (
                     <div 
                         key={cat.id} 
-                        onClick={() => setEditingCategory(cat)}
+                        onClick={() => {
+                            const nameLower = cat.name.toLowerCase().trim();
+                            const isSubCatCategory = cat.subCategories || nameLower === 'utilities' || nameLower === 'bills';
+                            if (isSubCatCategory) {
+                                setDetailsCategory(cat);
+                            } else {
+                                setEditingCategory(cat);
+                            }
+                        }}
                         className="rounded-[24px] p-4 flex flex-col cursor-pointer transition-colors active:scale-[0.98] border border-white/5"
                         style={{ 
                             backgroundColor: `${cat.color}11`, // very soft tint
@@ -260,6 +270,12 @@ export default function BudgetPage() {
             initialAmount={getDisplayValue(editingCategory.targetAmount, config.period)}
           />
       )}
+
+      <CategoryDetailsSheet
+        isOpen={!!detailsCategory}
+        onClose={() => setDetailsCategory(null)}
+        categoryId={detailsCategory?.id || null}
+      />
 
       <AddCategorySheet 
         isOpen={isAddCategoryOpen}
