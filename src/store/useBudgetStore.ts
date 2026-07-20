@@ -198,6 +198,7 @@ export const useBudgetStore = create<BudgetState>()(
         {
             name: 'duo-budget-storage',
             merge: (persistedState: any, currentState) => {
+                if (!persistedState) return currentState;
                 const merged = { ...currentState, ...persistedState };
                 if (persistedState.categories) {
                     merged.categories = persistedState.categories.map((cat: any) => {
