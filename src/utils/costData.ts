@@ -3,25 +3,29 @@ export const COST_DATA = {
         baseRent: 15000, rentPerExtraAdult: 5000, 
         baseUtilities: 3000, utilPerExtraAdult: 1000,
         baseFood: 8000, foodPerExtraAdult: 4000, kidFoodMultiplier: 0.5,
-        baseMisc: 2000, miscPerExtraAdult: 1000
+        baseMisc: 2000, miscPerExtraAdult: 1000,
+        depositMonths: 2, advanceRentMonths: 1, starterFurniture: 50000
     },
     'Quezon City': { 
         baseRent: 10000, rentPerExtraAdult: 4000, 
         baseUtilities: 2500, utilPerExtraAdult: 800,
         baseFood: 7000, foodPerExtraAdult: 3500, kidFoodMultiplier: 0.5,
-        baseMisc: 1500, miscPerExtraAdult: 800
+        baseMisc: 1500, miscPerExtraAdult: 800,
+        depositMonths: 2, advanceRentMonths: 1, starterFurniture: 40000
     },
     'Ortigas': { 
         baseRent: 12000, rentPerExtraAdult: 4500, 
         baseUtilities: 2800, utilPerExtraAdult: 900,
         baseFood: 7500, foodPerExtraAdult: 3800, kidFoodMultiplier: 0.5,
-        baseMisc: 1800, miscPerExtraAdult: 900
+        baseMisc: 1800, miscPerExtraAdult: 900,
+        depositMonths: 2, advanceRentMonths: 1, starterFurniture: 45000
     },
     'Provincial': { 
         baseRent: 6000, rentPerExtraAdult: 2000, 
         baseUtilities: 1500, utilPerExtraAdult: 500,
         baseFood: 5000, foodPerExtraAdult: 2500, kidFoodMultiplier: 0.5,
-        baseMisc: 1000, miscPerExtraAdult: 500
+        baseMisc: 1000, miscPerExtraAdult: 500,
+        depositMonths: 1, advanceRentMonths: 1, starterFurniture: 25000
     },
 } as const;
 
