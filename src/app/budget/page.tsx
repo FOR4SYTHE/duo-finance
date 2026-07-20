@@ -11,6 +11,7 @@ import { SmartTools } from "@/components/budget/SmartTools";
 import { AmountInputModal } from "@/components/budget/AmountInputModal";
 import { AddCategorySheet } from "@/components/budget/AddCategorySheet";
 import { CategoryDetailsSheet } from "@/components/budget/CategoryDetailsSheet";
+import { CategoryMenuSheet } from "@/components/budget/CategoryMenuSheet";
 import { getDisplayValue, getCanonicalValue, calculateAllocations } from "@/utils/budgetMath";
 
 const PERIODS: { value: BudgetPeriod; label: string }[] = [
@@ -30,6 +31,7 @@ export default function BudgetPage() {
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
   const [detailsCategory, setDetailsCategory] = useState<BudgetCategory | null>(null);
+  const [menuCategory, setMenuCategory] = useState<BudgetCategory | null>(null);
 
   // Computed Values
   const { displayTarget, displayAllocated, displayUnallocated } = calculateAllocations(config, categories);
@@ -232,6 +234,15 @@ export default function BudgetPage() {
                             >
                                 <Icon className="w-5 h-5" style={{ color: cat.color }} />
                             </div>
+                            <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setMenuCategory(cat);
+                                }}
+                                className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.02] hover:bg-white/[0.1] text-white/40 hover:text-white transition-colors -mt-1 -mr-1"
+                            >
+                                <Icons.MoreVertical className="w-4 h-4" />
+                            </button>
                         </div>
                         <span className="text-white font-medium mb-1 drop-shadow-sm">{cat.name}</span>
                         <span className="text-white/90 font-semibold mb-0.5">₱{catTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
@@ -275,6 +286,12 @@ export default function BudgetPage() {
         isOpen={!!detailsCategory}
         onClose={() => setDetailsCategory(null)}
         categoryId={detailsCategory?.id || null}
+      />
+
+      <CategoryMenuSheet
+        isOpen={!!menuCategory}
+        onClose={() => setMenuCategory(null)}
+        category={menuCategory}
       />
 
       <AddCategorySheet 

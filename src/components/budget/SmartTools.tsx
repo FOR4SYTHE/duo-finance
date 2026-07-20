@@ -342,14 +342,80 @@ function InflationGuardContent() {
 
 // 4. Salary Auto-Allocation Component
 function SalaryAllocationContent() {
-    const { categories, goals, updateCategoriesTarget, setBudget, addMoneyToGoal } = useBudgetStore();
+    const { categories, goals } = useBudgetStore();
     const { exchangeRate } = useCurrencyStore();
     
     const [income, setIncome] = useState<number>(0);
     const [needsPct, setNeedsPct] = useState<number>(50);
     const [wantsPct, setWantsPct] = useState<number>(30);
+    const [savingsPct, setSavingsPct] = useState<number>(20);
 
-    const savingsPct = Math.max(0, 100 - needsPct - wantsPct);
+    const SMART_PRESETS = [
+        { label: 'Metro (50/30/20)', needs: 50, wants: 30, savings: 20 },
+        { label: 'Essentials (65/15/20)', needs: 65, wants: 15, savings: 20 },
+        { label: 'Aggressive (40/30/30)', needs: 40, wants: 30, savings: 30 },
+    ];
+
+    const applyPreset = (needs: number, wants: number, savings: number) => {
+        setNeedsPct(needs);
+        setWantsPct(wants);
+        setSavingsPct(savings);
+    };
+
+    const handleSliderChange = (type: 'needs' | 'wants' | 'savings', newValue: number) => {
+        let others: { type: 'needs' | 'wants' | 'savings', value: number }[] = [];
+        
+        if (type === 'needs') {
+            others = [{ type: 'wants', value: wantsPct }, { type: 'savings', value: savingsPct }];
+        } else if (type === 'wants') {
+            others = [{ type: 'needs', value: needsPct }, { type: 'savings', value: savingsPct }];
+        } else {
+            others = [{ type: 'needs', value: needsPct }, { type: 'wants', value: wantsPct }];
+        }
+
+        const diff = newValue - (type === 'needs' ? needsPct : type === 'wants' ? wantsPct : savingsPct);
+        if (diff === 0) return;
+
+        let otherTotal = others[0].value + others[1].value;
+        if (otherTotal === 0) {
+            others[0].value = (100 - newValue) / 2;
+            others[1].value = (100 - newValue) / 2;
+        } else {
+            const o0_share = others[0].value / otherTotal;
+            let o0_change = diff * o0_share;
+            let o1_change = diff - o0_change;
+
+            others[0].value -= o0_change;
+            others[1].value -= o1_change;
+
+            if (others[0].value < 0) {
+                others[1].value += others[0].value;
+                others[0].value = 0;
+            } else if (others[1].value < 0) {
+                others[0].value += others[1].value;
+                others[1].value = 0;
+            }
+        }
+
+        const finalMain = newValue;
+        let finalO0 = Math.round(others[0].value);
+        let finalO1 = 100 - finalMain - finalO0;
+
+        if (finalO1 < 0) {
+            finalO0 += finalO1;
+            finalO1 = 0;
+        }
+
+        const setVals = (t: string, val: number) => {
+            if (t === 'needs') setNeedsPct(val);
+            if (t === 'wants') setWantsPct(val);
+            if (t === 'savings') setSavingsPct(val);
+        };
+
+        setVals(type, finalMain);
+        setVals(others[0].type, finalO0);
+        setVals(others[1].type, finalO1);
+    };
 
     // Dynamic calculations
     const needsAmount = income * (needsPct / 100);
@@ -373,6 +439,21 @@ function SalaryAllocationContent() {
     return (
         <ToolCardShell title="Salary Auto-Allocation">
             <div className="flex flex-col gap-4">
+                {/* Smart Presets */}
+                <div className="flex flex-col gap-2">
+                    <span className="text-white/50 text-[10px] uppercase tracking-wider font-semibold">PH Smart Suggestions</span>
+                    <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-2 w-full shrink-0">
+                        {SMART_PRESETS.map(p => (
+                            <button
+                                key={p.label}
+                                onClick={() => applyPreset(p.needs, p.wants, p.savings)}
+                                className="px-2.5 py-2 rounded-full bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.08] text-white/70 text-xs whitespace-nowrap transition-colors shrink-0"
+                            >
+                                {p.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
                 {/* Income Input */}
                 <div className="flex flex-col gap-2">
                     <span className="text-white/50 text-xs uppercase tracking-wider font-semibold">Monthly Combined Income</span>
@@ -431,15 +512,8 @@ function SalaryAllocationContent() {
                                 </div>
                                 <input 
                                     type="range" min="0" max="100" value={needsPct}
-                                    onChange={e => {
-                                        const nextNeeds = Number(e.target.value);
-                                        setNeedsPct(nextNeeds);
-                                        // Adjust Wants if needed to not exceed 100
-                                        if (nextNeeds + wantsPct > 100) {
-                                            setWantsPct(100 - nextNeeds);
-                                        }
-                                    }}
-                                    className="w-full accent-white h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                                    onChange={e => handleSliderChange('needs', Number(e.target.value))}
+                                    className="w-full accent-[#30D158] h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
                                 />
                             </div>
 
@@ -449,15 +523,22 @@ function SalaryAllocationContent() {
                                     <span>{wantsPct}%</span>
                                 </div>
                                 <input 
-                                    type="range" min="0" max={100 - needsPct} value={wantsPct}
-                                    onChange={e => setWantsPct(Number(e.target.value))}
-                                    className="w-full accent-white h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                                    type="range" min="0" max="100" value={wantsPct}
+                                    onChange={e => handleSliderChange('wants', Number(e.target.value))}
+                                    className="w-full accent-[#0A84FF] h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
                                 />
                             </div>
 
-                            <div className="flex justify-between text-xs font-semibold text-white/40 border-t border-white/5 pt-2">
-                                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#BF5AF2]"/> Savings</span>
-                                <span>{savingsPct}%</span>
+                            <div className="flex flex-col gap-1">
+                                <div className="flex justify-between text-xs font-semibold text-white/70">
+                                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#BF5AF2]"/> Savings</span>
+                                    <span>{savingsPct}%</span>
+                                </div>
+                                <input 
+                                    type="range" min="0" max="100" value={savingsPct}
+                                    onChange={e => handleSliderChange('savings', Number(e.target.value))}
+                                    className="w-full accent-[#BF5AF2] h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                                />
                             </div>
                         </div>
                     </div>

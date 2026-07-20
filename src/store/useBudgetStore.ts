@@ -93,9 +93,13 @@ export const useBudgetStore = create<BudgetState>()(
                     return { config: newConfig, goals };
                 }),
             addCategory: (category) => 
-                set((state) => ({ 
-                    categories: [...state.categories, { ...category, id: Math.random().toString(36).substring(7) }] 
-                })),
+                set((state) => {
+                    const defaultMatch = DEFAULT_CATEGORIES.find(d => d.name.toLowerCase() === category.name.toLowerCase());
+                    const subCategories = defaultMatch?.subCategories ? defaultMatch.subCategories : undefined;
+                    return { 
+                        categories: [...state.categories, { ...category, id: Math.random().toString(36).substring(7), subCategories }] 
+                    };
+                }),
             updateCategory: (id, updates) => 
                 set((state) => {
                     const newCats = state.categories.map(c => c.id === id ? { ...c, ...updates } : c);

@@ -22,6 +22,16 @@ const PRESETS = [
     { name: 'Savings', icon: 'PiggyBank', color: '#30D158' },
 ];
 
+const DEFAULT_PRESETS = [
+    { name: 'Rent', icon: 'Home', color: '#30D158' },
+    { name: 'Groceries', icon: 'ShoppingBag', color: '#E8A33D' },
+    { name: 'Utilities', icon: 'Zap', color: '#0A84FF' },
+    { name: 'Bills', icon: 'CreditCard', color: '#FF453A' },
+    { name: 'Kids Tuition', icon: 'GraduationCap', color: '#BF5AF2' },
+];
+
+const ALL_PRESETS = [...DEFAULT_PRESETS, ...PRESETS];
+
 export function AddCategorySheet({ isOpen, onClose }: AddCategorySheetProps) {
     const { categories, addCategory, config } = useBudgetStore();
     const [selectedDraft, setSelectedDraft] = useState<any | null>(null);
@@ -98,7 +108,7 @@ export function AddCategorySheet({ isOpen, onClose }: AddCategorySheetProps) {
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4 overflow-y-auto no-scrollbar">
                             <div className="mt-2">
                                 <span className="text-white/40 text-xs font-semibold uppercase tracking-widest">Common Categories</span>
-                                {renderList(PRESETS)}
+                                {renderList(ALL_PRESETS.filter(p => !categories.some(c => c.name.toLowerCase() === p.name.toLowerCase())))}
                             </div>
                         </motion.div>
                     </motion.div>
