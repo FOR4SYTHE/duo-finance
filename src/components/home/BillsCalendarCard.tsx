@@ -7,6 +7,7 @@ import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { formatCurrency } from "@/lib/format";
 import { BillsCalendar } from "./BillsCalendar";
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 
 export function BillsCalendarCard() {
   const { bills } = useBillsStore();
@@ -251,8 +252,9 @@ export function BillsCalendarCard() {
       </div>
 
       {/* Full Calendar Overlay */}
-      {showCalendar && (
-        <BillsCalendar onClose={() => setShowCalendar(false)} />
+      {showCalendar && typeof document !== 'undefined' && createPortal(
+        <BillsCalendar onClose={() => setShowCalendar(false)} />,
+        document.body
       )}
     </>
   );
