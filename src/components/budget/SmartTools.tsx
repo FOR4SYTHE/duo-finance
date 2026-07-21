@@ -157,9 +157,9 @@ function EmergencyRunwayContent() {
 
                 {targetRunway > 0 && (
                     <div className="flex flex-col gap-1.5 mt-1">
-                        <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                        <div className="w-full bg-white/10 h-1.5 rounded-full relative mb-1">
                             <div 
-                                className="bg-[#30D158] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(48,209,88,0.5)]" 
+                                className="bg-white h-full rounded-full transition-all duration-500 shadow-[0_0_15px_rgba(255,255,255,0.8)]" 
                                 style={{ width: `${progressPct}%` }}
                             />
                         </div>
@@ -242,18 +242,12 @@ function GoalsContent() {
                                 </div>
                             </div>
                             
-                            <div className="w-full bg-white/5 h-2 rounded-full mt-1 relative border border-white/[0.02] mb-3">
+                            <div className="w-full bg-white/10 h-1.5 rounded-full mt-2 relative mb-4">
                                 {goal.targetAmount > 0 && (
-                                    <>
-                                        <div className="bg-[#30D158] h-full rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(48,209,88,0.4)]" style={{ width: `${progress}%` }} />
-                                        {/* Star UI Tracker */}
-                                        <div 
-                                            className="absolute top-1/2 -translate-y-1/2 -ml-2.5 transition-all duration-500 flex items-center justify-center w-5 h-5 bg-[#30D158] rounded-full shadow-[0_0_12px_rgba(48,209,88,0.8)] border border-[#111]"
-                                            style={{ left: `${progress}%` }}
-                                        >
-                                            <Icons.Sparkles className="w-3 h-3 text-[#111]" />
-                                        </div>
-                                    </>
+                                    <div 
+                                        className="bg-white h-full rounded-full transition-all duration-500 shadow-[0_0_15px_rgba(255,255,255,0.8)]" 
+                                        style={{ width: `${progress}%` }} 
+                                    />
                                 )}
                             </div>
 

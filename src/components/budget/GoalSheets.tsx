@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Edit3, Target, Calendar, HelpCircle } from "lucide-react";
 import * as Icons from "lucide-react";
@@ -137,15 +137,18 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
     const [name, setName] = useState("");
     const [icon, setIcon] = useState("Target");
     const [date, setDate] = useState("");
+    const [savedAmount, setSavedAmount] = useState(0);
     const [isAmountModalOpen, setIsAmountModalOpen] = useState(false);
 
     // Sync state when goal changes
-    // using a simple effect to seed initial data
-    if (isOpen && goal && name === "" && icon === "Target" && date === "") {
-        setName(goal.name);
-        setIcon(goal.icon);
-        setDate(goal.targetDate || "");
-    }
+    useEffect(() => {
+        if (isOpen && goal) {
+            setName(goal.name);
+            setIcon(goal.icon);
+            setDate(goal.targetDate || "");
+            setSavedAmount(goal.savedAmount);
+        }
+    }, [isOpen, goal?.id]);
 
     const handleConfirmAmount = (amount: number) => {
         if (goal) {
@@ -153,7 +156,8 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
                 name,
                 icon,
                 targetAmount: amount,
-                targetDate: date || undefined
+                targetDate: date || undefined,
+                savedAmount
             });
         }
         setIsAmountModalOpen(false);
@@ -167,7 +171,8 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
             updateGoal(goal.id, {
                 name,
                 icon,
-                targetDate: date || undefined
+                targetDate: date || undefined,
+                savedAmount
             });
         }
         onClose();
@@ -241,6 +246,20 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
                                         onChange={e => setDate(e.target.value)}
                                         className="bg-black/40 border border-white/5 outline-none text-white text-sm px-4 py-3 rounded-2xl focus:border-white/20 transition-colors"
                                     />
+                                </div>
+
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-white/50 text-xs font-semibold uppercase tracking-wider">Saved So Far</label>
+                                    <div className="flex items-center gap-3 bg-black/40 border border-white/5 rounded-2xl px-4 py-3 focus-within:border-white/20 transition-colors">
+                                        <span className="text-white/50 font-medium">₱</span>
+                                        <input 
+                                            type="number"
+                                            value={savedAmount || ''}
+                                            onChange={e => setSavedAmount(Number(e.target.value) || 0)}
+                                            placeholder="0"
+                                            className="bg-transparent border-none outline-none text-white text-sm w-full font-medium"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
