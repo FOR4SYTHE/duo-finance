@@ -27,34 +27,8 @@ import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence, Variants } from "framer-motion";
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.1
-    }
-  }
-};
-
-const itemVariants: Variants = {
-  hidden: { y: 40, opacity: 0, scale: 0.95, filter: 'blur(12px)' },
-  visible: {
-    y: 0,
-    opacity: 1,
-    scale: 1,
-    filter: 'blur(0px)',
-    transition: { 
-      type: 'spring', 
-      stiffness: 260, 
-      damping: 20,
-      mass: 0.8
-    }
-  }
-};
+import { motion, AnimatePresence } from "framer-motion";
+import { containerVariants, itemVariants } from "@/utils/animations";
 
 export default function Home() {
   const { config, setLastSeenMonth, _hasHydrated, notifications, addNotification } = useBudgetStore();

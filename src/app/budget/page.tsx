@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ChevronDown, Plus, Edit2 } from "lucide-react";
 import * as Icons from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { containerVariants, itemVariants } from "@/utils/animations";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { BudgetPeriod, BudgetCategory } from "@/types/finance";
@@ -25,6 +26,14 @@ const PERIODS: { value: BudgetPeriod; label: string }[] = [
 ];
 
 export default function BudgetPage() {
+  const [isInitialLoad, setIsInitialLoad] = useState(false);
+  useEffect(() => {
+    if (!sessionStorage.getItem('hasSeenBudgetAnimation')) {
+      setIsInitialLoad(true);
+      sessionStorage.setItem('hasSeenBudgetAnimation', 'true');
+    }
+  }, []);
+
   const { config, categories, setBudget, updateCategory, _hasHydrated, setActiveMonth } = useBudgetStore();
   const { exchangeRate } = useCurrencyStore();
   
@@ -162,10 +171,16 @@ export default function BudgetPage() {
   const activePeriodLabel = PERIODS.find(p => p.value === config.period)?.label || 'Monthly';
 
   return (
-    <div className="flex flex-col w-full pb-8 pt-12 px-6">
+    <motion.div 
+      key={isInitialLoad ? "animate" : "static"}
+      variants={containerVariants}
+      initial={isInitialLoad ? "hidden" : false}
+      animate="visible"
+      className="flex flex-col w-full pb-8 pt-12 px-6"
+    >
       
       {/* Header */}
-      <div className="flex justify-between items-center mb-6 relative z-30 shrink-0">
+      <motion.div variants={itemVariants} className="flex justify-between items-center mb-6 relative z-30 shrink-0">
         <h1 className="text-3xl text-white font-light tracking-tight">Budget</h1>
         <div className="relative">
             <button 
@@ -196,10 +211,10 @@ export default function BudgetPage() {
                 )}
             </AnimatePresence>
         </div>
-      </div>
+      </motion.div>
 
       {/* Month Selector */}
-      <div className="flex justify-between items-center mb-6 px-4">
+      <motion.div variants={itemVariants} className="flex justify-between items-center mb-6 px-4">
         <button onClick={handlePrevMonth} className="p-2 text-white/40 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-full">
             <Icons.ChevronLeft className="w-4 h-4" />
         </button>
@@ -209,12 +224,13 @@ export default function BudgetPage() {
         <button onClick={handleNextMonth} className="p-2 text-white/40 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-full">
             <Icons.ChevronRight className="w-4 h-4" />
         </button>
-      </div>
+      </motion.div>
 
       {/* Hero Card - Virtual Bank Card Style */}
-      <div 
-        onClick={() => setIsHeroModalOpen(true)}
-        className={`w-full rounded-[24px] p-6 mb-8 relative z-20 cursor-pointer overflow-hidden border ${skin.border} group shadow-2xl flex flex-col justify-between aspect-[1.58/1] transition-all duration-500`}
+      <motion.div variants={itemVariants}>
+        <div 
+          onClick={() => setIsHeroModalOpen(true)}
+          className={`w-full rounded-[24px] p-6 mb-8 relative z-20 cursor-pointer overflow-hidden border ${skin.border} group shadow-2xl flex flex-col justify-between aspect-[1.58/1] transition-all duration-500`}
         style={{
             background: skin.background,
             boxShadow: skin.boxShadow
@@ -321,11 +337,14 @@ export default function BudgetPage() {
             </div>
         </div>
       </div>
+      </motion.div>
 
-      <SmartTools />
+      <motion.div variants={itemVariants}>
+        <SmartTools />
+      </motion.div>
 
       {/* Category Bento Grid */}
-      <div className="flex flex-col relative z-20 flex-1">
+      <motion.div variants={itemVariants} className="flex flex-col relative z-20 flex-1">
         <div className="flex justify-between items-center mb-4 px-1">
           <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Target Allocations</h2>
         </div>
@@ -410,7 +429,7 @@ export default function BudgetPage() {
                 <span className="text-[11px] font-semibold uppercase tracking-widest text-white/30">Add Category</span>
             </div>
         </div>
-      </div>
+      </motion.div>
 
       <AmountInputModal 
         isOpen={isHeroModalOpen}
@@ -451,6 +470,6 @@ export default function BudgetPage() {
         isOpen={isAddCategoryOpen}
         onClose={() => setIsAddCategoryOpen(false)}
       />
-    </div>
+    </motion.div>
   );
 }

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Plus, Settings2, PiggyBank, AlertTriangle, Lock } from "lucide-react";
 import { motion } from "framer-motion";
+import { containerVariants, itemVariants } from "@/utils/animations";
+import { useEffect } from "react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
@@ -12,6 +14,14 @@ import { JarSettingsModal } from "@/components/jar/JarSettingsModal";
 import { LogAnimationOverlay } from "@/components/jar/LogAnimationOverlay";
 
 export default function SpendJarPage() {
+  const [isInitialLoad, setIsInitialLoad] = useState(false);
+  useEffect(() => {
+    if (!sessionStorage.getItem('hasSeenJarAnimation')) {
+      setIsInitialLoad(true);
+      sessionStorage.setItem('hasSeenJarAnimation', 'true');
+    }
+  }, []);
+
   const { config } = useBudgetStore();
   const { entries, addExpense, clearEntries } = useSpendStore();
   const { exchangeRate } = useCurrencyStore();
@@ -88,10 +98,16 @@ export default function SpendJarPage() {
   }).reverse();
 
   return (
-    <div className="flex flex-col w-full h-full px-6 pt-12 pb-8 overflow-y-auto no-scrollbar">
+    <motion.div 
+      key={isInitialLoad ? "animate" : "static"}
+      variants={containerVariants}
+      initial={isInitialLoad ? "hidden" : false}
+      animate="visible"
+      className="flex flex-col w-full h-full px-6 pt-12 pb-8 overflow-y-auto no-scrollbar"
+    >
       
       {/* Header */}
-      <div className="flex justify-between items-center mb-8 relative z-20 shrink-0">
+      <motion.div variants={itemVariants} className="flex justify-between items-center mb-8 relative z-20 shrink-0">
         <div className="flex items-center gap-3">
             <h1 className="text-3xl text-white font-light tracking-tight">Spend Jar</h1>
             {/* Temporary Reset Button */}
@@ -108,10 +124,10 @@ export default function SpendJarPage() {
         >
           <Settings2 className="w-5 h-5 text-white/70" />
         </button>
-      </div>
+      </motion.div>
 
       {/* Hero Jar Progress */}
-      <div className="relative z-20 w-full flex flex-col items-center justify-center py-10 mb-4 shrink-0">
+      <motion.div variants={itemVariants} className="relative z-20 w-full flex flex-col items-center justify-center py-10 mb-4 shrink-0">
         <div className="relative w-64 h-64 flex items-center justify-center">
           <svg className="absolute inset-0 w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 100 100">
             {/* Background Track */}
@@ -157,11 +173,12 @@ export default function SpendJarPage() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Smart Warning */}
       {(isNearingCap || isLocked) && (
-        <motion.div 
+        <motion.div variants={itemVariants}>
+          <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className={`w-full rounded-[24px] p-4 mb-8 flex items-start gap-3 border ${
@@ -182,11 +199,12 @@ export default function SpendJarPage() {
               }
             </span>
           </div>
+          </motion.div>
         </motion.div>
       )}
 
       {/* Action Button */}
-      <div className="relative z-20 w-full mb-8 shrink-0">
+      <motion.div variants={itemVariants} className="relative z-20 w-full mb-8 shrink-0">
         <button 
           onClick={handleMainAction}
           className={`w-full h-[68px] rounded-full font-semibold text-lg tracking-wide flex items-center justify-center gap-3 transition-all duration-300 active:scale-[0.98]
@@ -208,10 +226,10 @@ export default function SpendJarPage() {
               </>
           )}
         </button>
-      </div>
+      </motion.div>
 
       {/* Recent Entries Feed */}
-      <div className="flex flex-col gap-4 relative z-20 flex-1">
+      <motion.div variants={itemVariants} className="flex flex-col gap-4 relative z-20 flex-1">
         <div className="flex justify-between items-center mb-2 px-1">
           <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Recent Drops ({entries.length})</h2>
           <div className="flex flex-col items-end">
@@ -245,7 +263,7 @@ export default function SpendJarPage() {
             <span className="text-sm">No expenses logged yet.</span>
           </div>
         )}
-      </div>
+      </motion.div>
 
       <QuickLogModal 
         isOpen={isLogModalOpen}
@@ -270,6 +288,6 @@ export default function SpendJarPage() {
         type={animationType}
         onComplete={() => setAnimationType(null)}
       />
-    </div>
+    </motion.div>
   );
 }

@@ -2,8 +2,9 @@
 
 import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpDown, Delete, ChevronRight } from "lucide-react";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { containerVariants, itemVariants } from "@/utils/animations";
+import { ArrowUpDown, Delete, ChevronRight } from "lucide-react";
 
 export function Calculator() {
     const { 
@@ -20,7 +21,15 @@ export function Calculator() {
     } = useCurrencyStore();
 
     const [mounted, setMounted] = React.useState(false);
-    useEffect(() => setMounted(true), []);
+    const [isInitialLoad, setIsInitialLoad] = React.useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        if (!sessionStorage.getItem('hasSeenCalculatorAnimation')) {
+            setIsInitialLoad(true);
+            sessionStorage.setItem('hasSeenCalculatorAnimation', 'true');
+        }
+    }, []);
 
     const buttons = [
         { label: "AC", type: "meta" }, { label: "⌫", type: "meta" }, { label: "%", type: "meta" }, { label: "÷", type: "op" },
@@ -49,10 +58,16 @@ export function Calculator() {
     };
 
     return (
-        <div className={`w-full h-full bg-transparent text-foreground flex flex-col font-sans transition-all duration-700 relative px-6 pb-10 pt-14 sm:pt-10`}>
+        <motion.div 
+            key={isInitialLoad ? "animate" : "static"}
+            variants={containerVariants}
+            initial={isInitialLoad ? "hidden" : false}
+            animate="visible"
+            className={`w-full h-full bg-transparent text-foreground flex flex-col font-sans transition-all duration-700 relative px-6 pb-10 pt-14 sm:pt-10`}
+        >
             
             {/* Header: Minimal Apple-style */}
-            <div className="flex justify-between items-center mb-8 relative z-20">
+            <motion.div variants={itemVariants} className="flex justify-between items-center mb-8 relative z-20">
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-white/[0.08] backdrop-blur-md flex items-center justify-center border border-white/[0.05]">
                         <span className="font-semibold text-[11px] tracking-wider">DF</span>
@@ -64,10 +79,10 @@ export function Calculator() {
                         Rate {exchangeRate.toFixed(2)}
                     </span>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Display Area */}
-            <div className="flex-1 flex flex-col items-center justify-center relative min-h-[220px] z-20 w-full mb-4">
+            <motion.div variants={itemVariants} className="flex-1 flex flex-col items-center justify-center relative min-h-[220px] z-20 w-full mb-4">
                 
                 {/* Huge Primary Currency */}
                 <div className="flex flex-col items-center">
@@ -159,10 +174,10 @@ export function Calculator() {
                     </div>
                 </div>
                 
-            </div>
+            </motion.div>
 
             {/* Premium Duo-Finance Glassmorphic Numpad */}
-            <div className="grid grid-cols-4 gap-3 sm:gap-4 mb-6 z-20 max-w-[420px] mx-auto w-full">
+            <motion.div variants={itemVariants} className="grid grid-cols-4 gap-3 sm:gap-4 mb-6 z-20 max-w-[420px] mx-auto w-full">
                 {buttons.map((btn) => {
                     let btnClasses = "";
                     let textClasses = "";
@@ -202,8 +217,8 @@ export function Calculator() {
                         </motion.button>
                     )
                 })}
-            </div>
+            </motion.div>
             
-        </div>
+        </motion.div>
     );
 }
