@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { MoreHorizontal } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
@@ -206,20 +207,22 @@ export function MonthlyReportCard() {
         </div>
       </div>
 
-      {/* Month Picker Overlay */}
-      {showMonthPicker && (
+      {/* Month Picker Overlay — portaled to body to escape transform context */}
+      {showMonthPicker && typeof document !== 'undefined' && createPortal(
         <MonthPicker
           onClose={() => setShowMonthPicker(false)}
           onSelectMonth={handleMonthSelect}
-        />
+        />,
+        document.body
       )}
 
-      {/* Monthly Summary Overlay */}
-      {showSummary && (
+      {/* Monthly Summary Overlay — portaled to body to escape transform context */}
+      {showSummary && typeof document !== 'undefined' && createPortal(
         <MonthlySummary
           monthKey={summaryMonth}
           onClose={() => setShowSummary(false)}
-        />
+        />,
+        document.body
       )}
     </>
   );
