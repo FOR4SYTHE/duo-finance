@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { MonthlyReportCard } from "@/components/home/MonthlyReportCard";
 import { BillsCalendarCard } from "@/components/home/BillsCalendarCard";
-import { MonthRolloverModal } from "@/components/home/MonthRolloverModal";
+import { MonthRecap } from "@/components/home/MonthRecap";
 import { MonthlySummary } from "@/components/home/MonthlySummary";
 import { NotificationCenter } from "@/components/home/NotificationCenter";
 import { useBudgetStore } from "@/store/useBudgetStore";
@@ -71,7 +71,7 @@ export default function Home() {
   return (
     <div className="flex flex-col w-full min-h-full px-6 pt-12 pb-8">
       {showRollover && (
-        <MonthRolloverModal 
+        <MonthRecap 
           lastSeenMonthKey={lastSeen} 
           currentMonthKey={currentMonth} 
           onClose={handleRolloverClose} 
