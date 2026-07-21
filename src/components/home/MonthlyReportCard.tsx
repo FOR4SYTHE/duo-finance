@@ -187,11 +187,10 @@ export function MonthlyReportCard() {
               className="font-black tracking-[-0.04em] w-full text-center leading-[0.75] select-none translate-y-0 capitalize"
               style={{
                 fontSize: "clamp(80px, 22vw, 130px)",
-                background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)",
+                background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.3) 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
-                WebkitTextStroke: "1px rgba(255, 255, 255, 0.4)",
-                filter: "drop-shadow(0px 15px 25px rgba(0,0,0,0.6)) drop-shadow(0px 4px 10px rgba(0,0,0,0.3))",
+                textShadow: "0px 8px 24px rgba(0,0,0,0.5)", // Smooth text shadow, no glitchy stroke
               }}
             >
               {currentMonthName}

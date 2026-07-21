@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronDown, Calendar, MoreHorizontal } from "lucide-react";
 
@@ -21,39 +21,107 @@ interface MonthPickerProps {
   onSelectMonth: (monthKey: string) => void;
 }
 
+function MonthCard({
+  monthKey,
+  monthName,
+  isCurrentMonth,
+  label,
+  onSelect,
+  delay
+}: {
+  monthKey: string;
+  monthName: string;
+  isCurrentMonth: boolean;
+  label: string;
+  onSelect: () => void;
+  delay: number;
+}) {
+  const [photoData, setPhotoData] = useState<PhotoData | null>(null);
+  const [hasFetched, setHasFetched] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasFetched) {
+          setHasFetched(true);
+          fetch(`/api/monthly-photo?month=${monthKey}`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+              if (data && data.url) setPhotoData(data);
+            })
+            .catch(() => {});
+        }
+      },
+      { rootMargin: "300px" } // Fetch slightly before it enters the viewport
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [monthKey, hasFetched]);
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.4, ease: "easeOut" }}
+      onClick={onSelect}
+      className="relative w-full aspect-[16/10] min-h-[220px] rounded-[24px] overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
+    >
+      {/* Photo */}
+      {photoData ? (
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 ease-out"
+          style={{
+            backgroundImage: `url(${photoData.url})`,
+            backgroundColor: photoData.color || "#1a1a1a",
+          }}
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] to-[#0a0a0a]" />
+      )}
+
+      {/* Scrim */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/5 pointer-events-none" />
+
+      {/* Content */}
+      <div className="relative z-10 w-full h-full p-5 flex flex-col justify-between">
+        <div className="flex justify-between items-start w-full">
+          <span className="bg-white/5 backdrop-blur-xl text-white/90 text-[11px] font-medium px-3.5 py-1.5 rounded-full border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]">
+            {label}
+          </span>
+          <div className="w-9 h-9 rounded-full bg-white/5 backdrop-blur-xl flex items-center justify-center border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]">
+            <MoreHorizontal className="w-4 h-4 text-white/90" />
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center w-full mt-auto relative -mb-5">
+          <h3 
+            className="font-black tracking-[-0.04em] w-full text-center leading-[0.75] select-none translate-y-0 capitalize"
+            style={{
+              fontSize: "clamp(60px, 18vw, 100px)",
+              background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.3) 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              textShadow: "0px 8px 24px rgba(0,0,0,0.5)", // Smooth text shadow, no glitchy stroke
+            }}
+          >
+            {monthName}
+          </h3>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export function MonthPicker({ onClose, onSelectMonth }: MonthPickerProps) {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [showYearPicker, setShowYearPicker] = useState(false);
-  const [photos, setPhotos] = useState<Record<string, PhotoData>>({});
-
-  // Fetch photos for all 12 months of the selected year
-  const fetchPhotos = useCallback(async (year: number) => {
-    const promises = MONTH_NAMES.map(async (_, idx) => {
-      const monthKey = `${year}-${String(idx + 1).padStart(2, "0")}`;
-      try {
-        const res = await fetch(`/api/monthly-photo?month=${monthKey}`);
-        if (!res.ok) return null;
-        const data = await res.json();
-        return { monthKey, data };
-      } catch {
-        return null;
-      }
-    });
-
-    const results = await Promise.allSettled(promises);
-    const newPhotos: Record<string, PhotoData> = {};
-    results.forEach((r) => {
-      if (r.status === "fulfilled" && r.value && r.value.data.url) {
-        newPhotos[r.value.monthKey] = r.value.data;
-      }
-    });
-    setPhotos((prev) => ({ ...prev, ...newPhotos }));
-  }, []);
-
-  useEffect(() => {
-    fetchPhotos(selectedYear);
-  }, [selectedYear, fetchPhotos]);
 
   // Only show months up to current month for current year
   const now = new Date();
@@ -135,64 +203,19 @@ export function MonthPicker({ onClose, onSelectMonth }: MonthPickerProps) {
               {monthsToShow.map((monthName, i) => {
                 const realMonthIdx = MONTH_NAMES.indexOf(monthName);
                 const monthKey = `${selectedYear}-${String(realMonthIdx + 1).padStart(2, "0")}`;
-                const photoData = photos[monthKey];
+                const isCurrentMonth = realMonthIdx === now.getMonth() && selectedYear === currentYear;
+                const label = isCurrentMonth ? "Current month" : `${monthName} ${selectedYear}`;
 
                 return (
-                    <motion.div
-                      key={monthKey}
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.06, duration: 0.4, ease: "easeOut" }}
-                      onClick={() => onSelectMonth(monthKey)}
-                      className="relative w-full aspect-[16/10] min-h-[220px] rounded-[24px] overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
-                    >
-                    {/* Photo */}
-                    {photoData ? (
-                      <div
-                        className="absolute inset-0 bg-cover bg-center"
-                        style={{
-                          backgroundImage: `url(${photoData.url})`,
-                          backgroundColor: photoData.color || "#1a1a1a",
-                        }}
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] to-[#0a0a0a]" />
-                    )}
-
-                    {/* Scrim */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/5 pointer-events-none" />
-
-                    {/* Content */}
-                    <div className="relative z-10 w-full h-full p-5 flex flex-col justify-between">
-                      <div className="flex justify-between items-start w-full">
-                        <span className="bg-white/5 backdrop-blur-xl text-white/90 text-[11px] font-medium px-3.5 py-1.5 rounded-full border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]">
-                          {realMonthIdx === now.getMonth() &&
-                          selectedYear === currentYear
-                            ? "Current month"
-                            : `${monthName} ${selectedYear}`}
-                        </span>
-                        <div className="w-9 h-9 rounded-full bg-white/5 backdrop-blur-xl flex items-center justify-center border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]">
-                          <MoreHorizontal className="w-4 h-4 text-white/90" />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col items-center w-full mt-auto relative -mb-5">
-                        <h3 
-                          className="font-black tracking-[-0.04em] w-full text-center leading-[0.75] select-none translate-y-0 capitalize"
-                          style={{
-                            fontSize: "clamp(60px, 18vw, 100px)",
-                            background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                            WebkitTextStroke: "1px rgba(255, 255, 255, 0.4)",
-                            filter: "drop-shadow(0px 15px 25px rgba(0,0,0,0.6)) drop-shadow(0px 4px 10px rgba(0,0,0,0.3))",
-                          }}
-                        >
-                          {monthName}
-                        </h3>
-                      </div>
-                    </div>
-                  </motion.div>
+                  <MonthCard
+                    key={monthKey}
+                    monthKey={monthKey}
+                    monthName={monthName}
+                    isCurrentMonth={isCurrentMonth}
+                    label={label}
+                    onSelect={() => onSelectMonth(monthKey)}
+                    delay={i * 0.06}
+                  />
                 );
               })}
             </div>
