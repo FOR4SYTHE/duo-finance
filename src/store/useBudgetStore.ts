@@ -16,6 +16,7 @@ interface BudgetState {
     categories: BudgetCategory[];
     goals: Goal[];
     notifications: AppNotification[];
+    setBudget: (targetAmount: number, period: BudgetPeriod) => void;
     
     // Config Operations
     setJarPercentage: (pct: number) => void;
