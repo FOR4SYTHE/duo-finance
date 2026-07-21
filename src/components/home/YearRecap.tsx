@@ -72,18 +72,17 @@ function SlideCover({ year }: { year: number }) {
         transition={{ duration: 1 }}
         className="relative z-10 text-center"
       >
-        <div className="flex justify-center items-center gap-3 mb-8">
-          <PremiumSparkle className="w-12 h-12 text-[#D4AF37] animate-pulse" />
+        <div className="flex justify-center items-center mb-8">
           <span className="text-4xl drop-shadow-[0_0_12px_rgba(212,175,55,0.8)]" role="img" aria-label="sparkles">✨</span>
         </div>
         <h1 
-          className="font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-[#FFF4D0] to-[#D4AF37] leading-[0.9]"
+          className="font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-[#FFF4D0] to-[#D4AF37] leading-[0.9] pb-[0.3em] -mb-[0.3em]"
           style={{ fontSize: "clamp(64px, 18vw, 120px)" }}
         >
           {year} <br />
           <span className="text-white/60">Wrapped.</span>
         </h1>
-        <p className="text-[#D4AF37]/60 mt-6 font-medium tracking-[0.2em] uppercase text-sm">
+        <p className="text-[#D4AF37]/60 mt-12 font-medium tracking-[0.2em] uppercase text-sm">
           A year of duo finance
         </p>
       </motion.div>
