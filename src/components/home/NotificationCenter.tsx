@@ -12,7 +12,7 @@ interface NotificationCenterProps {
 }
 
 export function NotificationCenter({ isOpen, onClose, onActionClick }: NotificationCenterProps) {
-  const { notifications, markNotificationRead, markAllNotificationsRead, removeNotification } = useBudgetStore();
+  const { notifications, markNotificationRead, markAllNotificationsRead, removeNotification, clearAllNotifications } = useBudgetStore();
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -71,7 +71,14 @@ export function NotificationCenter({ isOpen, onClose, onActionClick }: Notificat
                 </div>
               ) : (
                 <>
-                  <div className="flex justify-end mb-2">
+                  <div className="flex justify-between items-center mb-2 px-1">
+                    <button 
+                      onClick={() => clearAllNotifications()}
+                      className="text-xs text-[#FF453A]/70 hover:text-[#FF453A] transition-colors font-medium flex items-center gap-1.5"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Clear all
+                    </button>
                     <button 
                       onClick={() => markAllNotificationsRead()}
                       className="text-xs text-white/40 hover:text-white transition-colors font-medium flex items-center gap-1.5"

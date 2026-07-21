@@ -46,6 +46,7 @@ interface BudgetState {
     markNotificationRead: (id: string) => void;
     markAllNotificationsRead: () => void;
     removeNotification: (id: string) => void;
+    clearAllNotifications: () => void;
 
     _hasHydrated: boolean;
     setHasHydrated: (state: boolean) => void;
@@ -236,7 +237,9 @@ export const useBudgetStore = create<BudgetState>()(
             removeNotification: (id) =>
                 set((state) => ({
                     notifications: state.notifications.filter(n => n.id !== id)
-                }))
+                })),
+            clearAllNotifications: () =>
+                set({ notifications: [] })
         }),
         {
             name: 'duo-budget-storage',

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Trophy, Sparkles, Star, Crown, Activity } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { formatCurrency } from "@/lib/format";
@@ -12,6 +11,32 @@ interface YearRecapProps {
   year: number;
   onClose: () => void;
 }
+
+// Custom Premium Geometric SVGs
+const PremiumSparkle = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 100 100" fill="none" className={className}>
+    <path d="M50 0 C50 35 65 50 100 50 C65 50 50 65 50 100 C50 65 35 50 0 50 C35 50 50 35 50 0Z" fill="currentColor" />
+  </svg>
+);
+
+const PremiumStarBurst = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 100 100" fill="none" className={className}>
+    <path d="M50 0 L55 35 L90 20 L65 45 L100 50 L65 55 L90 80 L55 65 L50 100 L45 65 L10 80 L35 55 L0 50 L35 45 L10 20 L45 35 Z" fill="currentColor" opacity="0.8" />
+  </svg>
+);
+
+const PremiumDiamond = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 100 100" fill="none" className={className}>
+    <path d="M50 10 L90 50 L50 90 L10 50 Z" stroke="currentColor" strokeWidth="4" />
+    <path d="M50 25 L75 50 L50 75 L25 50 Z" fill="currentColor" />
+  </svg>
+);
+
+const PremiumArrow = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+    <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -47,7 +72,10 @@ function SlideCover({ year }: { year: number }) {
         transition={{ duration: 1 }}
         className="relative z-10 text-center"
       >
-        <Sparkles className="w-12 h-12 text-[#D4AF37] mx-auto mb-8 animate-pulse" />
+        <div className="flex justify-center items-center gap-3 mb-8">
+          <PremiumSparkle className="w-12 h-12 text-[#D4AF37] animate-pulse" />
+          <span className="text-4xl drop-shadow-[0_0_12px_rgba(212,175,55,0.8)]" role="img" aria-label="sparkles">✨</span>
+        </div>
         <h1 
           className="font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-[#FFF4D0] to-[#D4AF37] leading-[0.9]"
           style={{ fontSize: "clamp(64px, 18vw, 120px)" }}
@@ -67,8 +95,8 @@ function SlideCover({ year }: { year: number }) {
 function SlideTotals({ totalEntries, totalSpent, config }: any) {
   return (
     <div className="w-full h-full bg-[#1a1a1a] flex flex-col px-6 pt-16 pb-12 relative overflow-hidden">
-      <div className="absolute -right-20 -top-20 opacity-5">
-        <Star className="w-96 h-96 text-[#D4AF37]" />
+      <div className="absolute -right-32 -top-32 opacity-10 blur-sm">
+        <PremiumStarBurst className="w-[500px] h-[500px] text-[#D4AF37]" />
       </div>
       <div className="flex-1 flex flex-col justify-center gap-6 max-w-sm mx-auto w-full relative z-10">
         
@@ -84,8 +112,8 @@ function SlideTotals({ totalEntries, totalSpent, config }: any) {
             You were incredibly consistent this year.
           </h2>
           <div className="flex items-center gap-4 border-t border-[#D4AF37]/10 pt-6">
-            <div className="w-12 h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/30">
-              <Trophy className="w-6 h-6 text-[#D4AF37]" />
+            <div className="w-12 h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/30 shadow-[inset_0_1px_1px_rgba(212,175,55,0.2)]">
+              <span className="text-2xl drop-shadow-md" role="img" aria-label="trophy">🏆</span>
             </div>
             <div>
               <div className="text-3xl font-bold text-white tracking-tight">{totalEntries}</div>
@@ -127,8 +155,9 @@ function SlideHit({ topCategory, topAmount }: any) {
         whileInView={{ opacity: 1, x: 0 }}
         className="relative z-10"
       >
-        <div className="w-16 h-16 rounded-[20px] bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/20 mb-8">
-          <Crown className="w-8 h-8 text-[#D4AF37]" />
+        <div className="w-20 h-20 bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/30 mb-8 rounded-full overflow-hidden relative shadow-[0_0_30px_rgba(212,175,55,0.1)]">
+           <PremiumStarBurst className="w-24 h-24 text-[#D4AF37] absolute -right-4 -bottom-4 opacity-30" />
+           <span className="text-4xl relative z-10 drop-shadow-lg" role="img" aria-label="crown">👑</span>
         </div>
         <span className="text-[#D4AF37] text-sm font-bold tracking-[0.2em] uppercase mb-4 block">
           The Heavyweight Champion
@@ -156,7 +185,7 @@ function SlideBusiest({ busiestMonthName, busiestMonthEntries }: any) {
   return (
     <div className="w-full h-full bg-[#111] flex flex-col justify-center px-8 relative overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center opacity-[0.03]">
-        <Activity className="w-full h-full text-white" />
+        <PremiumStarBurst className="w-full h-full text-white scale-[1.5]" />
       </div>
       
       <motion.div
@@ -174,7 +203,8 @@ function SlideBusiest({ busiestMonthName, busiestMonthEntries }: any) {
           was your busiest month.
         </p>
         
-        <div className="w-32 h-32 mx-auto rounded-full bg-black/50 border border-white/10 flex flex-col items-center justify-center shadow-[inset_0_4px_20px_rgba(255,255,255,0.05)]">
+        <div className="w-32 h-32 mx-auto rounded-full bg-black/50 border border-white/10 flex flex-col items-center justify-center shadow-[inset_0_4px_20px_rgba(255,255,255,0.05)] relative">
+          <span className="absolute -top-3 -right-3 text-3xl rotate-12 drop-shadow-[0_0_12px_rgba(255,255,255,0.2)]" role="img" aria-label="chart">📈</span>
           <span className="text-4xl font-black text-[#D4AF37]">{busiestMonthEntries}</span>
           <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">Entries</span>
         </div>
@@ -205,8 +235,9 @@ function SlideOutro({ onClose, nextYear }: any) {
         whileInView={{ opacity: 1, y: 0 }}
         className="text-center w-full max-w-sm relative z-10"
       >
-        <div className="w-24 h-24 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#D4AF37] to-[#AA8529] rounded-full mx-auto mb-10 shadow-[0_0_60px_rgba(212,175,55,0.4)] flex items-center justify-center">
-          <Sparkles className="w-10 h-10 text-black" />
+        <div className="w-32 h-32 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#D4AF37] to-[#AA8529] rounded-[40px] mx-auto mb-10 shadow-[0_0_60px_rgba(212,175,55,0.4)] flex items-center justify-center transform rotate-12 relative overflow-hidden">
+          <PremiumSparkle className="w-24 h-24 text-black/10 absolute -rotate-12" />
+          <span className="text-5xl -rotate-12 drop-shadow-md relative z-10" role="img" aria-label="cheers">🥂</span>
         </div>
         <h2 className="text-4xl font-medium text-white tracking-tight mb-6">
           Cheers to a <br/> richer {nextYear}.
@@ -220,7 +251,7 @@ function SlideOutro({ onClose, nextYear }: any) {
           className="w-full flex items-center justify-center gap-3 px-6 py-5 bg-gradient-to-r from-[#D4AF37] to-[#AA8529] text-black rounded-[24px] font-bold text-[17px] hover:brightness-110 transition-all active:scale-[0.98] shadow-[0_8px_32px_rgba(212,175,55,0.2)]"
         >
           Start Dashboard
-          <ArrowRight className="w-5 h-5" />
+          <PremiumArrow className="w-5 h-5" />
         </button>
       </motion.div>
     </div>

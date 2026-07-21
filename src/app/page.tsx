@@ -15,6 +15,7 @@ import { BillsCalendarCard } from "@/components/home/BillsCalendarCard";
 import { MonthRecap } from "@/components/home/MonthRecap";
 import { YearRecap } from "@/components/home/YearRecap";
 import { MonthlySummary } from "@/components/home/MonthlySummary";
+import { YearlySummary } from "@/components/home/YearlySummary";
 import { NotificationCenter } from "@/components/home/NotificationCenter";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useEffect, useState, useMemo } from "react";
@@ -24,6 +25,7 @@ export default function Home() {
   const [showRollover, setShowRollover] = useState(false);
   const [showYearRollover, setShowYearRollover] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [showYearSummaryModal, setShowYearSummaryModal] = useState(false);
   const [showNotifCenter, setShowNotifCenter] = useState(false);
   
   const [lastSeen, setLastSeen] = useState("");
@@ -57,21 +59,33 @@ export default function Home() {
   }, [config.lastSeenMonth, _hasHydrated]);
 
   const handleRolloverClose = () => {
+    if (showYearRollover) {
+      addNotification({
+        title: 'Year in Review',
+        message: `Your ${recapYear} yearly summary report is ready. See how you performed over the last 12 months.`,
+        type: 'report',
+        read: false,
+        action: {
+          label: 'View Report',
+          payload: { actionType: 'view_year_report', year: recapYear }
+        }
+      });
+    } else {
+      addNotification({
+        title: 'Month in Review',
+        message: 'Your monthly summary report is ready to view. See how you performed against your budget.',
+        type: 'report',
+        read: false,
+        action: {
+          label: 'View Report',
+          payload: { actionType: 'view_report', monthKey: lastSeen }
+        }
+      });
+    }
+
     setShowRollover(false);
     setShowYearRollover(false);
     setLastSeenMonth(currentMonth);
-
-    // Give them a notification so they can easily find the report later!
-    addNotification({
-      title: 'Month in Review',
-      message: 'Your monthly summary report is ready to view. See how you performed against your budget.',
-      type: 'report',
-      read: false,
-      action: {
-        label: 'View Report',
-        payload: { actionType: 'view_report', monthKey: lastSeen }
-      }
-    });
   };
 
   const handleNotificationAction = (action: any) => {
@@ -79,6 +93,10 @@ export default function Home() {
       setShowNotifCenter(false);
       setLastSeen(action.payload.monthKey);
       setShowSummaryModal(true);
+    } else if (action?.payload?.actionType === 'view_year_report') {
+      setShowNotifCenter(false);
+      setRecapYear(action.payload.year);
+      setShowYearSummaryModal(true);
     }
   };
 
@@ -103,6 +121,13 @@ export default function Home() {
         <MonthlySummary 
           monthKey={lastSeen} 
           onClose={() => setShowSummaryModal(false)} 
+        />
+      )}
+
+      {showYearSummaryModal && (
+        <YearlySummary 
+          year={recapYear} 
+          onClose={() => setShowYearSummaryModal(false)} 
         />
       )}
 
