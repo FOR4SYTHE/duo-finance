@@ -12,6 +12,7 @@ interface Deal {
   expires: string;
   category: string;
   hot: boolean;
+  url: string;
 }
 
 interface CashbackDealsRadarProps {
@@ -166,26 +167,37 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                       </span>
                     </div>
                     
-                    <button
-                      onClick={() => handleCopy(deal.id, deal.code)}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-all overflow-hidden relative ${
-                        copiedId === deal.id 
-                          ? "bg-[#34C759]/20 text-[#34C759] border border-[#34C759]/30" 
-                          : "bg-white/10 text-white hover:bg-white/15 border border-white/10"
-                      }`}
-                    >
-                      {copiedId === deal.id ? (
-                        <>
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Copied</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>{deal.code}</span>
-                        </>
-                      )}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleCopy(deal.id, deal.code)}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-all overflow-hidden relative ${
+                          copiedId === deal.id 
+                            ? "bg-[#34C759]/20 text-[#34C759] border border-[#34C759]/30" 
+                            : "bg-white/10 text-white hover:bg-white/15 border border-white/10"
+                        }`}
+                      >
+                        {copiedId === deal.id ? (
+                          <>
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>{deal.code}</span>
+                          </>
+                        )}
+                      </button>
+                      
+                      <a
+                        href={deal.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-all overflow-hidden relative bg-white text-black hover:bg-white/90 shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                      >
+                        Claim
+                      </a>
+                    </div>
                   </div>
                 </motion.div>
               ))}

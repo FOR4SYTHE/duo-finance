@@ -13,73 +13,84 @@ export function AnimatedPiggyBank() {
     let mounted = true;
     
     const runAnimations = async () => {
-      // Add a small initial delay to ensure Framer Motion components are fully mounted in the DOM
-      // before attempting to call controls.start(), which prevents the runtime error.
-      await new Promise(r => setTimeout(r, 100));
+      // Wait for Framer Motion components to fully mount before calling controls.start()
+      await new Promise(r => setTimeout(r, 250));
 
       while (mounted) {
-        // --- Standby: Look left and right ---
         try {
+          // --- Standby: Look left and right ---
           await Promise.all([
             leftPupilControls.start({ x: -5, transition: { duration: 0.5, ease: "easeInOut" } }),
             rightPupilControls.start({ x: -5, transition: { duration: 0.5, ease: "easeInOut" } })
           ]);
-        } catch (e) {
-          // Ignore if unmounted during animation
+          if (!mounted) break;
+          await new Promise(r => setTimeout(r, 2000));
+          
+          if (!mounted) break;
+          await Promise.all([
+            leftPupilControls.start({ x: 0, transition: { duration: 0.4, ease: "easeInOut" } }),
+            rightPupilControls.start({ x: 0, transition: { duration: 0.4, ease: "easeInOut" } })
+          ]);
+          if (!mounted) break;
+          await new Promise(r => setTimeout(r, 1000));
+          
+          if (!mounted) break;
+          await Promise.all([
+            leftPupilControls.start({ x: 5, transition: { duration: 0.5, ease: "easeInOut" } }),
+            rightPupilControls.start({ x: 5, transition: { duration: 0.5, ease: "easeInOut" } })
+          ]);
+          if (!mounted) break;
+          await new Promise(r => setTimeout(r, 3000));
+
+          if (!mounted) break;
+          await Promise.all([
+            leftPupilControls.start({ x: 0, transition: { duration: 0.4, ease: "easeInOut" } }),
+            rightPupilControls.start({ x: 0, transition: { duration: 0.4, ease: "easeInOut" } })
+          ]);
+          if (!mounted) break;
+          await new Promise(r => setTimeout(r, 2500));
+
+          // --- Sneeze Animation (Explosion of coins) ---
+          if (!mounted) break;
+          await pigControls.start({ scaleY: 0.85, scaleX: 1.08, y: 15, transition: { duration: 0.8, ease: "easeInOut" } });
+          if (!mounted) break;
+          await new Promise(r => setTimeout(r, 200));
+
+          // Sneeze launch
+          if (!mounted) break;
+          pigControls.start({ scaleY: 1.1, scaleX: 0.95, y: -10, transition: { duration: 0.15, ease: "easeOut" } });
+          
+          // Spawn a massive fountain of coins
+          if (mounted) {
+            const newCoins = Array.from({ length: 20 }).map((_, i) => {
+              const angle = (Math.random() - 0.5) * Math.PI * 1.2;
+              const power = 150 + Math.random() * 200;
+              return {
+                id: Date.now() + i,
+                tx: Math.sin(angle) * power,
+                ty: -Math.cos(angle) * power,
+                delay: Math.random() * 0.15
+              };
+            });
+            setCoins(prev => [...prev, ...newCoins]);
+          }
+          
+          // Recover
+          await new Promise(r => setTimeout(r, 150));
+          if (!mounted) break;
+          await pigControls.start({ scaleY: 1, scaleX: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 15 } });
+          
+          // Clean up coins after they fall
+          setTimeout(() => {
+            if (mounted) setCoins([]);
+          }, 3000);
+
+          await new Promise(r => setTimeout(r, 6000));
+        } catch {
+          // Silently swallow errors from controls.start() on unmounted components
+          if (!mounted) break;
+          await new Promise(r => setTimeout(r, 500));
         }
-        await new Promise(r => setTimeout(r, 2000));
-        
-        await Promise.all([
-          leftPupilControls.start({ x: 0, transition: { duration: 0.4, ease: "easeInOut" } }),
-          rightPupilControls.start({ x: 0, transition: { duration: 0.4, ease: "easeInOut" } })
-        ]);
-        await new Promise(r => setTimeout(r, 1000));
-        
-        await Promise.all([
-          leftPupilControls.start({ x: 5, transition: { duration: 0.5, ease: "easeInOut" } }),
-          rightPupilControls.start({ x: 5, transition: { duration: 0.5, ease: "easeInOut" } })
-        ]);
-        await new Promise(r => setTimeout(r, 3000));
-
-        await Promise.all([
-          leftPupilControls.start({ x: 0, transition: { duration: 0.4, ease: "easeInOut" } }),
-          rightPupilControls.start({ x: 0, transition: { duration: 0.4, ease: "easeInOut" } })
-        ]);
-        await new Promise(r => setTimeout(r, 2500));
-
-        // --- Sneeze Animation (Explosion of coins) ---
-        // Anticipation squish
-        await pigControls.start({ scaleY: 0.85, scaleX: 1.08, y: 15, transition: { duration: 0.8, ease: "easeInOut" } });
-        await new Promise(r => setTimeout(r, 200));
-
-        // Sneeze launch
-        pigControls.start({ scaleY: 1.1, scaleX: 0.95, y: -10, transition: { duration: 0.15, ease: "easeOut" } });
-        
-        // Spawn a massive fountain of coins
-        if (mounted) {
-          const newCoins = Array.from({ length: 20 }).map((_, i) => {
-            const angle = (Math.random() - 0.5) * Math.PI * 1.2; // Wider spread angle
-            const power = 150 + Math.random() * 200; // Much higher power to reach the top of the card
-            return {
-              id: Date.now() + i,
-              tx: Math.sin(angle) * power,
-              ty: -Math.cos(angle) * power,
-              delay: Math.random() * 0.15
-            };
-          });
-          setCoins(prev => [...prev, ...newCoins]);
-        }
-        
-        // Recover
-        await new Promise(r => setTimeout(r, 150));
-        await pigControls.start({ scaleY: 1, scaleX: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 15 } });
-        
-        // Clean up coins after they fall
-        setTimeout(() => {
-          if (mounted) setCoins([]);
-        }, 3000);
-
-        await new Promise(r => setTimeout(r, 6000));
       }
     };
 
