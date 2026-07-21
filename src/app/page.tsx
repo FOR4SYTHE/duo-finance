@@ -22,6 +22,8 @@ import { NotificationCenter } from "@/components/home/NotificationCenter";
 import { AnimatedPiggyBank } from "@/components/home/AnimatedPiggyBank";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useEffect, useState, useMemo } from "react";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   const { config, setLastSeenMonth, _hasHydrated, notifications, addNotification } = useBudgetStore();
@@ -34,8 +36,16 @@ export default function Home() {
   const [lastSeen, setLastSeen] = useState("");
   const [currentMonth, setCurrentMonth] = useState("");
   const [recapYear, setRecapYear] = useState(new Date().getFullYear());
+  const [showInsuranceFamily, setShowInsuranceFamily] = useState(false);
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowInsuranceFamily(prev => !prev);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (_hasHydrated && config.lastSeenMonth) {
@@ -279,31 +289,53 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Insurance Tracker (Modeled after DJI Drone card) */}
-          <div className="aspect-square bg-[#1A1A1A] border border-white/5 rounded-[36px] p-5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)]">
-            <div className="flex justify-between items-start w-full">
-              <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-white/30">
-                <Shield className="w-4 h-4" />
-              </div>
-              <div className="flex gap-1 pr-1 pt-1">
-                <div className="w-1 h-1 rounded-full bg-white/30" />
-                <div className="w-1 h-1 rounded-full bg-white/30" />
-                <div className="w-1 h-1 rounded-full bg-white/30" />
-              </div>
-            </div>
-
-            <div className="mt-auto flex flex-col items-end w-full mb-3 pr-1">
-              <span className="text-white/80 text-[13px] font-semibold tracking-tight">Insurance</span>
-              <span className="text-white/40 text-[10px] font-medium tracking-wide">Car & Health</span>
-            </div>
-
-            <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden relative mb-2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
-              <div className="absolute top-0 left-0 bottom-0 w-[80%] bg-[#B5F145] rounded-full shadow-[0_0_12px_#B5F145]" />
+          {/* Insurance Tracker (Family Line Art Animation) */}
+          <div className="aspect-square bg-[#E8E8E8] border border-black/5 rounded-[36px] relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_2px_10px_rgba(255,255,255,0.8),0_12px_24px_rgba(0,0,0,0.15)]">
+            {/* The Line Art Background */}
+            <div className="absolute inset-0 w-full h-full opacity-80 mix-blend-multiply">
+              <AnimatePresence mode="wait">
+                {showInsuranceFamily ? (
+                  <motion.div
+                    key="family"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                    className="absolute inset-0"
+                  >
+                    <Image 
+                      src="/insurance-family-waving.png" 
+                      alt="Family Waving Art" 
+                      fill 
+                      className="object-cover object-bottom" 
+                      sizes="(max-width: 768px) 50vw, 33vw"
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="bg"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                    className="absolute inset-0"
+                  >
+                    <Image 
+                      src="/insurance-bg-only.png" 
+                      alt="House Background Art" 
+                      fill 
+                      className="object-cover object-bottom" 
+                      sizes="(max-width: 768px) 50vw, 33vw"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             
-            <div className="w-full flex justify-center items-center gap-1.5">
-              <span className="text-[#B5F145] text-xs font-black">⚡</span>
-              <span className="text-white/50 text-[10px] font-bold tracking-widest uppercase">Active</span>
+            {/* The Text Foreground - moved to top left, away from art */}
+            <div className="flex flex-col items-start relative z-10 p-2 mt-4 ml-4">
+              <span className="text-black/50 text-[10px] font-bold tracking-widest uppercase mb-0.5">Car & Health</span>
+              <span className="text-black text-2xl font-black tracking-tight leading-none">Insurance</span>
             </div>
           </div>
 
