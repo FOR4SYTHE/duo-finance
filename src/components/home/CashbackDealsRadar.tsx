@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Copy, Check, Radar, Clock, Flame } from "lucide-react";
+import { X, Copy, Check, Radar, Clock, Flame, Navigation } from "lucide-react";
 
 interface Deal {
   id: string;
@@ -21,26 +21,27 @@ interface CashbackDealsRadarProps {
 
 export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
   const [deals, setDeals] = useState<Deal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [scanStatus, setScanStatus] = useState<"idle" | "scanning" | "results">("idle");
+  const [location, setLocation] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const filters = ["All", "Foodpanda", "Grab", "Shopee", "Lazada", "Klook", "Agoda", "Cheapflights"];
+  const locationShortcuts = ["Metro Manila", "Cebu", "Palawan", "Online Only"];
 
-  useEffect(() => {
-    async function fetchDeals() {
-      try {
-        const res = await fetch("/api/deals");
-        const data = await res.json();
-        setDeals(data.deals || []);
-      } catch (error) {
-        console.error("Failed to fetch deals", error);
-      } finally {
-        setLoading(false);
-      }
+  const startScan = async () => {
+    setScanStatus("scanning");
+    try {
+      const queryParam = location.trim() ? `?location=${encodeURIComponent(location.trim())}` : "";
+      const res = await fetch(`/api/deals${queryParam}`);
+      const data = await res.json();
+      setDeals(data.deals || []);
+    } catch (error) {
+      console.error("Failed to fetch deals", error);
+    } finally {
+      setScanStatus("results");
     }
-    fetchDeals();
-  }, []);
+  };
 
   const filteredDeals = activeFilter === "All" 
     ? deals 
@@ -76,11 +77,13 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
       {/* Scanning Radar Background Effect */}
       <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[50%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0A84FF]/20 via-[#0A0A0C]/0 to-transparent pointer-events-none opacity-50"></div>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div 
-          animate={{ y: ["0%", "100%", "0%"] }} 
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-          className="w-full h-1 bg-gradient-to-r from-transparent via-[#0A84FF]/30 to-transparent blur-sm"
-        />
+        {scanStatus === "scanning" && (
+            <motion.div 
+              animate={{ y: ["0%", "100%", "0%"] }} 
+              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+              className="w-full h-1 bg-gradient-to-r from-transparent via-[#0A84FF]/30 to-transparent blur-sm"
+            />
+        )}
       </div>
 
       {/* Header */}
@@ -92,8 +95,10 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
           <div className="flex flex-col">
             <h2 className="text-white text-xl font-medium tracking-tight">Deals Radar</h2>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#34C759] animate-pulse"></span>
-              <span className="text-white/50 text-[11px] font-bold tracking-widest uppercase">Live Scanning</span>
+              <span className={`w-2 h-2 rounded-full ${scanStatus === 'scanning' ? 'bg-[#34C759] animate-pulse' : scanStatus === 'idle' ? 'bg-[#0A84FF]' : 'bg-white/50'}`}></span>
+              <span className="text-white/50 text-[11px] font-bold tracking-widest uppercase">
+                  {scanStatus === 'scanning' ? 'Live Scanning' : scanStatus === 'idle' ? 'Ready' : 'Scan Complete'}
+              </span>
             </div>
           </div>
         </div>
@@ -105,137 +110,254 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="px-6 py-2 pb-4 overflow-x-auto no-scrollbar flex items-center gap-2 relative z-10 shrink-0">
-        {filters.map((filter) => (
-          <button
-            key={filter}
-            onClick={() => setActiveFilter(filter)}
-            className={`px-4 py-2 rounded-full text-xs font-bold tracking-wide whitespace-nowrap transition-all border ${
-              activeFilter === filter
-                ? "bg-white text-black border-white shadow-[0_0_10px_rgba(255,255,255,0.3)]"
-                : "bg-white/5 text-white/60 border-white/5 hover:bg-white/10"
-            }`}
-          >
-            {filter}
-          </button>
-        ))}
-      </div>
+      {scanStatus === "idle" && (
+          <div className="flex-1 flex flex-col justify-center px-6 pb-32 relative z-10">
+              {/* Rotating Topological Grid Background (Hardware Accelerated) */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10 opacity-20 mix-blend-screen transform-gpu">
+                  <motion.div 
+                      animate={{ rotate: 360 }} 
+                      transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
+                      className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 will-change-transform"
+                      style={{
+                          backgroundImage: `
+                              linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
+                          `,
+                          backgroundSize: '40px 40px',
+                          maskImage: 'radial-gradient(circle at center, black 0%, transparent 60%)',
+                          WebkitMaskImage: 'radial-gradient(circle at center, black 0%, transparent 60%)'
+                      }}
+                  />
+              </div>
 
-      {/* Deals Feed */}
-      <div className="flex-1 overflow-y-auto px-6 pb-32 relative z-10 no-scrollbar">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center h-40 gap-6 opacity-70 mt-10">
-            {/* Custom State Variant 3 Animation (Matte & Precise) */}
-            <div className="w-[64px] h-[64px] rounded-full overflow-hidden flex flex-col justify-center items-center gap-[2px] relative bg-black/40 border border-white/5">
-                {Array.from({ length: 11 }).map((_, i) => {
-                    const hasBlock = [1, 3, 4, 6, 8, 9].includes(i);
-                    const delay = (i * 0.25) % 1.5;
-                    const duration = 1.4 + (i % 3) * 0.4;
-                    const width = 15 + (i % 3) * 10; 
-                    
-                    return (
-                        <div key={i} className="w-full h-[3px] bg-white/[0.08] relative shrink-0">
-                            {hasBlock && (
-                                <motion.div
-                                    className="absolute top-0 bottom-0 bg-[#D1D1D6] rounded-[1px]"
-                                    style={{ width: `${width}%` }}
-                                    initial={{ left: "-50%" }}
-                                    animate={{ left: "100%" }}
-                                    transition={{
-                                        duration,
-                                        repeat: Infinity,
-                                        ease: "linear",
-                                        delay
-                                    }}
+              <motion.div 
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                  className="flex flex-col gap-10 w-full max-w-sm mx-auto relative"
+              >
+                  <div className="text-center flex flex-col items-center">
+                      <div className="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                          <Navigation className="w-8 h-8 text-white/80 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]" />
+                      </div>
+                      <h3 className="text-white text-[28px] font-medium tracking-tight mb-2">Target Location</h3>
+                      <p className="text-white/40 text-[15px] font-light">Where are we hunting for deals?</p>
+                  </div>
+                  
+                  <div className="flex flex-col gap-5">
+                      <div className="relative group">
+                          {/* Inner glow effect on focus/hover */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                          <input 
+                              type="text" 
+                              value={location}
+                              onChange={(e) => setLocation(e.target.value)}
+                              placeholder="e.g. Metro Manila, Cebu..."
+                              className="relative w-full bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl px-6 py-5 text-white text-[19px] font-medium placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_10px_20px_rgba(0,0,0,0.3)] z-10"
+                          />
+                      </div>
+                      
+                      <div className="flex flex-wrap justify-center gap-2.5">
+                          {locationShortcuts.map(loc => (
+                              <button
+                                  key={loc}
+                                  onClick={() => setLocation(loc)}
+                                  className={`px-4 py-2.5 rounded-full text-[13px] font-semibold tracking-wide transition-all border backdrop-blur-md relative overflow-hidden group ${
+                                      location === loc
+                                          ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+                                          : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white"
+                                  }`}
+                              >
+                                  {/* Glass sheen on hover */}
+                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                                  <span className="relative z-10">{loc}</span>
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+
+                  <motion.button 
+                      onClick={startScan}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="relative w-full mt-2 group overflow-hidden rounded-[24px]"
+                  >
+                      {/* Holographic animated background */}
+                      <motion.div 
+                          animate={{ filter: ["hue-rotate(0deg)", "hue-rotate(360deg)"] }}
+                          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                          className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 opacity-80 group-hover:opacity-100 transition-opacity"
+                      />
+                      {/* Glass overlay for depth */}
+                      <div className="absolute inset-[1px] rounded-[23px] bg-black/20 backdrop-blur-sm" />
+                      
+                      <div className="relative px-6 py-5 flex items-center justify-center gap-3 z-10">
+                          <Radar className="w-5 h-5 text-white drop-shadow-md" />
+                          <span className="text-white font-bold tracking-[0.15em] uppercase text-[15px] drop-shadow-md">
+                              Initialize Scan
+                          </span>
+                      </div>
+                  </motion.button>
+              </motion.div>
+          </div>
+      )}
+
+      {scanStatus !== "idle" && (
+          <>
+            {/* Filters */}
+            <div className="px-6 py-2 pb-4 overflow-x-auto no-scrollbar flex items-center gap-2 relative z-10 shrink-0">
+                {filters.map((filter) => (
+                <button
+                    key={filter}
+                    onClick={() => setActiveFilter(filter)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold tracking-wide whitespace-nowrap transition-all border ${
+                    activeFilter === filter
+                        ? "bg-white text-black border-white shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+                        : "bg-white/5 text-white/60 border-white/5 hover:bg-white/10"
+                    }`}
+                >
+                    {filter}
+                </button>
+                ))}
+            </div>
+
+            {/* Deals Feed */}
+            <div className="flex-1 overflow-y-auto px-6 pb-32 relative z-10 no-scrollbar">
+                {scanStatus === "scanning" ? (
+                <div className="flex flex-col items-center justify-center h-40 gap-6 opacity-70 mt-10">
+                    {/* Custom State Variant 3 Animation (Matte & Precise) */}
+                    <div className="w-[64px] h-[64px] rounded-full overflow-hidden flex flex-col justify-center items-center gap-[2px] relative bg-black/40 border border-white/5">
+                        {Array.from({ length: 11 }).map((_, i) => {
+                            const hasBlock = [1, 3, 4, 6, 8, 9].includes(i);
+                            const delay = (i * 0.25) % 1.5;
+                            const duration = 1.4 + (i % 3) * 0.4;
+                            const width = 15 + (i % 3) * 10; 
+                            
+                            return (
+                                <div key={i} className="w-full h-[3px] bg-white/[0.08] relative shrink-0">
+                                    {hasBlock && (
+                                        <motion.div
+                                            className="absolute top-0 bottom-0 bg-[#D1D1D6] rounded-[1px]"
+                                            style={{ width: `${width}%` }}
+                                            initial={{ left: "-50%" }}
+                                            animate={{ left: "100%" }}
+                                            transition={{
+                                                duration,
+                                                repeat: Infinity,
+                                                ease: "linear",
+                                                delay
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
+                    <span className="text-white/60 text-xs font-bold tracking-[0.2em] uppercase text-center px-4">
+                        Scanning for deals in {location || 'the Philippines'}...
+                    </span>
+                </div>
+                ) : filteredDeals.length > 0 ? (
+                <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2 mb-2 px-2">
+                        <span className="text-white/50 text-xs font-bold tracking-widest uppercase">
+                            Here are some of the deals in {location || 'the Philippines'}
+                        </span>
+                    </div>
+                    <AnimatePresence>
+                    {filteredDeals.map((deal, i) => (
+                        <motion.div
+                        key={deal.id}
+                        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ delay: i * 0.08, type: "spring", damping: 25, stiffness: 200 }}
+                        className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-[32px] p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_20px_40px_rgba(0,0,0,0.4)] relative overflow-hidden flex flex-col gap-6 transform-gpu will-change-transform"
+                        >
+                        {/* Dynamic pulsing brand glow behind ticket */}
+                        <motion.div 
+                            animate={{ opacity: [0.15, 0.25, 0.15], scale: [1, 1.1, 1] }}
+                            transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut" }}
+                            className={`absolute top-0 right-0 w-40 h-40 blur-[60px] -translate-y-1/2 translate-x-1/4 rounded-full will-change-transform transform-gpu ${getBrandColor(deal.brand).split(' ')[3].replace('ring-', 'bg-')}`} 
+                        />
+                        
+                        <div className="flex items-start justify-between relative z-10">
+                            <div className="flex items-center gap-2">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border text-[10px] font-bold ${getBrandColor(deal.brand).split(' ').slice(0, 3).join(' ')}`}>
+                                    {deal.brand.substring(0, 1)}
+                                </div>
+                                <span className="text-white/60 text-xs font-bold tracking-widest uppercase">
+                                    {deal.brand}
+                                </span>
+                            </div>
+                            {deal.hot && (
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md overflow-hidden relative">
+                                <motion.div 
+                                    animate={{ filter: ["hue-rotate(0deg)", "hue-rotate(360deg)"] }}
+                                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                    className="absolute inset-0 bg-gradient-to-r from-[#FF3B30] via-[#FF9500] to-[#FFCC00] opacity-20"
                                 />
+                                <Flame className="w-3.5 h-3.5 text-[#FF9500] relative z-10" />
+                                <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">Hot</span>
+                            </div>
                             )}
                         </div>
-                    )
-                })}
+                        
+                        {/* Massive typography for the deal */}
+                        <div className="relative z-10 py-2">
+                            <h3 className="text-white text-3xl font-light leading-[1.1] tracking-tight pr-4">
+                                {deal.title}
+                            </h3>
+                        </div>
+                        
+                        <div className="flex items-center justify-between mt-auto relative z-10 pt-4 border-t border-white/10 border-dashed">
+                            <div className="flex items-center gap-2 text-white/40">
+                                <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center">
+                                    <Clock className="w-3 h-3" />
+                                </div>
+                                <span className="text-[11px] font-bold uppercase tracking-widest">
+                                    Ends {new Date(deal.expires).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                                </span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => handleCopy(deal.id, deal.code)}
+                                className={`flex items-center justify-center w-11 h-11 rounded-2xl transition-all overflow-hidden relative backdrop-blur-md ${
+                                copiedId === deal.id 
+                                    ? "bg-[#34C759]/20 text-[#34C759] border border-[#34C759]/30" 
+                                    : "bg-white/5 text-white hover:bg-white/10 border border-white/10"
+                                }`}
+                                title="Copy Promo Code"
+                            >
+                                {copiedId === deal.id ? (
+                                    <Check className="w-4 h-4" />
+                                ) : (
+                                    <Copy className="w-4 h-4" />
+                                )}
+                            </button>
+                            
+                            <a
+                                href={deal.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 px-6 h-11 rounded-2xl text-[13px] font-extrabold tracking-widest uppercase transition-all overflow-hidden relative bg-white text-black hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95"
+                            >
+                                Claim
+                            </a>
+                            </div>
+                        </div>
+                        </motion.div>
+                    ))}
+                    </AnimatePresence>
+                </div>
+                ) : (
+                <div className="flex flex-col items-center justify-center h-40 opacity-50">
+                    <span className="text-white/60 text-xs font-medium tracking-widest uppercase">No active deals found</span>
+                </div>
+                )}
             </div>
-            <span className="text-white/60 text-xs font-bold tracking-[0.2em] uppercase">Intercepting Deals...</span>
-          </div>
-        ) : filteredDeals.length > 0 ? (
-          <div className="flex flex-col gap-4">
-            <AnimatePresence>
-              {filteredDeals.map((deal, i) => (
-                <motion.div
-                  key={deal.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05, duration: 0.4, ease: "easeOut" }}
-                  className="bg-[#1A1A1C] border border-white/5 rounded-3xl p-5 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05),0_8px_16px_rgba(0,0,0,0.2)] relative overflow-hidden flex flex-col gap-5"
-                >
-                  {/* Subtle brand glow behind card */}
-                  <div className={`absolute top-0 right-0 w-32 h-32 blur-[50px] opacity-[0.15] -translate-y-1/2 translate-x-1/4 rounded-full ${getBrandColor(deal.brand).split(' ')[3].replace('ring-', 'bg-')}`} />
-                  
-                  <div className="flex items-start justify-between relative z-10">
-                    <div className={`px-3 py-1 rounded-lg text-[10px] font-extrabold tracking-wider uppercase border flex items-center gap-1.5 ${getBrandColor(deal.brand).split(' ').slice(0, 3).join(' ')}`}>
-                      {deal.brand}
-                    </div>
-                    {deal.hot && (
-                      <div className="flex items-center gap-1 px-2 py-1 bg-[#FF453A]/10 border border-[#FF453A]/20 rounded-md text-[#FF453A]">
-                        <Flame className="w-3 h-3" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">Hot</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <h3 className="text-white text-[17px] font-medium leading-snug relative z-10 pr-4">
-                    {deal.title}
-                  </h3>
-                  
-                  <div className="flex items-center justify-between mt-auto relative z-10 pt-1 border-t border-white/5">
-                    <div className="flex items-center gap-1.5 text-white/40">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span className="text-[10px] font-medium uppercase tracking-widest">
-                        Valid til {new Date(deal.expires).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleCopy(deal.id, deal.code)}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-all overflow-hidden relative ${
-                          copiedId === deal.id 
-                            ? "bg-[#34C759]/20 text-[#34C759] border border-[#34C759]/30" 
-                            : "bg-white/10 text-white hover:bg-white/15 border border-white/10"
-                        }`}
-                      >
-                        {copiedId === deal.id ? (
-                          <>
-                            <Check className="w-3.5 h-3.5" />
-                            <span>Copied</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>{deal.code}</span>
-                          </>
-                        )}
-                      </button>
-                      
-                      <a
-                        href={deal.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-all overflow-hidden relative bg-white text-black hover:bg-white/90 shadow-[0_0_15px_rgba(255,255,255,0.2)]"
-                      >
-                        Claim
-                      </a>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-40 opacity-50">
-            <span className="text-white/60 text-xs font-medium tracking-widest uppercase">No active deals found</span>
-          </div>
-        )}
-      </div>
+          </>
+      )}
       
       {/* Toast Notification for Copy (Floating at bottom) */}
       <AnimatePresence>
@@ -254,3 +376,4 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
     </motion.div>
   );
 }
+

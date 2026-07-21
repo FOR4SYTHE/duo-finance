@@ -3,8 +3,12 @@ import { NextResponse } from "next/server";
 // Use force-dynamic to prevent build-time evaluation timeouts.
 // We use Cache-Control headers to cache the response at the edge instead.
 export const dynamic = 'force-dynamic';
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const locationParam = searchParams.get('location') || '';
+    const locationStr = locationParam ? `in ${locationParam}` : 'in the Philippines';
+
     const braveApiKey = process.env.BRAVE_SEARCH_API_KEY;
     const geminiApiKey = process.env.GEMINI_API_KEY;
 
@@ -17,7 +21,7 @@ export async function GET() {
     }
 
     // 1. Fetch search results from Brave API
-    const searchQuery = encodeURIComponent("promo codes discounts Philippines Foodpanda Grab Shopee Lazada Klook Agoda Cheapflights 2026");
+    const searchQuery = encodeURIComponent(`promo codes discounts ${locationStr} Foodpanda Grab Shopee Lazada Klook Agoda Cheapflights 2026`);
     const braveRes = await fetch(`https://api.search.brave.com/res/v1/web/search?q=${searchQuery}&count=15`, {
       headers: {
         "Accept": "application/json",
@@ -42,7 +46,7 @@ export async function GET() {
 
     // 2. Ask Gemini to extract structured deals
     const prompt = `
-      Analyze the following search results for promo codes and discounts in the Philippines.
+      Analyze the following search results for promo codes and discounts ${locationStr}.
       Extract the best, most realistic promo codes specifically for these brands: Foodpanda, Grab, Shopee, Lazada, Klook, Agoda, Cheapflights.
       
       Respond STRICTLY with a valid JSON array of objects. No markdown formatting, no backticks, just the JSON array.
