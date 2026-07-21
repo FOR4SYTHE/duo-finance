@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
-export const revalidate = 43200; // Cache for 12 hours (43200 seconds) to save API limits
-
+// Use force-dynamic to prevent build-time evaluation timeouts.
+// We use Cache-Control headers to cache the response at the edge instead.
+export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const braveApiKey = process.env.BRAVE_SEARCH_API_KEY;
@@ -9,7 +10,10 @@ export async function GET() {
 
     if (!braveApiKey || !geminiApiKey) {
       console.warn("API keys missing, returning fallback deals.");
-      return NextResponse.json({ deals: getFallbackDeals() });
+      return NextResponse.json(
+        { deals: getFallbackDeals() },
+        { headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate" } }
+      );
     }
 
     // 1. Fetch search results from Brave API
@@ -23,7 +27,10 @@ export async function GET() {
 
     if (!braveRes.ok) {
       console.error("Brave API Error:", await braveRes.text());
-      return NextResponse.json({ deals: getFallbackDeals() });
+      return NextResponse.json(
+        { deals: getFallbackDeals() },
+        { headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate" } }
+      );
     }
 
     const braveData = await braveRes.json();
@@ -72,14 +79,20 @@ export async function GET() {
 
     if (!geminiRes.ok) {
       console.error("Gemini API Error:", await geminiRes.text());
-      return NextResponse.json({ deals: getFallbackDeals() });
+      return NextResponse.json(
+        { deals: getFallbackDeals() },
+        { headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate" } }
+      );
     }
 
     const geminiData = await geminiRes.json();
     const rawJson = geminiData.candidates[0]?.content?.parts[0]?.text;
     
     if (!rawJson) {
-      return NextResponse.json({ deals: getFallbackDeals() });
+      return NextResponse.json(
+        { deals: getFallbackDeals() },
+        { headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate" } }
+      );
     }
 
     let parsedDeals = [];
@@ -87,14 +100,23 @@ export async function GET() {
       parsedDeals = JSON.parse(rawJson);
     } catch (e) {
       console.error("Failed to parse Gemini JSON:", rawJson);
-      return NextResponse.json({ deals: getFallbackDeals() });
+      return NextResponse.json(
+        { deals: getFallbackDeals() },
+        { headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate" } }
+      );
     }
 
-    return NextResponse.json({ deals: parsedDeals });
+    return NextResponse.json(
+      { deals: parsedDeals },
+      { headers: { "Cache-Control": "s-maxage=43200, stale-while-revalidate" } }
+    );
 
   } catch (error) {
     console.error("Deals API Error:", error);
-    return NextResponse.json({ deals: getFallbackDeals() });
+    return NextResponse.json(
+      { deals: getFallbackDeals() },
+      { headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate" } }
+    );
   }
 }
 
