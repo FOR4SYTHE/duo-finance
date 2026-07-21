@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { X, Copy, Check, Radar, Clock, Flame, Navigation, Database } from "lucide-react";
 
 interface Deal {
@@ -19,6 +19,126 @@ interface Deal {
 interface CashbackDealsRadarProps {
   onClose: () => void;
 }
+
+const DealCard = ({ deal, index, getBrandColor, getBrandArtwork, handleCopy, copiedId, scrollContainerRef }: any) => {
+  const targetRef = useRef<HTMLDivElement>(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    container: scrollContainerRef,
+    offset: ["start 40px", "start -150px"] // Fades out as it scrolls 190px past the sticky point
+  });
+
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8, 1], [1, 0.3, 0]);
+  const filter = useTransform(scrollYProgress, [0, 1], ["brightness(1)", "brightness(0.3)"]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, -30]);
+
+  return (
+    <div ref={targetRef} className="relative h-[250px] mb-4">
+      <motion.div
+        className="sticky top-[40px] will-change-transform"
+        initial={{ opacity: 0, y: 100 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: Math.min(index * 0.05, 0.5), type: "spring", damping: 25, stiffness: 200 }}
+        style={{
+          scale,
+          opacity,
+          filter,
+          y,
+          zIndex: index,
+        }}
+      >
+        <div className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_20px_40px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-row h-[220px]">
+          
+          {/* Left Side: Content */}
+          <div className="flex flex-col gap-5 flex-1 relative z-20 pr-32">
+              <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center border text-[10px] font-bold overflow-hidden ${getBrandColor(deal.brand).split(' ').slice(0, 3).join(' ')}`}>
+                      <img 
+                          src={`https://icon.horse/icon/${
+                              deal.brand === 'Foodpanda' ? 'foodpanda.ph' :
+                              deal.brand === 'Grab' ? 'grab.com' :
+                              deal.brand === 'Shopee' ? 'shopee.ph' :
+                              deal.brand === 'Lazada' ? 'lazada.com.ph' :
+                              deal.brand === 'Klook' ? 'klook.com' :
+                              deal.brand === 'Agoda' ? 'agoda.com' :
+                              deal.brand === 'Cheapflights' ? 'cheapflights.com' :
+                              'example.com'
+                          }`} 
+                          alt={deal.brand}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                      />
+                      <span className="hidden">{deal.brand.substring(0, 1)}</span>
+                  </div>
+                  <span className="text-white/80 text-xs font-bold tracking-widest uppercase drop-shadow-md">
+                      {deal.brand}
+                  </span>
+              </div>
+              
+              <h3 className="text-white text-[28px] font-light leading-[1.1] tracking-tight drop-shadow-md">
+                  {deal.title}
+              </h3>
+              
+              <div className="flex items-center gap-3 mt-auto pt-2">
+                <button
+                    onClick={() => handleCopy(deal.id, deal.code)}
+                    className={`flex items-center justify-center w-11 h-11 rounded-full transition-all overflow-hidden relative backdrop-blur-md shadow-md ${
+                    copiedId === deal.id 
+                        ? "bg-[#34C759] text-white" 
+                        : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
+                    }`}
+                    title="Copy Promo Code"
+                >
+                    {copiedId === deal.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </button>
+                
+                <a
+                    href={deal.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-1 items-center justify-center gap-2 px-6 h-11 rounded-full text-[13px] font-extrabold tracking-widest uppercase transition-all overflow-hidden relative bg-white text-black hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95"
+                >
+                    Claim
+                </a>
+              </div>
+          </div>
+
+          {/* Right Side: Generated 3D Artwork */}
+          <div className="absolute right-[-30px] top-1/2 -translate-y-1/2 w-[220px] h-[220px] pointer-events-none z-10 opacity-100 mix-blend-screen"
+               style={{
+                   maskImage: 'radial-gradient(circle at center, black 30%, transparent 70%)',
+                   WebkitMaskImage: 'radial-gradient(circle at center, black 30%, transparent 70%)'
+               }}>
+              {getBrandArtwork(deal.brand) && (
+                  <Image 
+                      src={getBrandArtwork(deal.brand)} 
+                      alt={`${deal.brand} artwork`}
+                      width={220}
+                      height={220}
+                      className="w-full h-full object-contain filter contrast-125 brightness-110 drop-shadow-2xl"
+                      unoptimized={false}
+                  />
+              )}
+          </div>
+          
+          {/* Hot Badge Overlay */}
+          {deal.hot && (
+              <div className="absolute top-6 right-6 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 border border-[#FF9500]/30 backdrop-blur-md shadow-lg">
+                  <Flame className="w-3.5 h-3.5 text-[#FF9500]" />
+                  <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#FF9500]">Hot</span>
+              </div>
+          )}
+          
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
   const [deals, setDeals] = useState<Deal[]>([]);
@@ -322,106 +442,16 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                     </div>
                     <AnimatePresence>
                     {filteredDeals.map((deal, i) => (
-                        <motion.div
-                        key={deal.id}
-                        initial={{ opacity: 0, y: 100 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: Math.min(i * 0.05, 0.5), type: "spring", damping: 25, stiffness: 200 }}
-                        className="sticky will-change-transform"
-                        style={{
-                            // Create the stacked deck of cards effect based on the inspiration video
-                            top: `calc(40px + ${i * 12}px)`,
-                            zIndex: i,
-                            marginBottom: '16px', // Gap between cards when not stacked
-                        }}
-                        >
-                          <div className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_20px_40px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-row min-h-[220px]">
-                            
-                            {/* Left Side: Content */}
-                            <div className="flex flex-col gap-5 flex-1 relative z-20 pr-32">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border text-[10px] font-bold overflow-hidden ${getBrandColor(deal.brand).split(' ').slice(0, 3).join(' ')}`}>
-                                        <img 
-                                            src={`https://icon.horse/icon/${
-                                                deal.brand === 'Foodpanda' ? 'foodpanda.ph' :
-                                                deal.brand === 'Grab' ? 'grab.com' :
-                                                deal.brand === 'Shopee' ? 'shopee.ph' :
-                                                deal.brand === 'Lazada' ? 'lazada.com.ph' :
-                                                deal.brand === 'Klook' ? 'klook.com' :
-                                                deal.brand === 'Agoda' ? 'agoda.com' :
-                                                deal.brand === 'Cheapflights' ? 'cheapflights.com' :
-                                                'example.com'
-                                            }`} 
-                                            alt={deal.brand}
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                                e.currentTarget.style.display = 'none';
-                                                e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                            }}
-                                        />
-                                        <span className="hidden">{deal.brand.substring(0, 1)}</span>
-                                    </div>
-                                    <span className="text-white/80 text-xs font-bold tracking-widest uppercase drop-shadow-md">
-                                        {deal.brand}
-                                    </span>
-                                </div>
-                                
-                                <h3 className="text-white text-[28px] font-light leading-[1.1] tracking-tight drop-shadow-md">
-                                    {deal.title}
-                                </h3>
-                                
-                                <div className="flex items-center gap-3 mt-auto pt-2">
-                                  <button
-                                      onClick={() => handleCopy(deal.id, deal.code)}
-                                      className={`flex items-center justify-center w-11 h-11 rounded-full transition-all overflow-hidden relative backdrop-blur-md shadow-md ${
-                                      copiedId === deal.id 
-                                          ? "bg-[#34C759] text-white" 
-                                          : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
-                                      }`}
-                                      title="Copy Promo Code"
-                                  >
-                                      {copiedId === deal.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                                  </button>
-                                  
-                                  <a
-                                      href={deal.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="flex flex-1 items-center justify-center gap-2 px-6 h-11 rounded-full text-[13px] font-extrabold tracking-widest uppercase transition-all overflow-hidden relative bg-white text-black hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95"
-                                  >
-                                      Claim
-                                  </a>
-                                </div>
-                            </div>
-
-                            {/* Right Side: Generated 3D Artwork */}
-                            <div className="absolute right-[-30px] top-1/2 -translate-y-1/2 w-[220px] h-[220px] pointer-events-none z-10 opacity-100 mix-blend-screen"
-                                 style={{
-                                     maskImage: 'radial-gradient(circle at center, black 30%, transparent 70%)',
-                                     WebkitMaskImage: 'radial-gradient(circle at center, black 30%, transparent 70%)'
-                                 }}>
-                                {getBrandArtwork(deal.brand) && (
-                                    <Image 
-                                        src={getBrandArtwork(deal.brand)} 
-                                        alt={`${deal.brand} artwork`}
-                                        width={220}
-                                        height={220}
-                                        className="w-full h-full object-contain filter contrast-125 brightness-110 drop-shadow-2xl"
-                                        unoptimized={false}
-                                    />
-                                )}
-                            </div>
-                            
-                            {/* Hot Badge Overlay */}
-                            {deal.hot && (
-                                <div className="absolute top-6 right-6 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 border border-[#FF9500]/30 backdrop-blur-md shadow-lg">
-                                    <Flame className="w-3.5 h-3.5 text-[#FF9500]" />
-                                    <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#FF9500]">Hot</span>
-                                </div>
-                            )}
-                            
-                          </div>
-                        </motion.div>
+                        <DealCard 
+                            key={deal.id}
+                            deal={deal}
+                            index={i}
+                            getBrandColor={getBrandColor}
+                            getBrandArtwork={getBrandArtwork}
+                            handleCopy={handleCopy}
+                            copiedId={copiedId}
+                            scrollContainerRef={scrollContainerRef}
+                        />
                     ))}
                     </AnimatePresence>
                 </div>
