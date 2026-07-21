@@ -12,10 +12,45 @@ import {
 } from "lucide-react";
 import { MonthlyReportCard } from "@/components/home/MonthlyReportCard";
 import { BillsCalendarCard } from "@/components/home/BillsCalendarCard";
+import { MonthRolloverModal } from "@/components/home/MonthRolloverModal";
+import { useBudgetStore } from "@/store/useBudgetStore";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const { config, setLastSeenMonth, _hasHydrated } = useBudgetStore();
+  const [showRollover, setShowRollover] = useState(false);
+  const [lastSeen, setLastSeen] = useState("");
+  const [currentMonth, setCurrentMonth] = useState("");
+
+  useEffect(() => {
+    if (_hasHydrated && config.lastSeenMonth) {
+      const now = new Date();
+      const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      
+      // If the calendar month has moved past the last seen month, trigger rollover
+      if (currentMonthKey > config.lastSeenMonth) {
+        setLastSeen(config.lastSeenMonth);
+        setCurrentMonth(currentMonthKey);
+        setShowRollover(true);
+      }
+    }
+  }, [_hasHydrated, config.lastSeenMonth]);
+
+  const handleRolloverClose = () => {
+    setShowRollover(false);
+    setLastSeenMonth(currentMonth);
+  };
+
   return (
     <div className="flex flex-col w-full min-h-full px-6 pt-12 pb-8">
+      {showRollover && (
+        <MonthRolloverModal 
+          lastSeenMonthKey={lastSeen} 
+          currentMonthKey={currentMonth} 
+          onClose={handleRolloverClose} 
+        />
+      )}
+      
       {/* Header */}
       <div className="flex justify-between items-center mb-6 relative z-20">
         <div className="flex flex-col">

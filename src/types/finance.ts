@@ -43,4 +43,5 @@ export interface BudgetConfig {
     cardSkin?: string; // Selected skin for the hero card
     cardName?: string; // Custom name for the hero card
     activeMonth?: string; // "YYYY-MM" for filtering expenses
+    lastSeenMonth?: string; // Tracks the last calendar month the user opened the app
 }

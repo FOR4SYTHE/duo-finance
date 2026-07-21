@@ -21,6 +21,7 @@ interface BudgetState {
     setCardSkin: (skin: string) => void;
     setCardName: (name: string) => void;
     setActiveMonth: (month: string) => void;
+    setLastSeenMonth: (month: string) => void;
     addCategory: (category: Omit<BudgetCategory, 'id'>) => void;
     updateCategory: (id: string, updates: Partial<BudgetCategory>) => void;
     updateCategoriesTarget: (updates: { id: string, targetAmount: number }[]) => void;
@@ -90,7 +91,8 @@ export const useBudgetStore = create<BudgetState>()(
                 runwayMultiplier: 3,
                 cardSkin: 'default-dark',
                 cardName: 'BL',
-                activeMonth: new Date().toISOString().slice(0, 7) // "YYYY-MM" format
+                activeMonth: new Date().toISOString().slice(0, 7), // "YYYY-MM" format
+                lastSeenMonth: new Date().toISOString().slice(0, 7)
             },
             categories: DEFAULT_CATEGORIES,
             goals: DEFAULT_GOALS,
@@ -112,6 +114,8 @@ export const useBudgetStore = create<BudgetState>()(
                 set((state) => ({ config: { ...state.config, cardName: name } })),
             setActiveMonth: (month: string) =>
                 set((state) => ({ config: { ...state.config, activeMonth: month } })),
+            setLastSeenMonth: (month: string) =>
+                set((state) => ({ config: { ...state.config, lastSeenMonth: month } })),
             addCategory: (category) => 
                 set((state) => {
                     const defaultMatch = DEFAULT_CATEGORIES.find(d => d.name.toLowerCase() === category.name.toLowerCase());
@@ -228,6 +232,9 @@ export const useBudgetStore = create<BudgetState>()(
                     merged.config = currentState.config;
                 } else if (!merged.config.activeMonth) {
                     merged.config.activeMonth = new Date().toISOString().slice(0, 7);
+                }
+                if (!merged.config.lastSeenMonth) {
+                    merged.config.lastSeenMonth = merged.config.activeMonth || new Date().toISOString().slice(0, 7);
                 }
                 if (!merged.config.cardSkin) merged.config.cardSkin = 'default-dark';
                 if (!merged.config.cardName) merged.config.cardName = 'BL';
