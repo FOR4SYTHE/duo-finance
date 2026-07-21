@@ -125,9 +125,36 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
       {/* Deals Feed */}
       <div className="flex-1 overflow-y-auto px-6 pb-32 relative z-10 no-scrollbar">
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-40 gap-4 opacity-50">
-            <Radar className="w-8 h-8 text-[#0A84FF] animate-spin" />
-            <span className="text-white/60 text-xs font-medium tracking-widest uppercase">Intercepting Deals...</span>
+          <div className="flex flex-col items-center justify-center h-40 gap-6 opacity-70 mt-10">
+            {/* Custom State Variant 3 Animation (Matte & Precise) */}
+            <div className="w-[64px] h-[64px] rounded-full overflow-hidden flex flex-col justify-center items-center gap-[2px] relative bg-black/40 border border-white/5">
+                {Array.from({ length: 11 }).map((_, i) => {
+                    const hasBlock = [1, 3, 4, 6, 8, 9].includes(i);
+                    const delay = (i * 0.25) % 1.5;
+                    const duration = 1.4 + (i % 3) * 0.4;
+                    const width = 15 + (i % 3) * 10; 
+                    
+                    return (
+                        <div key={i} className="w-full h-[3px] bg-white/[0.08] relative shrink-0">
+                            {hasBlock && (
+                                <motion.div
+                                    className="absolute top-0 bottom-0 bg-[#D1D1D6] rounded-[1px]"
+                                    style={{ width: `${width}%` }}
+                                    initial={{ left: "-50%" }}
+                                    animate={{ left: "100%" }}
+                                    transition={{
+                                        duration,
+                                        repeat: Infinity,
+                                        ease: "linear",
+                                        delay
+                                    }}
+                                />
+                            )}
+                        </div>
+                    )
+                })}
+            </div>
+            <span className="text-white/60 text-xs font-bold tracking-[0.2em] uppercase">Intercepting Deals...</span>
           </div>
         ) : filteredDeals.length > 0 ? (
           <div className="flex flex-col gap-4">
