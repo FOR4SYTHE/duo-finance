@@ -282,8 +282,27 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                         
                         <div className="flex items-start justify-between relative z-10">
                             <div className="flex items-center gap-2">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border text-[10px] font-bold ${getBrandColor(deal.brand).split(' ').slice(0, 3).join(' ')}`}>
-                                    {deal.brand.substring(0, 1)}
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border text-[10px] font-bold overflow-hidden ${getBrandColor(deal.brand).split(' ').slice(0, 3).join(' ')}`}>
+                                    {/* Try to load logo, fallback to initial if it fails */}
+                                    <img 
+                                        src={`https://icon.horse/icon/${
+                                            deal.brand === 'Foodpanda' ? 'foodpanda.ph' :
+                                            deal.brand === 'Grab' ? 'grab.com' :
+                                            deal.brand === 'Shopee' ? 'shopee.ph' :
+                                            deal.brand === 'Lazada' ? 'lazada.com.ph' :
+                                            deal.brand === 'Klook' ? 'klook.com' :
+                                            deal.brand === 'Agoda' ? 'agoda.com' :
+                                            deal.brand === 'Cheapflights' ? 'cheapflights.com' :
+                                            'example.com'
+                                        }`} 
+                                        alt={deal.brand}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                        }}
+                                    />
+                                    <span className="hidden">{deal.brand.substring(0, 1)}</span>
                                 </div>
                                 <span className="text-white/60 text-xs font-bold tracking-widest uppercase">
                                     {deal.brand}
