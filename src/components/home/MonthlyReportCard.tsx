@@ -106,8 +106,7 @@ export function MonthlyReportCard() {
       {/* Hero Card */}
       <div
         onClick={handleCardTap}
-        className="relative w-full rounded-[28px] overflow-hidden cursor-pointer mb-6 active:scale-[0.985] transition-transform duration-200"
-        style={{ aspectRatio: "4 / 3" }}
+        className="relative w-full aspect-[4/3] min-h-[280px] rounded-[28px] overflow-hidden cursor-pointer mb-6 active:scale-[0.985] transition-transform duration-200"
       >
         {/* Photo Background */}
         {photo && !error ? (
@@ -176,44 +175,18 @@ export function MonthlyReportCard() {
             </button>
           </div>
 
-          {/* Bottom: Giant month text + attribution */}
-          <div className="flex flex-col">
+          {/* Bottom: Giant month text */}
+          <div className="flex flex-col items-center w-full mt-auto">
             {/* Entry count badge */}
             <div className="mb-2">
-              <span className="bg-white/15 backdrop-blur-md text-white text-[11px] font-semibold px-3 py-1 rounded-full border border-white/10">
+              <span className="bg-white/10 backdrop-blur-md text-white/80 text-[10px] font-medium px-3 py-1.5 rounded-full border border-white/10">
                 {monthEntries.length} entries logged
               </span>
             </div>
 
-            <h2 className="text-7xl sm:text-8xl font-extralight text-white tracking-[-0.04em] leading-[0.85] drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+            <h2 className="text-7xl sm:text-8xl font-black text-white mix-blend-overlay tracking-tighter leading-[0.85]">
               {currentMonthName}
             </h2>
-
-            {/* Attribution */}
-            {photo && !error && (
-              <div className="mt-3 text-[9px] text-white/40 leading-tight">
-                Photo by{" "}
-                <a
-                  href={`${photo.photographerUrl}?utm_source=duo_finance&utm_medium=referral`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:text-white/70 transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {photo.photographerName}
-                </a>{" "}
-                /{" "}
-                <a
-                  href="https://unsplash.com/?utm_source=duo_finance&utm_medium=referral"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:text-white/70 transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  Unsplash
-                </a>
-              </div>
-            )}
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronDown, Calendar } from "lucide-react";
+import { X, ChevronDown, Calendar, MoreHorizontal } from "lucide-react";
 
 interface PhotoData {
   url: string;
@@ -138,15 +138,14 @@ export function MonthPicker({ onClose, onSelectMonth }: MonthPickerProps) {
                 const photoData = photos[monthKey];
 
                 return (
-                  <motion.div
-                    key={monthKey}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.06, duration: 0.4, ease: "easeOut" }}
-                    onClick={() => onSelectMonth(monthKey)}
-                    className="relative w-full rounded-[24px] overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
-                    style={{ aspectRatio: "16 / 10" }}
-                  >
+                    <motion.div
+                      key={monthKey}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.06, duration: 0.4, ease: "easeOut" }}
+                      onClick={() => onSelectMonth(monthKey)}
+                      className="relative w-full aspect-[16/10] min-h-[220px] rounded-[24px] overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
+                    >
                     {/* Photo */}
                     {photoData ? (
                       <div
@@ -165,18 +164,23 @@ export function MonthPicker({ onClose, onSelectMonth }: MonthPickerProps) {
 
                     {/* Content */}
                     <div className="relative z-10 w-full h-full p-5 flex flex-col justify-between">
-                      <div className="flex justify-between items-start">
-                        <span className="bg-white/20 backdrop-blur-md text-white text-[10px] font-semibold px-3 py-1 rounded-full border border-white/10">
+                      <div className="flex justify-between items-start w-full">
+                        <span className="bg-white/10 backdrop-blur-md text-white/80 text-[10px] font-medium px-3 py-1.5 rounded-full border border-white/10">
                           {realMonthIdx === now.getMonth() &&
                           selectedYear === currentYear
                             ? "Current month"
                             : `${monthName} ${selectedYear}`}
                         </span>
+                        <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
+                          <MoreHorizontal className="w-4 h-4 text-white/70" />
+                        </div>
                       </div>
 
-                      <h3 className="text-5xl sm:text-6xl font-extralight text-white tracking-[-0.04em] leading-[0.85] drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
-                        {monthName}
-                      </h3>
+                      <div className="flex flex-col items-center w-full mt-auto">
+                        <h3 className="text-6xl sm:text-7xl font-black text-white mix-blend-overlay tracking-tighter leading-[0.85]">
+                          {monthName}
+                        </h3>
+                      </div>
                     </div>
                   </motion.div>
                 );
