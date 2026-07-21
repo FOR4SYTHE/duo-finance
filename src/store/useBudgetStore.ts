@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { BudgetConfig, BudgetPeriod, BudgetCategory } from '@/types/finance';
+import { BudgetConfig, BudgetPeriod, BudgetCategory, AppNotification } from '@/types/finance';
 
 export interface Goal {
     id: string;
@@ -15,7 +15,9 @@ interface BudgetState {
     config: BudgetConfig;
     categories: BudgetCategory[];
     goals: Goal[];
-    setBudget: (targetAmount: number, period: BudgetPeriod) => void;
+    notifications: AppNotification[];
+    
+    // Config Operations
     setJarPercentage: (pct: number) => void;
     setRunwayMultiplier: (multiplier: number) => void;
     setCardSkin: (skin: string) => void;
@@ -37,6 +39,12 @@ interface BudgetState {
     updateGoal: (id: string, updates: Partial<Goal>) => void;
     removeGoal: (id: string) => void;
     addMoneyToGoal: (id: string, amount: number) => void;
+
+    // Notifications Operations
+    addNotification: (notification: Omit<AppNotification, 'id' | 'timestamp'>) => void;
+    markNotificationRead: (id: string) => void;
+    markAllNotificationsRead: () => void;
+    removeNotification: (id: string) => void;
 
     _hasHydrated: boolean;
     setHasHydrated: (state: boolean) => void;
@@ -96,6 +104,7 @@ export const useBudgetStore = create<BudgetState>()(
             },
             categories: DEFAULT_CATEGORIES,
             goals: DEFAULT_GOALS,
+            notifications: [],
             setBudget: (targetAmount: number, period: BudgetPeriod) => 
                 set((state) => ({ config: { ...state.config, targetAmount, period } })),
             setJarPercentage: (percentage: number) => 
@@ -205,6 +214,27 @@ export const useBudgetStore = create<BudgetState>()(
             addMoneyToGoal: (id, amount) =>
                 set((state) => ({
                     goals: state.goals.map(g => g.id === id ? { ...g, savedAmount: g.savedAmount + amount } : g)
+                })),
+                
+            // Notifications operations
+            addNotification: (notif) => 
+                set((state) => ({
+                    notifications: [
+                        { ...notif, id: Math.random().toString(36).substring(7), timestamp: Date.now() },
+                        ...state.notifications
+                    ]
+                })),
+            markNotificationRead: (id) =>
+                set((state) => ({
+                    notifications: state.notifications.map(n => n.id === id ? { ...n, read: true } : n)
+                })),
+            markAllNotificationsRead: () =>
+                set((state) => ({
+                    notifications: state.notifications.map(n => ({ ...n, read: true }))
+                })),
+            removeNotification: (id) =>
+                set((state) => ({
+                    notifications: state.notifications.filter(n => n.id !== id)
                 }))
         }),
         {
@@ -256,6 +286,10 @@ export const useBudgetStore = create<BudgetState>()(
                     merged.goals = merged.goals.map((g: any) => 
                         g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g
                     );
+                }
+                
+                if (!merged.notifications) {
+                    merged.notifications = [];
                 }
 
                 return merged;

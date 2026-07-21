@@ -285,7 +285,7 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: "100%" }}
       transition={{ type: "spring", damping: 30, stiffness: 300 }}
-      className="fixed inset-0 z-[110] bg-[#050505] overflow-y-auto no-scrollbar"
+      className="fixed inset-0 z-[130] bg-[#050505] overflow-y-auto no-scrollbar"
     >
       <div className="w-full max-w-xl mx-auto min-h-full pb-12 relative z-10">
         {/* Header */}

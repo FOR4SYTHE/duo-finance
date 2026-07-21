@@ -137,7 +137,7 @@ export function MonthRolloverModal({ lastSeenMonthKey, currentMonthKey, onClose 
         {showSummary && (
           <MonthlySummary 
             monthKey={lastSeenMonthKey} 
-            onClose={() => setShowSummary(false)} 
+            onClose={onClose} 
           />
         )}
       </AnimatePresence>

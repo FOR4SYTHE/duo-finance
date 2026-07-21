@@ -13,14 +13,21 @@ import {
 import { MonthlyReportCard } from "@/components/home/MonthlyReportCard";
 import { BillsCalendarCard } from "@/components/home/BillsCalendarCard";
 import { MonthRolloverModal } from "@/components/home/MonthRolloverModal";
+import { MonthlySummary } from "@/components/home/MonthlySummary";
+import { NotificationCenter } from "@/components/home/NotificationCenter";
 import { useBudgetStore } from "@/store/useBudgetStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 export default function Home() {
-  const { config, setLastSeenMonth, _hasHydrated } = useBudgetStore();
+  const { config, setLastSeenMonth, _hasHydrated, notifications, addNotification } = useBudgetStore();
   const [showRollover, setShowRollover] = useState(false);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [showNotifCenter, setShowNotifCenter] = useState(false);
+  
   const [lastSeen, setLastSeen] = useState("");
   const [currentMonth, setCurrentMonth] = useState("");
+
+  const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
 
   useEffect(() => {
     if (_hasHydrated && config.lastSeenMonth) {
@@ -39,6 +46,26 @@ export default function Home() {
   const handleRolloverClose = () => {
     setShowRollover(false);
     setLastSeenMonth(currentMonth);
+
+    // Give them a notification so they can easily find the report later!
+    addNotification({
+      title: 'Month in Review',
+      message: 'Your monthly summary report is ready to view. See how you performed against your budget.',
+      type: 'report',
+      read: false,
+      action: {
+        label: 'View Report',
+        payload: { actionType: 'view_report', monthKey: lastSeen }
+      }
+    });
+  };
+
+  const handleNotificationAction = (action: any) => {
+    if (action?.payload?.actionType === 'view_report') {
+      setShowNotifCenter(false);
+      setLastSeen(action.payload.monthKey);
+      setShowSummaryModal(true);
+    }
   };
 
   return (
@@ -50,6 +77,19 @@ export default function Home() {
           onClose={handleRolloverClose} 
         />
       )}
+
+      {showSummaryModal && (
+        <MonthlySummary 
+          monthKey={lastSeen} 
+          onClose={() => setShowSummaryModal(false)} 
+        />
+      )}
+
+      <NotificationCenter
+        isOpen={showNotifCenter}
+        onClose={() => setShowNotifCenter(false)}
+        onActionClick={handleNotificationAction}
+      />
       
       {/* Header */}
       <div className="flex justify-between items-center mb-6 relative z-20">
@@ -61,9 +101,45 @@ export default function Home() {
             Sam & Jon
           </h1>
         </div>
-        <button className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors">
-          <Bell className="w-5 h-5 text-white/70" />
-        </button>
+        <div className="flex items-center gap-3">
+          {/* TEMP TRICK: Buttons for testing */}
+          <div className="flex gap-2">
+            <button 
+              onClick={() => {
+                setLastSeen("2026-07");
+                setCurrentMonth("2026-08");
+                setShowRollover(true);
+              }}
+              className="px-3 py-2 bg-[#0A84FF]/20 rounded-full text-[10px] uppercase tracking-widest font-bold text-[#0A84FF] hover:bg-[#0A84FF]/30 transition-colors border border-[#0A84FF]/30"
+            >
+              Test Rollover
+            </button>
+            <button 
+              onClick={() => {
+                addNotification({
+                  title: 'Welcome to Duo Finance',
+                  message: 'This is what a premium notification looks like! You can trigger actions from here.',
+                  type: 'system',
+                  read: false,
+                  action: { label: 'Got it!' }
+                });
+              }}
+              className="px-3 py-2 bg-white/10 rounded-full text-[10px] uppercase tracking-widest font-bold text-white/50 hover:text-white transition-colors border border-white/5"
+            >
+              Test Notif
+            </button>
+          </div>
+          
+          <button 
+            onClick={() => setShowNotifCenter(true)}
+            className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors relative"
+          >
+            <Bell className="w-5 h-5 text-white/70" />
+            {unreadCount > 0 && (
+              <div className="absolute top-0 right-0 w-3 h-3 bg-[#FF453A] rounded-full border-2 border-[#0A0A0C] shadow-[0_0_8px_#FF453A]" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Monthly Report Hero Card (photo-backed, budget overlaid) */}

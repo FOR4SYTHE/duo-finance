@@ -45,3 +45,16 @@ export interface BudgetConfig {
     activeMonth?: string; // "YYYY-MM" for filtering expenses
     lastSeenMonth?: string; // Tracks the last calendar month the user opened the app
 }
+
+export interface AppNotification {
+    id: string;
+    title: string;
+    message: string;
+    timestamp: number;
+    read: boolean;
+    type: 'system' | 'report' | 'alert';
+    action?: {
+        label: string;
+        payload?: any;
+    };
+}
