@@ -128,20 +128,17 @@ export function MonthlyReportCard() {
         <div className="relative z-10 w-full h-full p-5 flex flex-col justify-between">
           {/* Top Row: Budget overlay + overflow */}
           <div className="flex justify-between items-start">
-            {/* Budget Status Pill - Apple Premium Glass */}
-            <div className="bg-white/10 backdrop-blur-2xl rounded-[20px] px-4 py-3.5 border border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),_0_8px_20px_rgba(0,0,0,0.15)] flex flex-col gap-1.5 min-w-[140px]">
+            {/* Budget Status Pill - Apple Ultra Luxury Dark Glass */}
+            <div className="bg-black/40 backdrop-blur-2xl rounded-[20px] px-4 py-3 border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.2)] flex flex-col gap-1 min-w-[145px]">
               <div className="flex items-center gap-2 mb-0.5">
                 <div
-                  className="w-2 h-2 rounded-full"
+                  className="w-1.5 h-1.5 rounded-full"
                   style={{
-                    backgroundColor: statusColor,
-                    boxShadow: `0 0 10px ${statusColor}`,
+                    backgroundColor: spendRatio > 0.9 ? '#FF453A' : spendRatio > 0.7 ? '#FF9F0A' : '#34D399',
+                    boxShadow: spendRatio > 0.9 ? '0 0 8px #FF453A' : spendRatio > 0.7 ? '0 0 8px #FF9F0A' : '0 0 8px #34D399',
                   }}
                 />
-                <span
-                  className="text-[10px] font-bold tracking-[0.15em] uppercase"
-                  style={{ color: statusColor }}
-                >
+                <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-white/90 drop-shadow-sm">
                   {statusLabel}
                 </span>
               </div>
@@ -149,23 +146,29 @@ export function MonthlyReportCard() {
                 <span className="text-2xl font-semibold text-white tracking-tight drop-shadow-sm">
                   ₱{formatCurrency(Math.max(remaining, 0))}
                 </span>
-                <span className="text-[11px] text-white/70 font-medium">left</span>
+                <span className="text-[11px] text-white/60 font-medium">left</span>
               </div>
-              <span className="text-xs text-white/50 font-medium">
+              <span className="text-xs text-white/40 font-medium">
                 ≈ R{formatCurrency(Math.max(remainingZAR, 0))}
               </span>
-              {/* Premium progress bar */}
-              <div className="w-full h-1.5 bg-black/20 shadow-[inset_0_1px_2px_rgba(0,0,0,0.3)] rounded-full mt-1.5 overflow-hidden">
+              {/* Ultra sleek progress bar */}
+              <div className="w-full h-1 bg-white/10 rounded-full mt-1.5 overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-500 relative"
                   style={{
                     width: `${100 - progressPct}%`,
-                    backgroundColor: statusColor,
-                    boxShadow: `0 0 10px ${statusColor}80`,
+                    background: spendRatio > 0.9 
+                      ? 'linear-gradient(90deg, #FF453A, #FF7B72)' 
+                      : spendRatio > 0.7 
+                      ? 'linear-gradient(90deg, #FF9F0A, #FFC043)' 
+                      : 'linear-gradient(90deg, #10B981, #6EE7B7)',
+                    boxShadow: spendRatio > 0.9 
+                      ? '0 0 8px rgba(255,69,58,0.5)' 
+                      : spendRatio > 0.7 
+                      ? '0 0 8px rgba(255,159,10,0.5)' 
+                      : '0 0 8px rgba(52,211,153,0.5)',
                   }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                </div>
+                />
               </div>
             </div>
 

@@ -15,7 +15,7 @@ import { BillsCalendarCard } from "@/components/home/BillsCalendarCard";
 
 export default function Home() {
   return (
-    <div className="flex flex-col w-full h-full px-6 pt-12 pb-8">
+    <div className="flex flex-col w-full min-h-full px-6 pt-12 pb-8">
       {/* Header */}
       <div className="flex justify-between items-center mb-6 relative z-20">
         <div className="flex flex-col">
