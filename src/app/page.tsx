@@ -274,25 +274,27 @@ export default function Home() {
         <div className="grid grid-cols-2 gap-4">
           
           {/* Spend Jar (Modeled after USDC card) */}
-          <Link href="/jar" className="aspect-square bg-[#E8E8E8] rounded-[36px] p-5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_2px_10px_rgba(255,255,255,0.8),0_12px_24px_rgba(0,0,0,0.15)] border border-black/5">
+          <Link href="/jar" className="aspect-square bg-[#1A1A1A] rounded-[36px] p-5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
             {/* Animated Piggy Background */}
             <AnimatedPiggyBank />
             
-            <div className="w-8 h-8 rounded-full bg-[#1A1A1A] flex items-center justify-center shadow-md relative z-10 mb-3">
-              <PiggyBank className="w-4 h-4 text-white" strokeWidth={2.5} />
-            </div>
-            
-            <div className="flex flex-col items-start relative z-10">
-              <span className="text-black/50 text-[10px] font-bold tracking-widest uppercase mb-0.5">Spend Jar</span>
-              <span className="text-black text-[28px] font-black tracking-tighter leading-none mb-1">₱1,240</span>
-              <span className="text-[#FF3B30] text-[11px] font-extrabold tracking-wide">-₱120</span>
+            <div className="flex justify-between items-start relative z-10 w-full">
+              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-md backdrop-blur-md">
+                <PiggyBank className="w-4 h-4 text-white" strokeWidth={2.5} />
+              </div>
+              
+              <div className="flex flex-col items-end text-right">
+                <span className="text-white/50 text-[10px] font-bold tracking-widest uppercase mb-0.5">Spend Jar</span>
+                <span className="text-white text-[28px] font-black tracking-tighter leading-none mb-1">₱1,240</span>
+                <span className="text-[#FF453A] text-[11px] font-extrabold tracking-wide">-₱120</span>
+              </div>
             </div>
           </Link>
 
           {/* Insurance Tracker (Family Line Art Animation) */}
-          <div className="aspect-square bg-[#E8E8E8] border border-black/5 rounded-[36px] relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_2px_10px_rgba(255,255,255,0.8),0_12px_24px_rgba(0,0,0,0.15)]">
+          <div className="aspect-square bg-[#1A1A1A] border border-white/5 rounded-[36px] relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)]">
             {/* The Line Art Background */}
-            <div className="absolute inset-0 w-full h-full opacity-80 mix-blend-multiply">
+            <div className="absolute inset-0 w-full h-full opacity-60 invert mix-blend-screen">
               <AnimatePresence mode="wait">
                 {showInsuranceFamily ? (
                   <motion.div
@@ -334,8 +336,8 @@ export default function Home() {
             
             {/* The Text Foreground - moved to top left, away from art */}
             <div className="flex flex-col items-start relative z-10 p-2 mt-4 ml-4">
-              <span className="text-black/50 text-[10px] font-bold tracking-widest uppercase mb-0.5">Car & Health</span>
-              <span className="text-black text-2xl font-black tracking-tight leading-none">Insurance</span>
+              <span className="text-white/50 text-[10px] font-bold tracking-widest uppercase mb-0.5">Car & Health</span>
+              <span className="text-white text-2xl font-black tracking-tight leading-none">Insurance</span>
             </div>
           </div>
 
