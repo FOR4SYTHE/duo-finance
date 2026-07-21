@@ -346,11 +346,11 @@ export default function Home() {
              <div className="absolute top-0 left-0 w-32 h-32 bg-[#FF9F0A]/10 blur-[50px] rounded-full -translate-x-1/2 -translate-y-1/2" />
              <div className="absolute bottom-0 right-0 w-32 h-32 bg-[#FF453A]/10 blur-[50px] rounded-full translate-x-1/2 translate-y-1/2" />
              
-             <h3 className="text-white/80 text-3xl font-medium leading-[1.1] tracking-tight relative z-10 w-[85%]">
-               Scan <span className="font-semibold text-white">malls, Grab, Shopee,</span> & <span className="font-semibold text-white">Flights</span> for deals.
+             <h3 className="text-white/70 text-2xl sm:text-3xl font-medium leading-[1.25] tracking-tight relative z-10 w-full">
+               Scan <span className="font-bold text-[#D70F64]">Foodpanda</span>, <span className="font-bold text-[#00B14F]">Grab</span>, <span className="font-bold text-[#EE4D2D]">Shopee</span>, <span className="font-bold text-[#3877FF]">Lazada</span>, <span className="font-bold text-[#FF5722]">Klook</span>, <span className="font-bold text-[#38BDF8]">Agoda</span> & <span className="font-bold text-[#00A3E0]">Cheapflights</span> for deals.
              </h3>
 
-             <div className="flex items-center gap-2 mt-8 relative z-10">
+             <div className="flex items-center gap-2 mt-6 relative z-10">
                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm shadow-md">
                  <span role="img" aria-label="shopping">🛍️</span>
                </div>

@@ -13,12 +13,20 @@ export function AnimatedPiggyBank() {
     let mounted = true;
     
     const runAnimations = async () => {
+      // Add a small initial delay to ensure Framer Motion components are fully mounted in the DOM
+      // before attempting to call controls.start(), which prevents the runtime error.
+      await new Promise(r => setTimeout(r, 100));
+
       while (mounted) {
         // --- Standby: Look left and right ---
-        await Promise.all([
-          leftPupilControls.start({ x: -5, transition: { duration: 0.5, ease: "easeInOut" } }),
-          rightPupilControls.start({ x: -5, transition: { duration: 0.5, ease: "easeInOut" } })
-        ]);
+        try {
+          await Promise.all([
+            leftPupilControls.start({ x: -5, transition: { duration: 0.5, ease: "easeInOut" } }),
+            rightPupilControls.start({ x: -5, transition: { duration: 0.5, ease: "easeInOut" } })
+          ]);
+        } catch (e) {
+          // Ignore if unmounted during animation
+        }
         await new Promise(r => setTimeout(r, 2000));
         
         await Promise.all([
