@@ -1,13 +1,31 @@
 "use client";
 
 import { motion, useAnimation } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useBudgetStore } from "@/store/useBudgetStore";
+import { useSpendStore } from "@/store/useSpendStore";
 
 export function AnimatedPiggyBank() {
   const pigControls = useAnimation();
   const leftPupilControls = useAnimation();
   const rightPupilControls = useAnimation();
-  const [coins, setCoins] = useState<{ id: number; tx: number; ty: number; delay: number }[]>([]);
+  const [coins, setCoins] = useState<{ id: number; tx: number; ty: number; delay: number; isCurtain?: boolean; startX?: number }[]>([]);
+
+  // Get Spend Jar state
+  const { config } = useBudgetStore();
+  const { entries } = useSpendStore();
+  
+  // Ref to hold the latest percentage so the animation loop doesn't need to re-run on every state change
+  const percentageRef = useRef(0);
+  const totalSpentRef = useRef(0);
+
+  useEffect(() => {
+    const totalSpent = entries.reduce((sum, entry) => sum + entry.amount, 0);
+    const allowedSpend = config.targetAmount * ((config.jarAllowedPercentage || 20) / 100);
+    const percentage = allowedSpend > 0 ? Math.min((totalSpent / allowedSpend) * 100, 100) : 0;
+    percentageRef.current = percentage;
+    totalSpentRef.current = totalSpent;
+  }, [entries, config.targetAmount, config.jarAllowedPercentage]);
 
   useEffect(() => {
     let mounted = true;
@@ -60,19 +78,52 @@ export function AnimatedPiggyBank() {
           if (!mounted) break;
           pigControls.start({ scaleY: 1.1, scaleX: 0.95, y: -10, transition: { duration: 0.15, ease: "easeOut" } });
           
-          // Spawn a massive fountain of coins
+          // Spawn coins based on spend zone
           if (mounted) {
-            const newCoins = Array.from({ length: 20 }).map((_, i) => {
-              const angle = (Math.random() - 0.5) * Math.PI * 1.2;
-              const power = 150 + Math.random() * 200;
-              return {
-                id: Date.now() + i,
-                tx: Math.sin(angle) * power,
-                ty: -Math.cos(angle) * power,
-                delay: Math.random() * 0.15
-              };
-            });
-            setCoins(prev => [...prev, ...newCoins]);
+            const perc = percentageRef.current;
+            const spent = totalSpentRef.current;
+            
+            let numCoins = 0;
+            let isCurtain = false;
+
+            if (spent === 0) {
+              numCoins = 0;
+            } else if (perc < 50) {
+              numCoins = 3; // Green zone
+            } else if (perc >= 50 && perc < 70) {
+              numCoins = 8; // Orange zone
+            } else {
+              numCoins = 35; // Red zone - Full curtain
+              isCurtain = true;
+            }
+
+            if (numCoins > 0) {
+              const newCoins = Array.from({ length: numCoins }).map((_, i) => {
+                if (isCurtain) {
+                  // Curtain effect: falling from the top edge, spread across width
+                  return {
+                    id: Date.now() + i,
+                    tx: 0,
+                    ty: 300, // fall distance
+                    startX: (Math.random() - 0.5) * 280, // spread across the card width
+                    delay: Math.random() * 0.4, // smooth staggered fall
+                    isCurtain: true
+                  };
+                } else {
+                  // Standard fountain explosion from the snout
+                  const angle = (Math.random() - 0.5) * Math.PI * 1.2;
+                  const power = 100 + Math.random() * 150;
+                  return {
+                    id: Date.now() + i,
+                    tx: Math.sin(angle) * power,
+                    ty: -Math.cos(angle) * power,
+                    delay: Math.random() * 0.15,
+                    isCurtain: false
+                  };
+                }
+              });
+              setCoins(prev => [...prev, ...newCoins]);
+            }
           }
           
           // Recover
@@ -132,28 +183,38 @@ export function AnimatedPiggyBank() {
               <stop offset="0%" stopColor="#FFD4DC" />
               <stop offset="100%" stopColor="#FFAEC0" />
             </radialGradient>
+
+            {/* Ear Clip Paths */}
+            <clipPath id="leftEarClip">
+              <path d="M52 48 Q20 30 28 72 Q42 82 68 76 Z" />
+            </clipPath>
+            <clipPath id="rightEarClip">
+              <path d="M188 48 Q220 30 212 72 Q198 82 172 76 Z" />
+            </clipPath>
           </defs>
 
-          {/* --- Ears --- */}
-          {/* Left Ear Base */}
-          <path d="M45 40 Q20 30 25 70 Q40 80 60 75 Z" fill="url(#earGradientLeft)" />
-          {/* Left Ear Inner Shadow (Replaced filter with solid opacity path to avoid clipping artifact) */}
-          <path d="M35 55 Q25 45 40 40" stroke="#E07A92" strokeWidth="6" strokeLinecap="round" opacity="0.6" fill="none" />
+          {/* --- Ears (Tucked seamlessly behind main head) --- */}
+          {/* Left Ear */}
+          <g clipPath="url(#leftEarClip)">
+            <path d="M52 48 Q20 30 28 72 Q42 82 68 76 Z" fill="url(#earGradientLeft)" />
+            <path d="M50 68 Q38 52 52 46" stroke="#E07A92" strokeWidth="4" strokeLinecap="round" opacity="0.5" fill="none" />
+          </g>
           
-          {/* Right Ear Base */}
-          <path d="M195 40 Q220 30 215 70 Q200 80 180 75 Z" fill="url(#earGradientRight)" />
-          {/* Right Ear Inner Shadow */}
-          <path d="M205 55 Q215 45 200 40" stroke="#E07A92" strokeWidth="6" strokeLinecap="round" opacity="0.6" fill="none" />
+          {/* Right Ear */}
+          <g clipPath="url(#rightEarClip)">
+            <path d="M188 48 Q220 30 212 72 Q198 82 172 76 Z" fill="url(#earGradientRight)" />
+            <path d="M190 68 Q202 52 188 46" stroke="#E07A92" strokeWidth="4" strokeLinecap="round" opacity="0.5" fill="none" />
+          </g>
 
           {/* --- Main Body (Squashed Ellipse) --- */}
           <ellipse cx="120" cy="110" rx="90" ry="75" fill="url(#bodyGradient)" />
           
           {/* Highlight on top of head */}
-          <path d="M70 45 Q120 30 170 45 Q120 55 70 45 Z" fill="#FFFFFF" opacity="0.25" />
+          <path d="M78 45 Q120 33 162 45 Q120 52 78 45 Z" fill="#FFFFFF" opacity="0.22" />
 
-          {/* --- Coin Slot (Moved lower to sit naturally in the head) --- */}
-          <path d="M 95 46 Q 120 48 145 46 L 143 51 Q 120 53 97 51 Z" fill="#3A1C1D" />
-          <path d="M 96 52 Q 120 54 144 52" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" fill="none" />
+          {/* --- Coin Slot (Clean rounded slot) --- */}
+          <rect x="94" y="44" width="52" height="6" rx="3" fill="#3A1C1D" />
+          <path d="M 97 49 Q 120 51 143 49" stroke="#FFFFFF" strokeWidth="1.2" strokeLinecap="round" opacity="0.25" fill="none" />
 
           {/* --- Cheeks (Large Soft Airbrushed Blush) --- */}
           <circle cx="65" cy="115" r="24" fill="#FF5E7E" opacity="0.55" filter="url(#soft-blush)" />
@@ -199,18 +260,32 @@ export function AnimatedPiggyBank() {
         {coins.map((coin) => (
           <motion.div
             key={coin.id}
-            initial={{ y: -110, x: 0, scale: 0.1, opacity: 1, rotate: 0 }}
-            animate={{
-              y: [-110, coin.ty - 110, 250], // Start at hole, shoot way up, fall past the bottom
-              x: [0, coin.tx * 0.8, coin.tx * 1.5], // Explode outward widely
-              scale: [0.1, 1.2, 0.9],
-              opacity: [1, 1, 1, 0],
-              rotate: [0, 360, 1080]
-            }}
+            initial={
+              coin.isCurtain
+                ? { y: -200, x: coin.startX || 0, scale: 0.1, opacity: 0, rotate: 0 }
+                : { y: -110, x: 0, scale: 0.1, opacity: 1, rotate: 0 }
+            }
+            animate={
+              coin.isCurtain
+                ? {
+                    y: [-200, 250],
+                    x: [coin.startX || 0, (coin.startX || 0) + (Math.random() - 0.5) * 20],
+                    scale: [0.1, 1.2, 0.9],
+                    opacity: [0, 1, 1, 0],
+                    rotate: [0, 360]
+                  }
+                : {
+                    y: [-110, coin.ty - 110, 250],
+                    x: [0, coin.tx * 0.8, coin.tx * 1.5],
+                    scale: [0.1, 1.2, 0.9],
+                    opacity: [1, 1, 1, 0],
+                    rotate: [0, 360, 1080]
+                  }
+            }
             transition={{
-              duration: 1.8, // Slightly longer fall
-              times: [0, 0.3, 0.8, 1], // Wait to fade until very end
-              ease: ["easeOut", "easeIn"],
+              duration: coin.isCurtain ? 2.5 : 1.8,
+              times: coin.isCurtain ? [0, 1] : [0, 0.3, 0.8, 1],
+              ease: coin.isCurtain ? "linear" : ["easeOut", "easeIn"],
               delay: coin.delay
             }}
             className="absolute w-8 h-8 rounded-full flex items-center justify-center -translate-x-1/2 -translate-y-1/2"

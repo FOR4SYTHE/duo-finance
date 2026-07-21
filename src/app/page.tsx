@@ -23,6 +23,7 @@ import { NotificationCenter } from "@/components/home/NotificationCenter";
 import { AnimatedPiggyBank } from "@/components/home/AnimatedPiggyBank";
 import { CashbackDealsRadar } from "@/components/home/CashbackDealsRadar";
 import { useBudgetStore } from "@/store/useBudgetStore";
+import { useSpendStore } from "@/store/useSpendStore";
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, Variants } from "framer-motion";
@@ -56,7 +57,11 @@ const itemVariants: Variants = {
 
 export default function Home() {
   const { config, setLastSeenMonth, _hasHydrated, notifications, addNotification } = useBudgetStore();
+  const { entries } = useSpendStore();
   
+  const totalSpent = useMemo(() => entries.reduce((sum, entry) => sum + entry.amount, 0), [entries]);
+  const latestExpense = entries.length > 0 ? entries[0].amount : 0;
+
   const [isInitialLoad, setIsInitialLoad] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -376,8 +381,14 @@ export default function Home() {
               
               <div className="flex flex-col items-end text-right">
                 <span className="text-white/50 text-[10px] font-bold tracking-widest uppercase mb-0.5">Spend Jar</span>
-                <span className="text-white text-[28px] font-black tracking-tighter leading-none mb-1">₱1,240</span>
-                <span className="text-[#FF453A] text-[11px] font-extrabold tracking-wide">-₱120</span>
+                <span className="text-white text-[28px] font-black tracking-tighter leading-none mb-1">
+                  ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                </span>
+                {latestExpense > 0 && (
+                  <span className="text-[#FF453A] text-[11px] font-extrabold tracking-wide">
+                    -₱{latestExpense.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                  </span>
+                )}
               </div>
             </div>
           </Link>
