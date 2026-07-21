@@ -9,6 +9,8 @@ import {
   ScanLine,
   ArrowRight,
   PieChart,
+  Shield,
+  Sparkles,
 } from "lucide-react";
 import { MonthlyReportCard } from "@/components/home/MonthlyReportCard";
 import { BillsCalendarCard } from "@/components/home/BillsCalendarCard";
@@ -17,6 +19,7 @@ import { YearRecap } from "@/components/home/YearRecap";
 import { MonthlySummary } from "@/components/home/MonthlySummary";
 import { YearlySummary } from "@/components/home/YearlySummary";
 import { NotificationCenter } from "@/components/home/NotificationCenter";
+import { AnimatedPiggyBank } from "@/components/home/AnimatedPiggyBank";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useEffect, useState, useMemo } from "react";
 
@@ -101,7 +104,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-full px-6 pt-12 pb-8">
+    <div className="flex flex-col w-full min-h-full px-6 pt-12 pb-32">
       {showYearRollover && (
         <YearRecap 
           year={recapYear} 
@@ -253,66 +256,81 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Section Cards */}
+      {/* Apple Watch Style Bento UI */}
       <div className="flex flex-col gap-4 relative z-20 flex-1">
-        <h2 className="text-white/40 text-[10px] font-semibold tracking-[0.2em] uppercase mb-1 px-1">
-          Modules
+        <h2 className="text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase mb-1 px-2">
+          Lifestyle & Integrations
         </h2>
-
-        <Link
-          href="/budget"
-          className="w-full bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.03] rounded-[24px] p-5 flex items-center justify-between transition-all group active:scale-[0.98]"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#E8A33D]/10 flex items-center justify-center">
-              <PieChart className="w-5 h-5 text-[#E8A33D]" />
+        <div className="grid grid-cols-2 gap-4">
+          
+          {/* Spend Jar (Modeled after USDC card) */}
+          <Link href="/jar" className="aspect-square bg-[#E8E8E8] rounded-[36px] p-5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_2px_10px_rgba(255,255,255,0.8),0_12px_24px_rgba(0,0,0,0.15)] border border-black/5">
+            {/* Animated Piggy Background */}
+            <AnimatedPiggyBank />
+            
+            <div className="w-8 h-8 rounded-full bg-[#1A1A1A] flex items-center justify-center shadow-md relative z-10 mb-3">
+              <PiggyBank className="w-4 h-4 text-white" strokeWidth={2.5} />
             </div>
-            <div className="flex flex-col">
-              <span className="text-white font-medium mb-0.5">Budgeting</span>
-              <span className="text-white/50 text-xs tracking-wide">
-                Plan monthly targets
-              </span>
+            
+            <div className="flex flex-col items-start relative z-10">
+              <span className="text-black/50 text-[10px] font-bold tracking-widest uppercase mb-0.5">Spend Jar</span>
+              <span className="text-black text-[28px] font-black tracking-tighter leading-none mb-1">₱1,240</span>
+              <span className="text-[#FF3B30] text-[11px] font-extrabold tracking-wide">-₱120</span>
+            </div>
+          </Link>
+
+          {/* Insurance Tracker (Modeled after DJI Drone card) */}
+          <div className="aspect-square bg-[#1A1A1A] border border-white/5 rounded-[36px] p-5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)]">
+            <div className="flex justify-between items-start w-full">
+              <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-white/30">
+                <Shield className="w-4 h-4" />
+              </div>
+              <div className="flex gap-1 pr-1 pt-1">
+                <div className="w-1 h-1 rounded-full bg-white/30" />
+                <div className="w-1 h-1 rounded-full bg-white/30" />
+                <div className="w-1 h-1 rounded-full bg-white/30" />
+              </div>
+            </div>
+
+            <div className="mt-auto flex flex-col items-end w-full mb-3 pr-1">
+              <span className="text-white/80 text-[13px] font-semibold tracking-tight">Insurance</span>
+              <span className="text-white/40 text-[10px] font-medium tracking-wide">Car & Health</span>
+            </div>
+
+            <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden relative mb-2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
+              <div className="absolute top-0 left-0 bottom-0 w-[80%] bg-[#B5F145] rounded-full shadow-[0_0_12px_#B5F145]" />
+            </div>
+            
+            <div className="w-full flex justify-center items-center gap-1.5">
+              <span className="text-[#B5F145] text-xs font-black">⚡</span>
+              <span className="text-white/50 text-[10px] font-bold tracking-widest uppercase">Active</span>
             </div>
           </div>
-          <ChevronRightIcon />
-        </Link>
 
-        <Link
-          href="/jar"
-          className="w-full bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.03] rounded-[24px] p-5 flex items-center justify-between transition-all group active:scale-[0.98]"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#30D158]/10 flex items-center justify-center">
-              <PiggyBank className="w-5 h-5 text-[#30D158]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-white font-medium mb-0.5">Spend Jar</span>
-              <span className="text-white/50 text-xs tracking-wide">
-                Log everyday expenses
-              </span>
-            </div>
-          </div>
-          <ChevronRightIcon />
-        </Link>
+          {/* Cashback & Deals (Modeled after "It's 3° now" typography card) */}
+          <div className="col-span-2 bg-[#1C1C1E] rounded-[36px] p-7 relative overflow-hidden group hover:scale-[0.98] transition-transform shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)]">
+             <div className="absolute top-0 left-0 w-32 h-32 bg-[#FF9F0A]/10 blur-[50px] rounded-full -translate-x-1/2 -translate-y-1/2" />
+             <div className="absolute bottom-0 right-0 w-32 h-32 bg-[#FF453A]/10 blur-[50px] rounded-full translate-x-1/2 translate-y-1/2" />
+             
+             <h3 className="text-white/80 text-3xl font-medium leading-[1.1] tracking-tight relative z-10 w-[85%]">
+               Scan <span className="font-semibold text-white">malls, Grab, Shopee,</span> & <span className="font-semibold text-white">Flights</span> for deals.
+             </h3>
 
-        <Link
-          href="/cartify"
-          className="w-full bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.03] rounded-[24px] p-5 flex items-center justify-between transition-all group active:scale-[0.98]"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#F0654B]/10 flex items-center justify-center">
-              <ShoppingCart className="w-5 h-5 text-[#F0654B]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-white font-medium mb-0.5">Cartify</span>
-              <span className="text-white/50 text-xs tracking-wide">
-                Live shopping tracker
-              </span>
-            </div>
+             <div className="flex items-center gap-2 mt-8 relative z-10">
+               <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm shadow-md">
+                 <span role="img" aria-label="shopping">🛍️</span>
+               </div>
+               <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm shadow-md">
+                 <span role="img" aria-label="flight">✈️</span>
+               </div>
+               <span className="text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase ml-2">Cashback AI</span>
+             </div>
           </div>
-          <ChevronRightIcon />
-        </Link>
+        </div>
       </div>
+
+      {/* Massive spacer to guarantee scroll clearance over the bottom nav */}
+      <div className="h-40 shrink-0 pointer-events-none" />
     </div>
   );
 }
