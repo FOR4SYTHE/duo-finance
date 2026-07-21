@@ -67,6 +67,9 @@ If a UI change can't honestly clear all four, it goes back for another pass befo
 
 **Everything must run on free tiers only.** Flag any feature that would require a paid API before building it, and propose a free-tier-compatible alternative or a scoped-down mock version instead.
 
+**SUPABASE & AUTH PHASE REMINDER (MANDATORY WORKFLOW):**
+> Finish 100% of the UI design, client-side interactions, and local Zustand stores across all screens (Home, Budget, Spend Jar, Cartify) BEFORE initializing Supabase. Connecting the database while UI data structures are evolving forces redundant schema rewrites. Once the UI is fully complete, remind the user and kick off the Supabase Auth & Household RLS migration phase.
+
 ---
 
 ## 4. Feature Specs
@@ -209,6 +212,7 @@ The everyday counterpart to a savings piggy bank, but for outgoing spend: instea
 4. Spend Jar — the shared expense-entries data model, quick-add flow, and period accumulation. This is simpler than Cartify and unlocks it, so build it first.
 5. Cartify — shopping trip tracker built on the same expense-entries model as Spend Jar, Simple mode first, then Categorized.
 6. Shopping scanner — scoped per the note above; treat as a stretch/polish feature, not core v1.
+7. **Supabase & Auth Migration (Joint Accounts)** — Once all UI design and client-side Zustand stores are 100% finalized and approved, implement Supabase Auth, `households` schema with RLS, invite code flow, and Zustand-to-Supabase background sync.
 
 Do not start full functionality on Phase 3 onward until the App Shell (step 1) is in place — seeing the whole app's shape first is the point of this reordering.
 

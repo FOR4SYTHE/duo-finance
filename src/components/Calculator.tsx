@@ -114,18 +114,41 @@ export function Calculator() {
                 <div className="flex flex-col items-center opacity-80 mt-1">
                     <div className="flex items-baseline gap-2 justify-center">
                         <span className="text-xl text-white/30 font-light">{isPhpPrimary ? 'R' : '₱'}</span>
-                        <span className="text-[2.5rem] sm:text-[3rem] leading-none text-white font-light tracking-tight flex items-center">
-                            {Array.from(convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})).map((char, index) => (
-                                <motion.span
-                                    key={`${index}-${char}`}
-                                    initial={{ y: 10, opacity: 0, scale: 0.95 }}
-                                    animate={{ y: 0, opacity: 1, scale: 1 }}
-                                    transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.5 }}
-                                    className="inline-block"
-                                >
-                                    {char}
-                                </motion.span>
-                            ))}
+                        <span className="text-[2.5rem] sm:text-[3rem] leading-none text-white font-light tracking-tight flex items-center min-h-[48px] sm:min-h-[56px]">
+                            {Number.isNaN(convertedAmount) ? (
+                                <div className="relative w-8 h-8 opacity-60 ml-2">
+                                    {Array.from({ length: 8 }).map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="absolute inset-0 flex justify-center"
+                                            style={{ transform: `rotate(${i * 45}deg)` }}
+                                        >
+                                            <motion.div
+                                                className="w-1.5 h-1.5 rounded-full bg-white mt-1"
+                                                animate={{ opacity: [1, 0.2] }}
+                                                transition={{
+                                                    duration: 1,
+                                                    repeat: Infinity,
+                                                    delay: (i * 1) / 8,
+                                                    ease: "linear",
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                Array.from(convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})).map((char, index) => (
+                                    <motion.span
+                                        key={`${index}-${char}`}
+                                        initial={{ y: 10, opacity: 0, scale: 0.95 }}
+                                        animate={{ y: 0, opacity: 1, scale: 1 }}
+                                        transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.5 }}
+                                        className="inline-block"
+                                    >
+                                        {char}
+                                    </motion.span>
+                                ))
+                            )}
                         </span>
                     </div>
                     <div className="flex items-center gap-2 justify-center mt-2">
@@ -138,28 +161,47 @@ export function Calculator() {
                 
             </div>
 
-            {/* Premium Squircles Numpad */}
-            <div className="grid grid-cols-4 gap-3 mb-6 z-20">
-                {buttons.map((btn) => (
-                    <button
-                        key={btn.label}
-                        onClick={() => handleAction(btn.label)}
-                        className={`
-                            h-[68px] sm:h-[72px] rounded-[24px] flex items-center justify-center text-[26px] font-light transition-all duration-200 active:scale-[0.92] shadow-sm backdrop-blur-md
-                            ${btn.cols ? 'col-span-2' : ''}
-                            ${btn.type === "num" 
-                                ? "bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] text-white border border-white/[0.02]" 
-                                : btn.type === "op" 
-                                    ? "bg-orange-500/10 hover:bg-orange-500/20 active:bg-orange-500/30 text-orange-400 border border-orange-500/20" 
-                                    : btn.type === "action"
-                                        ? "bg-white text-black hover:bg-gray-200 active:bg-gray-300 border-none shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-                                        : "bg-white/[0.08] hover:bg-white/[0.12] active:bg-white/[0.16] text-white/80 border border-white/[0.05]"
-                            }
-                        `}
-                    >
-                        {btn.label === "⌫" ? <Delete className="w-6 h-6" strokeWidth={1.5} /> : btn.label}
-                    </button>
-                ))}
+            {/* Premium Duo-Finance Glassmorphic Numpad */}
+            <div className="grid grid-cols-4 gap-3 sm:gap-4 mb-6 z-20 max-w-[420px] mx-auto w-full">
+                {buttons.map((btn) => {
+                    let btnClasses = "";
+                    let textClasses = "";
+                    
+                    if (btn.type === "num") {
+                        btnClasses = "bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.06] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_8px_20px_rgba(0,0,0,0.5)] hover:from-white/[0.12] hover:to-white/[0.06]";
+                        textClasses = "text-white font-light text-[30px]";
+                    } else if (btn.type === "op") {
+                        btnClasses = "bg-gradient-to-b from-[#D4AF37]/15 to-[#D4AF37]/5 border border-[#D4AF37]/20 shadow-[inset_0_1px_1px_rgba(212,175,55,0.25),0_8px_20px_rgba(0,0,0,0.5)] hover:from-[#D4AF37]/25 hover:to-[#D4AF37]/10";
+                        textClasses = "text-[#D4AF37] font-normal text-[30px]";
+                    } else if (btn.type === "meta") {
+                        btnClasses = "bg-gradient-to-b from-black/40 to-black/60 border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_20px_rgba(0,0,0,0.5)] hover:from-black/30 hover:to-black/50";
+                        textClasses = "text-white/40 font-medium text-[20px] tracking-wide";
+                    } else if (btn.type === "action") {
+                        btnClasses = "bg-gradient-to-br from-[#D4AF37] to-[#B5952F] border border-[#F2D77D]/50 shadow-[inset_0_1px_2px_rgba(255,255,255,0.6),0_8px_24px_rgba(212,175,55,0.4)] hover:brightness-110";
+                        textClasses = "text-black font-medium text-[30px]";
+                    }
+
+                    return (
+                        <motion.button
+                            key={btn.label}
+                            onClick={() => handleAction(btn.label)}
+                            whileTap={{ scale: 0.9, y: 2 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                            className={`
+                                relative flex items-center justify-center rounded-[26px] h-[72px] sm:h-[78px] transition-colors duration-300 overflow-hidden group
+                                ${btn.cols ? 'col-span-2' : ''}
+                                ${btnClasses}
+                            `}
+                        >
+                            {/* Dynamic Liquid Sheen on Hover */}
+                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                            
+                            <span className={`relative z-10 ${textClasses}`}>
+                                {btn.label === "⌫" ? <Delete className="w-6 h-6" strokeWidth={1.5} /> : btn.label}
+                            </span>
+                        </motion.button>
+                    )
+                })}
             </div>
             
         </div>
