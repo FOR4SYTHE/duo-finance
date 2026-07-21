@@ -677,6 +677,28 @@ function SalaryAllocationContent() {
 export function SmartTools() {
     const [activeTool, setActiveTool] = useState<string | null>(null);
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const tool = params.get('tool');
+            if (tool) {
+                setActiveTool(tool);
+                
+                // Clean up URL without reloading so we don't re-trigger on refresh
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Slight delay to allow the accordion animation to start, then scroll smoothly
+                setTimeout(() => {
+                    const el = document.getElementById('smart-tools-section');
+                    if (el) {
+                        const y = el.getBoundingClientRect().top + window.scrollY - 100; // 100px offset for header
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                    }
+                }, 300);
+            }
+        }
+    }, []);
+
     const TABS = [
         { 
             id: 'runway', 
@@ -709,7 +731,7 @@ export function SmartTools() {
     ];
 
     return (
-        <div className="w-full rounded-[32px] relative z-30 mb-8 overflow-hidden p-[1px] group shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+        <div id="smart-tools-section" className="w-full rounded-[32px] relative z-30 mb-8 overflow-hidden p-[1px] group shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
             {/* The traveling light (Conic gradient border) */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1500px] h-[1500px] bg-[conic-gradient(from_0deg,transparent_60%,rgba(255,255,255,0.05)_80%,rgba(255,255,255,0.5)_100%)] animate-[spin_5s_linear_infinite] z-0 opacity-70 group-hover:opacity-100 transition-opacity duration-700" />
             

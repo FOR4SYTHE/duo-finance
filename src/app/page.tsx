@@ -7,6 +7,7 @@ import {
   PiggyBank,
   ShoppingCart,
   ScanLine,
+  Target,
   ArrowRight,
   PieChart,
   Shield,
@@ -285,49 +286,72 @@ export default function Home() {
         <BillsCalendarCard />
       </motion.div>
 
-      {/* Quick Actions Row */}
+      {/* Premium Quick Actions Row - Morphing Liquid Circles */}
       <motion.div variants={itemVariants} className="flex justify-between items-start mb-8 relative z-20 px-2">
-        <Link
-          href="/calculator"
-          className="flex flex-col items-center gap-3 group"
-        >
-          <div className="w-14 h-14 rounded-full bg-white/[0.04] border border-white/[0.05] flex items-center justify-center group-hover:bg-white/[0.08] transition-all group-active:scale-95">
-            <Calculator className="w-6 h-6 text-white" strokeWidth={1.5} />
-          </div>
-          <span className="text-[11px] font-medium text-white/60 tracking-wide">
+        
+        {/* Calculate */}
+        <Link href="/calculator" className="flex flex-col items-center gap-2 group w-[72px]">
+          <motion.div 
+            initial={{ borderRadius: 34 }} // Perfect circle for 68px
+            whileHover={{ borderRadius: 18, scale: 1.05, backgroundColor: "rgba(255,255,255,0.12)" }}
+            whileTap={{ borderRadius: 16, scale: 0.92 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="w-[68px] h-[68px] bg-gradient-to-b from-white/[0.08] to-transparent border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_8px_16px_rgba(0,0,0,0.4)] flex items-center justify-center overflow-hidden relative"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Calculator className="w-7 h-7 text-white/90 drop-shadow-md relative z-10" strokeWidth={1.5} />
+          </motion.div>
+          <span className="text-[11px] font-semibold text-white/70 tracking-wide group-hover:text-white transition-colors">
             Calculate
           </span>
         </Link>
-        <Link
-          href="/jar"
-          className="flex flex-col items-center gap-3 group"
-        >
-          <div className="w-14 h-14 rounded-full bg-white/[0.04] border border-white/[0.05] flex items-center justify-center group-hover:bg-white/[0.08] transition-all group-active:scale-95">
-            <PiggyBank className="w-6 h-6 text-white" strokeWidth={1.5} />
-          </div>
-          <span className="text-[11px] font-medium text-white/60 tracking-wide">
-            Log Spend
+
+        {/* Goals */}
+        <Link href="/budget?tool=goals" className="flex flex-col items-center gap-2 group w-[72px]">
+          <motion.div 
+            initial={{ borderRadius: 34 }}
+            whileHover={{ borderRadius: 18, scale: 1.05, backgroundColor: "rgba(255,255,255,0.12)" }}
+            whileTap={{ borderRadius: 16, scale: 0.92 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="w-[68px] h-[68px] bg-gradient-to-b from-white/[0.08] to-transparent border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_8px_16px_rgba(0,0,0,0.4)] flex items-center justify-center overflow-hidden relative"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-[#D4AF37]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Target className="w-7 h-7 text-[#D4AF37] drop-shadow-md relative z-10" strokeWidth={1.5} />
+          </motion.div>
+          <span className="text-[11px] font-semibold text-white/70 tracking-wide group-hover:text-white transition-colors">
+            Goals
           </span>
         </Link>
-        <Link
-          href="/cartify"
-          className="flex flex-col items-center gap-3 group"
-        >
-          <div className="w-14 h-14 rounded-full bg-white/[0.04] border border-white/[0.05] flex items-center justify-center group-hover:bg-white/[0.08] transition-all group-active:scale-95">
-            <ShoppingCart className="w-6 h-6 text-white" strokeWidth={1.5} />
-          </div>
-          <span className="text-[11px] font-medium text-white/60 tracking-wide">
-            Start Trip
+
+        {/* Cartify */}
+        <Link href="/cartify" className="flex flex-col items-center gap-2 group w-[72px]">
+          <motion.div 
+            initial={{ borderRadius: 34 }}
+            whileHover={{ borderRadius: 18, scale: 1.05, backgroundColor: "rgba(255,255,255,0.12)" }}
+            whileTap={{ borderRadius: 16, scale: 0.92 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="w-[68px] h-[68px] bg-gradient-to-b from-white/[0.08] to-transparent border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_8px_16px_rgba(0,0,0,0.4)] flex items-center justify-center overflow-hidden relative"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0A84FF]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ShoppingCart className="w-7 h-7 text-[#0A84FF] drop-shadow-md relative z-10" strokeWidth={1.5} />
+          </motion.div>
+          <span className="text-[11px] font-semibold text-white/70 tracking-wide group-hover:text-white transition-colors">
+            Cartify
           </span>
         </Link>
-        <div className="flex flex-col items-center gap-3 opacity-40 cursor-not-allowed relative">
-          <div className="w-14 h-14 rounded-full bg-white/[0.02] border border-white/[0.02] flex items-center justify-center">
-            <ScanLine className="w-6 h-6 text-white" strokeWidth={1.5} />
-          </div>
-          <span className="text-[11px] font-medium text-white/60 tracking-wide">
+
+        {/* Scan (Soon) */}
+        <div className="flex flex-col items-center gap-2 opacity-50 cursor-not-allowed relative w-[72px]">
+          <motion.div 
+            initial={{ borderRadius: 34 }}
+            className="w-[68px] h-[68px] bg-white/[0.02] border border-white/[0.02] flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
+          >
+            <ScanLine className="w-7 h-7 text-white/40 relative z-10" strokeWidth={1.5} />
+          </motion.div>
+          <span className="text-[11px] font-semibold text-white/40 tracking-wide">
             Scan
           </span>
-          <div className="absolute -top-2 -right-2 bg-black px-1.5 py-0.5 rounded text-[8px] text-white/80 border border-white/10 uppercase tracking-widest">
+          <div className="absolute -top-2 -right-1 bg-[#1A1A1A] px-1.5 py-0.5 rounded text-[8px] text-white/70 border border-white/10 shadow-lg uppercase tracking-widest backdrop-blur-md">
             Soon
           </div>
         </div>
