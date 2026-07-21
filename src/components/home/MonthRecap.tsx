@@ -214,13 +214,40 @@ function SlideOutro({ onClose, currentMonthName }: any) {
   );
 }
 
+const slideVariants = {
+  enter: (direction: number) => ({
+    y: direction > 0 ? "100%" : "-100%",
+    opacity: 0,
+    scale: 0.9,
+    zIndex: 0,
+  }),
+  center: {
+    y: 0,
+    opacity: 1,
+    scale: 1,
+    zIndex: 1,
+  },
+  exit: (direction: number) => ({
+    y: direction < 0 ? "100%" : "-100%",
+    opacity: 0,
+    scale: 0.9,
+    zIndex: 0,
+  })
+};
+
 export function MonthRecap({ lastSeenMonthKey, currentMonthKey, onClose }: MonthRecapProps) {
   const { config } = useBudgetStore();
   const { entries } = useSpendStore();
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ container: containerRef });
+  const [[page, direction], setPage] = useState([0, 0]);
+
+  const paginate = (newDirection: number) => {
+    const next = page + newDirection;
+    if (next >= 0 && next < 4) {
+      setPage([next, newDirection]);
+    }
+  };
 
   const [lastYear, lastMonth] = lastSeenMonthKey.split("-").map(Number);
   const lastMonthName = MONTH_NAMES[lastMonth - 1] || "Last Month";
@@ -238,7 +265,6 @@ export function MonthRecap({ lastSeenMonthKey, currentMonthKey, onClose }: Month
   const remaining = totalBudget - totalSpent;
   const isOver = remaining < 0;
 
-  // Calculate Top Category
   const categorySpending: Record<string, number> = {};
   monthEntries.forEach(e => {
     const cat = e.category || "Uncategorized";
@@ -262,63 +288,61 @@ export function MonthRecap({ lastSeenMonthKey, currentMonthKey, onClose }: Month
       .catch(() => {});
   }, [lastSeenMonthKey]);
 
-  // Framer Motion transforms for the Worm
-  // Mapping 0-1 scroll progress to a height and top position.
-  const wormTop = useTransform(scrollYProgress, [0, 0.33, 0.66, 1], ["0%", "33.33%", "66.66%", "100%"]);
-  // We stretch the worm slightly while travelling between points.
-  const wormHeight = useTransform(
-    scrollYProgress, 
-    [0, 0.16, 0.33, 0.5, 0.66, 0.83, 1], 
-    ["16px", "40px", "16px", "40px", "16px", "40px", "16px"]
-  );
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: "100%" }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: "100%" }}
-      transition={{ type: "spring", damping: 30, stiffness: 300 }}
-      className="fixed inset-0 z-[120] bg-black"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[120] bg-black overflow-hidden flex flex-col"
     >
-      {/* Scrollable Container */}
-      <div 
-        ref={containerRef}
-        className="w-full h-full overflow-y-scroll snap-y snap-mandatory no-scrollbar relative"
-      >
-        <div className="sticky top-0 h-[100dvh] snap-start z-10">
-          <SlideCover monthName={lastMonthName} photoUrl={photoUrl} />
-        </div>
-        
-        <div className="sticky top-0 h-[100dvh] snap-start z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
-          <SlideScore config={config} monthEntries={monthEntries} remaining={remaining} isOver={isOver} />
-        </div>
-        
-        <div className="sticky top-0 h-[100dvh] snap-start z-30 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
-          <SlideHit topCategory={topCategory} topAmount={topAmount} />
-        </div>
-        
-        <div className="sticky top-0 h-[100dvh] snap-start z-40 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
-          <SlideOutro onClose={onClose} currentMonthName={currentMonthName} />
-        </div>
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <AnimatePresence initial={false} custom={direction}>
+          <motion.div
+            key={page}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ y: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={1}
+            onDragEnd={(e, { offset, velocity }) => {
+              const swipe = Math.abs(offset.y) * velocity.y;
+              if (swipe < -10000 || offset.y < -50) {
+                paginate(1);
+              } else if (swipe > 10000 || offset.y > 50) {
+                paginate(-1);
+              }
+            }}
+            className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing pointer-events-auto"
+          >
+            {page === 0 && <SlideCover monthName={lastMonthName} photoUrl={photoUrl} />}
+            {page === 1 && <SlideScore config={config} monthEntries={monthEntries} remaining={remaining} isOver={isOver} />}
+            {page === 2 && <SlideHit topCategory={topCategory} topAmount={topAmount} />}
+            {page === 3 && <SlideOutro onClose={onClose} currentMonthName={currentMonthName} />}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* The Worm Progress Indicator */}
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 h-40 w-1 flex flex-col justify-between items-center z-[130]">
-        <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-        <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-        <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-        <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-        
-        {/* The Crawling Worm */}
-        <motion.div 
-          className="absolute w-1.5 bg-white rounded-full top-0 -ml-[0.75px]"
-          style={{ 
-            top: wormTop, 
-            height: wormHeight,
-            marginTop: useTransform(wormHeight, (h) => `-${parseInt(h)/2}px`),
-            transform: "translateY(-50%)"
-          }}
-        />
+      {/* Slide Indicators */}
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-[130] pointer-events-none">
+        {[0, 1, 2, 3].map((i) => (
+          <motion.div 
+            key={i}
+            animate={{ 
+              height: page === i ? 24 : 6,
+              opacity: page === i ? 1 : 0.2
+            }}
+            className="w-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+          />
+        ))}
+      </div>
+      
+      {/* Desktop Helper */}
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 z-[130] md:flex hidden pointer-events-none opacity-30">
+         <span className="text-white text-xs tracking-widest uppercase">Click & drag up/down</span>
       </div>
     </motion.div>
   );

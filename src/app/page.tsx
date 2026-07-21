@@ -13,6 +13,7 @@ import {
 import { MonthlyReportCard } from "@/components/home/MonthlyReportCard";
 import { BillsCalendarCard } from "@/components/home/BillsCalendarCard";
 import { MonthRecap } from "@/components/home/MonthRecap";
+import { YearRecap } from "@/components/home/YearRecap";
 import { MonthlySummary } from "@/components/home/MonthlySummary";
 import { NotificationCenter } from "@/components/home/NotificationCenter";
 import { useBudgetStore } from "@/store/useBudgetStore";
@@ -21,11 +22,13 @@ import { useEffect, useState, useMemo } from "react";
 export default function Home() {
   const { config, setLastSeenMonth, _hasHydrated, notifications, addNotification } = useBudgetStore();
   const [showRollover, setShowRollover] = useState(false);
+  const [showYearRollover, setShowYearRollover] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [showNotifCenter, setShowNotifCenter] = useState(false);
   
   const [lastSeen, setLastSeen] = useState("");
   const [currentMonth, setCurrentMonth] = useState("");
+  const [recapYear, setRecapYear] = useState(new Date().getFullYear());
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
 
@@ -34,17 +37,28 @@ export default function Home() {
       const now = new Date();
       const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
       
-      // If the calendar month has moved past the last seen month, trigger rollover
-      if (currentMonthKey > config.lastSeenMonth) {
+      const lastYear = parseInt(config.lastSeenMonth.split("-")[0]);
+      const currentYear = now.getFullYear();
+
+      // Yearly Rollover takes precedence
+      if (currentYear > lastYear) {
+        setRecapYear(lastYear);
+        setLastSeen(config.lastSeenMonth);
+        setCurrentMonth(currentMonthKey);
+        setShowYearRollover(true);
+      } 
+      // Monthly Rollover
+      else if (currentMonthKey > config.lastSeenMonth) {
         setLastSeen(config.lastSeenMonth);
         setCurrentMonth(currentMonthKey);
         setShowRollover(true);
       }
     }
-  }, [_hasHydrated, config.lastSeenMonth]);
+  }, [config.lastSeenMonth, _hasHydrated]);
 
   const handleRolloverClose = () => {
     setShowRollover(false);
+    setShowYearRollover(false);
     setLastSeenMonth(currentMonth);
 
     // Give them a notification so they can easily find the report later!
@@ -70,6 +84,13 @@ export default function Home() {
 
   return (
     <div className="flex flex-col w-full min-h-full px-6 pt-12 pb-8">
+      {showYearRollover && (
+        <YearRecap 
+          year={recapYear} 
+          onClose={handleRolloverClose} 
+        />
+      )}
+
       {showRollover && (
         <MonthRecap 
           lastSeenMonthKey={lastSeen} 
@@ -106,13 +127,24 @@ export default function Home() {
           <div className="flex gap-2">
             <button 
               onClick={() => {
+                setRecapYear(2026);
+                setLastSeen("2026-12");
+                setCurrentMonth("2027-01");
+                setShowYearRollover(true);
+              }}
+              className="px-3 py-2 bg-[#D4AF37]/20 rounded-full text-[10px] uppercase tracking-widest font-bold text-[#D4AF37] hover:bg-[#D4AF37]/30 transition-colors border border-[#D4AF37]/30"
+            >
+              Test Yearly
+            </button>
+            <button 
+              onClick={() => {
                 setLastSeen("2026-07");
                 setCurrentMonth("2026-08");
                 setShowRollover(true);
               }}
               className="px-3 py-2 bg-[#0A84FF]/20 rounded-full text-[10px] uppercase tracking-widest font-bold text-[#0A84FF] hover:bg-[#0A84FF]/30 transition-colors border border-[#0A84FF]/30"
             >
-              Test Rollover
+              Test Monthly
             </button>
             <button 
               onClick={() => {
