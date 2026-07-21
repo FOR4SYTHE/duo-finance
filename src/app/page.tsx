@@ -429,6 +429,7 @@ export default function Home() {
                       src="/insurance-family-waving.png" 
                       alt="Family Waving Art" 
                       fill 
+                      priority
                       className="object-cover object-bottom" 
                       sizes="(max-width: 768px) 50vw, 33vw"
                     />
@@ -446,6 +447,7 @@ export default function Home() {
                       src="/insurance-bg-only.png" 
                       alt="House Background Art" 
                       fill 
+                      priority
                       className="object-cover object-bottom" 
                       sizes="(max-width: 768px) 50vw, 33vw"
                     />
