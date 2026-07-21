@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Copy, Check, Radar, Clock, Flame, Navigation } from "lucide-react";
+import { X, Copy, Check, Radar, Clock, Flame, Navigation, Database } from "lucide-react";
 
 interface Deal {
   id: string;
@@ -26,8 +27,31 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
   const [activeFilter, setActiveFilter] = useState("All");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Reference for the scroll container to enable Framer Motion scroll effects if needed,
+  // though we will achieve the core stacking effect using high-performance CSS sticky.
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
   const filters = ["All", "Foodpanda", "Grab", "Shopee", "Lazada", "Klook", "Agoda", "Cheapflights"];
   const locationShortcuts = ["Metro Manila", "Cebu", "Palawan", "Online Only"];
+
+  const loadMockData = () => {
+    setScanStatus("scanning");
+    setTimeout(() => {
+      setDeals([
+        { id: "1", brand: "Foodpanda", title: "₱100 off on minimum spend ₱499", code: "PANDA100", expires: "2026-08-01T00:00:00Z", category: "Food", hot: true, url: "#" },
+        { id: "2", brand: "Grab", title: "20% off GrabCar (max ₱80)", code: "GRAB20", expires: "2026-07-26T00:00:00Z", category: "Transport", hot: false, url: "#" },
+        { id: "3", brand: "Shopee", title: "Free Shipping Vouchers", code: "FREESHIP", expires: "2026-08-01T00:00:00Z", category: "Shopping", hot: true, url: "#" },
+        { id: "4", brand: "Lazada", title: "₱250 off Tech Accessories", code: "LAZTECH", expires: "2026-07-30T00:00:00Z", category: "Shopping", hot: false, url: "#" },
+        { id: "5", brand: "Klook", title: "15% off Weekend Getaways", code: "WKND15", expires: "2026-08-15T00:00:00Z", category: "Travel", hot: true, url: "#" },
+        { id: "6", brand: "Agoda", title: "₱500 off Hotel Bookings", code: "AGODA500", expires: "2026-08-10T00:00:00Z", category: "Travel", hot: false, url: "#" },
+        { id: "7", brand: "Foodpanda", title: "Free Delivery on Pick-Up", code: "PICKUPFREE", expires: "2026-07-31T00:00:00Z", category: "Food", hot: false, url: "#" },
+        { id: "8", brand: "Grab", title: "₱50 off GrabFood orders", code: "FOOD50", expires: "2026-08-05T00:00:00Z", category: "Food", hot: false, url: "#" },
+        { id: "9", brand: "Shopee", title: "10% Cashback on Gadgets", code: "GADGET10", expires: "2026-08-02T00:00:00Z", category: "Shopping", hot: true, url: "#" },
+        { id: "10", brand: "Cheapflights", title: "₱1000 off International Flights", code: "FLY1000", expires: "2026-09-01T00:00:00Z", category: "Travel", hot: true, url: "#" },
+      ]);
+      setScanStatus("results");
+    }, 1500);
+  };
 
   const startScan = async () => {
     setScanStatus("scanning");
@@ -63,6 +87,19 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
       case "Agoda": return "text-[#38BDF8] bg-[#38BDF8]/10 border-[#38BDF8]/20 ring-[#38BDF8]";
       case "Cheapflights": return "text-[#00A3E0] bg-[#00A3E0]/10 border-[#00A3E0]/20 ring-[#00A3E0]";
       default: return "text-white/80 bg-white/10 border-white/20 ring-white";
+    }
+  };
+
+  const getBrandArtwork = (brand: string) => {
+    switch (brand) {
+      case "Foodpanda": return "/assets/deals/foodpanda.png";
+      case "Grab": return "/assets/deals/grab.png";
+      case "Shopee": return "/assets/deals/shopee.png";
+      case "Lazada": return "/assets/deals/shopee.png"; // shared bag art
+      case "Klook": return "/assets/deals/travel.png";
+      case "Agoda": return "/assets/deals/travel.png";
+      case "Cheapflights": return "/assets/deals/travel.png";
+      default: return ""; // Fallback
     }
   };
 
@@ -198,6 +235,21 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                           </span>
                       </div>
                   </motion.button>
+
+                  {/* MOCK DATA BUTTON */}
+                  <motion.button 
+                      onClick={loadMockData}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="relative w-full group overflow-hidden rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+                  >
+                      <div className="relative px-6 py-3 flex items-center justify-center gap-2 z-10">
+                          <Database className="w-4 h-4 text-white/50 group-hover:text-white/80 transition-colors" />
+                          <span className="text-white/50 group-hover:text-white/80 font-bold tracking-[0.1em] uppercase text-[11px] transition-colors">
+                              Load Long Mock Data (Test Scroll)
+                          </span>
+                      </div>
+                  </motion.button>
               </motion.div>
           </div>
       )}
@@ -222,7 +274,11 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
             </div>
 
             {/* Deals Feed */}
-            <div className="flex-1 overflow-y-auto px-6 pb-32 relative z-10 no-scrollbar">
+            <div 
+               ref={scrollContainerRef}
+               className="flex-1 overflow-y-auto px-6 pb-[60vh] relative z-10 no-scrollbar"
+               style={{ scrollBehavior: 'smooth' }}
+            >
                 {scanStatus === "scanning" ? (
                 <div className="flex flex-col items-center justify-center h-40 gap-6 opacity-70 mt-10">
                     {/* Custom State Variant 3 Animation (Matte & Precise) */}
@@ -258,9 +314,9 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                     </span>
                 </div>
                 ) : filteredDeals.length > 0 ? (
-                <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-2 mb-2 px-2">
-                        <span className="text-white/50 text-xs font-bold tracking-widest uppercase">
+                <div className="flex flex-col gap-0 relative pt-2">
+                    <div className="flex items-center gap-2 mb-4 px-2 sticky top-0 z-50 bg-[#0A0A0C]/80 backdrop-blur-md py-2 -mx-2">
+                        <span className="text-white/50 text-xs font-bold tracking-widest uppercase ml-2">
                             Here are some of the deals in {location || 'the Philippines'}
                         </span>
                     </div>
@@ -268,103 +324,103 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                     {filteredDeals.map((deal, i) => (
                         <motion.div
                         key={deal.id}
-                        initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ delay: i * 0.08, type: "spring", damping: 25, stiffness: 200 }}
-                        className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-[32px] p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_20px_40px_rgba(0,0,0,0.4)] relative overflow-hidden flex flex-col gap-6 transform-gpu will-change-transform"
+                        initial={{ opacity: 0, y: 100 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: Math.min(i * 0.05, 0.5), type: "spring", damping: 25, stiffness: 200 }}
+                        className="sticky will-change-transform"
+                        style={{
+                            // Create the stacked deck of cards effect based on the inspiration video
+                            top: `calc(40px + ${i * 12}px)`,
+                            zIndex: i,
+                            marginBottom: '16px', // Gap between cards when not stacked
+                        }}
                         >
-                        {/* Dynamic pulsing brand glow behind ticket */}
-                        <motion.div 
-                            animate={{ opacity: [0.15, 0.25, 0.15], scale: [1, 1.1, 1] }}
-                            transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut" }}
-                            className={`absolute top-0 right-0 w-40 h-40 blur-[60px] -translate-y-1/2 translate-x-1/4 rounded-full will-change-transform transform-gpu ${getBrandColor(deal.brand).split(' ')[3].replace('ring-', 'bg-')}`} 
-                        />
-                        
-                        <div className="flex items-start justify-between relative z-10">
-                            <div className="flex items-center gap-2">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border text-[10px] font-bold overflow-hidden ${getBrandColor(deal.brand).split(' ').slice(0, 3).join(' ')}`}>
-                                    {/* Try to load logo, fallback to initial if it fails */}
-                                    <img 
-                                        src={`https://icon.horse/icon/${
-                                            deal.brand === 'Foodpanda' ? 'foodpanda.ph' :
-                                            deal.brand === 'Grab' ? 'grab.com' :
-                                            deal.brand === 'Shopee' ? 'shopee.ph' :
-                                            deal.brand === 'Lazada' ? 'lazada.com.ph' :
-                                            deal.brand === 'Klook' ? 'klook.com' :
-                                            deal.brand === 'Agoda' ? 'agoda.com' :
-                                            deal.brand === 'Cheapflights' ? 'cheapflights.com' :
-                                            'example.com'
-                                        }`} 
-                                        alt={deal.brand}
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            e.currentTarget.style.display = 'none';
-                                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                        }}
+                          <div className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_20px_40px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-row min-h-[220px]">
+                            
+                            {/* Left Side: Content */}
+                            <div className="flex flex-col gap-5 flex-1 relative z-20 pr-32">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border text-[10px] font-bold overflow-hidden ${getBrandColor(deal.brand).split(' ').slice(0, 3).join(' ')}`}>
+                                        <img 
+                                            src={`https://icon.horse/icon/${
+                                                deal.brand === 'Foodpanda' ? 'foodpanda.ph' :
+                                                deal.brand === 'Grab' ? 'grab.com' :
+                                                deal.brand === 'Shopee' ? 'shopee.ph' :
+                                                deal.brand === 'Lazada' ? 'lazada.com.ph' :
+                                                deal.brand === 'Klook' ? 'klook.com' :
+                                                deal.brand === 'Agoda' ? 'agoda.com' :
+                                                deal.brand === 'Cheapflights' ? 'cheapflights.com' :
+                                                'example.com'
+                                            }`} 
+                                            alt={deal.brand}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                            }}
+                                        />
+                                        <span className="hidden">{deal.brand.substring(0, 1)}</span>
+                                    </div>
+                                    <span className="text-white/80 text-xs font-bold tracking-widest uppercase drop-shadow-md">
+                                        {deal.brand}
+                                    </span>
+                                </div>
+                                
+                                <h3 className="text-white text-[28px] font-light leading-[1.1] tracking-tight drop-shadow-md">
+                                    {deal.title}
+                                </h3>
+                                
+                                <div className="flex items-center gap-3 mt-auto pt-2">
+                                  <button
+                                      onClick={() => handleCopy(deal.id, deal.code)}
+                                      className={`flex items-center justify-center w-11 h-11 rounded-full transition-all overflow-hidden relative backdrop-blur-md shadow-md ${
+                                      copiedId === deal.id 
+                                          ? "bg-[#34C759] text-white" 
+                                          : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
+                                      }`}
+                                      title="Copy Promo Code"
+                                  >
+                                      {copiedId === deal.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                                  </button>
+                                  
+                                  <a
+                                      href={deal.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex flex-1 items-center justify-center gap-2 px-6 h-11 rounded-full text-[13px] font-extrabold tracking-widest uppercase transition-all overflow-hidden relative bg-white text-black hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95"
+                                  >
+                                      Claim
+                                  </a>
+                                </div>
+                            </div>
+
+                            {/* Right Side: Generated 3D Artwork */}
+                            <div className="absolute right-[-30px] top-1/2 -translate-y-1/2 w-[220px] h-[220px] pointer-events-none z-10 opacity-100 mix-blend-screen"
+                                 style={{
+                                     maskImage: 'radial-gradient(circle at center, black 30%, transparent 70%)',
+                                     WebkitMaskImage: 'radial-gradient(circle at center, black 30%, transparent 70%)'
+                                 }}>
+                                {getBrandArtwork(deal.brand) && (
+                                    <Image 
+                                        src={getBrandArtwork(deal.brand)} 
+                                        alt={`${deal.brand} artwork`}
+                                        width={220}
+                                        height={220}
+                                        className="w-full h-full object-contain filter contrast-125 brightness-110 drop-shadow-2xl"
+                                        unoptimized={false}
                                     />
-                                    <span className="hidden">{deal.brand.substring(0, 1)}</span>
-                                </div>
-                                <span className="text-white/60 text-xs font-bold tracking-widest uppercase">
-                                    {deal.brand}
-                                </span>
-                            </div>
-                            {deal.hot && (
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md overflow-hidden relative">
-                                <motion.div 
-                                    animate={{ filter: ["hue-rotate(0deg)", "hue-rotate(360deg)"] }}
-                                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                                    className="absolute inset-0 bg-gradient-to-r from-[#FF3B30] via-[#FF9500] to-[#FFCC00] opacity-20"
-                                />
-                                <Flame className="w-3.5 h-3.5 text-[#FF9500] relative z-10" />
-                                <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">Hot</span>
-                            </div>
-                            )}
-                        </div>
-                        
-                        {/* Massive typography for the deal */}
-                        <div className="relative z-10 py-2">
-                            <h3 className="text-white text-3xl font-light leading-[1.1] tracking-tight pr-4">
-                                {deal.title}
-                            </h3>
-                        </div>
-                        
-                        <div className="flex items-center justify-between mt-auto relative z-10 pt-4 border-t border-white/10 border-dashed">
-                            <div className="flex items-center gap-2 text-white/40">
-                                <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center">
-                                    <Clock className="w-3 h-3" />
-                                </div>
-                                <span className="text-[11px] font-bold uppercase tracking-widest">
-                                    Ends {new Date(deal.expires).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
-                                </span>
-                            </div>
-                            
-                            <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => handleCopy(deal.id, deal.code)}
-                                className={`flex items-center justify-center w-11 h-11 rounded-2xl transition-all overflow-hidden relative backdrop-blur-md ${
-                                copiedId === deal.id 
-                                    ? "bg-[#34C759]/20 text-[#34C759] border border-[#34C759]/30" 
-                                    : "bg-white/5 text-white hover:bg-white/10 border border-white/10"
-                                }`}
-                                title="Copy Promo Code"
-                            >
-                                {copiedId === deal.id ? (
-                                    <Check className="w-4 h-4" />
-                                ) : (
-                                    <Copy className="w-4 h-4" />
                                 )}
-                            </button>
-                            
-                            <a
-                                href={deal.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-2 px-6 h-11 rounded-2xl text-[13px] font-extrabold tracking-widest uppercase transition-all overflow-hidden relative bg-white text-black hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95"
-                            >
-                                Claim
-                            </a>
                             </div>
-                        </div>
+                            
+                            {/* Hot Badge Overlay */}
+                            {deal.hot && (
+                                <div className="absolute top-6 right-6 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 border border-[#FF9500]/30 backdrop-blur-md shadow-lg">
+                                    <Flame className="w-3.5 h-3.5 text-[#FF9500]" />
+                                    <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#FF9500]">Hot</span>
+                                </div>
+                            )}
+                            
+                          </div>
                         </motion.div>
                     ))}
                     </AnimatePresence>
