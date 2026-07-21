@@ -107,7 +107,7 @@ export function MonthlyReportCard() {
       {/* Hero Card */}
       <div
         onClick={handleCardTap}
-        className="relative w-full aspect-[4/3] min-h-[280px] rounded-[28px] overflow-hidden cursor-pointer mb-6 active:scale-[0.985] transition-transform duration-200"
+        className="relative w-full aspect-[16/10] min-h-[220px] rounded-[24px] overflow-hidden cursor-pointer mb-6 active:scale-[0.985] transition-transform duration-200"
       >
         {/* Photo Background */}
         {photo && !error ? (
@@ -187,7 +187,7 @@ export function MonthlyReportCard() {
             <h2 
               className="font-black tracking-[-0.04em] w-full text-center leading-[0.75] select-none translate-y-0 capitalize"
               style={{
-                fontSize: "clamp(80px, 22vw, 130px)",
+                fontSize: "clamp(60px, 18vw, 100px)",
                 background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.3) 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
