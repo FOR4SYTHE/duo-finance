@@ -56,7 +56,7 @@ export function MonthlyReportCard() {
       ? "#FF453A"
       : spendRatio > 0.7
       ? "#FF9F0A"
-      : "#30D158";
+      : "#00D287"; // Premium fintech mint green
   const statusLabel =
     spendRatio > 0.9
       ? "Over Budget"
@@ -128,65 +128,78 @@ export function MonthlyReportCard() {
         <div className="relative z-10 w-full h-full p-5 flex flex-col justify-between">
           {/* Top Row: Budget overlay + overflow */}
           <div className="flex justify-between items-start">
-            {/* Budget Status Pill */}
-            <div className="bg-black/40 backdrop-blur-xl rounded-2xl px-4 py-3 border border-white/10">
-              <div className="flex items-center gap-2 mb-1.5">
+            {/* Budget Status Pill - Apple Premium Glass */}
+            <div className="bg-white/10 backdrop-blur-2xl rounded-[20px] px-4 py-3.5 border border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),_0_8px_20px_rgba(0,0,0,0.15)] flex flex-col gap-1.5 min-w-[140px]">
+              <div className="flex items-center gap-2 mb-0.5">
                 <div
                   className="w-2 h-2 rounded-full"
                   style={{
                     backgroundColor: statusColor,
-                    boxShadow: `0 0 8px ${statusColor}`,
+                    boxShadow: `0 0 10px ${statusColor}`,
                   }}
                 />
                 <span
-                  className="text-[10px] font-bold tracking-widest uppercase"
+                  className="text-[10px] font-bold tracking-[0.15em] uppercase"
                   style={{ color: statusColor }}
                 >
                   {statusLabel}
                 </span>
               </div>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-xl font-semibold text-white tracking-tight">
+                <span className="text-2xl font-semibold text-white tracking-tight drop-shadow-sm">
                   ₱{formatCurrency(Math.max(remaining, 0))}
                 </span>
-                <span className="text-[10px] text-white/50 font-medium">left</span>
+                <span className="text-[11px] text-white/70 font-medium">left</span>
               </div>
-              <span className="text-[11px] text-white/40 font-medium">
+              <span className="text-xs text-white/50 font-medium">
                 ≈ R{formatCurrency(Math.max(remainingZAR, 0))}
               </span>
-              {/* Mini progress bar */}
-              <div className="w-full h-1 bg-white/10 rounded-full mt-2 overflow-hidden">
+              {/* Premium progress bar */}
+              <div className="w-full h-1.5 bg-black/20 shadow-[inset_0_1px_2px_rgba(0,0,0,0.3)] rounded-full mt-1.5 overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-500"
+                  className="h-full rounded-full transition-all duration-500 relative"
                   style={{
                     width: `${100 - progressPct}%`,
                     backgroundColor: statusColor,
+                    boxShadow: `0 0 10px ${statusColor}80`,
                   }}
-                />
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
               </div>
             </div>
 
             {/* Overflow button → Month Picker */}
             <button
               onClick={handleOverflowTap}
-              className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black/50 transition-colors"
+              className="w-9 h-9 rounded-full bg-white/5 backdrop-blur-xl flex items-center justify-center border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)] hover:bg-white/10 transition-colors"
             >
-              <MoreHorizontal className="w-4 h-4 text-white" />
+              <MoreHorizontal className="w-4 h-4 text-white/90" />
             </button>
           </div>
 
-          {/* Bottom: Giant month text */}
-          <div className="flex flex-col items-center w-full mt-auto">
-            {/* Entry count badge */}
-            <div className="mb-2">
-              <span className="bg-white/10 backdrop-blur-md text-white/80 text-[10px] font-medium px-3 py-1.5 rounded-full border border-white/10">
+          {/* Bottom: Giant Liquid Glass month text */}
+          <div className="flex flex-col items-center w-full mt-auto relative -mb-5">
+            <h2 
+              className="font-black tracking-[-0.04em] w-full text-center leading-[0.75] select-none translate-y-0 capitalize"
+              style={{
+                fontSize: "clamp(80px, 22vw, 130px)",
+                background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                WebkitTextStroke: "1px rgba(255, 255, 255, 0.4)",
+                filter: "drop-shadow(0px 15px 25px rgba(0,0,0,0.6)) drop-shadow(0px 4px 10px rgba(0,0,0,0.3))",
+              }}
+            >
+              {currentMonthName}
+            </h2>
+
+            {/* Entry count badge - Bottom Right */}
+            <div className="absolute bottom-8 right-0 z-20">
+              <span className="bg-black/20 backdrop-blur-xl text-white/90 text-[10px] font-medium px-3.5 py-1.5 rounded-full border border-white/20 shadow-[0_4px_10px_rgba(0,0,0,0.2)]">
                 {monthEntries.length} entries logged
               </span>
             </div>
-
-            <h2 className="text-7xl sm:text-8xl font-black text-white mix-blend-overlay tracking-tighter leading-[0.85]">
-              {currentMonthName}
-            </h2>
           </div>
         </div>
       </div>

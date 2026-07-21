@@ -165,19 +165,29 @@ export function MonthPicker({ onClose, onSelectMonth }: MonthPickerProps) {
                     {/* Content */}
                     <div className="relative z-10 w-full h-full p-5 flex flex-col justify-between">
                       <div className="flex justify-between items-start w-full">
-                        <span className="bg-white/10 backdrop-blur-md text-white/80 text-[10px] font-medium px-3 py-1.5 rounded-full border border-white/10">
+                        <span className="bg-white/5 backdrop-blur-xl text-white/90 text-[11px] font-medium px-3.5 py-1.5 rounded-full border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]">
                           {realMonthIdx === now.getMonth() &&
                           selectedYear === currentYear
                             ? "Current month"
                             : `${monthName} ${selectedYear}`}
                         </span>
-                        <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
-                          <MoreHorizontal className="w-4 h-4 text-white/70" />
+                        <div className="w-9 h-9 rounded-full bg-white/5 backdrop-blur-xl flex items-center justify-center border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]">
+                          <MoreHorizontal className="w-4 h-4 text-white/90" />
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-center w-full mt-auto">
-                        <h3 className="text-6xl sm:text-7xl font-black text-white mix-blend-overlay tracking-tighter leading-[0.85]">
+                      <div className="flex flex-col items-center w-full mt-auto relative -mb-5">
+                        <h3 
+                          className="font-black tracking-[-0.04em] w-full text-center leading-[0.75] select-none translate-y-0 capitalize"
+                          style={{
+                            fontSize: "clamp(60px, 18vw, 100px)",
+                            background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            WebkitTextStroke: "1px rgba(255, 255, 255, 0.4)",
+                            filter: "drop-shadow(0px 15px 25px rgba(0,0,0,0.6)) drop-shadow(0px 4px 10px rgba(0,0,0,0.3))",
+                          }}
+                        >
                           {monthName}
                         </h3>
                       </div>
