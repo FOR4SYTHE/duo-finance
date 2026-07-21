@@ -64,6 +64,24 @@ export default function Home() {
   const totalSpent = useMemo(() => entries.reduce((sum, entry) => sum + entry.amount, 0), [entries]);
   const zarTotalSpent = useMemo(() => Math.round(totalSpent * exchangeRate), [totalSpent, exchangeRate]);
 
+  const allowedSpend = config.targetAmount * ((config.jarAllowedPercentage || 20) / 100);
+  const percentage = allowedSpend > 0 ? (totalSpent / allowedSpend) * 100 : 0;
+
+  let phpColor = "text-white";
+  let zarColor = "text-white/60";
+  if (totalSpent > 0) {
+    if (percentage < 50) {
+      phpColor = "text-[#30D158]"; // Green
+      zarColor = "text-[#30D158]/70";
+    } else if (percentage >= 50 && percentage < 70) {
+      phpColor = "text-[#E8A33D]"; // Orange
+      zarColor = "text-[#E8A33D]/70";
+    } else {
+      phpColor = "text-[#FF453A]"; // Red
+      zarColor = "text-[#FF453A]/70";
+    }
+  }
+
   const [isInitialLoad, setIsInitialLoad] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -383,10 +401,10 @@ export default function Home() {
               
               <div className="flex flex-col items-end text-right">
                 <span className="text-white/50 text-[10px] font-bold tracking-widest uppercase mb-0.5">Spend Jar</span>
-                <span className="text-white text-[28px] font-black tracking-tighter leading-none mb-1">
+                <span className={`${phpColor} text-[28px] font-black tracking-tighter leading-none mb-1 transition-colors duration-300`}>
                   ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                 </span>
-                <span className="text-white/60 text-[11px] font-semibold tracking-wide">
+                <span className={`${zarColor} text-[11px] font-semibold tracking-wide transition-colors duration-300`}>
                   ≈ R{zarTotalSpent.toLocaleString()}
                 </span>
               </div>

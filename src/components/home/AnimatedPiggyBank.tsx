@@ -9,7 +9,7 @@ export function AnimatedPiggyBank() {
   const pigControls = useAnimation();
   const leftPupilControls = useAnimation();
   const rightPupilControls = useAnimation();
-  const [coins, setCoins] = useState<{ id: number; tx: number; ty: number; delay: number; isCurtain?: boolean; startX?: number }[]>([]);
+  const [coins, setCoins] = useState<{ id: number; tx: number; ty: number; delay: number; isCurtain?: boolean; startX?: number; endX?: number }[]>([]);
 
   // Get Spend Jar state
   const { config } = useBudgetStore();
@@ -101,11 +101,13 @@ export function AnimatedPiggyBank() {
               const newCoins = Array.from({ length: numCoins }).map((_, i) => {
                 if (isCurtain) {
                   // Curtain effect: falling from the top edge, spread across width
+                  const sx = (Math.random() - 0.5) * 280;
                   return {
                     id: Date.now() + i,
                     tx: 0,
                     ty: 300, // fall distance
-                    startX: (Math.random() - 0.5) * 280, // spread across the card width
+                    startX: sx, // spread across the card width
+                    endX: sx + (Math.random() - 0.5) * 30, // drift slightly while falling
                     delay: Math.random() * 0.4, // smooth staggered fall
                     isCurtain: true
                   };
@@ -265,7 +267,7 @@ export function AnimatedPiggyBank() {
               coin.isCurtain
                 ? {
                     y: [-110, -350, 250], // Spits up high, arcs, falls down
-                    x: [0, coin.startX || 0, (coin.startX || 0) + (Math.random() - 0.5) * 20],
+                    x: [0, coin.startX || 0, coin.endX || 0],
                     scale: [0.1, 1.2, 0.9],
                     opacity: [1, 1, 1, 0],
                     rotate: [0, 360, 1080]
