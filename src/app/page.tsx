@@ -24,6 +24,7 @@ import { AnimatedPiggyBank } from "@/components/home/AnimatedPiggyBank";
 import { CashbackDealsRadar } from "@/components/home/CashbackDealsRadar";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
+import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, Variants } from "framer-motion";
@@ -58,9 +59,10 @@ const itemVariants: Variants = {
 export default function Home() {
   const { config, setLastSeenMonth, _hasHydrated, notifications, addNotification } = useBudgetStore();
   const { entries } = useSpendStore();
+  const { exchangeRate } = useCurrencyStore();
   
   const totalSpent = useMemo(() => entries.reduce((sum, entry) => sum + entry.amount, 0), [entries]);
-  const latestExpense = entries.length > 0 ? entries[0].amount : 0;
+  const zarTotalSpent = useMemo(() => Math.round(totalSpent * exchangeRate), [totalSpent, exchangeRate]);
 
   const [isInitialLoad, setIsInitialLoad] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -384,11 +386,9 @@ export default function Home() {
                 <span className="text-white text-[28px] font-black tracking-tighter leading-none mb-1">
                   ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                 </span>
-                {latestExpense > 0 && (
-                  <span className="text-[#FF453A] text-[11px] font-extrabold tracking-wide">
-                    -₱{latestExpense.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
-                  </span>
-                )}
+                <span className="text-white/60 text-[11px] font-semibold tracking-wide">
+                  ≈ R{zarTotalSpent.toLocaleString()}
+                </span>
               </div>
             </div>
           </Link>

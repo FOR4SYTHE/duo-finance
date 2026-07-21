@@ -260,19 +260,15 @@ export function AnimatedPiggyBank() {
         {coins.map((coin) => (
           <motion.div
             key={coin.id}
-            initial={
-              coin.isCurtain
-                ? { y: -200, x: coin.startX || 0, scale: 0.1, opacity: 0, rotate: 0 }
-                : { y: -110, x: 0, scale: 0.1, opacity: 1, rotate: 0 }
-            }
+            initial={{ y: -110, x: 0, scale: 0.1, opacity: 1, rotate: 0 }}
             animate={
               coin.isCurtain
                 ? {
-                    y: [-200, 250],
-                    x: [coin.startX || 0, (coin.startX || 0) + (Math.random() - 0.5) * 20],
+                    y: [-110, -350, 250], // Spits up high, arcs, falls down
+                    x: [0, coin.startX || 0, (coin.startX || 0) + (Math.random() - 0.5) * 20],
                     scale: [0.1, 1.2, 0.9],
-                    opacity: [0, 1, 1, 0],
-                    rotate: [0, 360]
+                    opacity: [1, 1, 1, 0],
+                    rotate: [0, 360, 1080]
                   }
                 : {
                     y: [-110, coin.ty - 110, 250],
@@ -284,8 +280,8 @@ export function AnimatedPiggyBank() {
             }
             transition={{
               duration: coin.isCurtain ? 2.5 : 1.8,
-              times: coin.isCurtain ? [0, 1] : [0, 0.3, 0.8, 1],
-              ease: coin.isCurtain ? "linear" : ["easeOut", "easeIn"],
+              times: coin.isCurtain ? [0, 0.25, 1] : [0, 0.3, 0.8, 1],
+              ease: ["easeOut", "easeIn"], // Same gravity ease for both modes
               delay: coin.delay
             }}
             className="absolute w-8 h-8 rounded-full flex items-center justify-center -translate-x-1/2 -translate-y-1/2"
