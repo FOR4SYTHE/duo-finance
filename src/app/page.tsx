@@ -20,6 +20,7 @@ import { MonthlySummary } from "@/components/home/MonthlySummary";
 import { YearlySummary } from "@/components/home/YearlySummary";
 import { NotificationCenter } from "@/components/home/NotificationCenter";
 import { AnimatedPiggyBank } from "@/components/home/AnimatedPiggyBank";
+import { CashbackDealsRadar } from "@/components/home/CashbackDealsRadar";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
@@ -32,6 +33,7 @@ export default function Home() {
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [showYearSummaryModal, setShowYearSummaryModal] = useState(false);
   const [showNotifCenter, setShowNotifCenter] = useState(false);
+  const [showDealsRadar, setShowDealsRadar] = useState(false);
   
   const [lastSeen, setLastSeen] = useState("");
   const [currentMonth, setCurrentMonth] = useState("");
@@ -143,6 +145,12 @@ export default function Home() {
           onClose={() => setShowYearSummaryModal(false)} 
         />
       )}
+
+      <AnimatePresence>
+        {showDealsRadar && (
+          <CashbackDealsRadar onClose={() => setShowDealsRadar(false)} />
+        )}
+      </AnimatePresence>
 
       <NotificationCenter
         isOpen={showNotifCenter}
@@ -342,7 +350,10 @@ export default function Home() {
           </div>
 
           {/* Cashback & Deals (Modeled after "It's 3° now" typography card) */}
-          <div className="col-span-2 bg-[#1C1C1E] rounded-[36px] p-7 relative overflow-hidden group hover:scale-[0.98] transition-transform shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)]">
+          <button 
+            onClick={() => setShowDealsRadar(true)}
+            className="text-left w-full col-span-2 bg-[#1C1C1E] rounded-[36px] p-7 relative overflow-hidden group hover:scale-[0.98] transition-transform shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)]"
+          >
              <div className="absolute top-0 left-0 w-32 h-32 bg-[#FF9F0A]/10 blur-[50px] rounded-full -translate-x-1/2 -translate-y-1/2" />
              <div className="absolute bottom-0 right-0 w-32 h-32 bg-[#FF453A]/10 blur-[50px] rounded-full translate-x-1/2 translate-y-1/2" />
              
@@ -359,7 +370,7 @@ export default function Home() {
                </div>
                <span className="text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase ml-2">Cashback AI</span>
              </div>
-          </div>
+          </button>
         </div>
       </div>
 
