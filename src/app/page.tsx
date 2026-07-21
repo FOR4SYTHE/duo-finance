@@ -24,10 +24,49 @@ import { CashbackDealsRadar } from "@/components/home/CashbackDealsRadar";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const itemVariants: Variants = {
+  hidden: { y: 40, opacity: 0, scale: 0.95, filter: 'blur(12px)' },
+  visible: {
+    y: 0,
+    opacity: 1,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: { 
+      type: 'spring', 
+      stiffness: 260, 
+      damping: 20,
+      mass: 0.8
+    }
+  }
+};
 
 export default function Home() {
   const { config, setLastSeenMonth, _hasHydrated, notifications, addNotification } = useBudgetStore();
+  
+  const [isInitialLoad, setIsInitialLoad] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (!sessionStorage.getItem('hasSeenHomeAnimation')) {
+      setIsInitialLoad(true);
+      sessionStorage.setItem('hasSeenHomeAnimation', 'true');
+    }
+  }, []);
+
   const [showRollover, setShowRollover] = useState(false);
   const [showYearRollover, setShowYearRollover] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
@@ -116,7 +155,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-full px-6 pt-12 pb-32">
+    <div suppressHydrationWarning className="flex flex-col w-full min-h-full px-6 pt-12 pb-32">
       {showYearRollover && (
         <YearRecap 
           year={recapYear} 
@@ -158,8 +197,15 @@ export default function Home() {
         onActionClick={handleNotificationAction}
       />
       
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6 relative z-20">
+      <motion.div
+        key={isInitialLoad ? "animate" : "static"}
+        variants={containerVariants}
+        initial={isInitialLoad ? "hidden" : false}
+        animate="visible"
+        className="flex flex-col w-full"
+      >
+        {/* Header */}
+        <motion.div variants={itemVariants} className="flex justify-between items-center mb-6 relative z-20">
         <div className="flex flex-col">
           <span className="text-white/40 text-[11px] font-medium tracking-[0.2em] uppercase mb-1">
             Welcome back
@@ -169,30 +215,32 @@ export default function Home() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          {/* TEMP TRICK: Buttons for testing */}
+          {/* TEMP TRICK: Compact test dots */}
           <div className="flex gap-2">
+            {/* Yearly: Gold */}
             <button 
+              title="Test Yearly Summary"
               onClick={() => {
                 setRecapYear(2026);
                 setLastSeen("2026-12");
                 setCurrentMonth("2027-01");
                 setShowYearRollover(true);
               }}
-              className="px-3 py-2 bg-[#D4AF37]/20 rounded-full text-[10px] uppercase tracking-widest font-bold text-[#D4AF37] hover:bg-[#D4AF37]/30 transition-colors border border-[#D4AF37]/30"
-            >
-              Test Yearly
-            </button>
+              className="w-3 h-3 rounded-full bg-[#D4AF37] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(212,175,55,0.5)]"
+            />
+            {/* Monthly: Blue */}
             <button 
+              title="Test Monthly Summary"
               onClick={() => {
                 setLastSeen("2026-07");
                 setCurrentMonth("2026-08");
                 setShowRollover(true);
               }}
-              className="px-3 py-2 bg-[#0A84FF]/20 rounded-full text-[10px] uppercase tracking-widest font-bold text-[#0A84FF] hover:bg-[#0A84FF]/30 transition-colors border border-[#0A84FF]/30"
-            >
-              Test Monthly
-            </button>
+              className="w-3 h-3 rounded-full bg-[#0A84FF] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(10,132,255,0.5)]"
+            />
+            {/* Notif: White */}
             <button 
+              title="Test Notification"
               onClick={() => {
                 addNotification({
                   title: 'Welcome to Duo Finance',
@@ -202,10 +250,17 @@ export default function Home() {
                   action: { label: 'Got it!' }
                 });
               }}
-              className="px-3 py-2 bg-white/10 rounded-full text-[10px] uppercase tracking-widest font-bold text-white/50 hover:text-white transition-colors border border-white/5"
-            >
-              Test Notif
-            </button>
+              className="w-3 h-3 rounded-full bg-white hover:scale-125 transition-transform shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+            />
+            {/* Animation: Purple */}
+            <button 
+              title="Test Entrance Animation"
+              onClick={() => {
+                sessionStorage.removeItem('hasSeenHomeAnimation');
+                window.location.reload();
+              }}
+              className="w-3 h-3 rounded-full bg-[#BF5AF2] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(191,90,242,0.5)]"
+            />
           </div>
           
           <button 
@@ -218,16 +273,20 @@ export default function Home() {
             )}
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Monthly Report Hero Card (photo-backed, budget overlaid) */}
-      <MonthlyReportCard />
+      <motion.div variants={itemVariants}>
+        <MonthlyReportCard />
+      </motion.div>
 
       {/* Bills Calendar Card */}
-      <BillsCalendarCard />
+      <motion.div variants={itemVariants}>
+        <BillsCalendarCard />
+      </motion.div>
 
       {/* Quick Actions Row */}
-      <div className="flex justify-between items-start mb-8 relative z-20 px-2">
+      <motion.div variants={itemVariants} className="flex justify-between items-start mb-8 relative z-20 px-2">
         <Link
           href="/calculator"
           className="flex flex-col items-center gap-3 group"
@@ -272,10 +331,10 @@ export default function Home() {
             Soon
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Apple Watch Style Bento UI */}
-      <div className="flex flex-col gap-4 relative z-20 flex-1">
+      <motion.div variants={itemVariants} className="flex flex-col gap-4 relative z-20 flex-1">
         <h2 className="text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase mb-1 px-2">
           Lifestyle & Integrations
         </h2>
@@ -372,7 +431,8 @@ export default function Home() {
              </div>
           </button>
         </div>
-      </div>
+      </motion.div>
+      </motion.div>
 
       {/* Massive spacer to guarantee scroll clearance over the bottom nav */}
       <div className="h-40 shrink-0 pointer-events-none" />
