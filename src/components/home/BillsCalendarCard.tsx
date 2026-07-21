@@ -218,12 +218,7 @@ export function BillsCalendarCard() {
                                 : formatCurrency(selectedBills[0].amount)}
                             </span>
                           </div>
-                          {selectedBills.length === 1 && selectedBills[0].isPaid && (
-                            <div className="flex items-center gap-1 text-[#30D158]">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span className="text-[10px] font-bold">Paid</span>
-                            </div>
-                          )}
+
                         </div>
                       </>
                     ) : (
