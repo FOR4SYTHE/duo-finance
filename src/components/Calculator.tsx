@@ -37,9 +37,7 @@ export function Calculator() {
     const convertedAmount = isPhpPrimary 
         ? numericValue * exchangeRate 
         : numericValue / exchangeRate;
-
-    const glowClass = convertedAmount > 10000 ? "glow-danger" : convertedAmount > 5000 ? "glow-warn" : "";
-    const statusColor = convertedAmount > 10000 ? "text-status-danger" : convertedAmount > 5000 ? "text-status-warn" : "text-status-good";
+    const statusColor = isLoadingRate ? "text-status-warn animate-pulse" : "text-status-good";
 
     const handleAction = (label: string) => {
         if (label === "AC") clearInput();
@@ -51,7 +49,7 @@ export function Calculator() {
     };
 
     return (
-        <div className={`w-full h-full bg-transparent text-foreground flex flex-col font-sans transition-all duration-700 relative ${glowClass} px-6 pb-10 pt-14 sm:pt-10`}>
+        <div className={`w-full h-full bg-transparent text-foreground flex flex-col font-sans transition-all duration-700 relative px-6 pb-10 pt-14 sm:pt-10`}>
             
             {/* Header: Minimal Apple-style */}
             <div className="flex justify-between items-center mb-8 relative z-20">
@@ -81,12 +79,19 @@ export function Calculator() {
                     </div>
                     <div className="flex items-baseline gap-2 justify-center">
                         <span className="text-3xl text-white/30 font-light">{isPhpPrimary ? '₱' : 'R'}</span>
-                        <motion.div 
-                            layoutId="hero-number"
-                            className="text-[4.5rem] sm:text-[5.5rem] leading-none text-white font-light tracking-tight drop-shadow-2xl"
-                        >
-                            {displayValue || "0"}
-                        </motion.div>
+                        <div className="text-[4.5rem] sm:text-[5.5rem] leading-none text-white font-light tracking-tight drop-shadow-2xl flex items-center">
+                            {Array.from(displayValue || "0").map((char, index) => (
+                                <motion.span
+                                    key={`${index}-${char}`}
+                                    initial={{ y: 15, opacity: 0, scale: 0.9 }}
+                                    animate={{ y: 0, opacity: 1, scale: 1 }}
+                                    transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.5 }}
+                                    className="inline-block"
+                                >
+                                    {char}
+                                </motion.span>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
@@ -109,8 +114,18 @@ export function Calculator() {
                 <div className="flex flex-col items-center opacity-80 mt-1">
                     <div className="flex items-baseline gap-2 justify-center">
                         <span className="text-xl text-white/30 font-light">{isPhpPrimary ? 'R' : '₱'}</span>
-                        <span className="text-[2.5rem] sm:text-[3rem] leading-none text-white font-light tracking-tight">
-                            {convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        <span className="text-[2.5rem] sm:text-[3rem] leading-none text-white font-light tracking-tight flex items-center">
+                            {Array.from(convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})).map((char, index) => (
+                                <motion.span
+                                    key={`${index}-${char}`}
+                                    initial={{ y: 10, opacity: 0, scale: 0.95 }}
+                                    animate={{ y: 0, opacity: 1, scale: 1 }}
+                                    transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.5 }}
+                                    className="inline-block"
+                                >
+                                    {char}
+                                </motion.span>
+                            ))}
                         </span>
                     </div>
                     <div className="flex items-center gap-2 justify-center mt-2">
