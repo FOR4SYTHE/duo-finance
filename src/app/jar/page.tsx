@@ -194,6 +194,9 @@ export default function SpendJarPage() {
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ opacity: { duration: 0.5 }, y: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
                   className="w-full h-full object-contain drop-shadow-2xl"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/mascot_safe.png";
+                  }}
                 />
               )}
               {percentage >= 50 && percentage < 85 && (
@@ -206,6 +209,10 @@ export default function SpendJarPage() {
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ opacity: { duration: 0.5 }, y: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
                   className="w-full h-full object-contain drop-shadow-2xl"
+                  onError={(e) => {
+                    // Fallback to mascot_danger.webp if mascot_warning.webp is missing
+                    (e.currentTarget as HTMLImageElement).src = "/mascot_danger.webp";
+                  }}
                 />
               )}
               {percentage >= 85 && (
@@ -218,6 +225,9 @@ export default function SpendJarPage() {
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ opacity: { duration: 0.5 }, y: { duration: 0.8, repeat: Infinity, ease: "easeInOut" } }}
                   className="w-full h-full object-contain drop-shadow-2xl"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/mascot_safe.webp";
+                  }}
                 />
               )}
             </AnimatePresence>
@@ -253,18 +263,7 @@ export default function SpendJarPage() {
                   </motion.div>
                 )}
                 
-                {percentage >= 50 && percentage < 85 && (
-                  <motion.div
-                    key="warning-fx"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-2 border-[4px] border-[#E8A33D]/20 rounded-full"
-                    style={{
-                      animation: "pulse 2s infinite ease-in-out"
-                    }}
-                  />
-                )}
+                {percentage >= 50 && percentage < 85 && null}
                 
                 {percentage >= 85 && (
                   <motion.div
