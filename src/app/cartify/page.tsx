@@ -6,6 +6,7 @@ import { TripSetup } from "@/components/cartify/TripSetup";
 import { PlannedListBuilder } from "@/components/cartify/PlannedListBuilder";
 import { LiveTripTracker } from "@/components/cartify/LiveTripTracker";
 import { ReceiptView } from "@/components/cartify/ReceiptView";
+import { CancelPromptModal } from "@/components/cartify/CancelPromptModal";
 import { MoreHorizontal, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { containerVariants, itemVariants } from "@/utils/animations";
@@ -20,7 +21,7 @@ export default function CartifyPage() {
         }
     }, []);
 
-    const { isActive, isBuildingList, isReceiptView, endTrip } = useCartifyStore();
+    const { isActive, isBuildingList, isReceiptView, endTrip, mode } = useCartifyStore();
     const [showCancelPrompt, setShowCancelPrompt] = useState(false);
 
     return (
@@ -59,47 +60,15 @@ export default function CartifyPage() {
                 )}
             </motion.div>
 
-            <AnimatePresence>
-                {showCancelPrompt && (
-                    <>
-                        <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setShowCancelPrompt(false)}
-                            className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm" 
-                        />
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="absolute z-50 left-6 right-6 top-[30%] bg-[#1C1C1E] border border-white/10 p-6 rounded-3xl shadow-2xl"
-                        >
-                            <h3 className="text-xl font-medium text-white mb-2 tracking-tight">End Trip?</h3>
-                            <p className="text-white/50 text-sm mb-6 leading-relaxed">
-                                Are you sure you want to end this trip? You'll lose this active session and return to the setup screen.
-                            </p>
-                            <div className="flex gap-3">
-                                <button 
-                                    onClick={() => setShowCancelPrompt(false)}
-                                    className="flex-1 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors"
-                                >
-                                    Keep Shopping
-                                </button>
-                                <button 
-                                    onClick={() => {
-                                        setShowCancelPrompt(false);
-                                        endTrip();
-                                    }}
-                                    className="flex-1 py-3.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-medium transition-colors border border-red-500/20"
-                                >
-                                    End Trip
-                                </button>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
+            <CancelPromptModal 
+                isOpen={showCancelPrompt}
+                onClose={() => setShowCancelPrompt(false)}
+                onConfirm={() => {
+                    setShowCancelPrompt(false);
+                    endTrip();
+                }}
+                mode={mode}
+            />
         </motion.div>
     );
 }
