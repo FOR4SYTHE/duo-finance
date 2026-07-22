@@ -161,17 +161,16 @@ export function LiveTripTracker() {
                              style={{ backgroundColor: getPathwayColor() }} />
                     </div>
 
-                    {/* Left: 3D Virtual Card (Half emerging from portal) */}
-                    <div className="relative z-20 w-[90px] h-full flex items-center shrink-0 pl-1">
-                        {/* The actual card */}
-                        <div className="relative w-[65px] h-[80px] rounded-[10px] bg-[#111] border border-white/10 shadow-[10px_0_20px_rgba(0,0,0,1)] flex flex-col justify-between p-3 overflow-hidden ml-3">
-                            <div className="self-end text-white font-bold text-[8px] tracking-tighter">R</div>
-                            <div className="self-start text-white font-black italic text-[9px] tracking-tighter mt-auto">VISA</div>
+                    {/* Left: 3D Virtual Card (Seamlessly emerging from darkness) */}
+                    <div className="relative z-20 w-[80px] h-full flex items-center shrink-0">
+                        {/* The actual card (Gradient from black ensures it dissolves on the left) */}
+                        <div className="relative w-[100px] h-[76px] rounded-r-[16px] bg-gradient-to-r from-black via-[#0a0a0a] to-[#181818] border-y border-r border-white/10 shadow-[12px_0_24px_rgba(0,0,0,0.9)] flex flex-col justify-end p-3 -ml-[20px] overflow-hidden">
+                            <div className="self-end text-white/90 font-black italic text-[14px] tracking-tighter pr-0.5">DF</div>
                             {/* Card Right Edge Highlight */}
                             <div className="absolute inset-y-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-white/50 to-transparent mix-blend-screen" />
                         </div>
-                        {/* Dark portal fade on the left side to make it blend into the black */}
-                        <div className="absolute inset-y-0 left-0 w-[45px] bg-gradient-to-r from-black via-black/95 to-transparent pointer-events-none z-30" />
+                        {/* Extra dark portal fade just to guarantee blending */}
+                        <div className="absolute inset-y-0 left-0 w-[35px] bg-gradient-to-r from-black to-transparent pointer-events-none z-30" />
                     </div>
 
                     {/* Center: Text Content (Crisp, perfectly aligned with the beam core) */}
