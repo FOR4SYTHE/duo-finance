@@ -370,28 +370,36 @@ export default function SpendJarPage() {
       )}
 
       {/* Action Button */}
-      <motion.div variants={itemVariants} className="relative z-20 w-full mb-8 shrink-0">
+      <motion.div variants={itemVariants} className="relative z-20 w-full mb-12 shrink-0 flex flex-col items-center justify-center mt-6">
         <button 
           onClick={handleMainAction}
-          className={`w-full h-[68px] rounded-full font-semibold text-lg tracking-wide flex items-center justify-center gap-3 transition-all duration-300 active:scale-[0.98]
-            ${isLocked 
-                ? "bg-[#FF453A]/10 text-[#FF453A] border border-[#FF453A]/30 hover:bg-[#FF453A]/20" 
-                : "bg-white text-black hover:bg-gray-100"
-            }
+          className={`relative group w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300
+            ${isLocked ? 'cursor-not-allowed opacity-70' : 'active:scale-[0.97]'}
           `}
         >
-          {isLocked ? (
-              <>
-                  <Lock className="w-5 h-5" strokeWidth={2.5} />
-                  <span>Jar Locked</span>
-              </>
-          ) : (
-              <>
-                  <Plus className="w-6 h-6" strokeWidth={2.5} />
-                  <span>Quick Log Spend</span>
-              </>
-          )}
+          {/* Base shadow/depth */}
+          <div className="absolute inset-0 rounded-full shadow-[0_12px_30px_rgba(0,0,0,0.6)] bg-black" />
+          
+          {/* Bevel edge (Bottom rim) */}
+          <div className={`absolute inset-0 rounded-full translate-y-2 ${isLocked ? 'bg-[#8B251F]' : 'bg-[#B0C1C7]'}`} />
+          
+          {/* Top Surface */}
+          <div className={`absolute inset-0 rounded-full border-t border-white/50 shadow-[inset_0_4px_12px_rgba(255,255,255,0.8),inset_0_-8px_16px_rgba(0,0,0,0.15)] transition-transform duration-300 flex items-center justify-center
+            ${isLocked 
+              ? 'bg-gradient-to-b from-[#FF5A50] to-[#E33D33] translate-y-2' 
+              : 'bg-gradient-to-b from-[#FFFFFF] to-[#E2EBED] group-active:translate-y-2'
+            }
+          `}>
+             {isLocked ? (
+                  <Lock className="w-8 h-8 text-black/30" strokeWidth={3} />
+              ) : (
+                  <Plus className="w-10 h-10 text-black/60 drop-shadow-sm" strokeWidth={3} />
+              )}
+          </div>
         </button>
+        <span className={`mt-8 text-xs tracking-[0.2em] uppercase font-bold ${isLocked ? 'text-[#FF453A]' : 'text-white/60'}`}>
+          {isLocked ? 'Jar Locked' : 'Quick Log Spend'}
+        </span>
       </motion.div>
 
       {/* Recent Entries Feed */}
