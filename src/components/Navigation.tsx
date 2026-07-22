@@ -3,10 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Calculator, PieChart, PiggyBank, ShoppingCart } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCartifyStore } from "@/store/useCartifyStore";
 
 export function Navigation() {
   const pathname = usePathname();
+  const { isActive } = useCartifyStore();
+
+  const isCartifyTripActive = pathname === '/cartify' && isActive;
 
   const tabs = [
     { name: "Home", href: "/", icon: Home },
@@ -17,7 +21,15 @@ export function Navigation() {
   ];
 
   return (
-    <div className="absolute bottom-6 left-6 right-6 z-50 will-change-transform">
+    <AnimatePresence>
+      {!isCartifyTripActive && (
+        <motion.div 
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 100, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="absolute bottom-6 left-6 right-6 z-50 will-change-transform"
+        >
       <div className="bg-white/[0.05] backdrop-blur-lg border border-white/[0.05] rounded-[28px] p-2 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href;
@@ -56,6 +68,8 @@ export function Navigation() {
           );
         })}
       </div>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
