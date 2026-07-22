@@ -187,49 +187,37 @@ export default function SpendJarPage() {
               {percentage < 50 && (
                 <motion.img
                   key="safe"
-                  src="/mascot_safe.png"
+                  src="/mascot_safe.webp"
                   alt="Safe Mascot"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ opacity: { duration: 0.5 }, y: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
-                  className="w-full h-full object-contain mix-blend-screen drop-shadow-2xl"
-                  style={{ 
-                    maskImage: "radial-gradient(circle at center, black 45%, transparent 65%)", 
-                    WebkitMaskImage: "radial-gradient(circle at center, black 45%, transparent 65%)" 
-                  }}
+                  className="w-full h-full object-contain drop-shadow-2xl"
                 />
               )}
               {percentage >= 50 && percentage < 85 && (
                 <motion.img
                   key="warning"
-                  src="/mascot_warning.png"
+                  src="/mascot_warning.webp"
                   alt="Warning Mascot"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1, y: [0, -6, 0] }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ opacity: { duration: 0.5 }, y: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
-                  className="w-full h-full object-contain mix-blend-screen drop-shadow-2xl"
-                  style={{ 
-                    maskImage: "radial-gradient(circle at center, black 45%, transparent 65%)", 
-                    WebkitMaskImage: "radial-gradient(circle at center, black 45%, transparent 65%)" 
-                  }}
+                  className="w-full h-full object-contain drop-shadow-2xl"
                 />
               )}
               {percentage >= 85 && (
                 <motion.img
                   key="danger"
-                  src="/mascot_danger.png"
+                  src="/mascot_danger.webp"
                   alt="Danger Mascot"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1, y: [0, -4, 0] }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ opacity: { duration: 0.5 }, y: { duration: 0.8, repeat: Infinity, ease: "easeInOut" } }}
-                  className="w-full h-full object-contain mix-blend-screen drop-shadow-2xl"
-                  style={{ 
-                    maskImage: "radial-gradient(circle at center, black 45%, transparent 65%)", 
-                    WebkitMaskImage: "radial-gradient(circle at center, black 45%, transparent 65%)" 
-                  }}
+                  className="w-full h-full object-contain drop-shadow-2xl"
                 />
               )}
             </AnimatePresence>
