@@ -113,21 +113,12 @@ export function LiveTripTracker() {
     const HeroCard = () => {
         let status = 'safe';
         if (progressPercent >= 90) status = 'danger';
-        else if (progressPercent >= 50) status = 'warning';
+        else if (progressPercent >= 70) status = 'warning';
 
-        // Safe: Blue pathway -> Green Orb
-        // Warning: Yellow pathway -> Orange Orb
-        // Danger: Red pathway -> Red Orb
         const getOrbColor = () => {
             if (status === 'danger') return 'rgba(255, 30, 30, 1)'; 
             if (status === 'warning') return 'rgba(255, 140, 0, 1)'; 
             return 'rgba(20, 230, 90, 1)'; 
-        };
-
-        const getPathwayColor = () => {
-            if (status === 'danger') return 'rgba(230, 20, 20, 1)';
-            if (status === 'warning') return 'rgba(230, 120, 0, 1)';
-            return 'rgba(20, 80, 255, 1)'; 
         };
 
         return (
@@ -145,30 +136,44 @@ export function LiveTripTracker() {
                     {/* The Premium Volumetric Q-Tip Beam */}
                     <div className="absolute left-[70px] right-[70px] top-0 bottom-0 pointer-events-none z-10 flex items-center justify-center">
                         
-                        {/* Central Beam (Solid, crisp core, stays solid longer to support text, then fades out) */}
-                        <div className="absolute left-[-20px] right-[0px] h-[36px] blur-[3px] opacity-100"
-                             style={{ background: `linear-gradient(to right, ${getPathwayColor()} 75%, transparent 100%)` }} />
-                             
-                        {/* Central Beam (Soft backing) */}
-                        <div className="absolute left-[-20px] right-[0px] h-[46px] blur-[6px] opacity-80"
-                             style={{ background: `linear-gradient(to right, ${getPathwayColor()} 75%, transparent 100%)` }} />
+                        {/* Energy Pulse (Triggered only when a NEW item is logged, not on +/- adjustments) */}
+                        {items.length > 0 && (
+                            <motion.div 
+                                key={`pulse-${items.length}`}
+                                initial={{ left: "0%", opacity: 0, scaleX: 0.5 }}
+                                animate={{ left: "100%", opacity: [0, 1, 1, 0], scaleX: 1.5 }}
+                                transition={{ duration: 1.2, ease: "easeInOut" }}
+                                className="absolute top-1/2 -translate-y-1/2 w-[120px] h-[36px] rounded-full blur-[12px] mix-blend-screen z-20"
+                                style={{ backgroundColor: 'rgba(255,255,255,0.6)' }}
+                            />
+                        )}
 
-                        {/* Left Fishtail Flare (Mirrors the right side, subtle blue arms wrapping the beam from behind the card) */}
-                        <div className="absolute left-[0px] w-[110px] h-[56px] blur-[10px] opacity-60 flex items-center justify-center">
-                            <div className="w-full h-full"
-                                 style={{ 
-                                     background: `linear-gradient(to right, ${getPathwayColor()} 0%, transparent 110%)`,
-                                     clipPath: 'polygon(0 0, 100% 15%, 45% 50%, 100% 85%, 0 100%)'
-                                 }} />
+                        {/* Central Beam Core (Stable crossfade approach ensures the bridge never breaks) */}
+                        <div className="absolute left-[-20px] right-[0px] h-[36px] blur-[3px]">
+                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(20, 80, 255, 1) 75%, transparent 100%)` }} />
+                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(230, 120, 0, 1) 75%, transparent 100%)` }} />
+                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(230, 20, 20, 1) 75%, transparent 100%)` }} />
                         </div>
                              
-                        {/* Right Fishtail Flare (Wraps the top and bottom of the blue beam like two gentle arms, perfectly matching the sketch) */}
-                        <div className="absolute right-[0px] w-[110px] h-[56px] blur-[10px] opacity-60 flex items-center justify-center">
-                            <div className="w-full h-full"
-                                 style={{ 
-                                     background: `linear-gradient(to right, transparent -10%, ${getOrbColor()} 100%)`,
-                                     clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)'
-                                 }} />
+                        {/* Central Beam Soft Backing */}
+                        <div className="absolute left-[-20px] right-[0px] h-[46px] blur-[6px] opacity-80">
+                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(20, 80, 255, 1) 75%, transparent 100%)` }} />
+                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(230, 120, 0, 1) 75%, transparent 100%)` }} />
+                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(230, 20, 20, 1) 75%, transparent 100%)` }} />
+                        </div>
+
+                        {/* Left Fishtail Flare */}
+                        <div className="absolute left-[0px] w-[110px] h-[56px] blur-[10px] opacity-60">
+                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(20, 80, 255, 1) 0%, transparent 110%)`, clipPath: 'polygon(0 0, 100% 15%, 45% 50%, 100% 85%, 0 100%)' }} />
+                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(255, 140, 0, 1) 0%, transparent 110%)`, clipPath: 'polygon(0 0, 100% 15%, 45% 50%, 100% 85%, 0 100%)' }} />
+                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(255, 30, 30, 1) 0%, transparent 110%)`, clipPath: 'polygon(0 0, 100% 15%, 45% 50%, 100% 85%, 0 100%)' }} />
+                        </div>
+                             
+                        {/* Right Fishtail Flare */}
+                        <div className="absolute right-[0px] w-[110px] h-[56px] blur-[10px] opacity-60">
+                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, transparent -10%, rgba(20, 230, 90, 1) 100%)`, clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)' }} />
+                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, transparent -10%, rgba(255, 140, 0, 1) 100%)`, clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)' }} />
+                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, transparent -10%, rgba(255, 30, 30, 1) 100%)`, clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)' }} />
                         </div>
                     </div>
 
@@ -186,7 +191,7 @@ export function LiveTripTracker() {
 
                     {/* Center: Text Content (Crisp, perfectly aligned with the beam core) */}
                     <div className="relative z-30 flex flex-col items-center justify-center flex-1 h-full px-2">
-                        <span className="text-white/70 text-[11px] font-light tracking-wide mb-[1px]">
+                        <span className="text-white/80 text-[11px] font-medium tracking-wide mb-[1px]">
                             Remaining Budget
                         </span>
                         <motion.span 
@@ -211,41 +216,45 @@ export function LiveTripTracker() {
 
                     {/* Right: Glowing Orb (Ultra-premium volumetric bloom effect) */}
                     <div className="relative z-20 w-[80px] h-full flex items-center justify-center shrink-0 -translate-x-[12px]">
-                        {/* Controlled diffuse aura (Tightened to wrap closely around the atom) */}
+                        {/* Controlled diffuse aura */}
                         <div 
-                            className="absolute w-[56px] h-[44px] rounded-[100px] blur-[8px] opacity-80"
+                            className="absolute w-[56px] h-[44px] rounded-[100px] blur-[8px] opacity-80 transition-colors duration-1000 ease-in-out"
                             style={{ backgroundColor: getOrbColor() }}
                         />
-                        {/* Subtle atmospheric spill (Contained so it drops to black exactly at the spikey red lines) */}
+                        {/* Subtle atmospheric spill */}
                         <div 
-                            className="absolute w-[76px] h-[54px] rounded-[100px] blur-[12px] opacity-40 -translate-x-[4px]"
+                            className="absolute w-[76px] h-[54px] rounded-[100px] blur-[12px] opacity-40 -translate-x-[4px] transition-colors duration-1000 ease-in-out"
                             style={{ backgroundColor: getOrbColor() }}
                         />
                         
                         {/* Orb Core (A soft hazy energy cloud) */}
                         <motion.div 
-                            key={`orb-${status}-${items.length}`}
+                            key={`orb-pop-${items.length}`}
                             initial={{ scale: 1.5 }}
                             animate={{ scale: 1 }}
-                            className="w-[32px] h-[32px] rounded-full relative z-20 blur-[12px] opacity-90 mix-blend-screen"
-                            style={{ backgroundColor: getOrbColor() }}
-                        />
+                            className="w-[32px] h-[32px] rounded-full relative z-20 mix-blend-screen"
+                        >
+                            <div 
+                                className="w-full h-full rounded-full blur-[12px] opacity-90 transition-colors duration-1000 ease-in-out"
+                                style={{ backgroundColor: getOrbColor() }}
+                            />
+                        </motion.div>
                         
-                        {/* Soft Glowing Atom Rings (Pure volumetric mist, flat X shape) */}
+                        {/* Soft Glowing Atom Rings */}
                         <motion.div 
                             animate={{ rotate: 360 }}
                             transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
                             className="absolute inset-0 m-auto flex items-center justify-center pointer-events-none"
                         >
-                            {/* Loop 1 (Flatter angle: 25deg, restored high opacity core to punch through) */}
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-90 mix-blend-screen blur-[2.5px]" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-60 mix-blend-screen blur-[6px]" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-30 mix-blend-screen blur-[12px]" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
+                            {/* Loop 1 */}
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-90 mix-blend-screen blur-[2.5px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-60 mix-blend-screen blur-[6px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-30 mix-blend-screen blur-[12px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
                             
-                            {/* Loop 2 (Flatter angle: 155deg, restored high opacity core to punch through) */}
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-90 mix-blend-screen blur-[2.5px]" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-60 mix-blend-screen blur-[6px]" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-30 mix-blend-screen blur-[12px]" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
+                            {/* Loop 2 */}
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-90 mix-blend-screen blur-[2.5px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-60 mix-blend-screen blur-[6px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-30 mix-blend-screen blur-[12px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
                         </motion.div>
                     </div>
                 </div>
