@@ -152,12 +152,12 @@ export function LiveTripTracker() {
                         <div className="absolute left-[-20px] right-[0px] h-[46px] blur-[6px] opacity-80"
                              style={{ background: `linear-gradient(to right, ${getPathwayColor()} 75%, transparent 100%)` }} />
 
-                        {/* Left Trumpet Flare (Perfectly aligned to card edge, zero sharp cuts) */}
-                        <div className="absolute left-[8px] w-[50px] h-[60px] blur-[4px] opacity-100 flex items-center justify-center">
+                        {/* Left Fishtail Flare (Mirrors the right side, subtle blue arms wrapping the beam from behind the card) */}
+                        <div className="absolute left-[0px] w-[110px] h-[56px] blur-[10px] opacity-60 flex items-center justify-center">
                             <div className="w-full h-full"
                                  style={{ 
-                                     backgroundColor: getPathwayColor(),
-                                     clipPath: 'polygon(0 0, 100% 50%, 0 100%)'
+                                     background: `linear-gradient(to right, ${getPathwayColor()} 0%, transparent 110%)`,
+                                     clipPath: 'polygon(0 0, 100% 15%, 45% 50%, 100% 85%, 0 100%)'
                                  }} />
                         </div>
                              
