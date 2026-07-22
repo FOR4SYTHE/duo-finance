@@ -131,15 +131,16 @@ export function LiveTripTracker() {
         };
 
         return (
-            <motion.div 
-                layout
-                className="sticky top-2 z-40 shrink-0 w-full rounded-[44px] mb-6 overflow-hidden bg-black flex flex-col"
-                style={{
-                    boxShadow: "0 20px 40px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05)"
-                }}
-            >
-                {/* Top Section: Card, Beam, Orb, Values */}
-                <div className="relative w-full h-[120px] flex items-center justify-between overflow-hidden">
+            <div className="sticky top-2 z-40 shrink-0 w-full mb-6 flex flex-col">
+                <motion.div 
+                    layout
+                    className="w-full rounded-[48px] overflow-hidden bg-black flex flex-col border border-white/[0.03] pt-3 pb-5"
+                    style={{
+                        boxShadow: "0 30px 60px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.05)"
+                    }}
+                >
+                    {/* Top Section: Card, Beam, Orb, Values */}
+                    <div className="relative w-full h-[96px] flex items-center justify-between overflow-hidden">
                     
                     {/* The Premium Volumetric Q-Tip Beam */}
                     <div className="absolute left-[70px] right-[70px] top-0 bottom-0 pointer-events-none z-10 flex items-center justify-center">
@@ -185,7 +186,7 @@ export function LiveTripTracker() {
 
                     {/* Center: Text Content (Crisp, perfectly aligned with the beam core) */}
                     <div className="relative z-30 flex flex-col items-center justify-center flex-1 h-full px-2">
-                        <span className="text-white/80 text-[10px] font-medium tracking-wide mb-[1px]">
+                        <span className="text-white/70 text-[11px] font-light tracking-wide mb-[1px]">
                             Remaining Budget
                         </span>
                         <motion.span 
@@ -193,15 +194,15 @@ export function LiveTripTracker() {
                             initial={{ scale: 1.1 }}
                             animate={{ scale: 1 }}
                             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                            className="text-white text-[32px] leading-none font-semibold tracking-tight"
+                            className="text-white text-[32px] leading-none font-medium tracking-tight"
                         >
                             ₱{Math.abs(remaining).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                         </motion.span>
-                        <div className="flex items-center gap-1.5 mt-1 text-white/60 text-[9px] font-medium tracking-wide">
+                        <div className="flex items-center justify-center gap-2 mt-1 text-white/50 text-[10px] font-light tracking-wide">
                             <span>≈ R{(Math.abs(remaining) * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             {vatAmount > 0 && (
                                 <>
-                                    <span className="w-[1px] h-2.5 bg-white/30" />
+                                    <span className="w-[1px] h-2.5 bg-white/20" />
                                     <span>Est. VAT ₱{vatAmount.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
                                 </>
                             )}
@@ -249,16 +250,17 @@ export function LiveTripTracker() {
                     </div>
                 </div>
 
-                {/* Bottom Section: Spent and Total (Dark area) */}
-                <div className="w-full px-8 pb-5 flex justify-between items-center bg-black relative z-20">
-                    <span className="text-white/40 text-[10px] font-bold tracking-widest uppercase">
-                        Spent: ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
-                    </span>
-                    <span className="text-white/40 text-[10px] font-bold tracking-widest uppercase">
-                        Total: ₱{budget.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
-                    </span>
-                </div>
-            </motion.div>
+                    {/* Bottom Section: Supplementary Text (Centered directly under the beam text, exact font match) */}
+                    <div className="w-full pt-1 flex justify-center items-center gap-10 relative z-20 bg-black">
+                        <span className="text-[#888] text-[13px] font-light tracking-[0.03em] flex items-center gap-2">
+                            SPENT <span className="text-[#aaa] tracking-normal">₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                        </span>
+                        <span className="text-[#888] text-[13px] font-light tracking-[0.03em] flex items-center gap-2">
+                            TOTAL <span className="text-[#aaa] tracking-normal">₱{budget.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                        </span>
+                    </div>
+                </motion.div>
+            </div>
         );
     };
 
