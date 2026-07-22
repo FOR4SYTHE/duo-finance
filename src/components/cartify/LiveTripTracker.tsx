@@ -141,24 +141,34 @@ export function LiveTripTracker() {
                 {/* Top Section: Card, Beam, Orb, Values */}
                 <div className="relative w-full h-[120px] flex items-center justify-between overflow-hidden">
                     
-                    {/* The Organic Q-Tip Pathway Beam */}
-                    <div className="absolute left-[65px] right-[65px] h-[70px] top-[25px] pointer-events-none z-10 flex items-center justify-center">
+                    {/* The Premium Volumetric Q-Tip Beam */}
+                    <div className="absolute left-[70px] right-[70px] top-0 bottom-0 pointer-events-none z-10 flex items-center justify-center">
                         
-                        {/* Left Q-Tip Head (Taller, soft, blends behind card) */}
-                        <div className="absolute left-[-15px] w-[50px] h-[64px] rounded-[100px] blur-[14px] opacity-90"
-                             style={{ backgroundColor: getPathwayColor() }} />
+                        {/* Central Beam (Solid, crisp core, finishes early and fades out to completely eliminate the bright green rectangle) */}
+                        <div className="absolute left-[-20px] right-[0px] h-[36px] blur-[3px] opacity-100"
+                             style={{ background: `linear-gradient(to right, ${getPathwayColor()} 55%, transparent 100%)` }} />
                              
-                        {/* Right Q-Tip Head (Taller, soft, blends behind orb) */}
-                        <div className="absolute right-[-15px] w-[50px] h-[64px] rounded-[100px] blur-[14px] opacity-90"
-                             style={{ backgroundColor: getPathwayColor() }} />
+                        {/* Central Beam (Soft backing) */}
+                        <div className="absolute left-[-20px] right-[0px] h-[46px] blur-[6px] opacity-80"
+                             style={{ background: `linear-gradient(to right, ${getPathwayColor()} 55%, transparent 100%)` }} />
 
-                        {/* Center Bridge (Shorter, creates the pinch/concave effect organically) */}
-                        <div className="absolute left-[15px] right-[15px] h-[36px] rounded-[100px] blur-[8px] opacity-100"
-                             style={{ backgroundColor: getPathwayColor() }} />
+                        {/* Left Trumpet Flare (Perfectly aligned to card edge, zero sharp cuts) */}
+                        <div className="absolute left-[8px] w-[50px] h-[60px] blur-[4px] opacity-100 flex items-center justify-center">
+                            <div className="w-full h-full"
+                                 style={{ 
+                                     backgroundColor: getPathwayColor(),
+                                     clipPath: 'polygon(0 0, 100% 50%, 0 100%)'
+                                 }} />
+                        </div>
                              
-                        {/* Center Core (Provides a solid backing for the crisp text) */}
-                        <div className="absolute left-[25px] right-[25px] h-[20px] rounded-[100px] blur-[3px] opacity-100"
-                             style={{ backgroundColor: getPathwayColor() }} />
+                        {/* Right Trumpet Flare (Fades in from transparent to green, perfectly flush with the atom to eliminate the 24px gap) */}
+                        <div className="absolute right-[0px] w-[80px] h-[60px] blur-[8px] opacity-80 flex items-center justify-center">
+                            <div className="w-full h-full"
+                                 style={{ 
+                                     background: `linear-gradient(to right, transparent 0%, ${getOrbColor()} 100%)`,
+                                     clipPath: 'polygon(100% 0, 0 50%, 100% 100%)'
+                                 }} />
+                        </div>
                     </div>
 
                     {/* Left: 3D Virtual Card (Seamlessly emerging from darkness) */}
@@ -199,24 +209,24 @@ export function LiveTripTracker() {
                     </div>
 
                     {/* Right: Glowing Orb (Ultra-premium volumetric bloom effect) */}
-                    <div className="relative z-20 w-[80px] h-full flex items-center justify-center shrink-0">
-                        {/* Large diffuse glow behind orb (expanded for seamless blending) */}
+                    <div className="relative z-20 w-[80px] h-full flex items-center justify-center shrink-0 -translate-x-[12px]">
+                        {/* Controlled diffuse aura (Expanded to softly swallow the 60px flare without a harsh crash) */}
                         <div 
-                            className="absolute w-[64px] h-[64px] rounded-full blur-[24px] opacity-80"
+                            className="absolute w-[80px] h-[60px] rounded-[100px] blur-[16px] opacity-60"
                             style={{ backgroundColor: getOrbColor() }}
                         />
-                        {/* Extended faint diffuse glow for that ultra-premium volumetric light spill */}
+                        {/* Subtle atmospheric spill */}
                         <div 
-                            className="absolute w-[100px] h-[100px] rounded-full blur-[40px] opacity-40"
+                            className="absolute w-[110px] h-[70px] rounded-[100px] blur-[20px] opacity-30 -translate-x-[10px]"
                             style={{ backgroundColor: getOrbColor() }}
                         />
                         
-                        {/* Orb Core (A soft hazy energy cloud, perfectly filling the center of the X) */}
+                        {/* Orb Core (A soft hazy energy cloud) */}
                         <motion.div 
                             key={`orb-${status}-${items.length}`}
                             initial={{ scale: 1.5 }}
                             animate={{ scale: 1 }}
-                            className="w-[28px] h-[28px] rounded-full relative z-20 blur-[10px] opacity-80 mix-blend-screen"
+                            className="w-[32px] h-[32px] rounded-full relative z-20 blur-[12px] opacity-90 mix-blend-screen"
                             style={{ backgroundColor: getOrbColor() }}
                         />
                         
@@ -226,14 +236,14 @@ export function LiveTripTracker() {
                             transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
                             className="absolute inset-0 m-auto flex items-center justify-center pointer-events-none"
                         >
-                            {/* Loop 1 (Flatter angle: 25deg, very thick and blurred for pure mist) */}
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-70 mix-blend-screen blur-[3px]" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-50 mix-blend-screen blur-[7px]" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
+                            {/* Loop 1 (Flatter angle: 25deg, restored high opacity core to punch through) */}
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-90 mix-blend-screen blur-[2.5px]" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-60 mix-blend-screen blur-[6px]" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
                             <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-30 mix-blend-screen blur-[12px]" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
                             
-                            {/* Loop 2 (Flatter angle: 155deg, very thick and blurred for pure mist) */}
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-70 mix-blend-screen blur-[3px]" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-50 mix-blend-screen blur-[7px]" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
+                            {/* Loop 2 (Flatter angle: 155deg, restored high opacity core to punch through) */}
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-90 mix-blend-screen blur-[2.5px]" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-60 mix-blend-screen blur-[6px]" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
                             <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-30 mix-blend-screen blur-[12px]" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
                         </motion.div>
                     </div>
