@@ -186,9 +186,9 @@ export function MonthlyReportCard() {
           </div>
 
           {/* Bottom: Giant Liquid Glass month text */}
-          <div className="flex flex-col items-center w-full mt-auto relative -mb-8" style={{ containerType: 'inline-size' }}>
+          <div className="flex flex-col items-center w-full mt-auto relative pb-2" style={{ containerType: 'inline-size' }}>
             <h2 
-              className="font-black tracking-[-0.04em] w-full text-center leading-[0.75] select-none translate-y-0 capitalize whitespace-nowrap"
+              className="font-black tracking-[-0.04em] w-full text-center leading-none select-none translate-y-14 capitalize whitespace-nowrap"
               style={{
                 fontSize: `clamp(50px, ${currentMonthName.toLowerCase() === 'january' ? 25 : currentMonthName.toLowerCase() === 'february' ? 22.5 : 145 / currentMonthName.length}cqw, 150px)`,
                 background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.3) 100%)",
@@ -201,8 +201,8 @@ export function MonthlyReportCard() {
             </h2>
 
             {/* Entry count badge - Bottom Right */}
-            <div className="absolute bottom-8 right-0 z-20">
-              <span className="bg-black/20 backdrop-blur-xl text-white/90 text-[10px] font-medium px-3.5 py-1.5 rounded-full border border-white/20 shadow-[0_4px_10px_rgba(0,0,0,0.2)]">
+            <div className="absolute bottom-2 right-0 z-20">
+              <span className="bg-black/40 backdrop-blur-xl text-white/90 text-[10px] font-medium px-3.5 py-1.5 rounded-full border border-white/20 shadow-[0_4px_10px_rgba(0,0,0,0.2)]">
                 {monthEntries.length} entries logged
               </span>
             </div>
