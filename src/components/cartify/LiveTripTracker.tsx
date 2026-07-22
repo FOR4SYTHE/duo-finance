@@ -4,8 +4,8 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useCartifyStore } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { PriceEntryModal } from "./PriceEntryModal";
-import { Activity, Plus, ShoppingCart, Trash2, ArrowUpDown, ReceiptText, Delete, ShoppingBag, Shirt, Armchair, Laptop, Pill, Wrench, Milk, Egg, Croissant, Cookie, Drumstick, Fish, Carrot, Apple, CupSoda, Coffee, Beer, Wine, Pizza, Cake, Banana, Cherry, Grape, Package, Droplets } from "lucide-react";
-import { motion, useAnimation, PanInfo } from "framer-motion";
+import { Activity, Plus, ShoppingCart, Trash2, ArrowUpDown, ReceiptText, Delete, ShoppingBag, Shirt, Armchair, Laptop, Pill, Wrench, Milk, Egg, Croissant, Cookie, Drumstick, Fish, Carrot, Apple, CupSoda, Coffee, Beer, Wine, Pizza, Cake, Banana, Cherry, Grape, Package, Droplets, X } from "lucide-react";
+import { motion, useAnimation, PanInfo, AnimatePresence } from "framer-motion";
 
 export function LiveTripTracker() {
     const { items, budget, mode, activeCategory, setActiveCategory, updateItemPrice, incrementQuantity, decrementQuantity, removeItem, addItem, showReceipt } = useCartifyStore();
@@ -161,6 +161,10 @@ export function LiveTripTracker() {
         </div>
     );
 
+    const [showCalc, setShowCalc] = useState(false);
+    const [showList, setShowList] = useState(false);
+    const [flyingValue, setFlyingValue] = useState<string | null>(null);
+
     if (mode === 'simple') {
         const simpleButtons = [
             { label: "1", type: "num" }, { label: "2", type: "num" }, { label: "3", type: "num" },
@@ -172,8 +176,18 @@ export function LiveTripTracker() {
         const handleSimpleAdd = () => {
             const val = parseFloat(simpleDisplayValue);
             if (val > 0) {
+                // Trigger flying animation
+                setFlyingValue(simpleDisplayValue);
+                
+                // Add the item to the store
                 addItem(`Item ${items.length + 1}`, undefined, val, 1);
                 setSimpleDisplayValue("0");
+                setShowCalc(false);
+                
+                // Clear the flying value after animation completes
+                setTimeout(() => {
+                    setFlyingValue(null);
+                }, 600);
             }
         };
 
@@ -185,72 +199,213 @@ export function LiveTripTracker() {
             setSimpleDisplayValue(prev => prev.length > 1 ? prev.slice(0, -1) : "0");
         };
 
+        // Progress ring calculations
+        const radius = 90;
+        const circumference = 2 * Math.PI * radius;
+        const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
+
         return (
-            <div className="flex flex-col w-full h-full relative z-20 pt-2 pb-6 overflow-hidden">
-                <HeroCard />
-                
-                {/* Scrollable List sitting behind/above the keypad dynamically */}
-                <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-2 mb-4 shrink relative rounded-[24px]">
-                    <div className="sticky top-0 bg-black/80 backdrop-blur-md z-10 py-2 border-b border-white/[0.05]">
-                        <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase px-2">Recent Items</h2>
-                    </div>
-                    {sortedItems.slice(0, 10).map((item) => (
-                        <div key={item.id} className="bg-[#111] border border-white/[0.05] rounded-[16px] p-3 flex justify-between items-center shrink-0">
-                            <span className="text-white text-sm">{item.name}</span>
-                            <div className="flex items-center gap-4">
-                                <div className="flex flex-col items-end">
-                                    <span className="text-white font-medium text-sm">₱{item.amount.toLocaleString()}</span>
-                                    <span className="text-white/40 text-[10px] uppercase tracking-wider">
-                                        ≈ R{(item.amount * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                                    </span>
-                                </div>
-                                <button onClick={() => removeItem(item.id)} className="text-red-500/50 hover:text-red-500 p-1">
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                    {items.length === 0 && (
-                        <div className="text-white/20 text-xs text-center py-4">No items yet. Type an amount below.</div>
-                    )}
-                </div>
-
-                {/* Persistent Keypad Area */}
-                <div className="w-full flex flex-col shrink-0">
-                    <div className="flex flex-col items-center justify-center gap-1 mb-4">
-                        <div className="flex items-center gap-2">
-                            <span className="text-3xl text-white/40">₱</span>
-                            <span className="text-5xl text-white font-light tracking-tight">{simpleDisplayValue}</span>
-                        </div>
-                        <span className="text-white/40 text-sm font-medium tracking-wide">
-                            ≈ R{(Number(simpleDisplayValue || 0) * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                        </span>
-                    </div>
-
-                    <div className="flex-1 min-h-[220px] grid grid-cols-3 gap-3 mb-4">
-                        {simpleButtons.map((btn) => (
-                            <button
-                                key={btn.label}
-                                onClick={() => btn.label === "⌫" ? deleteSimpleLast() : appendSimpleInput(btn.label)}
-                                className={`
-                                    h-full w-full rounded-[20px] flex items-center justify-center text-[24px] font-light transition-all duration-200 bg-white/[0.05] hover:bg-white/[0.1] active:scale-[0.96] border border-white/[0.02]
-                                    ${btn.type === "num" ? "text-white" : "text-white/50"}
-                                `}
-                            >
-                                {btn.label === "⌫" ? <Delete className="w-5 h-5" strokeWidth={1.5} /> : btn.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    <button
-                        onClick={handleSimpleAdd}
-                        disabled={parseFloat(simpleDisplayValue) <= 0}
-                        className="w-full h-[60px] shrink-0 rounded-full bg-[#30D158] text-black font-semibold text-base tracking-wide flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:bg-white/20"
+            <div className="flex flex-col w-full h-full relative z-20 overflow-hidden">
+                {/* Top Nav */}
+                <div className="flex justify-between items-center px-2 pt-2 mb-8 relative z-30 shrink-0">
+                    <button 
+                        onClick={() => setShowList(true)}
+                        className="flex items-center gap-2 bg-white/[0.04] backdrop-blur-md border border-white/[0.05] px-4 py-2.5 rounded-full hover:bg-white/[0.08] transition-colors"
                     >
-                        <Plus className="w-5 h-5" />
-                        Add to Trip
+                        <ShoppingCart className="w-4 h-4 text-white/70" />
+                        <span className="text-white/70 font-medium text-sm tracking-wide">Cart</span>
+                        {items.length > 0 && (
+                            <span className="bg-[#30D158] text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                                {items.length}
+                            </span>
+                        )}
+                    </button>
+                    <button 
+                        onClick={showReceipt}
+                        className="bg-[#E5E5E5] text-black font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-white transition-colors tracking-wide"
+                    >
+                        Done
                     </button>
                 </div>
+
+                {/* Remaining Budget Area */}
+                <div className="flex flex-col items-center justify-center flex-1 mt-[-60px]">
+                    <span className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4">Remaining Budget</span>
+                    
+                    <div className="flex items-start">
+                        <span className="text-white/40 text-3xl font-light mt-3 mr-1">₱</span>
+                        <motion.span 
+                            layout
+                            className={`text-[96px] leading-none tracking-tighter font-medium ${isOverBudget ? 'text-red-500' : 'text-white'}`}
+                        >
+                            {Math.abs(remaining).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                        </motion.span>
+                    </div>
+                    
+                    <span className="text-white/40 text-sm font-medium tracking-wide mt-2">
+                        ≈ R{(Math.abs(remaining) * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </span>
+                </div>
+
+                {/* Bottom Circular Progress Add Button */}
+                <div className="mt-auto flex justify-center pb-12 shrink-0 relative z-30">
+                    <button 
+                        onClick={() => setShowCalc(true)}
+                        className="relative w-[200px] h-[200px] flex flex-col items-center justify-center rounded-full group active:scale-[0.97] transition-transform duration-300"
+                    >
+                        {/* Background Circles */}
+                        <div className="absolute inset-0 rounded-full bg-[#151516] border border-white/[0.04] shadow-[0_20px_40px_rgba(0,0,0,0.5)]" />
+                        <div className="absolute inset-[12px] rounded-full bg-[#111]" />
+                        <div className="absolute inset-[24px] rounded-full bg-[#1C1C1E] border border-white/[0.02] shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center z-10">
+                            {totalSpent === 0 ? (
+                                <Plus className="w-10 h-10 text-white/30 group-hover:text-white/60 transition-colors" />
+                            ) : (
+                                <>
+                                    <span className="text-white/40 text-[9px] font-bold tracking-[0.2em] uppercase mb-1">Spent</span>
+                                    <span className="text-white text-3xl font-medium tracking-tight">₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Progress SVG */}
+                        <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none z-20">
+                            {/* Track */}
+                            <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="6" />
+                            {/* Progress */}
+                            <circle 
+                                cx="100" 
+                                cy="100" 
+                                r="90" 
+                                fill="none" 
+                                stroke={isOverBudget ? '#ef4444' : '#30D158'} 
+                                strokeWidth="6" 
+                                strokeLinecap="round"
+                                strokeDasharray={circumference}
+                                strokeDashoffset={strokeDashoffset}
+                                className="transition-all duration-1000 ease-out"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
+                {/* Flying Animation Layer */}
+                <AnimatePresence>
+                    {flyingValue && (
+                        <motion.div
+                            initial={{ top: "50%", left: "50%", x: "-50%", y: "-50%", scale: 1, opacity: 1 }}
+                            animate={{ top: 40, left: 60, x: "-50%", y: "-50%", scale: 0.1, opacity: 0 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 25, mass: 0.8 }}
+                            className="fixed z-[200] pointer-events-none flex items-center justify-center"
+                        >
+                            <span className="text-white text-[80px] font-light tracking-tight drop-shadow-2xl">
+                                ₱{flyingValue}
+                            </span>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Overlays */}
+                <AnimatePresence>
+                    {showCalc && (
+                        <>
+                            <motion.div 
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                onClick={() => setShowCalc(false)}
+                                className="absolute inset-0 bg-black/60 backdrop-blur-md z-[100]" 
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                className="absolute z-[101] flex flex-col bg-[#111] border border-white/10 inset-6 top-24 bottom-24 rounded-[40px] p-6 shadow-2xl justify-center"
+                            >
+                                <button onClick={() => setShowCalc(false)} className="absolute top-6 right-6 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                                    <X className="w-4 h-4 text-white/70" />
+                                </button>
+                                
+                                <div className="flex flex-col items-center justify-center gap-1 mb-8">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-4xl text-white/40">₱</span>
+                                        <span className="text-[64px] text-white font-light tracking-tight">{simpleDisplayValue}</span>
+                                    </div>
+                                    <span className="text-white/40 text-sm font-medium tracking-wide">
+                                        ≈ R{(Number(simpleDisplayValue || 0) * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-3 mb-6 flex-1 max-h-[320px]">
+                                    {simpleButtons.map((btn) => (
+                                        <button
+                                            key={btn.label}
+                                            onClick={() => btn.label === "⌫" ? deleteSimpleLast() : appendSimpleInput(btn.label)}
+                                            className={`
+                                                h-full w-full rounded-[24px] flex items-center justify-center text-[28px] tracking-tight transition-colors duration-75 bg-white/[0.06] hover:bg-white/[0.1] active:bg-white/[0.25] backdrop-blur-md
+                                                ${btn.type === "num" ? "text-white font-normal" : "text-white/40 font-medium"}
+                                            `}
+                                        >
+                                            {btn.label === "⌫" ? <Delete className="w-6 h-6" strokeWidth={1.5} /> : btn.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button
+                                    onClick={handleSimpleAdd}
+                                    disabled={parseFloat(simpleDisplayValue) <= 0}
+                                    className="w-full h-[72px] shrink-0 rounded-full bg-[#E5E5E5] text-black font-semibold text-[17px] tracking-wide flex items-center justify-center gap-2 hover:bg-white transition-all disabled:opacity-50"
+                                >
+                                    Add Amount
+                                </button>
+                            </motion.div>
+                        </>
+                    )}
+                </AnimatePresence>
+
+                <AnimatePresence>
+                    {showList && (
+                        <>
+                            <motion.div 
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                onClick={() => setShowList(false)}
+                                className="absolute inset-0 bg-black/60 backdrop-blur-md z-[100]" 
+                            />
+                            <motion.div
+                                initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                className="absolute bottom-0 left-0 right-0 h-[80%] bg-[#111] rounded-t-[40px] pt-8 pb-10 px-6 border-t border-white/10 z-[101] flex flex-col shadow-[0_-20px_40px_rgba(0,0,0,0.5)]"
+                            >
+                                <div className="flex justify-between items-center mb-6 shrink-0">
+                                    <h3 className="text-white text-xl font-medium tracking-tight">Recent Items</h3>
+                                    <button onClick={() => setShowList(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                                        <X className="w-4 h-4 text-white/70" />
+                                    </button>
+                                </div>
+                                <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-3">
+                                    {sortedItems.map((item) => (
+                                        <div key={item.id} className="bg-white/[0.02] border border-white/[0.05] rounded-[24px] p-4 flex justify-between items-center">
+                                            <span className="text-white font-medium pl-2">{item.name}</span>
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex flex-col items-end">
+                                                    <span className="text-white font-medium text-lg tracking-tight">₱{item.amount.toLocaleString()}</span>
+                                                    <span className="text-white/40 text-[10px] uppercase tracking-wider">
+                                                        ≈ R{(item.amount * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                                    </span>
+                                                </div>
+                                                <button onClick={() => removeItem(item.id)} className="w-10 h-10 rounded-full bg-red-500/10 text-red-500/80 hover:text-red-500 hover:bg-red-500/20 flex items-center justify-center transition-colors">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {items.length === 0 && (
+                                        <div className="text-white/20 text-sm text-center py-10">No items logged yet.</div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        </>
+                    )}
+                </AnimatePresence>
             </div>
         );
     }
