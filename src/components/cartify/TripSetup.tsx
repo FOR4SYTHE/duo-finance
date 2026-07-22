@@ -138,8 +138,8 @@ export function TripSetup() {
                         key={btn.label}
                         onClick={() => btn.label === "⌫" ? deleteLast() : appendInput(btn.label)}
                         className={`
-                            h-full w-full rounded-[24px] flex items-center justify-center text-[28px] font-light transition-all duration-200 bg-[#151516] hover:bg-[#1A1A1B] active:scale-[0.96] border border-white/[0.04] shadow-inner
-                            ${btn.type === "num" ? "text-white/90" : "text-white/40"}
+                            h-full w-full rounded-[24px] flex items-center justify-center text-[28px] tracking-tight transition-colors duration-75 bg-white/[0.06] hover:bg-white/[0.1] active:bg-white/[0.25] backdrop-blur-md
+                            ${btn.type === "num" ? "text-white font-normal" : "text-white/40 font-medium"}
                         `}
                     >
                         {btn.label === "⌫" ? <Delete className="w-6 h-6" strokeWidth={1.5} /> : btn.label}
