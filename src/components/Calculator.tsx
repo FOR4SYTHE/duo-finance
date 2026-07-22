@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { containerVariants, itemVariants } from "@/utils/animations";
-import { ArrowUpDown, Delete, ChevronRight } from "lucide-react";
+import { ArrowUpDown, Delete, ChevronRight, History } from "lucide-react";
 
 export function Calculator() {
     const { 
@@ -17,11 +17,14 @@ export function Calculator() {
         primaryCurrency,
         toggleCurrency,
         isLoadingRate,
-        lastUpdated
+        lastUpdated,
+        history,
+        clearHistory
     } = useCurrencyStore();
 
     const [mounted, setMounted] = React.useState(false);
     const [isInitialLoad, setIsInitialLoad] = React.useState(false);
+    const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -29,7 +32,10 @@ export function Calculator() {
             setIsInitialLoad(true);
             sessionStorage.setItem('hasSeenCalculatorAnimation', 'true');
         }
-    }, []);
+        
+        // Clear input when user leaves the calculator page
+        return () => clearInput();
+    }, [clearInput]);
 
     const buttons = [
         { label: "AC", type: "meta" }, { label: "⌫", type: "meta" }, { label: "%", type: "meta" }, { label: "÷", type: "op" },
@@ -69,9 +75,18 @@ export function Calculator() {
             {/* Header: Minimal Apple-style */}
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-8 relative z-20">
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-white/[0.08] backdrop-blur-md flex items-center justify-center border border-white/[0.05]">
-                        <span className="font-semibold text-[11px] tracking-wider">DF</span>
-                    </div>
+                    {history.length > 0 ? (
+                        <button 
+                            onClick={() => setIsHistoryOpen(true)}
+                            className="w-9 h-9 rounded-full bg-white/[0.08] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.12] transition-colors active:scale-95"
+                        >
+                            <History className="w-4 h-4 text-white/70" strokeWidth={2.5} />
+                        </button>
+                    ) : (
+                        <div className="w-9 h-9 rounded-full bg-white/[0.08] backdrop-blur-md flex items-center justify-center border border-white/[0.05]">
+                            <span className="font-semibold text-[11px] tracking-wider text-white/70">DF</span>
+                        </div>
+                    )}
                 </div>
                 <div className="flex items-center gap-2 bg-white/[0.04] backdrop-blur-md px-3 py-1.5 rounded-full border border-white/[0.03]">
                     <div className={`w-1.5 h-1.5 rounded-full bg-current ${statusColor} shadow-[0_0_8px_currentColor]`} />
@@ -218,7 +233,62 @@ export function Calculator() {
                     )
                 })}
             </motion.div>
-            
+
+            {/* History Sheet Modal */}
+            <AnimatePresence>
+                {isHistoryOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex flex-col justify-end"
+                        onClick={() => setIsHistoryOpen(false)}
+                    >
+                        <motion.div
+                            initial={{ y: "100%" }}
+                            animate={{ y: 0 }}
+                            exit={{ y: "100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className="bg-[#111112] rounded-t-[32px] w-full max-h-[75vh] flex flex-col border-t border-white/10 shadow-[0_-20px_40px_rgba(0,0,0,0.8)]"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="w-full flex justify-center py-4">
+                                <div className="w-12 h-1.5 bg-white/20 rounded-full" />
+                            </div>
+                            <div className="px-6 pb-4 flex justify-between items-center">
+                                <h3 className="text-white text-lg font-medium tracking-wide">Session History</h3>
+                                <button onClick={clearHistory} className="text-[#FF453A] hover:bg-[#FF453A]/10 px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors uppercase tracking-widest">
+                                    Clear
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto px-6 pb-12 flex flex-col gap-3">
+                                {history.length === 0 ? (
+                                    <div className="text-white/40 text-center py-10 text-sm">No history yet</div>
+                                ) : (
+                                    history.map((item, idx) => (
+                                        <button 
+                                            key={`${item.timestamp}-${idx}`}
+                                            onClick={() => {
+                                                useCurrencyStore.setState({ displayValue: item.result });
+                                                setIsHistoryOpen(false);
+                                            }}
+                                            className="flex flex-col gap-1 p-4 bg-white/[0.03] border border-white/[0.05] rounded-2xl active:bg-white/10 transition-colors text-left group hover:border-white/10"
+                                        >
+                                            <div className="flex justify-between items-center w-full">
+                                                <span className="text-white/40 text-[13px] font-medium tracking-wider">{item.expression.replace(/\*/g, '×').replace(/\//g, '÷')}</span>
+                                                <span className="text-white/30 text-[10px] tracking-widest uppercase font-semibold">
+                                                    {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </div>
+                                            <span className="text-white text-2xl font-light tracking-tight group-hover:text-[#D4AF37] transition-colors">={item.result}</span>
+                                        </button>
+                                    ))
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 }

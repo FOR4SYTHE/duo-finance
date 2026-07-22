@@ -2,17 +2,25 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { fetchExchangeRate } from '@/lib/frankfurter';
 
+export interface HistoryItem {
+    expression: string;
+    result: string;
+    timestamp: number;
+}
+
 interface CurrencyState {
     primaryCurrency: 'PHP' | 'ZAR';
     displayValue: string;
     exchangeRate: number;
     lastUpdated: number | null;
     isLoadingRate: boolean;
+    history: HistoryItem[];
     toggleCurrency: () => void;
     appendInput: (char: string) => void;
     clearInput: () => void;
     deleteLast: () => void;
     executeCalculation: () => void;
+    clearHistory: () => void;
     syncRates: () => Promise<void>;
 }
 
@@ -24,6 +32,9 @@ export const useCurrencyStore = create<CurrencyState>()(
             exchangeRate: 0.27, // Always represents PHP to ZAR rate
             lastUpdated: null,
             isLoadingRate: false,
+            history: [],
+
+            clearHistory: () => set({ history: [] }),
 
             toggleCurrency: async () => {
                 const nextCurrency = get().primaryCurrency === 'PHP' ? 'ZAR' : 'PHP';
@@ -115,7 +126,16 @@ export const useCurrencyStore = create<CurrencyState>()(
                     }
 
                     const resultString = parseFloat(computed.toFixed(4)).toString();
-                    set({ displayValue: resultString });
+                    
+                    // Only add to history if it was an actual calculation involving operators
+                    if (['+', '-', '*', '/'].some(op => current.includes(op))) {
+                         set((state) => ({ 
+                             displayValue: resultString,
+                             history: [{ expression: current, result: resultString, timestamp: Date.now() }, ...state.history]
+                         }));
+                    } else {
+                         set({ displayValue: resultString });
+                    }
                 } catch {
                     set({ displayValue: 'Error' });
                     setTimeout(() => set({ displayValue: '0' }), 1200);
