@@ -128,9 +128,9 @@ export function MonthlyReportCard() {
         {/* Content */}
         <div className="relative z-10 w-full h-full p-5 flex flex-col justify-between">
           {/* Top Row: Budget overlay + overflow */}
-          <div className="flex justify-between items-start">
-            {/* Budget Status Pill - Apple Ultra Luxury Dark Glass */}
-            <div className="bg-black/40 backdrop-blur-2xl rounded-[20px] px-4 py-3 border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.2)] flex flex-col gap-1 min-w-[145px]">
+          <div className="flex justify-between items-start w-full">
+            {/* Budget Status Pill - Apple Ultra Luxury Dark Glass (Floating Overlay) */}
+            <div className="absolute top-5 left-5 z-20 bg-black/40 backdrop-blur-2xl rounded-[20px] px-4 py-3 border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.2)] flex flex-col gap-1 min-w-[145px]">
               <div className="flex items-center gap-2 mb-0.5">
                 <div
                   className="w-1.5 h-1.5 rounded-full"
@@ -173,10 +173,13 @@ export function MonthlyReportCard() {
               </div>
             </div>
 
+            {/* Empty placeholder spacer for left side of top row flex */}
+            <div />
+
             {/* Overflow button → Month Picker */}
             <button
               onClick={handleOverflowTap}
-              className="w-9 h-9 rounded-full bg-white/5 backdrop-blur-xl flex items-center justify-center border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)] hover:bg-white/10 transition-colors"
+              className="w-9 h-9 rounded-full bg-white/5 backdrop-blur-xl flex items-center justify-center border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)] hover:bg-white/10 transition-colors z-20"
             >
               <MoreHorizontal className="w-4 h-4 text-white/90" />
             </button>
@@ -191,7 +194,7 @@ export function MonthlyReportCard() {
                 background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.3) 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
-                textShadow: "0px 8px 24px rgba(0,0,0,0.5)", // Smooth text shadow, no glitchy stroke
+                textShadow: "0px 8px 24px rgba(0,0,0,0.5)",
               }}
             >
               {currentMonthName}

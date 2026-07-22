@@ -1,10 +1,28 @@
-# Plan: Mount Calculator Component into page.tsx
+# 📋 Execution & Architecture Plan — Duo Finance
 
-## Objective
-Dynamically mount the completed physical calculator widget layout (`Calculator` component) into the main spatial workspace screen layout in `src/app/page.tsx`.
+## Current Hand-Off Audit & Verification
+- **Motion & Staggered Animations:** Implemented via `src/utils/animations.ts` with session storage caching (`hasSeen*Animation`).
+- **Typography Polish:** Fluid container query typography on `MonthlyReportCard.tsx` and `MonthPicker.tsx` (custom scaling for January/February with bottom-sinking overflow).
+- **Portal Overlays:** `BillsCalendarCard.tsx`, `MonthPicker.tsx`, `MonthlySummary`, `YearlySummary` correctly portaled to `document.body` via React Portals (`createPortal`).
+- **Git State:** Clean working tree on `main`.
 
-## Steps
-1. **Prepare the Layout**: Update `src/app/page.tsx` with the requested import and layout code.
-2. **Review Code Integration**: Ensure `src/components/Calculator.tsx` and all references are correctly imported.
-3. **Local Dev Verification**: Run `npm run dev` to verify the application builds and loads properly without errors in runtime.
-4. **Final Presentation**: Confirm the layout is complete and matches the premium Apple-grade aesthetics.
+---
+
+## 🎯 Next Objective & Focus Options
+Based on `AGENTS.md` roadmap and current application state:
+
+1. **Option A: Audit & Polish Category Tile Color Nuance (Section 2 & 4.2)**
+   - Verify all budget tiles feature signature desaturated tints (sage, warm amber, dusty blue, muted rose, soft lavender) without competing with the card hero moment.
+   - Verify $0 default behavior for fresh installs.
+
+2. **Option B: Shopping Scanner / Cartify Enhancements (Section 4.4 & 4.5)**
+   - Check Cartify live trip item tracking, tax/VAT toggle calculations, and receipt audit log flow.
+
+3. **Option C: Supabase Migration Readiness Audit (Section 3)**
+   - Perform a comprehensive client-side data schema check across Zustand stores before initiating backend / Supabase RLS integration phase.
+
+---
+
+## 🔒 Verification Steps
+- Run `npm run dev` to verify dev server execution and clean UI load.
+- Ensure strict adherence to Apple+++ UI, no native dialogs, responsive `100dvh` boundaries, and no clipped dynamic containers.

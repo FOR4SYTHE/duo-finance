@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, Settings2, PiggyBank, AlertTriangle, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants, itemVariants } from "@/utils/animations";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
@@ -12,6 +12,7 @@ import { QuickLogModal } from "@/components/jar/QuickLogModal";
 import { JarLockedModal } from "@/components/jar/JarLockedModal";
 import { JarSettingsModal } from "@/components/jar/JarSettingsModal";
 import { LogAnimationOverlay } from "@/components/jar/LogAnimationOverlay";
+import { AnimatePresence } from "framer-motion";
 
 export default function SpendJarPage() {
   const [isInitialLoad, setIsInitialLoad] = useState(false);
@@ -30,6 +31,18 @@ export default function SpendJarPage() {
   const [isLockedModalOpen, setIsLockedModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [animationType, setAnimationType] = useState<'happy' | 'worried' | 'scared' | null>(null);
+
+  const [isLogFlash, setIsLogFlash] = useState(false);
+  const previousEntriesLength = useRef(entries.length);
+
+  useEffect(() => {
+    if (entries.length > previousEntriesLength.current) {
+      setIsLogFlash(true);
+      const timer = setTimeout(() => setIsLogFlash(false), 800);
+      previousEntriesLength.current = entries.length;
+      return () => clearTimeout(timer);
+    }
+  }, [entries.length]);
 
   // Calculate totals based on allowed percentage
   const totalSpent = entries.reduce((sum, entry) => sum + entry.amount, 0);
@@ -51,11 +64,8 @@ export default function SpendJarPage() {
     ringGlow = "rgba(255,69,58,0.6)";
   }
 
-  // SVG parameters
-  const radius = 42;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
-
+  // SVG parameters (Removed since we use nitro glow ring now)
+  
   const handleLogSpend = (amount: number, note: string) => {
       // Calculate new percentage to trigger corresponding animation
       const newTotal = totalSpent + amount;
@@ -127,50 +137,206 @@ export default function SpendJarPage() {
       </motion.div>
 
       {/* Hero Jar Progress */}
-      <motion.div variants={itemVariants} className="relative z-20 w-full flex flex-col items-center justify-center py-10 mb-4 shrink-0">
-        <div className="relative w-64 h-64 flex items-center justify-center">
-          <svg className="absolute inset-0 w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 100 100">
-            {/* Background Track */}
+      <motion.div variants={itemVariants} className="relative z-20 w-full flex flex-col items-center justify-center py-6 mb-4 shrink-0">
+        <div className="relative w-64 h-64 flex flex-col items-center justify-center mb-6">
+          {/* Subtle ambient background glow (reduced intensity) */}
+          <motion.div 
+            className="absolute inset-0 rounded-full blur-[20px] opacity-10 mix-blend-screen"
+            animate={{
+              scale: [1, 1.05, 1],
+              opacity: percentage >= 85 ? [0.15, 0.3, 0.15] : percentage >= 50 ? [0.1, 0.2, 0.1] : [0.05, 0.1, 0.05]
+            }}
+            transition={{
+              duration: percentage >= 85 ? 1 : percentage >= 50 ? 2 : 4,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            style={{ backgroundColor: ringColor }}
+          />
+          
+          {/* Cartoon Progress Circle */}
+          <svg className="absolute inset-0 w-full h-full transform -rotate-90 overflow-visible z-20 pointer-events-none" viewBox="0 0 100 100">
+            {/* Background Track (Darker, solid) */}
             <circle 
-              cx="50" cy="50" r={radius} 
+              cx="50" cy="50" r={46} 
               fill="transparent" 
-              stroke="rgba(255,255,255,0.05)" 
-              strokeWidth="8"
+              stroke="rgba(255,255,255,0.06)" 
+              strokeWidth="3.5"
             />
-            {/* Progress Fill */}
+            {/* Progress Fill (Solid cartoon color) */}
             <motion.circle 
-              cx="50" cy="50" r={radius} 
+              cx="50" cy="50" r={46} 
               fill="transparent" 
               stroke={ringColor} 
-              strokeWidth="8" 
+              strokeWidth="4" 
               strokeLinecap="round"
-              strokeDasharray={circumference}
-              initial={{ strokeDashoffset: circumference }}
-              animate={{ strokeDashoffset, stroke: ringColor }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              style={{ filter: `drop-shadow(0 0 16px ${ringGlow})` }}
+              strokeDasharray={2 * Math.PI * 46}
+              initial={{ strokeDashoffset: 2 * Math.PI * 46 }}
+              animate={{ 
+                 strokeDashoffset: (2 * Math.PI * 46) - (percentage / 100) * (2 * Math.PI * 46),
+                 stroke: ringColor,
+                 filter: isLogFlash ? 'brightness(1.5) drop-shadow(0 0 8px currentColor)' : 'brightness(1) drop-shadow(0 0 0px currentColor)' 
+              }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
             />
           </svg>
-          
-          {/* Inner Content */}
-          <div className="flex flex-col items-center justify-center text-center z-10">
-            <span className="text-white/50 text-xs font-semibold tracking-widest uppercase mb-2">
-              Spent {config.period === 'monthly' ? 'this month' : 'this week'}
-            </span>
-            <span className="text-4xl font-light text-white tracking-tight mb-1">
-              ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
-            </span>
-            <span className="text-white/60 font-medium tracking-wide text-sm mb-4">
-              ≈ R{(totalSpent * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
-            </span>
-            <div 
-              className="px-2.5 py-0.5 rounded-full border transition-colors duration-500 w-fit mx-auto mt-1"
-              style={{ backgroundColor: `${ringColor}33`, borderColor: `${ringColor}4D` }}
-            >
-              <span className="text-[9px] uppercase tracking-widest font-bold" style={{ color: ringColor }}>
-                {percentage.toFixed(0)}% OF ALLOWED
-              </span>
+
+          {/* Mascot Image Crossfade */}
+          <div className="relative z-10 w-56 h-56 rounded-full flex items-center justify-center">
+            <AnimatePresence mode="wait">
+              {percentage < 50 && (
+                <motion.img
+                  key="safe"
+                  src="/mascot_safe.png"
+                  alt="Safe Mascot"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ opacity: { duration: 0.5 }, y: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
+                  className="w-full h-full object-contain mix-blend-screen drop-shadow-2xl"
+                  style={{ 
+                    maskImage: "radial-gradient(circle at center, black 45%, transparent 65%)", 
+                    WebkitMaskImage: "radial-gradient(circle at center, black 45%, transparent 65%)" 
+                  }}
+                />
+              )}
+              {percentage >= 50 && percentage < 85 && (
+                <motion.img
+                  key="warning"
+                  src="/mascot_warning.png"
+                  alt="Warning Mascot"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1, y: [0, -6, 0] }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ opacity: { duration: 0.5 }, y: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
+                  className="w-full h-full object-contain mix-blend-screen drop-shadow-2xl"
+                  style={{ 
+                    maskImage: "radial-gradient(circle at center, black 45%, transparent 65%)", 
+                    WebkitMaskImage: "radial-gradient(circle at center, black 45%, transparent 65%)" 
+                  }}
+                />
+              )}
+              {percentage >= 85 && (
+                <motion.img
+                  key="danger"
+                  src="/mascot_danger.png"
+                  alt="Danger Mascot"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1, y: [0, -4, 0] }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ opacity: { duration: 0.5 }, y: { duration: 0.8, repeat: Infinity, ease: "easeInOut" } }}
+                  className="w-full h-full object-contain mix-blend-screen drop-shadow-2xl"
+                  style={{ 
+                    maskImage: "radial-gradient(circle at center, black 45%, transparent 65%)", 
+                    WebkitMaskImage: "radial-gradient(circle at center, black 45%, transparent 65%)" 
+                  }}
+                />
+              )}
+            </AnimatePresence>
+            
+            {/* Extra Overlay Elements (Seamless FX) */}
+            <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center overflow-hidden rounded-full">
+              <AnimatePresence>
+                {percentage < 50 && (
+                  <motion.div
+                    key="safe-fx"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 flex items-center justify-around"
+                  >
+                    {[...Array(4)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="w-1.5 h-1.5 bg-[#30D158] rounded-full blur-[1px]"
+                        animate={{
+                          y: [-10, -60],
+                          opacity: [0, 0.8, 0],
+                          scale: [0, 1.5, 0],
+                        }}
+                        transition={{
+                          duration: 2.5 + i,
+                          repeat: Infinity,
+                          delay: i * 0.4,
+                          ease: "easeInOut"
+                        }}
+                      />
+                    ))}
+                  </motion.div>
+                )}
+                
+                {percentage >= 50 && percentage < 85 && (
+                  <motion.div
+                    key="warning-fx"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-2 border-[4px] border-[#E8A33D]/20 rounded-full"
+                    style={{
+                      animation: "pulse 2s infinite ease-in-out"
+                    }}
+                  />
+                )}
+                
+                {percentage >= 85 && (
+                  <motion.div
+                    key="danger-fx"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 flex justify-center"
+                  >
+                    {/* Fiery Embers */}
+                    {[...Array(8)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute bottom-4 w-2.5 h-2.5 bg-[#FF453A] rounded-full blur-[2px]"
+                        style={{ left: `${30 + (i * 5)}%` }}
+                        animate={{
+                          y: [0, -120],
+                          x: [0, (i % 2 === 0 ? 20 : -20), 0],
+                          opacity: [0, 1, 0],
+                          scale: [1, 0.3, 0]
+                        }}
+                        transition={{
+                          duration: 1 + (i * 0.15),
+                          repeat: Infinity,
+                          delay: i * 0.2,
+                          ease: "easeOut"
+                        }}
+                      />
+                    ))}
+                    {/* Danger vignette inner shadow */}
+                    <motion.div 
+                      className="absolute inset-0 rounded-full shadow-[inset_0_0_50px_rgba(255,69,58,0.8)] mix-blend-screen"
+                      animate={{ opacity: [0.3, 0.8, 0.3] }}
+                      transition={{ duration: 0.6, repeat: Infinity }}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
+          </div>
+        </div>
+        
+        {/* Inner Content Text - Repositioned Below Mascot */}
+        <div className="flex flex-col items-center justify-center text-center z-10 mt-2">
+          <span className="text-white/50 text-xs font-semibold tracking-widest uppercase mb-2">
+            Spent {config.period === 'monthly' ? 'this month' : 'this week'}
+          </span>
+          <span className="text-4xl font-light text-white tracking-tight mb-1">
+            ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+          </span>
+          <span className="text-white/60 font-medium tracking-wide text-sm mb-4">
+            ≈ R{(totalSpent * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+          </span>
+          <div 
+            className="px-3 py-1 rounded-full border transition-colors duration-500 w-fit mx-auto shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
+            style={{ backgroundColor: `${ringColor}22`, borderColor: `${ringColor}4D` }}
+          >
+            <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: ringColor, textShadow: `0 0 12px ${ringGlow}` }}>
+              {percentage.toFixed(0)}% OF ALLOWED
+            </span>
           </div>
         </div>
       </motion.div>
