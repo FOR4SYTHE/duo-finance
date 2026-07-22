@@ -198,30 +198,43 @@ export function LiveTripTracker() {
                         </div>
                     </div>
 
-                    {/* Right: Glowing Orb */}
+                    {/* Right: Glowing Orb (Ultra-premium volumetric bloom effect) */}
                     <div className="relative z-20 w-[80px] h-full flex items-center justify-center shrink-0">
-                        {/* Large diffuse glow behind orb */}
+                        {/* Large diffuse glow behind orb (expanded for seamless blending) */}
                         <div 
-                            className="absolute w-[56px] h-[56px] rounded-full blur-[20px] opacity-70"
+                            className="absolute w-[64px] h-[64px] rounded-full blur-[24px] opacity-80"
                             style={{ backgroundColor: getOrbColor() }}
                         />
-                        {/* Orb Core Dot */}
+                        {/* Extended faint diffuse glow for that ultra-premium volumetric light spill */}
+                        <div 
+                            className="absolute w-[100px] h-[100px] rounded-full blur-[40px] opacity-40"
+                            style={{ backgroundColor: getOrbColor() }}
+                        />
+                        
+                        {/* Orb Core (A soft hazy energy cloud, perfectly filling the center of the X) */}
                         <motion.div 
                             key={`orb-${status}-${items.length}`}
                             initial={{ scale: 1.5 }}
                             animate={{ scale: 1 }}
-                            className="w-[10px] h-[10px] rounded-full relative z-20 blur-[0.5px]"
-                            style={{ backgroundColor: getOrbColor(), boxShadow: `0 0 10px ${getOrbColor()}` }}
+                            className="w-[28px] h-[28px] rounded-full relative z-20 blur-[10px] opacity-80 mix-blend-screen"
+                            style={{ backgroundColor: getOrbColor() }}
                         />
-                        {/* Precise Crisp Saturn Rings */}
+                        
+                        {/* Soft Glowing Atom Rings (Pure volumetric mist, flat X shape) */}
                         <motion.div 
                             animate={{ rotate: 360 }}
-                            transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
+                            transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
                             className="absolute inset-0 m-auto flex items-center justify-center pointer-events-none"
                         >
-                            <div className="absolute w-[46px] h-[14px] rounded-[50%] border-[1.5px] opacity-90 mix-blend-screen blur-[0.5px]" style={{ borderColor: getOrbColor(), transform: 'rotate(15deg)' }} />
-                            <div className="absolute w-[46px] h-[14px] rounded-[50%] border-[1.5px] opacity-90 mix-blend-screen blur-[0.5px]" style={{ borderColor: getOrbColor(), transform: 'rotate(75deg)' }} />
-                            <div className="absolute w-[46px] h-[14px] rounded-[50%] border-[1.5px] opacity-90 mix-blend-screen blur-[0.5px]" style={{ borderColor: getOrbColor(), transform: 'rotate(135deg)' }} />
+                            {/* Loop 1 (Flatter angle: 25deg, very thick and blurred for pure mist) */}
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-70 mix-blend-screen blur-[3px]" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-50 mix-blend-screen blur-[7px]" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-30 mix-blend-screen blur-[12px]" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
+                            
+                            {/* Loop 2 (Flatter angle: 155deg, very thick and blurred for pure mist) */}
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-70 mix-blend-screen blur-[3px]" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-50 mix-blend-screen blur-[7px]" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
+                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-30 mix-blend-screen blur-[12px]" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
                         </motion.div>
                     </div>
                 </div>
