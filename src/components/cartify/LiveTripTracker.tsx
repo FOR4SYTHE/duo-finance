@@ -144,13 +144,13 @@ export function LiveTripTracker() {
                     {/* The Premium Volumetric Q-Tip Beam */}
                     <div className="absolute left-[70px] right-[70px] top-0 bottom-0 pointer-events-none z-10 flex items-center justify-center">
                         
-                        {/* Central Beam (Solid, crisp core, finishes early and fades out to completely eliminate the bright green rectangle) */}
+                        {/* Central Beam (Solid, crisp core, stays solid longer to support text, then fades out) */}
                         <div className="absolute left-[-20px] right-[0px] h-[36px] blur-[3px] opacity-100"
-                             style={{ background: `linear-gradient(to right, ${getPathwayColor()} 55%, transparent 100%)` }} />
+                             style={{ background: `linear-gradient(to right, ${getPathwayColor()} 75%, transparent 100%)` }} />
                              
                         {/* Central Beam (Soft backing) */}
                         <div className="absolute left-[-20px] right-[0px] h-[46px] blur-[6px] opacity-80"
-                             style={{ background: `linear-gradient(to right, ${getPathwayColor()} 55%, transparent 100%)` }} />
+                             style={{ background: `linear-gradient(to right, ${getPathwayColor()} 75%, transparent 100%)` }} />
 
                         {/* Left Trumpet Flare (Perfectly aligned to card edge, zero sharp cuts) */}
                         <div className="absolute left-[8px] w-[50px] h-[60px] blur-[4px] opacity-100 flex items-center justify-center">
@@ -161,12 +161,12 @@ export function LiveTripTracker() {
                                  }} />
                         </div>
                              
-                        {/* Right Trumpet Flare (Tighter and contained so it doesn't bleed into a fog) */}
-                        <div className="absolute right-[0px] w-[60px] h-[48px] blur-[6px] opacity-70 flex items-center justify-center">
+                        {/* Right Fishtail Flare (Wraps the top and bottom of the blue beam like two gentle arms, perfectly matching the sketch) */}
+                        <div className="absolute right-[0px] w-[110px] h-[56px] blur-[10px] opacity-60 flex items-center justify-center">
                             <div className="w-full h-full"
                                  style={{ 
-                                     background: `linear-gradient(to right, transparent 0%, ${getOrbColor()} 100%)`,
-                                     clipPath: 'polygon(100% 0, 0 50%, 100% 100%)'
+                                     background: `linear-gradient(to right, transparent -10%, ${getOrbColor()} 100%)`,
+                                     clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)'
                                  }} />
                         </div>
                     </div>
