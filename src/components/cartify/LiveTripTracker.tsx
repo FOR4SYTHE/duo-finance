@@ -161,8 +161,8 @@ export function LiveTripTracker() {
                                  }} />
                         </div>
                              
-                        {/* Right Trumpet Flare (Fades in from transparent to green, perfectly flush with the atom to eliminate the 24px gap) */}
-                        <div className="absolute right-[0px] w-[80px] h-[60px] blur-[8px] opacity-80 flex items-center justify-center">
+                        {/* Right Trumpet Flare (Softened to perfectly match the gentle, misty glow of the atom without harshness) */}
+                        <div className="absolute right-[0px] w-[80px] h-[60px] blur-[12px] opacity-50 flex items-center justify-center">
                             <div className="w-full h-full"
                                  style={{ 
                                      background: `linear-gradient(to right, transparent 0%, ${getOrbColor()} 100%)`,
