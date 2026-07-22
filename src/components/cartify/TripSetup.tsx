@@ -224,7 +224,7 @@ export function TripSetup() {
                                 
                                 <div className="w-[84px] h-[84px] relative -mr-2 shrink-0 z-10 flex items-center justify-center pointer-events-none">
                                     <img 
-                                        src="/cart_3d.png" 
+                                        src="/cart_3d.webp" 
                                         alt="3D Cart" 
                                         style={{ 
                                             WebkitMaskImage: 'radial-gradient(circle at center, black 40%, transparent 65%)',
