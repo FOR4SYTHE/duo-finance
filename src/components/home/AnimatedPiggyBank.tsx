@@ -214,6 +214,18 @@ export function AnimatedPiggyBank() {
           {/* Highlight on top of head */}
           <path d="M78 45 Q120 33 162 45 Q120 52 78 45 Z" fill="#FFFFFF" opacity="0.22" />
 
+          {/* --- Sprout (Leaves on Head) --- */}
+          <g>
+            {/* Stem */}
+            <path d="M120 42 Q 118 30 120 22" stroke="#68A55A" strokeWidth="4" strokeLinecap="round" fill="none" />
+            {/* Left Leaf */}
+            <path d="M119 28 C 102 28, 90 12, 105 8 C 115 5, 119 18, 119 28 Z" fill="#88C776" stroke="#68A55A" strokeWidth="2" strokeLinejoin="round" />
+            <path d="M119 28 Q 110 18 105 8" stroke="#5C934E" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.8" />
+            {/* Right Leaf */}
+            <path d="M120 25 C 135 25, 145 10, 130 5 C 120 0, 120 15, 120 25 Z" fill="#88C776" stroke="#68A55A" strokeWidth="2" strokeLinejoin="round" />
+            <path d="M120 25 Q 128 15 130 5" stroke="#5C934E" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.8" />
+          </g>
+
           {/* --- Coin Slot (Clean rounded slot) --- */}
           <rect x="94" y="44" width="52" height="6" rx="3" fill="#3A1C1D" />
           <path d="M 97 49 Q 120 51 143 49" stroke="#FFFFFF" strokeWidth="1.2" strokeLinecap="round" opacity="0.25" fill="none" />
