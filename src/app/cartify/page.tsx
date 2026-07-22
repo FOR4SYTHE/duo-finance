@@ -29,7 +29,7 @@ export default function CartifyPage() {
             variants={containerVariants}
             initial={isInitialLoad ? "hidden" : false}
             animate="visible"
-            className="flex flex-col w-full h-full px-6 pt-12 pb-8 relative"
+            className="flex flex-col w-full h-full px-6 pt-12 pb-8 relative overflow-y-auto no-scrollbar"
         >
             
             {/* Header Area */}
@@ -47,7 +47,7 @@ export default function CartifyPage() {
             </motion.div>
 
             {/* Smart Container Rendering */}
-            <motion.div variants={itemVariants} className="flex-1 overflow-hidden flex flex-col relative z-20">
+            <motion.div variants={itemVariants} className="flex-1 flex flex-col relative z-20 min-h-[min-content]">
                 {isReceiptView ? (
                     <ReceiptView />
                 ) : !isActive ? (

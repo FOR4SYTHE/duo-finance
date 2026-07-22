@@ -335,19 +335,35 @@ export function LiveTripTracker() {
                                     </span>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-3 mb-6 flex-1 max-h-[320px]">
-                                    {simpleButtons.map((btn) => (
-                                        <button
-                                            key={btn.label}
-                                            onClick={() => btn.label === "⌫" ? deleteSimpleLast() : appendSimpleInput(btn.label)}
-                                            className={`
-                                                h-full w-full rounded-[24px] flex items-center justify-center text-[28px] tracking-tight transition-colors duration-75 bg-white/[0.06] hover:bg-white/[0.1] active:bg-white/[0.25] backdrop-blur-md
-                                                ${btn.type === "num" ? "text-white font-normal" : "text-white/40 font-medium"}
-                                            `}
-                                        >
-                                            {btn.label === "⌫" ? <Delete className="w-6 h-6" strokeWidth={1.5} /> : btn.label}
-                                        </button>
-                                    ))}
+                                <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 flex-1 max-h-[340px] max-w-[360px] mx-auto w-full">
+                                    {simpleButtons.map((btn) => {
+                                        let btnClasses = "";
+                                        let textClasses = "";
+                                        
+                                        if (btn.type === "num") {
+                                            btnClasses = "bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.06] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_8px_20px_rgba(0,0,0,0.5)] hover:from-white/[0.12] hover:to-white/[0.06]";
+                                            textClasses = "text-white font-light text-[30px]";
+                                        } else if (btn.type === "action") {
+                                            btnClasses = "bg-gradient-to-b from-black/40 to-black/60 border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_20px_rgba(0,0,0,0.5)] hover:from-black/30 hover:to-black/50";
+                                            textClasses = "text-white/40 font-medium text-[24px] tracking-wide";
+                                        }
+
+                                        return (
+                                            <button
+                                                key={btn.label}
+                                                onClick={() => btn.label === "⌫" ? deleteSimpleLast() : appendSimpleInput(btn.label)}
+                                                className={`
+                                                    relative flex items-center justify-center rounded-[24px] h-[72px] sm:h-[78px] transition-colors duration-300 overflow-hidden group active:scale-[0.92]
+                                                    ${btnClasses}
+                                                `}
+                                            >
+                                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                                                <span className={`relative z-10 ${textClasses}`}>
+                                                    {btn.label === "⌫" ? <Delete className="w-6 h-6" strokeWidth={1.5} /> : btn.label}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
 
                                 <button
