@@ -19,6 +19,9 @@ export function LiveTripTracker() {
     
     // Simple mode numpad state
     const [simpleDisplayValue, setSimpleDisplayValue] = useState("0");
+    const [showCalc, setShowCalc] = useState(false);
+    const [showList, setShowList] = useState(false);
+    const [flyingValue, setFlyingValue] = useState<string | null>(null);
 
     const totalSpent = items.reduce((acc, item) => acc + item.amount, 0);
     const remaining = budget - totalSpent;
@@ -107,63 +110,135 @@ export function LiveTripTracker() {
         );
     }
 
-    const HeroCard = () => (
-        <div className={`relative shrink-0 w-full rounded-[32px] p-6 mb-4 overflow-hidden border transition-colors duration-500 ${isOverBudget ? 'bg-red-500/10 border-red-500/20 shadow-[0_0_60px_rgba(239,68,68,0.1)]' : 'bg-black/40 border-white/[0.05] shadow-[0_0_60px_rgba(255,255,255,0.02)]'}`}>
-            <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/[0.1] flex items-center justify-center">
-                        <ShoppingCart className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-white/80 font-medium tracking-wide">Live Trip</span>
-                </div>
-                <div className="flex gap-2">
-                    <button onClick={showReceipt} className="flex items-center gap-2 border border-white/10 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
-                        <ReceiptText className="w-3 h-3 text-white" />
-                        <span className="text-xs font-semibold tracking-widest uppercase text-white">Done</span>
-                    </button>
-                    <div className={`flex items-center gap-2 border px-3 py-1.5 rounded-full ${isOverBudget ? 'bg-red-500/10 border-red-500/20' : 'bg-[#30D158]/10 border-[#30D158]/20'}`}>
-                        <Activity className={`w-3 h-3 ${isOverBudget ? 'text-red-500' : 'text-[#30D158]'}`} />
-                        <span className={`text-xs font-semibold tracking-widest uppercase ${isOverBudget ? 'text-red-500' : 'text-[#30D158]'}`}>
-                            {isOverBudget ? 'Over' : 'Live'}
-                        </span>
-                    </div>
-                </div>
-            </div>
-            
-            <div className="flex flex-col gap-1 mb-6">
-                <span className="text-white/50 text-xs font-semibold tracking-widest uppercase mb-1">Remaining Budget</span>
-                <div className="flex items-baseline gap-2">
-                    <span className={`text-5xl font-light tracking-tight ${isOverBudget ? 'text-red-500' : 'text-white'}`}>
-                        ₱{Math.abs(remaining).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                    </span>
-                </div>
-                <span className="text-white/60 font-medium tracking-wide">
-                    ≈ R{(Math.abs(remaining) * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                </span>
-                {vatAmount > 0 && (
-                    <span className="text-white/30 text-xs font-medium tracking-wide mt-1">
-                        Est. VAT included: ₱{vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} / R{(vatAmount * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                    </span>
-                )}
-            </div>
-            
-            {/* Heat Map Progress */}
-            <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                <div 
-                    className={`h-full rounded-full transition-all duration-500 ${isOverBudget ? 'bg-red-500' : 'bg-gradient-to-r from-[#30D158] to-[#E8A33D]'}`} 
-                    style={{ width: `${progressPercent}%` }} 
-                />
-            </div>
-            <div className="flex justify-between items-center mt-3">
-                <span className="text-white/40 text-[10px] uppercase tracking-wider font-bold">Spent: ₱{totalSpent.toLocaleString()}</span>
-                <span className="text-white/40 text-[10px] uppercase tracking-wider font-bold">Total: ₱{budget.toLocaleString()}</span>
-            </div>
-        </div>
-    );
+    const HeroCard = () => {
+        let status = 'safe';
+        if (progressPercent >= 90) status = 'danger';
+        else if (progressPercent >= 50) status = 'warning';
 
-    const [showCalc, setShowCalc] = useState(false);
-    const [showList, setShowList] = useState(false);
-    const [flyingValue, setFlyingValue] = useState<string | null>(null);
+        // Safe: Blue pathway -> Green Orb
+        // Warning: Yellow pathway -> Orange Orb
+        // Danger: Red pathway -> Red Orb
+        const getOrbColor = () => {
+            if (status === 'danger') return 'rgba(255, 30, 30, 1)'; 
+            if (status === 'warning') return 'rgba(255, 140, 0, 1)'; 
+            return 'rgba(20, 230, 90, 1)'; 
+        };
+
+        const getPathwayColor = () => {
+            if (status === 'danger') return 'rgba(230, 20, 20, 1)';
+            if (status === 'warning') return 'rgba(230, 120, 0, 1)';
+            return 'rgba(20, 80, 255, 1)'; 
+        };
+
+        return (
+            <motion.div 
+                layout
+                className="sticky top-2 z-40 shrink-0 w-full rounded-[44px] mb-6 overflow-hidden bg-black flex flex-col"
+                style={{
+                    boxShadow: "0 20px 40px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05)"
+                }}
+            >
+                {/* Top Section: Card, Beam, Orb, Values */}
+                <div className="relative w-full h-[120px] flex items-center justify-between overflow-hidden">
+                    
+                    {/* The Organic Q-Tip Pathway Beam */}
+                    <div className="absolute left-[65px] right-[65px] h-[70px] top-[25px] pointer-events-none z-10 flex items-center justify-center">
+                        
+                        {/* Left Q-Tip Head (Taller, soft, blends behind card) */}
+                        <div className="absolute left-[-15px] w-[50px] h-[64px] rounded-[100px] blur-[14px] opacity-90"
+                             style={{ backgroundColor: getPathwayColor() }} />
+                             
+                        {/* Right Q-Tip Head (Taller, soft, blends behind orb) */}
+                        <div className="absolute right-[-15px] w-[50px] h-[64px] rounded-[100px] blur-[14px] opacity-90"
+                             style={{ backgroundColor: getPathwayColor() }} />
+
+                        {/* Center Bridge (Shorter, creates the pinch/concave effect organically) */}
+                        <div className="absolute left-[15px] right-[15px] h-[36px] rounded-[100px] blur-[8px] opacity-100"
+                             style={{ backgroundColor: getPathwayColor() }} />
+                             
+                        {/* Center Core (Provides a solid backing for the crisp text) */}
+                        <div className="absolute left-[25px] right-[25px] h-[20px] rounded-[100px] blur-[3px] opacity-100"
+                             style={{ backgroundColor: getPathwayColor() }} />
+                    </div>
+
+                    {/* Left: 3D Virtual Card (Half emerging from portal) */}
+                    <div className="relative z-20 w-[90px] h-full flex items-center shrink-0 pl-1">
+                        {/* The actual card */}
+                        <div className="relative w-[65px] h-[80px] rounded-[10px] bg-[#111] border border-white/10 shadow-[10px_0_20px_rgba(0,0,0,1)] flex flex-col justify-between p-3 overflow-hidden ml-3">
+                            <div className="self-end text-white font-bold text-[8px] tracking-tighter">R</div>
+                            <div className="self-start text-white font-black italic text-[9px] tracking-tighter mt-auto">VISA</div>
+                            {/* Card Right Edge Highlight */}
+                            <div className="absolute inset-y-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-white/50 to-transparent mix-blend-screen" />
+                        </div>
+                        {/* Dark portal fade on the left side to make it blend into the black */}
+                        <div className="absolute inset-y-0 left-0 w-[45px] bg-gradient-to-r from-black via-black/95 to-transparent pointer-events-none z-30" />
+                    </div>
+
+                    {/* Center: Text Content (Crisp, perfectly aligned with the beam core) */}
+                    <div className="relative z-30 flex flex-col items-center justify-center flex-1 h-full px-2">
+                        <span className="text-white/80 text-[10px] font-medium tracking-wide mb-[1px]">
+                            Remaining Budget
+                        </span>
+                        <motion.span 
+                            key={remaining}
+                            initial={{ scale: 1.1 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            className="text-white text-[32px] leading-none font-semibold tracking-tight"
+                        >
+                            ₱{Math.abs(remaining).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                        </motion.span>
+                        <div className="flex items-center gap-1.5 mt-1 text-white/60 text-[9px] font-medium tracking-wide">
+                            <span>≈ R{(Math.abs(remaining) * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            {vatAmount > 0 && (
+                                <>
+                                    <span className="w-[1px] h-2.5 bg-white/30" />
+                                    <span>Est. VAT ₱{vatAmount.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Right: Glowing Orb */}
+                    <div className="relative z-20 w-[80px] h-full flex items-center justify-center shrink-0">
+                        {/* Large diffuse glow behind orb */}
+                        <div 
+                            className="absolute w-[56px] h-[56px] rounded-full blur-[20px] opacity-70"
+                            style={{ backgroundColor: getOrbColor() }}
+                        />
+                        {/* Orb Core Dot */}
+                        <motion.div 
+                            key={`orb-${status}-${items.length}`}
+                            initial={{ scale: 1.5 }}
+                            animate={{ scale: 1 }}
+                            className="w-[10px] h-[10px] rounded-full relative z-20 blur-[0.5px]"
+                            style={{ backgroundColor: getOrbColor(), boxShadow: `0 0 10px ${getOrbColor()}` }}
+                        />
+                        {/* Precise Crisp Saturn Rings */}
+                        <motion.div 
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
+                            className="absolute inset-0 m-auto flex items-center justify-center pointer-events-none"
+                        >
+                            <div className="absolute w-[46px] h-[14px] rounded-[50%] border-[1.5px] opacity-90 mix-blend-screen blur-[0.5px]" style={{ borderColor: getOrbColor(), transform: 'rotate(15deg)' }} />
+                            <div className="absolute w-[46px] h-[14px] rounded-[50%] border-[1.5px] opacity-90 mix-blend-screen blur-[0.5px]" style={{ borderColor: getOrbColor(), transform: 'rotate(75deg)' }} />
+                            <div className="absolute w-[46px] h-[14px] rounded-[50%] border-[1.5px] opacity-90 mix-blend-screen blur-[0.5px]" style={{ borderColor: getOrbColor(), transform: 'rotate(135deg)' }} />
+                        </motion.div>
+                    </div>
+                </div>
+
+                {/* Bottom Section: Spent and Total (Dark area) */}
+                <div className="w-full px-8 pb-5 flex justify-between items-center bg-black relative z-20">
+                    <span className="text-white/40 text-[10px] font-bold tracking-widest uppercase">
+                        Spent: ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                    </span>
+                    <span className="text-white/40 text-[10px] font-bold tracking-widest uppercase">
+                        Total: ₱{budget.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                    </span>
+                </div>
+            </motion.div>
+        );
+    };
 
     if (mode === 'simple') {
         const simpleButtons = [
@@ -432,61 +507,84 @@ export function LiveTripTracker() {
             <HeroCard />
 
             {mode === 'unplanned' && activeCategory && (
-                <div className="flex items-center justify-between px-2 mb-4 shrink-0">
-                    <span className="text-white/40 text-xs uppercase tracking-widest font-semibold">Active Tag</span>
-                    <button 
-                        onClick={() => setIsSwitchingCategory(true)}
-                        className="bg-[#30D158]/10 border border-[#30D158]/30 px-4 py-1.5 rounded-full flex items-center gap-2 hover:bg-[#30D158]/20 transition-colors"
-                    >
-                        <span className="text-[#30D158] text-xs font-bold">{activeCategory}</span>
-                        <span className="w-4 h-4 rounded-full bg-[#30D158]/20 flex items-center justify-center text-[#30D158] text-[10px]">▼</span>
-                    </button>
+                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-4 -mx-6 px-6 shrink-0 snap-x">
+                    {categories.map(cat => (
+                        <button
+                            key={cat.name}
+                            onClick={() => setActiveCategory(cat.name)}
+                            className={`snap-start shrink-0 px-4 py-2 rounded-full border transition-all duration-300 flex items-center gap-2 ${
+                                activeCategory === cat.name 
+                                    ? 'bg-[#30D158]/10 border-[#30D158]/30 shadow-[0_4px_16px_rgba(48,209,88,0.1)]' 
+                                    : 'bg-white/5 border-white/5 hover:bg-white/10'
+                            }`}
+                        >
+                            <img src={cat.image} alt={cat.name} className="w-5 h-5 object-contain" />
+                            <span className={`text-[11px] font-bold tracking-wide ${activeCategory === cat.name ? 'text-[#30D158]' : 'text-white/60'}`}>
+                                {cat.name}
+                            </span>
+                        </button>
+                    ))}
                 </div>
             )}
 
             {/* Cart Items List */}
-            <div className="flex flex-col gap-4 flex-1">
-                <div className="flex justify-between items-center mb-2 px-1">
+            <div className="flex flex-col flex-1 pb-32">
+                <div className="flex justify-between items-center mb-4 px-2">
                     <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Scanned Items ({items.length})</h2>
-                    <div className="flex items-center gap-2">
-                        <button 
-                            onClick={() => setIsAddingNew(true)}
-                            className="flex items-center gap-1.5 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.05] active:scale-[0.98] px-3 py-1.5 rounded-full transition-all text-white text-[10px] font-bold uppercase tracking-wider"
-                        >
-                            <Plus className="w-3.5 h-3.5 text-[#30D158]" />
-                            <span>Add Item</span>
-                        </button>
-                        <button 
-                            onClick={() => setSortAsc(!sortAsc)}
-                            className="flex items-center gap-1 bg-white/[0.05] hover:bg-white/[0.1] px-2.5 py-1.5 rounded-full transition-colors"
-                        >
-                            <span className="text-white/70 text-[10px] uppercase tracking-wider font-bold">Sort</span>
-                            <ArrowUpDown className="w-3 h-3 text-white/70" />
-                        </button>
-                    </div>
+                    <button 
+                        onClick={() => setSortAsc(!sortAsc)}
+                        className="flex items-center gap-1 bg-white/[0.05] hover:bg-white/[0.1] px-2.5 py-1.5 rounded-full transition-colors"
+                    >
+                        <span className="text-white/70 text-[10px] uppercase tracking-wider font-bold">Sort</span>
+                        <ArrowUpDown className="w-3 h-3 text-white/70" />
+                    </button>
                 </div>
 
-                {sortedItems.map((item) => (
-                    <SwipeableCartItem 
-                        key={item.id} 
-                        item={item} 
-                        exchangeRate={exchangeRate}
-                        onEdit={() => setActiveEditId(item.id)}
-                        onIncrement={() => incrementQuantity(item.id)}
-                        onDecrement={() => decrementQuantity(item.id)}
-                        onDelete={() => removeItem(item.id)}
-                    />
-                ))}
+                <AnimatePresence mode="popLayout">
+                    {sortedItems.map((item, i) => (
+                        <motion.div
+                            key={item.id}
+                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 30, delay: i * 0.05 }}
+                        >
+                            <SwipeableCartItem 
+                                item={item} 
+                                exchangeRate={exchangeRate}
+                                onEdit={() => setActiveEditId(item.id)}
+                                onIncrement={() => incrementQuantity(item.id)}
+                                onDecrement={() => decrementQuantity(item.id)}
+                                onDelete={() => removeItem(item.id)}
+                            />
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
                 
                 {items.length === 0 && (
-                    <button 
+                    <motion.button 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         onClick={() => setIsAddingNew(true)}
-                        className="w-full border-2 border-dashed border-white/10 hover:border-white/20 rounded-[24px] p-6 flex flex-col items-center justify-center gap-2 bg-white/[0.01] hover:bg-white/[0.03] transition-all text-white/40 text-sm font-medium py-10"
+                        className="w-full border border-dashed border-white/10 hover:border-white/20 rounded-[32px] p-6 flex flex-col items-center justify-center gap-3 bg-white/[0.01] hover:bg-white/[0.03] transition-all text-white/40 text-sm font-medium py-12"
                     >
-                        <Plus className="w-6 h-6 text-[#30D158]" />
-                        <span>Add First Item</span>
-                    </button>
+                        <div className="w-12 h-12 rounded-full bg-[#30D158]/10 flex items-center justify-center border border-[#30D158]/20">
+                            <Plus className="w-6 h-6 text-[#30D158]" />
+                        </div>
+                        <span>Scan your first item</span>
+                    </motion.button>
                 )}
+            </div>
+
+            {/* Floating Action Button */}
+            <div className="fixed bottom-24 left-0 right-0 flex justify-center z-50 pointer-events-none px-6">
+                <button 
+                    onClick={() => setIsAddingNew(true)}
+                    className="pointer-events-auto bg-gradient-to-r from-[#30D158] to-[#25A645] text-black border border-white/20 shadow-[0_8px_32px_rgba(48,209,88,0.4)] px-6 py-3.5 rounded-full flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all w-full max-w-[200px]"
+                >
+                    <Plus className="w-5 h-5" strokeWidth={2.5} />
+                    <span className="font-bold tracking-wide text-[15px]">Add Item</span>
+                </button>
             </div>
 
             {/* Modals */}
@@ -606,81 +704,81 @@ function SwipeableCartItem({ item, exchangeRate, onEdit, onIncrement, onDecremen
     };
 
     return (
-        <div className="relative w-full rounded-[24px] overflow-hidden group">
-            <div className="absolute inset-0 bg-red-500/20 flex items-center justify-end px-6">
-                <Trash2 className="w-6 h-6 text-red-500" />
+        <div className="relative w-full rounded-[32px] overflow-hidden group mb-4 shadow-[0_16px_32px_rgba(0,0,0,0.3)]">
+            <div className="absolute inset-0 bg-red-500 flex items-center justify-end px-8">
+                <Trash2 className="w-7 h-7 text-white" />
             </div>
             
             <motion.div
+                layout
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={{ left: 0.8, right: 0 }}
                 onDragEnd={handleDragEnd}
                 animate={controls}
-                className={`relative w-full border rounded-[24px] p-4 flex flex-col z-10 transition-colors ${
+                className={`relative w-full rounded-[32px] p-3 flex z-10 transition-colors backdrop-blur-3xl border ${
                     isStillNeed 
-                        ? 'bg-[#111] border-white/[0.03] opacity-60' 
-                        : 'bg-[#1a1a1a] border-white/[0.08]'
+                        ? 'bg-black/80 border-white/[0.03] opacity-60' 
+                        : 'bg-gradient-to-b from-white/[0.08] to-white/[0.02] border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
                 }`}
             >
-                <div className="flex items-center justify-between w-full">
+                {/* Unified Quantity Adjuster */}
+                {!isStillNeed && (
+                    <div className="flex flex-col items-center justify-between w-10 bg-black/40 rounded-[20px] py-2 shrink-0 border border-white/5 mr-3">
+                        <button onClick={onIncrement} className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-full active:scale-90 transition-all text-white/70">
+                            <Plus className="w-4 h-4" />
+                        </button>
+                        <span className="text-white text-xs font-bold my-1">{item.quantity}</span>
+                        <button onClick={onDecrement} className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-full active:scale-90 transition-all text-white/70">
+                            <span className="w-3 h-0.5 bg-current rounded-full" />
+                        </button>
+                    </div>
+                )}
+                
+                <div className="flex items-center justify-between w-full py-1 pr-2">
                     <div className="flex items-center gap-4 flex-1" onClick={isStillNeed ? onEdit : undefined}>
-                        {!isStillNeed && (
-                            <div className="flex flex-col items-center gap-1 bg-white/[0.05] p-1 rounded-full border border-white/[0.02] shrink-0">
-                                <button onClick={onIncrement} className="w-6 h-6 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 transition-colors">
-                                    <Plus className="w-3 h-3 text-white" />
-                                </button>
-                                <span className="text-white text-xs font-bold w-6 text-center">{item.quantity}</span>
-                                <button onClick={onDecrement} className="w-6 h-6 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/20 transition-colors">
-                                    <span className="w-3 h-0.5 bg-white rounded-full" />
-                                </button>
-                            </div>
-                        )}
-                        
                         {(() => {
                             const Art = getItemArt(item.name);
                             const Icon = Art.icon;
                             return (
-                                <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center border border-white/5 relative overflow-hidden bg-gradient-to-br ${Art.color} shadow-lg ml-1`}>
-                                    <div className="absolute inset-0 opacity-20 bg-white/10 mix-blend-overlay" />
-                                    <Icon className={`w-5 h-5 ${Art.text} drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]`} strokeWidth={1.5} />
+                                <div className={`w-14 h-14 shrink-0 rounded-[22px] flex items-center justify-center border border-white/10 relative overflow-hidden bg-gradient-to-br ${Art.color} shadow-lg ml-1`}>
+                                    <div className="absolute inset-0 opacity-20 bg-white/20 mix-blend-overlay" />
+                                    <Icon className={`w-6 h-6 ${Art.text} drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]`} strokeWidth={1.5} />
                                 </div>
                             );
                         })()}
 
                         <div className="flex flex-col flex-1 pl-1" onClick={!isStillNeed ? onEdit : undefined}>
-                            <span className={`font-medium mb-0.5 ${isStillNeed ? 'text-white/60' : 'text-white'}`}>{item.name}</span>
-                            <span className="text-white/40 text-xs tracking-wide">
+                            <span className={`font-semibold text-[16px] leading-tight tracking-tight mb-1 ${isStillNeed ? 'text-white/60' : 'text-white'}`}>{item.name}</span>
+                            <span className="text-white/40 text-[11px] font-medium tracking-wide">
                                 {isStillNeed ? 'Tap to set price' : `₱${item.unitPrice.toLocaleString()} each`}
                             </span>
-                            {/* Manual VAT Toggle Trigger */}
-                            <button 
-                                onClick={(e) => { e.stopPropagation(); toggleItemVatable(item.id); }}
-                                className={`self-start mt-1 px-2 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider border ${item.isVatable ? 'text-[#30D158] border-[#30D158]/20 bg-[#30D158]/10' : 'text-white/40 border-white/10 bg-white/5'}`}
-                            >
-                                {item.isVatable ? '12% VAT' : 'VAT Exempt'}
-                            </button>
+                            
+                            {/* Premium glowing VAT Badge */}
+                            {!isStillNeed && (
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); toggleItemVatable(item.id); }}
+                                    className={`self-start mt-1.5 px-2 py-0.5 rounded-md text-[9px] uppercase font-bold tracking-widest border transition-all ${
+                                        item.isVatable 
+                                            ? 'text-[#30D158] border-[#30D158]/30 bg-[#30D158]/10 shadow-[0_0_8px_rgba(48,209,88,0.2)]' 
+                                            : 'text-white/30 border-white/5 bg-white/5 hover:bg-white/10'
+                                    }`}
+                                >
+                                    {item.isVatable ? '12% VAT' : 'VAT Exempt'}
+                                </button>
+                            )}
                         </div>
                     </div>
                     
-                    <div className="flex items-center gap-4">
-                        <div className="flex flex-col items-end" onClick={onEdit}>
-                            <span className={`font-medium ${isStillNeed ? 'text-white/30' : 'text-white'}`}>
-                                {isStillNeed ? '--' : `₱${item.amount.toLocaleString()}`}
+                    <div className="flex flex-col items-end justify-center" onClick={onEdit}>
+                        <span className={`font-medium text-[19px] tracking-tight ${isStillNeed ? 'text-white/30' : 'text-white'}`}>
+                            {isStillNeed ? '--' : `₱${item.amount.toLocaleString()}`}
+                        </span>
+                        {!isStillNeed && (
+                            <span className="text-white/30 text-[10px] uppercase font-bold tracking-wider mt-1">
+                                ≈ R{(item.amount * exchangeRate).toFixed(0)}
                             </span>
-                            {!isStillNeed && (
-                                <span className="text-white/40 text-[10px] uppercase tracking-wider">
-                                    R{(item.amount * exchangeRate).toFixed(0)}
-                                </span>
-                            )}
-                        </div>
-                        <button 
-                            onClick={onDelete}
-                            className="w-8 h-8 rounded-full bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity md:opacity-100"
-                            title="Delete"
-                        >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                        </button>
+                        )}
                     </div>
                 </div>
             </motion.div>
