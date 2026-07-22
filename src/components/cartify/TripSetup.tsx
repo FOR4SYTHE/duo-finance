@@ -54,64 +54,81 @@ export function TripSetup() {
 
     return (
         <div className="flex flex-col w-full h-full relative z-20 flex-1 overflow-y-auto no-scrollbar pb-24 pt-2">
-            <div className="flex justify-between items-center mb-4 px-1">
-                <span className="text-white/50 text-xs font-semibold tracking-widest uppercase">Trip Budget</span>
-                <button 
-                    onClick={toggleCurrency} 
-                    className="flex items-center gap-1.5 bg-white/[0.05] hover:bg-white/[0.1] active:bg-white/[0.15] border border-white/10 px-3 py-1.5 rounded-full transition-all group"
-                >
-                    <ArrowUpDown className="w-3 h-3 text-white/60 group-hover:text-white" />
-                    <span className="text-white/80 text-[10px] uppercase font-bold tracking-widest">
-                        {primaryCurrency} ⇌ {targetCurrency}
-                    </span>
-                </button>
-            </div>
             
-            <div className="flex flex-col items-center justify-center mb-4 min-h-[70px] shrink-0">
-                <div className="flex flex-col items-center">
-                    <div className="text-[3.5rem] leading-none text-white flex items-baseline justify-center gap-1 font-light tracking-tight">
-                        <span className="text-2xl text-white/40">{isPhpPrimary ? '₱' : 'R'}</span>
-                        <span>{displayValue || "0"}</span>
-                    </div>
-                    <span className="text-white/40 font-medium tracking-wide mt-1 text-sm">
-                        ≈ {targetCurrency === 'PHP' ? '₱' : 'R'}{convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                    </span>
-                </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5 mb-4 shrink-0">
-                <span className="text-white/50 text-[10px] font-semibold tracking-widest uppercase mb-0.5 px-1">Mode</span>
+            {/* Premium Top Island */}
+            <div className="relative z-20 shrink-0 bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.08] rounded-[40px] p-6 mb-6 shadow-[0_16px_40px_rgba(0,0,0,0.3)] overflow-hidden">
+                {/* Elegant glow inside the card */}
+                <div className="absolute -top-24 -left-24 w-56 h-56 bg-[#30D158]/20 rounded-full blur-[60px] pointer-events-none" />
+                <div className="absolute -bottom-24 -right-24 w-56 h-56 bg-[#30D158]/10 rounded-full blur-[60px] pointer-events-none" />
                 
-                {(['simple', 'unplanned', 'planned'] as CartifyMode[]).map(mode => (
-                    <button 
-                        key={mode}
-                        onClick={() => setSelectedMode(mode)}
-                        className={`w-full p-3 rounded-[16px] border flex items-center justify-between transition-all active:scale-[0.98] ${
-                            selectedMode === mode 
-                                ? 'bg-[#30D158]/10 border-[#30D158]/30 shadow-[0_0_20px_rgba(48,209,88,0.05)]' 
-                                : 'bg-white/[0.02] border-white/[0.03] hover:bg-white/[0.05]'
-                        }`}
-                    >
-                        <div className="flex flex-col items-start text-left">
-                            <span className={`text-sm font-medium capitalize ${selectedMode === mode ? 'text-[#30D158]' : 'text-white'}`}>
-                                {mode === 'unplanned' ? 'Organized (On the fly)' : mode === 'planned' ? 'Organized (Pre-planned)' : 'Simple'}
+                <div className="relative z-10">
+                    <div className="flex justify-between items-center mb-8">
+                        <span className="text-white/50 text-[11px] font-semibold tracking-[0.2em] uppercase">Trip Budget</span>
+                        <button 
+                            onClick={toggleCurrency} 
+                            className="flex items-center gap-1.5 bg-black/20 hover:bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full transition-all group"
+                        >
+                            <ArrowUpDown className="w-3 h-3 text-white/60 group-hover:text-white transition-colors" />
+                            <span className="text-white/80 text-[10px] uppercase font-bold tracking-widest">
+                                {primaryCurrency} ⇌ {targetCurrency}
                             </span>
-                            <span className={`text-xs mt-0.5 ${selectedMode === mode ? 'text-[#30D158]/70' : 'text-white/40'}`}>
-                                {mode === 'simple' && "Fastest way to just log prices."}
-                                {mode === 'unplanned' && "Categorize as you shop."}
-                                {mode === 'planned' && "Build a list before you go."}
-                            </span>
+                        </button>
+                    </div>
+                    
+                    <div className="flex flex-col items-center justify-center mb-10">
+                        <div className="flex flex-col items-center">
+                            <div className="text-[4rem] leading-none text-white flex items-baseline justify-center gap-1.5 font-light tracking-tight drop-shadow-lg">
+                                <span className="text-3xl text-white/40 font-medium">{isPhpPrimary ? '₱' : 'R'}</span>
+                                <span>{displayValue || "0"}</span>
+                            </div>
+                            <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full bg-black/20 backdrop-blur-md border border-white/5">
+                                <span className="text-white/50 font-medium tracking-wide text-sm">
+                                    ≈ {targetCurrency === 'PHP' ? '₱' : 'R'}{convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                </span>
+                            </div>
                         </div>
-                        {selectedMode === mode && (
-                            <motion.div 
-                                layoutId="modeCheck"
-                                className="w-5 h-5 rounded-full bg-[#30D158] flex items-center justify-center"
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2 mb-1 px-1">
+                            <div className="w-1 h-1 rounded-full bg-[#30D158]/50" />
+                            <span className="text-white/40 text-[10px] font-semibold tracking-widest uppercase">Shopping Mode</span>
+                        </div>
+                        
+                        {(['simple', 'unplanned', 'planned'] as CartifyMode[]).map(mode => (
+                            <button 
+                                key={mode}
+                                onClick={() => setSelectedMode(mode)}
+                                className={`w-full p-3.5 rounded-[20px] flex items-center justify-between transition-all duration-300 active:scale-[0.98] ${
+                                    selectedMode === mode 
+                                        ? 'bg-black/40 border border-[#30D158]/30 shadow-[0_0_20px_rgba(48,209,88,0.05)] backdrop-blur-md' 
+                                        : 'bg-black/10 border border-transparent hover:bg-black/20'
+                                }`}
                             >
-                                <Check className="w-3 h-3 text-black" strokeWidth={3} />
-                            </motion.div>
-                        )}
-                    </button>
-                ))}
+                                <div className="flex flex-col items-start text-left">
+                                    <span className={`text-sm font-medium capitalize tracking-wide transition-colors ${selectedMode === mode ? 'text-[#30D158]' : 'text-white/80'}`}>
+                                        {mode === 'unplanned' ? 'Organized (On the fly)' : mode === 'planned' ? 'Organized (Pre-planned)' : 'Simple & Fast'}
+                                    </span>
+                                    <span className={`text-[11px] mt-0.5 transition-colors ${selectedMode === mode ? 'text-[#30D158]/60' : 'text-white/40'}`}>
+                                        {mode === 'simple' && "Just log prices as you go."}
+                                        {mode === 'unplanned' && "Categorize items in store."}
+                                        {mode === 'planned' && "Build a list before leaving."}
+                                    </span>
+                                </div>
+                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-300 ${
+                                    selectedMode === mode ? 'border-[#30D158] bg-[#30D158]/20' : 'border-white/20'
+                                }`}>
+                                    {selectedMode === mode && (
+                                        <motion.div 
+                                            layoutId="modeCheckCartify"
+                                            className="w-2.5 h-2.5 rounded-full bg-[#30D158]"
+                                        />
+                                    )}
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             {/* Numpad */}

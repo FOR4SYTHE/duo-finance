@@ -54,7 +54,7 @@ export default function SpendJarPage() {
   const isNearingCap = percentage >= 85 && !isLocked;
 
   // Visuals for ring
-  let ringColor = "#30D158"; // Green
+  let ringColor = percentage === 0 ? "transparent" : "#30D158"; // Green
   let ringGlow = "rgba(48,209,88,0.6)";
   if (percentage >= 50 && percentage < 70) {
     ringColor = "#E8A33D"; // Amber
@@ -139,20 +139,22 @@ export default function SpendJarPage() {
       {/* Hero Jar Progress */}
       <motion.div variants={itemVariants} className="relative z-20 w-full flex flex-col items-center justify-center py-6 mb-4 shrink-0">
         <div className="relative w-64 h-64 flex flex-col items-center justify-center mb-6">
-          {/* Subtle ambient background glow (reduced intensity) */}
-          <motion.div 
-            className="absolute inset-0 rounded-full blur-[20px] opacity-10 mix-blend-screen"
-            animate={{
-              scale: [1, 1.05, 1],
-              opacity: percentage >= 85 ? [0.15, 0.3, 0.15] : percentage >= 50 ? [0.1, 0.2, 0.1] : [0.05, 0.1, 0.05]
-            }}
-            transition={{
-              duration: percentage >= 85 ? 1 : percentage >= 50 ? 2 : 4,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{ backgroundColor: ringColor }}
-          />
+          {/* Subtle ambient background glow (only active after spend logged) */}
+          {percentage > 0 && (
+            <motion.div 
+              className="absolute inset-0 rounded-full blur-[20px] mix-blend-screen"
+              animate={{
+                scale: [1, 1.05, 1],
+                opacity: percentage >= 85 ? [0.15, 0.3, 0.15] : percentage >= 50 ? [0.1, 0.2, 0.1] : [0.05, 0.1, 0.05]
+              }}
+              transition={{
+                duration: percentage >= 85 ? 1 : percentage >= 50 ? 2 : 4,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              style={{ backgroundColor: ringColor }}
+            />
+          )}
           
           {/* Cartoon Progress Circle */}
           <svg className="absolute inset-0 w-full h-full transform -rotate-90 overflow-visible z-20 pointer-events-none" viewBox="0 0 100 100">
@@ -235,7 +237,7 @@ export default function SpendJarPage() {
             {/* Extra Overlay Elements (Seamless FX) */}
             <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center overflow-hidden rounded-full">
               <AnimatePresence>
-                {percentage < 50 && (
+                {percentage > 0 && percentage < 50 && (
                   <motion.div
                     key="safe-fx"
                     initial={{ opacity: 0 }}
@@ -317,14 +319,16 @@ export default function SpendJarPage() {
           <span className="text-white/60 font-medium tracking-wide text-sm mb-4">
             ≈ R{(totalSpent * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
           </span>
-          <div 
-            className="px-3 py-1 rounded-full border transition-colors duration-500 w-fit mx-auto shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
-            style={{ backgroundColor: `${ringColor}22`, borderColor: `${ringColor}4D` }}
-          >
-            <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: ringColor, textShadow: `0 0 12px ${ringGlow}` }}>
-              {percentage.toFixed(0)}% OF ALLOWED
-            </span>
-          </div>
+          {totalSpent > 0 && (
+            <div 
+              className="px-3 py-1 rounded-full border transition-all duration-500 w-fit mx-auto shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
+              style={{ backgroundColor: `${ringColor}22`, borderColor: `${ringColor}4D` }}
+            >
+              <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: ringColor, textShadow: `0 0 12px ${ringGlow}` }}>
+                {percentage.toFixed(0)}% OF ALLOWED
+              </span>
+            </div>
+          )}
         </div>
       </motion.div>
 
