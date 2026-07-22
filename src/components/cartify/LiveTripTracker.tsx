@@ -134,7 +134,7 @@ export function LiveTripTracker() {
             <div className="sticky top-2 z-40 shrink-0 w-full mb-6 flex flex-col">
                 <motion.div 
                     layout
-                    className="w-full rounded-[48px] overflow-hidden bg-black flex flex-col border border-white/[0.03] pt-3 pb-5"
+                    className="w-full rounded-[56px] overflow-hidden bg-black flex flex-col border border-white/[0.03] pt-11 pb-6"
                     style={{
                         boxShadow: "0 30px 60px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.05)"
                     }}
