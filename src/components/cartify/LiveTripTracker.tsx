@@ -161,8 +161,8 @@ export function LiveTripTracker() {
                                  }} />
                         </div>
                              
-                        {/* Right Trumpet Flare (Softened to perfectly match the gentle, misty glow of the atom without harshness) */}
-                        <div className="absolute right-[0px] w-[80px] h-[60px] blur-[12px] opacity-50 flex items-center justify-center">
+                        {/* Right Trumpet Flare (Tighter and contained so it doesn't bleed into a fog) */}
+                        <div className="absolute right-[0px] w-[60px] h-[48px] blur-[6px] opacity-70 flex items-center justify-center">
                             <div className="w-full h-full"
                                  style={{ 
                                      background: `linear-gradient(to right, transparent 0%, ${getOrbColor()} 100%)`,
@@ -210,14 +210,14 @@ export function LiveTripTracker() {
 
                     {/* Right: Glowing Orb (Ultra-premium volumetric bloom effect) */}
                     <div className="relative z-20 w-[80px] h-full flex items-center justify-center shrink-0 -translate-x-[12px]">
-                        {/* Controlled diffuse aura (Expanded to softly swallow the 60px flare without a harsh crash) */}
+                        {/* Controlled diffuse aura (Tightened to wrap closely around the atom) */}
                         <div 
-                            className="absolute w-[80px] h-[60px] rounded-[100px] blur-[16px] opacity-60"
+                            className="absolute w-[56px] h-[44px] rounded-[100px] blur-[8px] opacity-80"
                             style={{ backgroundColor: getOrbColor() }}
                         />
-                        {/* Subtle atmospheric spill */}
+                        {/* Subtle atmospheric spill (Contained so it drops to black exactly at the spikey red lines) */}
                         <div 
-                            className="absolute w-[110px] h-[70px] rounded-[100px] blur-[20px] opacity-30 -translate-x-[10px]"
+                            className="absolute w-[76px] h-[54px] rounded-[100px] blur-[12px] opacity-40 -translate-x-[4px]"
                             style={{ backgroundColor: getOrbColor() }}
                         />
                         
