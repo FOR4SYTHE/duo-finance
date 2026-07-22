@@ -132,100 +132,98 @@ export function TripSetup() {
             </div>
 
             {/* Numpad */}
-            <div className="flex-1 grid grid-cols-3 gap-2 mb-4 min-h-[200px]">
+            <div className="flex-1 grid grid-cols-3 gap-3 mb-4 min-h-[220px]">
                 {buttons.map((btn) => (
                     <button
                         key={btn.label}
                         onClick={() => btn.label === "⌫" ? deleteLast() : appendInput(btn.label)}
                         className={`
-                            h-full w-full rounded-[20px] flex items-center justify-center text-[24px] font-light transition-all duration-200 bg-white/[0.05] hover:bg-white/[0.1] active:scale-[0.96] border border-white/[0.02]
-                            ${btn.type === "num" ? "text-white" : "text-white/50"}
+                            h-full w-full rounded-[24px] flex items-center justify-center text-[28px] font-light transition-all duration-200 bg-[#151516] hover:bg-[#1A1A1B] active:scale-[0.96] border border-white/[0.04] shadow-inner
+                            ${btn.type === "num" ? "text-white/90" : "text-white/40"}
                         `}
                     >
-                        {btn.label === "⌫" ? <Delete className="w-5 h-5" strokeWidth={1.5} /> : btn.label}
+                        {btn.label === "⌫" ? <Delete className="w-6 h-6" strokeWidth={1.5} /> : btn.label}
                     </button>
                 ))}
             </div>
 
-            <div className="mt-auto">
+            <div className="mt-auto relative z-30 pb-2 flex justify-center w-full min-h-[96px] items-center">
                 <motion.button
-                    whileTap={{ scale: parseFloat(displayValue) > 0 ? 0.96 : 1 }}
+                    layout
+                    whileTap={{ scale: 0.97 }}
                     onClick={handleConfirm}
                     disabled={parseFloat(displayValue) <= 0}
-                    className={`w-full h-[64px] rounded-full font-semibold text-base tracking-wide flex items-center justify-between px-6 transition-all duration-500 group overflow-hidden relative ${
-                        parseFloat(displayValue) > 0 
-                            ? 'bg-white text-black hover:bg-gray-100 shadow-[0_8px_30px_rgba(255,255,255,0.15)] border-none' 
-                            : 'bg-white/5 text-white/40 border border-white/10'
-                    }`}
+                    initial={false}
+                    animate={{
+                        width: parseFloat(displayValue) > 0 ? "100%" : 160,
+                        height: parseFloat(displayValue) > 0 ? 96 : 56,
+                        borderRadius: parseFloat(displayValue) > 0 ? 40 : 28,
+                        backgroundColor: parseFloat(displayValue) > 0 ? "#000000" : "#151516",
+                        borderColor: parseFloat(displayValue) > 0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)"
+                    }}
+                    transition={{ type: "spring", stiffness: 350, damping: 28, mass: 0.8 }}
+                    className="border shadow-[0_20px_40px_rgba(0,0,0,0.5)] flex items-center justify-center p-4 overflow-hidden relative group"
+                    style={{ WebkitTransform: "translateZ(0)" }} // Force GPU acceleration for buttery smooth animation
                 >
-                    {/* Glossy sheen effect on hover when active */}
+                    {/* Ambient glow inside the island - only visible when active */}
+                    <motion.div 
+                        animate={{ opacity: parseFloat(displayValue) > 0 ? 0.5 : 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="absolute inset-0 bg-gradient-to-r from-[#30D158]/15 via-transparent to-transparent pointer-events-none" 
+                    />
+                    
+                    {/* Glossy sweep effect */}
                     {parseFloat(displayValue) > 0 && (
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-50 group-hover:translate-x-full transition-all duration-700 ease-out -skew-x-12" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 group-hover:translate-x-full transition-all duration-700 ease-out -skew-x-12 pointer-events-none" />
                     )}
                     
-                    <div className="pl-2 relative overflow-hidden h-[24px] w-48 flex items-center">
-                        <AnimatePresence mode="wait">
-                            {parseFloat(displayValue) > 0 ? (
-                                <motion.span
-                                    key="active-text"
-                                    initial={{ y: 20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    exit={{ y: -20, opacity: 0 }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                    className="absolute inset-0 flex items-center"
-                                >
-                                    Start Trip
-                                </motion.span>
-                            ) : (
-                                <motion.span
-                                    key="disabled-text"
-                                    initial={{ y: 20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    exit={{ y: -20, opacity: 0 }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                    className="absolute inset-0 flex items-center"
-                                >
+                    <AnimatePresence mode="popLayout">
+                        {parseFloat(displayValue) > 0 ? (
+                            <motion.div 
+                                key="active-content"
+                                initial={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                                exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                                transition={{ type: "spring", stiffness: 400, damping: 30, delay: 0.05 }}
+                                className="flex items-center justify-between w-full h-full"
+                            >
+                                <div className="flex flex-col items-start text-left pl-2 z-10">
+                                    <span className="text-[#30D158] text-[10px] font-bold tracking-widest uppercase mb-1 flex items-center gap-1.5">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-[#30D158] animate-pulse shadow-[0_0_8px_#30D158]" />
+                                        Budget Set
+                                    </span>
+                                    <span className="text-white text-[17px] font-semibold leading-tight tracking-tight">Start your shopping trip</span>
+                                    <span className="text-white/30 text-[9px] font-semibold mt-1 tracking-[0.2em] uppercase">powered by Cartify DF</span>
+                                </div>
+                                
+                                <div className="w-[84px] h-[84px] relative -mr-2 shrink-0 z-10 flex items-center justify-center pointer-events-none">
+                                    <img 
+                                        src="/cart_3d.png" 
+                                        alt="3D Cart" 
+                                        style={{ 
+                                            WebkitMaskImage: 'radial-gradient(circle at center, black 40%, transparent 65%)',
+                                            maskImage: 'radial-gradient(circle at center, black 40%, transparent 65%)'
+                                        }}
+                                        className="w-[140%] h-[140%] max-w-none object-cover mix-blend-screen drop-shadow-2xl absolute" 
+                                    />
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="inactive-content"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                className="flex items-center justify-center w-full h-full absolute inset-0"
+                            >
+                                <span className="text-white/40 font-medium text-[15px] tracking-wide relative z-10 flex items-center gap-2">
+                                    <ChevronRight className="w-4 h-4 text-white/20" strokeWidth={2.5} />
                                     Set Budget
-                                </motion.span>
-                            )}
-                        </AnimatePresence>
-                    </div>
-
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-500 relative overflow-hidden ${
-                        parseFloat(displayValue) > 0 ? 'bg-black/5 group-hover:bg-black/10' : 'bg-white/5'
-                    }`}>
-                        <AnimatePresence mode="wait">
-                            {parseFloat(displayValue) > 0 ? (
-                                <motion.div
-                                    key="cart-icon"
-                                    initial={{ scale: 0, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    exit={{ scale: 0, opacity: 0 }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                    className="absolute inset-0 w-full h-full"
-                                >
-                                    {/* The Adhamuxi-style double-icon rolling trick */}
-                                    <div className="absolute inset-0 flex items-center justify-center transition-transform duration-[600ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-10">
-                                        <ShoppingCart className="w-4 h-4 text-black" strokeWidth={2.5} />
-                                    </div>
-                                    <div className="absolute inset-0 flex items-center justify-center -translate-x-10 transition-transform duration-[600ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-0">
-                                        <ShoppingCart className="w-4 h-4 text-black" strokeWidth={2.5} />
-                                    </div>
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="arrow-icon"
-                                    initial={{ x: -20, opacity: 0 }}
-                                    animate={{ x: 0, opacity: 1 }}
-                                    exit={{ x: 20, opacity: 0 }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                    className="absolute"
-                                >
-                                    <ChevronRight className="w-4 h-4 text-white/40" strokeWidth={2.5} />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                                </span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </motion.button>
             </div>
         </div>
