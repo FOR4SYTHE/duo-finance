@@ -499,14 +499,14 @@ export function LiveTripTracker() {
                             <motion.div 
                                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                 onClick={() => setShowCalc(false)}
-                                className="absolute inset-0 bg-black/95 z-[100]" 
+                                className="fixed inset-0 bg-black/95 z-[100]" 
                             />
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                                className="absolute z-[101] flex flex-col bg-[#111] border border-white/10 inset-6 top-24 bottom-24 rounded-[40px] p-6 shadow-2xl justify-center"
+                                className="fixed z-[101] flex flex-col bg-[#111] border border-white/10 left-4 right-4 top-1/2 -translate-y-1/2 max-h-[90dvh] sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[400px] rounded-[40px] p-6 shadow-2xl justify-center"
                             >
                                 <button onClick={() => setShowCalc(false)} className="absolute top-6 right-6 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                                     <X className="w-4 h-4 text-white/70" />
@@ -571,12 +571,12 @@ export function LiveTripTracker() {
                             <motion.div 
                                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                 onClick={() => setShowList(false)}
-                                className="absolute inset-0 bg-black/95 z-[100]" 
+                                className="fixed inset-0 bg-black/95 z-[100]" 
                             />
                             <motion.div
                                 initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
                                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                                className="absolute bottom-0 left-0 right-0 h-[80%] bg-[#111] rounded-t-[40px] pt-8 pb-10 px-6 border-t border-white/10 z-[101] flex flex-col shadow-[0_-20px_40px_rgba(0,0,0,0.5)]"
+                                className="fixed bottom-0 left-0 right-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[400px] sm:max-h-[80dvh] h-[90dvh] bg-[#111] rounded-t-[40px] pt-8 pb-10 px-6 border-t border-white/10 z-[101] flex flex-col shadow-[0_-20px_40px_rgba(0,0,0,0.5)]"
                             >
                                 <div className="flex justify-between items-center mb-6 shrink-0">
                                     <h3 className="text-white text-xl font-medium tracking-tight">Recent Items</h3>
@@ -740,8 +740,8 @@ export function LiveTripTracker() {
                             initial={{ y: 200, opacity: 0, scale: 0.95 }}
                             animate={{ y: 0, opacity: 1, scale: 1 }}
                             exit={{ y: 200, opacity: 0, scale: 0.95 }}
-                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="bg-[#1c1c1e] border border-white/10 rounded-[32px] p-6 w-full max-w-[400px] shadow-[0_24px_48px_rgba(0,0,0,0.5)] overflow-hidden"
+                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                            className="fixed z-[101] flex flex-col bg-[#1c1c1e] border border-white/10 left-4 right-4 bottom-4 top-1/2 mt-8 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[400px] rounded-[32px] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)] overflow-hidden"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="flex justify-between items-center mb-5">
