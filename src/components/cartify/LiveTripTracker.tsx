@@ -110,24 +110,24 @@ export function LiveTripTracker() {
         );
     }
 
-    const HeroCard = () => {
-        let status = 'safe';
-        if (progressPercent >= 90) status = 'danger';
-        else if (progressPercent >= 70) status = 'warning';
+    // Calculate volumetric states directly in the main render cycle
+    let status = 'safe';
+    if (progressPercent >= 90) status = 'danger';
+    else if (progressPercent >= 70) status = 'warning';
 
-        const getOrbColor = () => {
-            if (status === 'danger') return 'rgba(255, 30, 30, 1)'; 
-            if (status === 'warning') return 'rgba(255, 140, 0, 1)'; 
-            return 'rgba(20, 230, 90, 1)'; 
-        };
+    const getOrbColor = () => {
+        if (status === 'danger') return 'rgba(255, 30, 30, 1)'; 
+        if (status === 'warning') return 'rgba(255, 140, 0, 1)'; 
+        return 'rgba(20, 230, 90, 1)'; 
+    };
 
-        return (
-            <div className="sticky top-2 z-40 shrink-0 w-full mb-6 flex flex-col">
+    const heroCardJSX = (
+        <div className="sticky top-2 z-40 shrink-0 w-full mb-6 flex flex-col">
                 <motion.div 
                     layout
-                    className="w-full rounded-[56px] overflow-hidden bg-black flex flex-col border border-white/[0.03] pt-11 pb-6"
+                    className="w-full rounded-[56px] overflow-hidden bg-black flex flex-col border border-white/[0.12] pt-11 pb-6 relative"
                     style={{
-                        boxShadow: "0 30px 60px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.05)"
+                        boxShadow: "0 40px 80px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 0 32px rgba(255,255,255,0.02)"
                     }}
                 >
                     {/* Top Section: Card, Beam, Orb, Values */}
@@ -140,9 +140,9 @@ export function LiveTripTracker() {
                         {items.length > 0 && (
                             <motion.div 
                                 key={`pulse-${items.length}`}
-                                initial={{ left: "0%", opacity: 0, scaleX: 0.5 }}
-                                animate={{ left: "100%", opacity: [0, 1, 1, 0], scaleX: 1.5 }}
-                                transition={{ duration: 1.2, ease: "easeInOut" }}
+                                initial={{ left: "0%", x: "-100%", opacity: 0, scaleX: 0.5 }}
+                                animate={{ left: "100%", x: "-50%", opacity: [0, 1, 1, 0], scaleX: 1.5 }}
+                                transition={{ duration: 1.5, ease: "easeInOut" }}
                                 className="absolute top-1/2 -translate-y-1/2 w-[120px] h-[36px] rounded-full blur-[12px] mix-blend-screen z-20"
                                 style={{ backgroundColor: 'rgba(255,255,255,0.6)' }}
                             />
@@ -228,17 +228,12 @@ export function LiveTripTracker() {
                         />
                         
                         {/* Orb Core (A soft hazy energy cloud) */}
-                        <motion.div 
-                            key={`orb-pop-${items.length}`}
-                            initial={{ scale: 1.5 }}
-                            animate={{ scale: 1 }}
-                            className="w-[32px] h-[32px] rounded-full relative z-20 mix-blend-screen"
-                        >
+                        <div className="w-[32px] h-[32px] rounded-full relative z-20 mix-blend-screen">
                             <div 
                                 className="w-full h-full rounded-full blur-[12px] opacity-90 transition-colors duration-1000 ease-in-out"
                                 style={{ backgroundColor: getOrbColor() }}
                             />
-                        </motion.div>
+                        </div>
                         
                         {/* Soft Glowing Atom Rings */}
                         <motion.div 
@@ -270,9 +265,7 @@ export function LiveTripTracker() {
                     </div>
                 </motion.div>
             </div>
-        );
-    };
-
+    );
     if (mode === 'simple') {
         const simpleButtons = [
             { label: "1", type: "num" }, { label: "2", type: "num" }, { label: "3", type: "num" },
@@ -537,7 +530,7 @@ export function LiveTripTracker() {
     return (
         <div className="flex flex-col w-full h-full relative z-20 overflow-y-auto no-scrollbar pb-24">
             
-            <HeroCard />
+            {heroCardJSX}
 
             {mode === 'unplanned' && activeCategory && (
                 <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-4 -mx-6 px-6 shrink-0 snap-x">
