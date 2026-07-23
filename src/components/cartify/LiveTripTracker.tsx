@@ -106,7 +106,12 @@ export function LiveTripTracker() {
 
     if (mode === 'unplanned' && (!activeCategory || isSwitchingCategory)) {
         return (
-            <div className="flex flex-col w-full h-full relative z-20 pt-4">
+            <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                className="flex flex-col w-full h-full relative z-20 pt-4"
+            >
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-white text-xl font-medium tracking-tight">Pick a Category</h2>
                     {activeCategory && (
@@ -148,7 +153,7 @@ export function LiveTripTracker() {
                         );
                     })}
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
@@ -175,10 +180,27 @@ export function LiveTripTracker() {
                     {/* Top Section: Card, Beam, Orb, Values */}
                     <div className="relative w-full h-[96px] flex items-center justify-between overflow-hidden">
                     
+                    {/* Left: 3D Virtual Card (Seamlessly emerging from darkness) */}
+                    <motion.div 
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+                        className="relative z-20 w-[80px] h-full flex items-center shrink-0"
+                    >
+                        {/* The actual card (Gradient from black ensures it dissolves on the left) */}
+                        <div className="relative w-[100px] h-[76px] rounded-r-[16px] bg-gradient-to-r from-black via-[#0a0a0a] to-[#181818] border-y border-r border-white/10 shadow-[12px_0_24px_rgba(0,0,0,0.9)] flex flex-col justify-end p-3 -ml-[20px] overflow-hidden">
+                            <div className="self-end text-white/90 font-black italic text-[14px] tracking-tighter pr-0.5">DF</div>
+                            {/* Card Right Edge Highlight */}
+                            <div className="absolute inset-y-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-white/50 to-transparent mix-blend-screen" />
+                        </div>
+                        {/* Extra dark portal fade just to guarantee blending */}
+                        <div className="absolute inset-y-0 left-0 w-[35px] bg-gradient-to-r from-black to-transparent pointer-events-none z-30" />
+                    </motion.div>
+                    
                     {/* The Premium Volumetric Q-Tip Beam */}
                     <div className="absolute left-[70px] right-[70px] top-0 bottom-0 pointer-events-none z-10 flex items-center justify-center">
                         
-                        {/* Energy Pulse (Triggered when spent changes, direction depends on increase/decrease) */}
+                        {/* Energy Pulse */}
                         {pulse.id > 0 && (
                             <motion.div 
                                 key={`pulse-${pulse.id}`}
@@ -200,49 +222,50 @@ export function LiveTripTracker() {
                             />
                         )}
 
-                        {/* Central Beam Core (Stable crossfade approach ensures the bridge never breaks) */}
-                        <div className="absolute left-[-20px] right-[0px] h-[36px] blur-[3px]">
-                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(20, 80, 255, 1) 75%, transparent 100%)` }} />
-                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(230, 120, 0, 1) 75%, transparent 100%)` }} />
-                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(230, 20, 20, 1) 75%, transparent 100%)` }} />
-                        </div>
-                             
-                        {/* Central Beam Soft Backing */}
-                        <div className="absolute left-[-20px] right-[0px] h-[46px] blur-[6px] opacity-80">
-                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(20, 80, 255, 1) 75%, transparent 100%)` }} />
-                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(230, 120, 0, 1) 75%, transparent 100%)` }} />
-                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(230, 20, 20, 1) 75%, transparent 100%)` }} />
-                        </div>
+                        {/* Central Beam (Crawling to the right animation on load) */}
+                        <motion.div 
+                            initial={{ scaleX: 0, opacity: 0, originX: 0 }}
+                            animate={{ scaleX: 1, opacity: 1 }}
+                            transition={{ delay: 0.4, duration: 0.8, ease: "easeInOut" }}
+                            className="absolute inset-0 flex items-center justify-center"
+                        >
+                            {/* Core */}
+                            <div className="absolute left-[-20px] right-[0px] h-[36px] blur-[3px]">
+                                <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(20, 80, 255, 1) 75%, transparent 100%)` }} />
+                                <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(230, 120, 0, 1) 75%, transparent 100%)` }} />
+                                <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(230, 20, 20, 1) 75%, transparent 100%)` }} />
+                            </div>
+                                
+                            {/* Soft Backing */}
+                            <div className="absolute left-[-20px] right-[0px] h-[46px] blur-[6px] opacity-80">
+                                <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(20, 80, 255, 1) 75%, transparent 100%)` }} />
+                                <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(230, 120, 0, 1) 75%, transparent 100%)` }} />
+                                <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(230, 20, 20, 1) 75%, transparent 100%)` }} />
+                            </div>
 
-                        {/* Left Fishtail Flare */}
-                        <div className="absolute left-[0px] w-[110px] h-[56px] blur-[10px] opacity-60">
-                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(20, 80, 255, 1) 0%, transparent 110%)`, clipPath: 'polygon(0 0, 100% 15%, 45% 50%, 100% 85%, 0 100%)' }} />
-                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(255, 140, 0, 1) 0%, transparent 110%)`, clipPath: 'polygon(0 0, 100% 15%, 45% 50%, 100% 85%, 0 100%)' }} />
-                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(255, 30, 30, 1) 0%, transparent 110%)`, clipPath: 'polygon(0 0, 100% 15%, 45% 50%, 100% 85%, 0 100%)' }} />
-                        </div>
-                             
-                        {/* Right Fishtail Flare */}
-                        <div className="absolute right-[0px] w-[110px] h-[56px] blur-[10px] opacity-60">
-                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, transparent -10%, rgba(20, 230, 90, 1) 100%)`, clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)' }} />
-                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, transparent -10%, rgba(255, 140, 0, 1) 100%)`, clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)' }} />
-                            <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, transparent -10%, rgba(255, 30, 30, 1) 100%)`, clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)' }} />
-                        </div>
-                    </div>
-
-                    {/* Left: 3D Virtual Card (Seamlessly emerging from darkness) */}
-                    <div className="relative z-20 w-[80px] h-full flex items-center shrink-0">
-                        {/* The actual card (Gradient from black ensures it dissolves on the left) */}
-                        <div className="relative w-[100px] h-[76px] rounded-r-[16px] bg-gradient-to-r from-black via-[#0a0a0a] to-[#181818] border-y border-r border-white/10 shadow-[12px_0_24px_rgba(0,0,0,0.9)] flex flex-col justify-end p-3 -ml-[20px] overflow-hidden">
-                            <div className="self-end text-white/90 font-black italic text-[14px] tracking-tighter pr-0.5">DF</div>
-                            {/* Card Right Edge Highlight */}
-                            <div className="absolute inset-y-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-white/50 to-transparent mix-blend-screen" />
-                        </div>
-                        {/* Extra dark portal fade just to guarantee blending */}
-                        <div className="absolute inset-y-0 left-0 w-[35px] bg-gradient-to-r from-black to-transparent pointer-events-none z-30" />
+                            {/* Left Fishtail Flare */}
+                            <div className="absolute left-[0px] w-[110px] h-[56px] blur-[10px] opacity-60">
+                                <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(20, 80, 255, 1) 0%, transparent 110%)`, clipPath: 'polygon(0 0, 100% 15%, 45% 50%, 100% 85%, 0 100%)' }} />
+                                <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(255, 140, 0, 1) 0%, transparent 110%)`, clipPath: 'polygon(0 0, 100% 15%, 45% 50%, 100% 85%, 0 100%)' }} />
+                                <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, rgba(255, 30, 30, 1) 0%, transparent 110%)`, clipPath: 'polygon(0 0, 100% 15%, 45% 50%, 100% 85%, 0 100%)' }} />
+                            </div>
+                                
+                            {/* Right Fishtail Flare */}
+                            <div className="absolute right-[0px] w-[110px] h-[56px] blur-[10px] opacity-60">
+                                <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, transparent -10%, rgba(20, 230, 90, 1) 100%)`, clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)' }} />
+                                <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, transparent -10%, rgba(255, 140, 0, 1) 100%)`, clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)' }} />
+                                <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, transparent -10%, rgba(255, 30, 30, 1) 100%)`, clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)' }} />
+                            </div>
+                        </motion.div>
                     </div>
 
                     {/* Center: Text Content (Crisp, perfectly aligned with the beam core) */}
-                    <div className="relative z-30 flex flex-col items-center justify-center flex-1 h-full px-2">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 1.1, duration: 0.6, ease: "easeOut" }}
+                        className="relative z-30 flex flex-col items-center justify-center flex-1 h-full px-2"
+                    >
                         <span className="text-white/80 text-[11px] font-medium tracking-wide mb-[1px]">
                             Remaining Budget
                         </span>
@@ -264,10 +287,15 @@ export function LiveTripTracker() {
                                 </>
                             )}
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Right: Glowing Orb (Ultra-premium volumetric bloom effect) */}
-                    <div className="relative z-20 w-[80px] h-full flex items-center justify-center shrink-0 -translate-x-[12px]">
+                    <motion.div 
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.9, duration: 0.8, type: "spring", damping: 20 }}
+                        className="relative z-20 w-[80px] h-full flex items-center justify-center shrink-0 -translate-x-[12px]"
+                    >
                         {/* Controlled diffuse aura */}
                         <div 
                             className="absolute w-[56px] h-[44px] rounded-[100px] blur-[8px] opacity-80 transition-colors duration-1000 ease-in-out"
@@ -303,18 +331,23 @@ export function LiveTripTracker() {
                             <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-60 mix-blend-screen blur-[6px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
                             <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-30 mix-blend-screen blur-[12px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
                         </motion.div>
-                    </div>
+                    </motion.div>
                 </div>
 
                     {/* Bottom Section: Supplementary Text (Centered directly under the beam text, exact font match) */}
-                    <div className="w-full pt-1 flex justify-center items-center gap-10 relative z-20 bg-black">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 1.3, duration: 0.6, ease: "easeOut" }}
+                        className="w-full pt-1 flex justify-center items-center gap-10 relative z-20 bg-black"
+                    >
                         <span className="text-[#888] text-[13px] font-light tracking-[0.03em] flex items-center gap-2">
                             SPENT <span className="text-[#aaa] tracking-normal">₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
                         </span>
                         <span className="text-[#888] text-[13px] font-light tracking-[0.03em] flex items-center gap-2">
                             TOTAL <span className="text-[#aaa] tracking-normal">₱{budget.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
                         </span>
-                    </div>
+                    </motion.div>
                 </motion.div>
             </div>
     );
@@ -580,14 +613,24 @@ export function LiveTripTracker() {
     }
 
     return (
-        <div className="flex flex-col w-full h-full relative z-20 overflow-y-auto no-scrollbar pb-24">
+        <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            className="flex flex-col w-full h-full relative z-20 overflow-y-auto no-scrollbar pb-24"
+        >
             
             {heroCardJSX}
 
 
 
             {/* Cart Items List */}
-            <div className="flex flex-col flex-1 pb-32">
+            <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.4, duration: 0.6, ease: "easeOut" }}
+                className="flex flex-col flex-1 pb-32"
+            >
                 <div className="flex justify-between items-center mb-4 px-2">
                     <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Scanned Items ({items.length})</h2>
                     <div className="flex items-center gap-2">
@@ -646,7 +689,7 @@ export function LiveTripTracker() {
                         <span>Scan your first item</span>
                     </motion.button>
                 )}
-            </div>
+            </motion.div>
 
             {/* Floating Action Button */}
             <div className="fixed bottom-24 left-0 right-0 flex justify-center z-50 pointer-events-none px-6">
@@ -737,7 +780,7 @@ export function LiveTripTracker() {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </motion.div>
     );
 }
 
