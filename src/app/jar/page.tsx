@@ -107,327 +107,218 @@ export default function SpendJarPage() {
       return { ...entry, colorClass, bgClass };
   }).reverse();
 
+  // Compute dynamic background gradient based on budget health
+  const bgGradient = 
+    percentage >= 85 ? 'radial-gradient(140% 120% at 50% 0%, #3a0b0b 0%, #000000 100%)' :
+    percentage >= 50 ? 'radial-gradient(140% 120% at 50% 0%, #362005 0%, #000000 100%)' :
+    'radial-gradient(140% 120% at 50% 0%, #06210f 0%, #000000 100%)';
+
   return (
     <motion.div 
       key={isInitialLoad ? "animate" : "static"}
       variants={containerVariants}
       initial={isInitialLoad ? "hidden" : false}
       animate="visible"
-      className="flex flex-col w-full h-full px-6 pt-12 pb-8 overflow-y-auto no-scrollbar"
+      className="relative flex flex-col w-full h-full overflow-hidden transition-colors duration-1000 ease-in-out"
+      style={{ background: bgGradient }}
     >
       
-      {/* Header */}
-      <motion.div variants={itemVariants} className="flex justify-between items-center mb-8 relative z-20 shrink-0">
-        <div className="flex items-center gap-3">
-            <h1 className="text-3xl text-white font-light tracking-tight">Spend Jar</h1>
-            {/* Temporary Reset Button */}
-            <button 
-                onClick={() => clearEntries()} 
-                className="px-2 py-1 bg-white/5 text-white/50 rounded-md text-[10px] uppercase font-bold tracking-wider hover:bg-white/10 hover:text-white transition-colors border border-white/10"
-            >
-                Reset Logs
-            </button>
+      {/* Floating Header */}
+      <motion.div variants={itemVariants} className="absolute top-12 left-6 right-6 flex justify-between items-center z-50">
+        <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl text-white font-medium tracking-tight drop-shadow-md">Spend Jar</h1>
+              <button 
+                  onClick={() => clearEntries()} 
+                  className="px-2 py-1 bg-white/[0.05] text-white/50 rounded-md text-[10px] uppercase font-bold tracking-wider hover:bg-white/[0.1] hover:text-white transition-colors border border-white/[0.1]"
+              >
+                  Reset Logs
+              </button>
+            </div>
+            <span className="text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase">Household Budget</span>
         </div>
         <button 
           onClick={() => setIsSettingsModalOpen(true)}
-          className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors"
+          className="w-11 h-11 rounded-full bg-white/[0.05] backdrop-blur-xl flex items-center justify-center border border-white/[0.08] hover:bg-white/[0.1] transition-all shadow-lg active:scale-95"
         >
-          <Settings2 className="w-5 h-5 text-white/70" />
+          <Settings2 className="w-5 h-5 text-white/90" />
         </button>
       </motion.div>
 
-      {/* Hero Jar Progress */}
-      <motion.div variants={itemVariants} className="relative z-20 w-full flex flex-col items-center justify-center py-6 mb-4 shrink-0">
-        <div className="relative w-64 h-64 flex flex-col items-center justify-center mb-6">
-          {/* Subtle ambient background glow (only active after spend logged) */}
-          {percentage > 0 && (
-            <motion.div 
-              className="absolute inset-0 rounded-full blur-[20px] mix-blend-screen"
-              animate={{
-                scale: [1, 1.05, 1],
-                opacity: percentage >= 85 ? [0.15, 0.3, 0.15] : percentage >= 50 ? [0.1, 0.2, 0.1] : [0.05, 0.1, 0.05]
-              }}
-              transition={{
-                duration: percentage >= 85 ? 1 : percentage >= 50 ? 2 : 4,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              style={{ backgroundColor: ringColor }}
-            />
-          )}
+      {/* Main Scrollable Content */}
+      <div className="flex-1 overflow-y-auto no-scrollbar relative z-10 pt-[20vh] pb-32">
+        
+        {/* Massive Arch & Mascot Section */}
+        <motion.div variants={itemVariants} className="relative w-full flex flex-col items-center justify-center shrink-0">
           
-          {/* Cartoon Progress Circle */}
-          <svg className="absolute inset-0 w-full h-full transform -rotate-90 overflow-visible z-20 pointer-events-none" viewBox="0 0 100 100">
-            {/* Background Track (Darker, solid) */}
-            <circle 
-              cx="50" cy="50" r={46} 
-              fill="transparent" 
-              stroke="rgba(255,255,255,0.06)" 
-              strokeWidth="3.5"
-            />
-            {/* Progress Fill (Solid cartoon color) */}
-            <motion.circle 
-              cx="50" cy="50" r={46} 
-              fill="transparent" 
-              stroke={ringColor} 
-              strokeWidth="4" 
-              strokeLinecap="round"
-              strokeDasharray={2 * Math.PI * 46}
-              initial={{ strokeDashoffset: 2 * Math.PI * 46 }}
-              animate={{ 
-                 strokeDashoffset: (2 * Math.PI * 46) - (percentage / 100) * (2 * Math.PI * 46),
-                 stroke: ringColor,
-                 filter: isLogFlash ? 'brightness(1.5) drop-shadow(0 0 8px currentColor)' : 'brightness(1) drop-shadow(0 0 0px currentColor)' 
-              }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            />
-          </svg>
+          <div className="relative w-[340px] h-[200px] flex justify-center overflow-visible">
+            {/* The Thick Arch (Behind Mascot) */}
+            <svg viewBox="0 0 200 120" className="absolute top-0 w-full h-[200px] pointer-events-none drop-shadow-2xl">
+              {/* Background Track */}
+              <path 
+                d="M 20 110 A 80 80 0 0 1 180 110" 
+                fill="none" 
+                stroke="rgba(255,255,255,0.04)" 
+                strokeWidth="18" 
+                strokeLinecap="round" 
+              />
+              {/* Foreground Progress (Length ~ 251.2) */}
+              <motion.path 
+                d="M 20 110 A 80 80 0 0 1 180 110" 
+                fill="none" 
+                stroke={ringColor} 
+                strokeWidth="18" 
+                strokeLinecap="round"
+                strokeDasharray={252}
+                initial={{ strokeDashoffset: 252 }}
+                animate={{ strokeDashoffset: 252 - (percentage / 100) * 252 }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+                style={{ filter: isLogFlash ? `drop-shadow(0 0 12px ${ringColor})` : 'none' }}
+              />
+            </svg>
 
-          {/* Mascot Image Crossfade */}
-          <div className="relative z-10 w-56 h-56 rounded-full flex items-center justify-center">
-            <AnimatePresence mode="wait">
-              {percentage < 50 && (
-                <motion.img
-                  key="safe"
-                  src="/mascot/difu-safe.webp"
-                  alt="Safe Mascot"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ opacity: { duration: 0.5 }, y: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
-                  className="w-full h-full object-contain drop-shadow-2xl"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "/mascot/difu-safe.webp";
-                  }}
-                />
-              )}
-              {percentage >= 50 && percentage < 85 && (
-                <motion.img
-                  key="warning"
-                  src="/mascot/difu-warning.webp"
-                  alt="Warning Mascot"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1, y: [0, -6, 0] }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ opacity: { duration: 0.5 }, y: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
-                  className="w-full h-full object-contain drop-shadow-2xl"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "/mascot/difu-warning.webp";
-                  }}
-                />
-              )}
-              {percentage >= 85 && (
-                <motion.img
-                  key="danger"
-                  src="/mascot/difu-danger.webp"
-                  alt="Danger Mascot"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1, y: [0, -4, 0] }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ opacity: { duration: 0.5 }, y: { duration: 0.8, repeat: Infinity, ease: "easeInOut" } }}
-                  className="w-full h-full object-contain drop-shadow-2xl"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "/mascot/difu-danger.webp";
-                  }}
-                />
-              )}
-            </AnimatePresence>
+            {/* Difu Sprite Placeholder (Centered in the Arch) */}
+            <div className="absolute inset-0 flex flex-col items-center justify-end pb-2 z-10">
+              <div 
+                className="w-48 h-48 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center bg-white/[0.02] backdrop-blur-sm shadow-2xl relative transition-colors duration-500"
+                style={{ borderColor: `${ringColor}50` }}
+              >
+                <span className="text-white/60 text-[10px] font-bold uppercase tracking-widest text-center px-4 leading-relaxed mb-1">
+                  Difu Sprite Space
+                </span>
+                <span className="text-white/30 text-[9px] uppercase text-center px-2">
+                  (Waiting on upload)
+                </span>
+                
+                {/* Simulated drop shadow for mascot */}
+                <div className="absolute -bottom-4 w-32 h-6 bg-black/60 blur-[10px] rounded-full -z-10" />
+              </div>
+            </div>
             
-            {/* Extra Overlay Elements (Seamless FX) */}
-            <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center overflow-hidden rounded-full">
-              <AnimatePresence>
-                {percentage > 0 && percentage < 50 && (
-                  <motion.div
-                    key="safe-fx"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 flex items-center justify-around"
-                  >
-                    {[...Array(4)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="w-1.5 h-1.5 bg-[#30D158] rounded-full blur-[1px]"
-                        animate={{
-                          y: [-10, -60],
-                          opacity: [0, 0.8, 0],
-                          scale: [0, 1.5, 0],
-                        }}
-                        transition={{
-                          duration: 2.5 + i,
-                          repeat: Infinity,
-                          delay: i * 0.4,
-                          ease: "easeInOut"
-                        }}
-                      />
-                    ))}
-                  </motion.div>
-                )}
-                
-                {percentage >= 50 && percentage < 85 && null}
-                
-                {percentage >= 85 && (
-                  <motion.div
-                    key="danger-fx"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 flex justify-center"
-                  >
-                    {/* Fiery Embers */}
-                    {[...Array(8)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="absolute bottom-4 w-2.5 h-2.5 bg-[#FF453A] rounded-full blur-[2px]"
-                        style={{ left: `${30 + (i * 5)}%` }}
-                        animate={{
-                          y: [0, -120],
-                          x: [0, (i % 2 === 0 ? 20 : -20), 0],
-                          opacity: [0, 1, 0],
-                          scale: [1, 0.3, 0]
-                        }}
-                        transition={{
-                          duration: 1 + (i * 0.15),
-                          repeat: Infinity,
-                          delay: i * 0.2,
-                          ease: "easeOut"
-                        }}
-                      />
-                    ))}
-                    {/* Danger vignette inner shadow */}
-                    <motion.div 
-                      className="absolute inset-0 rounded-full shadow-[inset_0_0_50px_rgba(255,69,58,0.8)] mix-blend-screen"
-                      animate={{ opacity: [0.3, 0.8, 0.3] }}
-                      transition={{ duration: 0.6, repeat: Infinity }}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            {/* Arc Labels */}
+            <div className="absolute bottom-[-10px] left-3 text-[10px] text-white/30 font-bold tracking-widest">₱0</div>
+            <div className="absolute bottom-[-10px] right-3 text-[10px] text-white/30 font-bold tracking-widest">
+              ₱{Math.round(allowedSpend/1000)}k
             </div>
           </div>
-        </div>
-        
-        {/* Inner Content Text - Repositioned Below Mascot */}
-        <div className="flex flex-col items-center justify-center text-center z-10 mt-2">
-          <span className="text-white/50 text-xs font-semibold tracking-widest uppercase mb-2">
+        </motion.div>
+
+        {/* Hero Typography Section */}
+        <motion.div variants={itemVariants} className="flex flex-col items-center justify-center text-center mt-12 relative z-20">
+          <span className="text-white/40 text-[10px] font-bold tracking-[0.25em] uppercase mb-3">
             Spent {config.period === 'monthly' ? 'this month' : 'this week'}
           </span>
-          <span className="text-4xl font-light text-white tracking-tight mb-1">
-            ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
-          </span>
-          <span className="text-white/60 font-medium tracking-wide text-sm mb-4">
+          <div className="flex items-start justify-center">
+            <span className="text-3xl text-white/40 font-light mt-2 mr-1">₱</span>
+            <span className="text-[5.5rem] leading-none font-light tracking-tighter text-white drop-shadow-2xl">
+              {totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+            </span>
+          </div>
+          <span className="text-white/30 font-medium tracking-widest text-xs mt-3">
             ≈ R{(totalSpent * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
           </span>
+          
+          {/* Subtle Status Pill */}
           {totalSpent > 0 && (
             <div 
-              className="px-3 py-1 rounded-full border transition-all duration-500 w-fit mx-auto shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
-              style={{ backgroundColor: `${ringColor}22`, borderColor: `${ringColor}4D` }}
+              className="mt-6 px-5 py-2 rounded-full border backdrop-blur-md shadow-xl transition-all duration-500 w-fit mx-auto"
+              style={{ backgroundColor: `${ringColor}15`, borderColor: `${ringColor}30` }}
             >
-              <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: ringColor, textShadow: `0 0 12px ${ringGlow}` }}>
+              <span className="text-[10px] uppercase tracking-[0.15em] font-bold" style={{ color: ringColor, textShadow: `0 0 16px ${ringColor}60` }}>
                 {percentage.toFixed(0)}% OF ALLOWED
               </span>
             </div>
           )}
-        </div>
-      </motion.div>
-
-      {/* Smart Warning */}
-      {(isNearingCap || isLocked) && (
-        <motion.div variants={itemVariants}>
-          <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`w-full rounded-[24px] p-4 mb-8 flex items-start gap-3 border ${
-            isLocked 
-              ? 'bg-[#FF453A]/10 border-[#FF453A]/30' 
-              : 'bg-[#E8A33D]/10 border-[#E8A33D]/30'
-          }`}
-        >
-          <AlertTriangle className={`w-5 h-5 mt-0.5 shrink-0 ${isLocked ? 'text-[#FF453A]' : 'text-[#E8A33D]'}`} />
-          <div className="flex flex-col">
-            <span className={`font-semibold mb-1 ${isLocked ? 'text-[#FF453A]' : 'text-[#E8A33D]'}`}>
-              {isLocked ? 'Limit Reached' : 'Approaching Limit'}
-            </span>
-            <span className="text-white/70 text-sm leading-relaxed">
-              {isLocked 
-                ? `You have maxed out your allowed extra spend for the ${config.period}.` 
-                : `You only have ₱${remainingAllowed.toLocaleString()} left in your allowed extra spend.`
-              }
-            </span>
-          </div>
-          </motion.div>
         </motion.div>
-      )}
 
-      {/* Action Button */}
-      <motion.div variants={itemVariants} className="relative z-20 w-full mb-12 shrink-0 flex flex-col items-center justify-center mt-6">
-        <button 
-          onClick={handleMainAction}
-          className={`relative group w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300
-            ${isLocked ? 'cursor-not-allowed opacity-70' : 'active:scale-[0.97]'}
-          `}
-        >
-          {/* Base shadow/depth */}
-          <div className="absolute inset-0 rounded-full shadow-[0_12px_30px_rgba(0,0,0,0.6)] bg-black" />
-          
-          {/* Bevel edge (Bottom rim) */}
-          <div className={`absolute inset-0 rounded-full translate-y-2 ${isLocked ? 'bg-[#8B251F]' : 'bg-[#B0C1C7]'}`} />
-          
-          {/* Top Surface */}
-          <div className={`absolute inset-0 rounded-full border-t border-white/50 shadow-[inset_0_4px_12px_rgba(255,255,255,0.8),inset_0_-8px_16px_rgba(0,0,0,0.15)] transition-transform duration-300 flex items-center justify-center
-            ${isLocked 
-              ? 'bg-gradient-to-b from-[#FF5A50] to-[#E33D33] translate-y-2' 
-              : 'bg-gradient-to-b from-[#FFFFFF] to-[#E2EBED] group-active:translate-y-2'
-            }
-          `}>
-             {isLocked ? (
-                  <Lock className="w-8 h-8 text-black/30" strokeWidth={3} />
-              ) : (
-                  <Plus className="w-10 h-10 text-black/60 drop-shadow-sm" strokeWidth={3} />
-              )}
-          </div>
-        </button>
-        <span className={`mt-8 text-xs tracking-[0.2em] uppercase font-bold ${isLocked ? 'text-[#FF453A]' : 'text-white/60'}`}>
-          {isLocked ? 'Jar Locked' : 'Quick Log Spend'}
-        </span>
-      </motion.div>
-
-      {/* Recent Entries Feed */}
-      <motion.div variants={itemVariants} className="flex flex-col gap-4 relative z-20 flex-1">
-        <div className="flex justify-between items-center mb-2 px-1">
-          <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Recent Drops ({entries.length})</h2>
-          <div className="flex flex-col items-end">
-            <span className="text-white/30 text-[10px] uppercase font-bold tracking-wider">Allowed: ₱{allowedSpend.toLocaleString()}</span>
-            <span className="text-white/20 text-[9px] uppercase font-bold tracking-wider">({config.jarAllowedPercentage || 20}% of ₱{config.targetAmount.toLocaleString()})</span>
-          </div>
-        </div>
-        
-        {logsWithColor.map((entry) => (
-          <div key={entry.id} className="w-full bg-white/[0.02] border border-white/[0.03] rounded-[24px] p-4 flex items-center justify-between group">
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${entry.bgClass}`}>
-                <PiggyBank className={`w-5 h-5 ${entry.colorClass}`} />
-              </div>
+        {/* Solid Premium Action Button Area */}
+        <motion.div variants={itemVariants} className="w-[85%] mx-auto mt-12 relative z-20">
+          {(isNearingCap || isLocked) && (
+            <div 
+              className={`w-full rounded-[24px] p-5 mb-6 flex items-start gap-4 border shadow-xl transition-colors duration-500 ${
+                isLocked 
+                  ? 'bg-[#1a0a0a] border-[#FF453A]/30' 
+                  : 'bg-[#1a150a] border-[#FF9F0A]/30'
+              }`}
+            >
+              <AlertTriangle className={`w-5 h-5 mt-0.5 shrink-0 transition-colors duration-500 ${isLocked ? 'text-[#FF453A]' : 'text-[#FF9F0A]'}`} />
               <div className="flex flex-col">
-                <span className="text-white font-medium mb-0.5">{entry.note || "Quick Log"}</span>
-                <span className="text-white/50 text-xs tracking-wide">
-                  {new Date(entry.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                <span className={`font-semibold tracking-wide mb-1 transition-colors duration-500 ${isLocked ? 'text-[#FF453A]' : 'text-[#FF9F0A]'}`}>
+                  {isLocked ? 'Limit Reached' : 'Approaching Limit'}
+                </span>
+                <span className="text-white/60 text-sm leading-relaxed">
+                  {isLocked 
+                    ? `You have maxed out your allowed extra spend for the ${config.period}.` 
+                    : `You only have ₱${remainingAllowed.toLocaleString()} left in your allowed extra spend.`
+                  }
                 </span>
               </div>
             </div>
-            <div className="flex flex-col items-end">
-              <span className={`font-medium ${entry.colorClass}`}>₱{entry.amount.toLocaleString()}</span>
-              <span className="text-white/40 text-[10px] uppercase tracking-wider">R{(entry.amount * exchangeRate).toFixed(0)}</span>
-            </div>
-          </div>
-        ))}
+          )}
 
-        {entries.length === 0 && (
-          <div className="text-center py-10 opacity-40">
-            <span className="text-sm">No expenses logged yet.</span>
+          <button 
+            onClick={handleMainAction}
+            className={`w-full h-14 rounded-full flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_8px_20px_rgba(0,0,0,0.3)]
+              ${isLocked 
+                ? 'bg-[#1a0a0a] text-[#FF453A] border border-[#FF453A]/30 cursor-not-allowed opacity-80' 
+                : 'bg-white text-black active:scale-[0.97] hover:bg-white/90'
+              }
+            `}
+          >
+            {isLocked ? (
+              <Lock className="w-4 h-4" strokeWidth={2.5} />
+            ) : (
+              <Plus className="w-5 h-5" strokeWidth={2.5} />
+            )}
+            <span className="font-bold tracking-widest text-xs uppercase">
+              {isLocked ? 'Jar Locked' : 'Quick Log Spend'}
+            </span>
+          </button>
+        </motion.div>
+
+        {/* Premium Solid Recent Entries Feed */}
+        <motion.div variants={itemVariants} className="w-[85%] mx-auto mt-12 flex flex-col gap-3 relative z-20">
+          <div className="flex justify-between items-center mb-3 px-1">
+            <h2 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase">Recent Drops ({entries.length})</h2>
+            <button 
+                onClick={() => clearEntries()} 
+                className="text-white/20 text-[9px] uppercase font-bold tracking-[0.15em] hover:text-white/60 transition-colors"
+            >
+                Reset
+            </button>
           </div>
-        )}
-      </motion.div>
+          
+          {logsWithColor.map((entry) => (
+            <div key={entry.id} className="w-full bg-[#111111] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-white/[0.04] rounded-[24px] p-5 flex items-center justify-between group transition-colors">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center transition-colors ${entry.bgClass}`}>
+                  <PiggyBank className={`w-5 h-5 ${entry.colorClass}`} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-white/90 font-medium tracking-wide mb-1 text-sm">{entry.note || "Quick Log"}</span>
+                  <span className="text-white/40 text-[10px] tracking-[0.1em] font-mono">
+                    {new Date(entry.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className={`font-semibold tracking-wider ${entry.colorClass}`}>₱{entry.amount.toLocaleString()}</span>
+                <span className="text-white/30 text-[10px] uppercase tracking-wider font-mono mt-0.5">R{(entry.amount * exchangeRate).toFixed(0)}</span>
+              </div>
+            </div>
+          ))}
+
+          {entries.length === 0 && (
+            <div className="text-center py-16 opacity-30 flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full border border-dashed border-white/20 mb-4 flex items-center justify-center">
+                <PiggyBank className="w-6 h-6 text-white/50" />
+              </div>
+              <span className="text-xs font-medium tracking-widest uppercase">No expenses logged yet</span>
+            </div>
+          )}
+        </motion.div>
+
+      </div>
 
       <QuickLogModal 
         isOpen={isLogModalOpen}
