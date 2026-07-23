@@ -17,112 +17,14 @@ import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { formatCurrency } from "@/lib/format";
+import { ActivityRingsChart } from "./ActivityRingsChart";
 
 interface YearlySummaryProps {
   year: number;
   onClose: () => void;
 }
 
-// --- SVG Donut Chart Component ---
-function DonutChart({
-  segments,
-  size = 180,
-  strokeWidth = 28,
-}: {
-  segments: { value: number; color: string; label: string }[];
-  size?: number;
-  strokeWidth?: number;
-}) {
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const total = segments.reduce((s, seg) => s + seg.value, 0);
 
-  if (total === 0) {
-    return (
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="rgba(212,175,55,0.1)"
-          strokeWidth={strokeWidth}
-        />
-        <text
-          x={size / 2}
-          y={size / 2}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fill="rgba(212,175,55,0.4)"
-          fontSize="12"
-          fontWeight="500"
-          fontFamily="Inter, sans-serif"
-          letterSpacing="0.05em"
-        >
-          NO DATA
-        </text>
-      </svg>
-    );
-  }
-
-  let offset = 0;
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      {segments
-        .filter((s) => s.value > 0)
-        .map((seg, i) => {
-          const pct = seg.value / total;
-          const dashLen = pct * circumference;
-          const gapLen = circumference - dashLen;
-          const rotation = (offset / total) * 360 - 90;
-          offset += seg.value;
-
-          return (
-            <circle
-              key={i}
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              fill="none"
-              stroke={seg.color}
-              strokeWidth={strokeWidth}
-              strokeDasharray={`${dashLen} ${gapLen}`}
-              strokeLinecap="round"
-              transform={`rotate(${rotation} ${size / 2} ${size / 2})`}
-              style={{ 
-                transition: "stroke-dasharray 0.6s ease",
-                filter: `drop-shadow(0 0 6px ${seg.color}60)`
-              }}
-            />
-          );
-        })}
-      <text
-        x={size / 2}
-        y={size / 2 - 8}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill="#D4AF37"
-        fontSize="20"
-        fontWeight="600"
-        fontFamily="Inter, sans-serif"
-      >
-        ₱{formatCurrency(total)}
-      </text>
-      <text
-        x={size / 2}
-        y={size / 2 + 12}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill="rgba(212,175,55,0.6)"
-        fontSize="10"
-        fontFamily="Inter, sans-serif"
-        className="uppercase tracking-widest font-bold"
-      >
-        yearly spent
-      </text>
-    </svg>
-  );
-}
 
 // --- Horizontal Bar Chart ---
 function HorizontalBar({
@@ -243,10 +145,11 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
     return map;
   }, [yearEntries]);
 
-  // Donut segments from budget categories
-  const donutSegments = useMemo(() => {
+  // Activity Rings segments from budget categories
+  const ringSegments = useMemo(() => {
     return categories.map((cat) => ({
       value: categorySpending[cat.name] || 0,
+      target: cat.targetAmount * 12, // Yearly target is 12x
       color: cat.color,
       label: cat.name,
     }));
@@ -255,16 +158,17 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
   // Add uncategorized if present
   const uncategorizedAmount = categorySpending["Uncategorized"] || 0;
   const allSegments = useMemo(() => {
-    const segs = [...donutSegments];
+    const segs = [...ringSegments];
     if (uncategorizedAmount > 0) {
       segs.push({
         value: uncategorizedAmount,
+        target: totalBudget, // Yearly total budget
         color: "#8E8E93",
         label: "Other",
       });
     }
     return segs.filter((s) => s.value > 0);
-  }, [donutSegments, uncategorizedAmount]);
+  }, [ringSegments, uncategorizedAmount, totalBudget]);
 
   const hasData = yearEntries.length > 0 || totalBudget > 0;
 
@@ -342,7 +246,7 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
                 Yearly Breakdown
               </h3>
               <div className="flex items-center justify-center mb-6">
-                <DonutChart segments={allSegments} size={200} strokeWidth={32} />
+                <ActivityRingsChart segments={allSegments} size={200} strokeWidth={14} gap={4} />
               </div>
               <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                 {allSegments.map((seg) => (
