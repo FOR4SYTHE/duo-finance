@@ -32,7 +32,7 @@ import { containerVariants, itemVariants } from "@/utils/animations";
 
 export default function Home() {
   const { config, setLastSeenMonth, _hasHydrated, notifications, addNotification } = useBudgetStore();
-  const { entries } = useSpendStore();
+  const { entries, injectMockEntries } = useSpendStore();
   const { exchangeRate } = useCurrencyStore();
   
   const totalSpent = useMemo(() => entries.reduce((sum, entry) => sum + entry.amount, 0), [entries]);
@@ -227,6 +227,27 @@ export default function Home() {
                 setShowYearRollover(true);
               }}
               className="w-3 h-3 rounded-full bg-[#D4AF37] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(212,175,55,0.5)]"
+            />
+            {/* Mock Busy Month: Green */}
+            <button 
+              title="Test Busy Month Data"
+              onClick={() => {
+                // Generate 35 mock entries for June 2026
+                const mockEntries = Array.from({ length: 35 }).map((_, i) => ({
+                  id: `mock-${crypto.randomUUID()}`,
+                  amount: Math.floor(Math.random() * 3000) + 100, // 100 to 3100
+                  currency: 'PHP' as const,
+                  category: ['Groceries', 'Rent', 'Utilities', 'Child Care', 'Bills'][Math.floor(Math.random() * 5)],
+                  note: `Mock Entry ${i + 1}`,
+                  timestamp: new Date(2026, 5, Math.floor(Math.random() * 28) + 1).getTime() // June 2026
+                }));
+                injectMockEntries(mockEntries);
+                
+                // Show the report for June 2026
+                setLastSeen("2026-06");
+                setShowSummaryModal(true);
+              }}
+              className="w-3 h-3 rounded-full bg-[#30D158] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(48,209,88,0.5)]"
             />
             {/* Monthly: Blue */}
             <button 
