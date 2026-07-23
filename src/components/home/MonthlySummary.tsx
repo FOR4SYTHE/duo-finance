@@ -18,6 +18,8 @@ import { useCartifyStore } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { formatCurrency } from "@/lib/format";
 import { ActivityRingsChart } from "./ActivityRingsChart";
+import { Sparkline } from "./Sparkline";
+import { AnimatedCounter } from "./AnimatedCounter";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -77,6 +79,7 @@ function GoalBar({
   saved,
   target,
   icon,
+  color = "#BF5AF2" // Premium glowing purple
 }: {
   name: string;
   saved: number;
@@ -85,26 +88,69 @@ function GoalBar({
   color?: string;
 }) {
   const pct = target > 0 ? Math.min((saved / target) * 100, 100) : 0;
+  
+  const isGold = color === "#D4AF37";
+  const trackFillColor = isGold ? "#3A2A0D" : "#2E154C";
+  
+  const pillGradient = isGold 
+    ? 'radial-gradient(100% 100% at 30% 20%, #FFF4D0 0%, #E8B923 40%, #755100 100%)'
+    : 'radial-gradient(100% 100% at 30% 20%, #E7C6FF 0%, #A242FF 45%, #4C00A8 100%)';
+    
+  const pillShadow = isGold
+    ? 'inset 0 2px 4px rgba(255,255,255,0.9), inset 0 -4px 8px rgba(0,0,0,0.5), 0 0 20px rgba(232,185,35,0.7)'
+    : 'inset 0 2px 4px rgba(255,255,255,0.9), inset 0 -4px 8px rgba(0,0,0,0.5), 0 0 20px rgba(162,66,255,0.7)';
 
   return (
-    <div className="flex flex-col gap-2 p-4 bg-white/5 backdrop-blur-md rounded-[20px] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
-      <div className="flex justify-between items-center">
-        <span className="text-sm text-white/90 font-medium">{name}</span>
-        <span className="text-xs font-semibold text-white/60 tracking-tight">{pct.toFixed(0)}%</span>
+    <div className="flex flex-col p-6 bg-[#09090B] rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden">
+      
+      {/* Top Header Layer */}
+      <div className="flex justify-between items-end mb-6 relative z-10">
+        <div>
+          <span 
+            className="text-[11px] font-bold tracking-[0.2em] uppercase mb-1.5 block"
+            style={{ color: isGold ? '#D4AF37' : '#C496FF' }}
+          >
+            {name}
+          </span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-[28px] font-bold text-white tracking-tight tabular-nums leading-none">
+              <AnimatedCounter value={saved} prefix="₱" />
+            </span>
+            <span className="text-sm font-medium text-white/30">
+              / ₱{formatCurrency(target)}
+            </span>
+          </div>
+        </div>
+        <div className="text-right pb-1">
+          <span className="text-2xl font-bold text-white tracking-tight tabular-nums">
+            <AnimatedCounter value={pct} />%
+          </span>
+        </div>
       </div>
-      <div className="w-full h-1.5 bg-black/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] rounded-full overflow-hidden mt-1">
-        <div
-          className="h-full rounded-full transition-all duration-500 ease-out"
-          style={{ 
-            width: `${pct}%`,
-            background: 'linear-gradient(90deg, #30D158, #34C759)',
-            boxShadow: '0 0 8px rgba(48,209,88,0.5)',
+
+      {/* The Premium Animated Track */}
+      <div className="relative w-full h-10 p-1 bg-[#000000] rounded-full shadow-[inset_0_4px_16px_rgba(0,0,0,1)] border border-white/5 flex items-center">
+        
+        {/* The Solid Trailing Beam */}
+        <motion.div
+          initial={{ width: "0%" }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 1.5, type: "spring", bounce: 0, delay: 0.2 }}
+          className="h-full rounded-full flex items-center justify-end"
+          style={{
+            backgroundColor: trackFillColor,
+            minWidth: '32px', // At 0%, the track perfectly houses the 32px thumb
           }}
-        />
-      </div>
-      <div className="flex justify-between mt-0.5">
-        <span className="text-xs text-white/40 font-medium">₱{formatCurrency(saved)} <span className="text-white/20">saved</span></span>
-        <span className="text-xs text-white/40 font-medium">₱{formatCurrency(target)} <span className="text-white/20">target</span></span>
+        >
+          {/* The 3D Glossy Jelly Bean Pill */}
+          <div 
+            className="h-8 w-8 rounded-full relative z-10 flex-shrink-0"
+            style={{
+              background: pillGradient,
+              boxShadow: pillShadow,
+            }}
+          />
+        </motion.div>
       </div>
     </div>
   );
@@ -179,6 +225,20 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
     return segs.filter((s) => s.value > 0);
   }, [ringSegments, uncategorizedAmount, totalBudget]);
 
+  const sparklineData = useMemo(() => {
+    const daysInMonth = new Date(year, monthNum, 0).getDate();
+    const dailyTotals = Array(daysInMonth).fill(0);
+    monthEntries.forEach(e => {
+       const day = new Date(e.timestamp).getDate();
+       dailyTotals[day - 1] += e.amount;
+    });
+    let running = 0;
+    return dailyTotals.map(d => {
+       running += d;
+       return running;
+    });
+  }, [monthEntries, monthNum, year]);
+
   const hasData = monthEntries.length > 0 || totalBudget > 0;
 
   return (
@@ -223,30 +283,41 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
           <div className="px-6 pt-6 flex flex-col gap-6">
             {/* Status Banner */}
             <div
-              className="flex items-center gap-4 p-5 rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] relative overflow-hidden"
+              className="flex items-center p-3 pl-4 rounded-full border border-white/10 bg-white/5 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] relative overflow-hidden"
             >
               <div 
                  className="absolute inset-0 opacity-[0.15]"
-                 style={{ background: `radial-gradient(circle at 0% 50%, ${statusColor}, transparent 60%)` }}
+                 style={{ background: `radial-gradient(circle at 24px 50%, ${statusColor}, transparent 50%)` }}
               />
               <div 
-                className="w-12 h-12 rounded-full flex items-center justify-center relative z-10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]"
-                style={{ backgroundColor: `${statusColor}25`, border: `1px solid ${statusColor}40` }}
+                className="w-10 h-10 rounded-full flex items-center justify-center relative z-10"
+                style={{ backgroundColor: `${statusColor}15` }}
               >
                 <StatusIcon
-                  className="w-6 h-6"
+                  className="w-5 h-5"
                   style={{ color: statusColor, filter: `drop-shadow(0 0 8px ${statusColor})` }}
                 />
               </div>
-              <div className="flex-1 relative z-10">
-                <span className="text-xs font-bold tracking-[0.15em] uppercase text-white/90 drop-shadow-sm">
-                  {statusLabel}
-                </span>
-                <p className="text-sm font-medium text-white/60 mt-1 tracking-tight">
+              <div className="flex-1 ml-3 relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className="text-[13px] font-bold tracking-[0.1em] uppercase text-white/90 drop-shadow-sm">
+                    {statusLabel}
+                  </span>
+                  {/* Subtle dynamic island badge */}
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none" style={{ color: statusColor, backgroundColor: `${statusColor}20` }}>
+                    {spendRatio > 0 ? `${(spendRatio * 100).toFixed(0)}%` : "0%"}
+                  </span>
+                </div>
+                <p className="text-[11px] font-medium text-white/60 mt-0.5 tracking-tight truncate pr-2">
                   {remaining >= 0
-                    ? `₱${formatCurrency(remaining)} remaining (≈ R${formatCurrency(remaining * exchangeRate)})`
-                    : `₱${formatCurrency(Math.abs(remaining))} over budget (≈ R${formatCurrency(Math.abs(remaining) * exchangeRate)})`}
+                    ? `₱${formatCurrency(remaining)} remaining`
+                    : `₱${formatCurrency(Math.abs(remaining))} over`}
+                  <span className="opacity-50 ml-1">(≈ R${formatCurrency(Math.abs(remaining) * exchangeRate)})</span>
                 </p>
+              </div>
+              {/* Right Chart */}
+              <div className="pr-3 relative z-10">
+                 <Sparkline data={sparklineData} color={statusColor} width={64} height={24} />
               </div>
             </div>
 
@@ -307,17 +378,17 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
               </div>
               <div className="grid grid-cols-2 gap-4 bg-black/20 rounded-[20px] p-5 border border-white/5">
                 <div>
-                  <p className="text-2xl font-bold text-white tracking-tight drop-shadow-sm">
-                    ₱{formatCurrency(totalSpent)}
+                  <p className="text-2xl font-bold text-white tracking-tight drop-shadow-sm tabular-nums">
+                    <AnimatedCounter value={totalSpent} prefix="₱" />
                   </p>
-                  <p className="text-xs font-medium text-white/40 mt-1">
-                    ≈ R{formatCurrency(totalSpent * exchangeRate)}
+                  <p className="text-xs font-medium text-white/40 mt-1 tabular-nums">
+                    ≈ <AnimatedCounter value={totalSpent * exchangeRate} prefix="R" />
                   </p>
                   <p className="text-xs font-semibold text-white/30 mt-2 uppercase tracking-wider">Total logged</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white tracking-tight drop-shadow-sm">
-                    {monthEntries.length}
+                  <p className="text-2xl font-bold text-white tracking-tight drop-shadow-sm tabular-nums">
+                    <AnimatedCounter value={monthEntries.length} />
                   </p>
                   <p className="text-xs font-semibold text-white/30 mt-2 uppercase tracking-wider">Entries</p>
                 </div>
@@ -336,15 +407,28 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
                   </h3>
                 </div>
                 <div className="flex flex-col gap-4">
-                  {goals.map((g) => (
-                    <GoalBar
-                      key={g.id}
-                      name={g.name}
-                      saved={g.savedAmount}
-                      target={g.targetAmount}
-                      icon={g.icon}
-                    />
-                  ))}
+                  {(() => {
+                    const displayGoals = [...goals];
+                    // Inject mock goal so the user can verify the animation!
+                    displayGoals.push({
+                      id: "mock-emergency-test",
+                      name: "Test Emergency Fund (Mock)",
+                      savedAmount: 37500,
+                      targetAmount: 74997,
+                      icon: "Target",
+                      color: "#BF5AF2",
+                    } as any);
+
+                    return displayGoals.map((g) => (
+                      <GoalBar
+                        key={g.id}
+                        name={g.name}
+                        saved={g.savedAmount}
+                        target={g.targetAmount}
+                        icon={g.icon}
+                      />
+                    ));
+                  })()}
                 </div>
               </div>
             )}

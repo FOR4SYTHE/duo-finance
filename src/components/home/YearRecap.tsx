@@ -212,8 +212,15 @@ function SlideBusiest({ busiestMonthName, busiestMonthEntries }: any) {
   );
 }
 
-// Slide 5: Outro
-function SlideOutro({ onClose, nextYear }: any) {
+import { useRouter } from "next/navigation";
+import { useCurrencyStore } from "@/store/useCurrencyStore";
+
+// Slide 5: Outro (Budget Renewal)
+function SlideOutro({ onClose, nextYear, config }: any) {
+  const router = useRouter();
+  const { exchangeRate } = useCurrencyStore();
+  const zarBudget = Math.round((config?.targetAmount || 0) * 12 * exchangeRate);
+
   const handleClose = () => {
     // Fire confetti just before closing
     confetti({
@@ -234,24 +241,37 @@ function SlideOutro({ onClose, nextYear }: any) {
         whileInView={{ opacity: 1, y: 0 }}
         className="text-center w-full max-w-sm relative z-10"
       >
-        <div className="w-32 h-32 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#D4AF37] to-[#AA8529] rounded-[40px] mx-auto mb-10 shadow-[0_0_60px_rgba(212,175,55,0.4)] flex items-center justify-center transform rotate-12 relative overflow-hidden">
-          <PremiumSparkle className="w-24 h-24 text-black/10 absolute -rotate-12" />
-          <span className="text-5xl -rotate-12 drop-shadow-md relative z-10" role="img" aria-label="cheers">🥂</span>
+        <div className="w-20 h-20 bg-gradient-to-tr from-[#D4AF37] to-[#AA8529] rounded-full mx-auto mb-8 shadow-[0_0_40px_rgba(212,175,55,0.4)] flex items-center justify-center">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
-        <h2 className="text-4xl font-medium text-white tracking-tight mb-6">
-          Cheers to a <br/> richer {nextYear}.
+        
+        <h2 className="text-3xl font-semibold text-white tracking-tight mb-4 leading-tight">
+          Set up your budget <br/> for {nextYear}
         </h2>
-        <p className="text-[#D4AF37]/60 text-sm font-medium mb-12">
-          Your full yearly recap is saved in your Notification Center. Let's conquer {nextYear}.
+        
+        <p className="text-white/50 text-sm font-medium mb-10 leading-relaxed">
+          Your target budget was <span className="text-white">₱{formatCurrency((config?.targetAmount || 0) * 12)}</span> (≈ R{formatCurrency(zarBudget)}) last year.
         </p>
         
-        <button
-          onClick={handleClose}
-          className="w-full flex items-center justify-center gap-3 px-6 py-5 bg-gradient-to-r from-[#D4AF37] to-[#AA8529] text-black rounded-[24px] font-bold text-[17px] hover:brightness-110 transition-all active:scale-[0.98] shadow-[0_8px_32px_rgba(212,175,55,0.2)]"
-        >
-          Start Dashboard
-          <PremiumArrow className="w-5 h-5" />
-        </button>
+        <div className="flex flex-col gap-4">
+          <button
+            onClick={handleClose}
+            className="w-full flex items-center justify-center gap-3 px-6 py-5 bg-gradient-to-r from-[#D4AF37] to-[#AA8529] text-black rounded-[24px] font-bold text-[17px] hover:brightness-110 transition-all active:scale-[0.98] shadow-[0_8px_32px_rgba(212,175,55,0.2)]"
+          >
+            Keep Previous Budget
+            <PremiumArrow className="w-5 h-5" />
+          </button>
+          
+          <button
+            onClick={() => {
+              handleClose();
+              router.push('/budget');
+            }}
+            className="w-full flex items-center justify-center gap-3 px-6 py-5 bg-[#1C1C1E] text-[#D4AF37] rounded-[24px] font-bold text-[17px] hover:bg-[#2C2C2E] transition-transform active:scale-[0.98] border border-[#D4AF37]/20"
+          >
+            Adjust Allocations
+          </button>
+        </div>
       </motion.div>
     </div>
   );
@@ -344,7 +364,7 @@ export function YearRecap({ year, onClose }: YearRecapProps) {
             {page === 1 && <SlideTotals totalEntries={yearEntries.length} totalSpent={totalSpent} config={config} />}
             {page === 2 && <SlideHit topCategory={topCategory} topAmount={topAmount} />}
             {page === 3 && <SlideBusiest busiestMonthName={busiestMonthName} busiestMonthEntries={busiestMonthEntries} />}
-            {page === 4 && <SlideOutro onClose={onClose} nextYear={year + 1} />}
+            {page === 4 && <SlideOutro onClose={onClose} nextYear={year + 1} config={config} />}
           </motion.div>
         </AnimatePresence>
       </div>
