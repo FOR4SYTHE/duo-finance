@@ -33,12 +33,24 @@ export default function SpendJarPage() {
   const [animationType, setAnimationType] = useState<'happy' | 'worried' | 'scared' | null>(null);
 
   const [isLogFlash, setIsLogFlash] = useState(false);
+  const [mascotReaction, setMascotReaction] = useState<'idle' | 'action' | 'reset' | 'locked_click'>('idle');
   const previousEntriesLength = useRef(entries.length);
 
   useEffect(() => {
     if (entries.length > previousEntriesLength.current) {
       setIsLogFlash(true);
-      const timer = setTimeout(() => setIsLogFlash(false), 800);
+      setMascotReaction('action');
+      const timer = setTimeout(() => {
+        setIsLogFlash(false);
+        setMascotReaction('idle');
+      }, 3000);
+      previousEntriesLength.current = entries.length;
+      return () => clearTimeout(timer);
+    } else if (entries.length === 0 && previousEntriesLength.current > 0) {
+      setMascotReaction('reset');
+      const timer = setTimeout(() => {
+        setMascotReaction('idle');
+      }, 3000);
       previousEntriesLength.current = entries.length;
       return () => clearTimeout(timer);
     }
@@ -83,6 +95,8 @@ export default function SpendJarPage() {
   const handleMainAction = () => {
       if (isLocked) {
           setIsLockedModalOpen(true);
+          setMascotReaction('locked_click');
+          setTimeout(() => setMascotReaction('idle'), 3000);
       } else {
           setIsLogModalOpen(true);
       }
@@ -106,6 +120,34 @@ export default function SpendJarPage() {
       }
       return { ...entry, colorClass, bgClass };
   }).reverse();
+
+  // Get active mascot state image
+  const getMascotImage = () => {
+    let state = 'safe';
+    if (percentage >= 85) state = 'danger';
+    else if (percentage >= 50) state = 'warning';
+
+    let suffix = '1'; // default idle
+
+    if (mascotReaction === 'reset') {
+        state = 'safe';
+        suffix = '3'; // Happy Spin
+    } else if (mascotReaction === 'locked_click') {
+        state = 'danger';
+        suffix = '2'; // Dizzy Spin when denied
+    } else if (mascotReaction === 'action') {
+        suffix = '2'; // Thumbs Up / Gasp
+    } else {
+        // Idle variations based on specific thresholds
+        if (state === 'danger' && isLocked) {
+            suffix = '3'; // Fallen Over (100%+)
+        } else if (state === 'warning' && percentage >= 75) {
+            suffix = '3'; // Heavy Breathing (75% - 84%)
+        }
+    }
+
+    return `/mascot/difu-${state}-${suffix}.webp`;
+  };
 
   // Compute dynamic background gradient based on budget health
   const bgGradient = 
@@ -177,21 +219,22 @@ export default function SpendJarPage() {
               />
             </svg>
 
-            {/* Difu Sprite Placeholder (Centered in the Arch) */}
+            {/* DUFI Mascot Image */}
             <div className="absolute inset-0 flex flex-col items-center justify-end pb-2 z-10">
               <div 
-                className="w-48 h-48 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center bg-white/[0.02] backdrop-blur-sm shadow-2xl relative transition-colors duration-500"
-                style={{ borderColor: `${ringColor}50` }}
+                className="w-48 h-48 flex flex-col items-center justify-center relative transition-colors duration-500 overflow-visible"
               >
-                <span className="text-white/60 text-[10px] font-bold uppercase tracking-widest text-center px-4 leading-relaxed mb-1">
-                  Difu Sprite Space
-                </span>
-                <span className="text-white/30 text-[9px] uppercase text-center px-2">
-                  (Waiting on upload)
-                </span>
-                
+                <motion.img
+                  key={getMascotImage()} // Re-animate on source change
+                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  src={getMascotImage()}
+                  alt="Dufi Mascot"
+                  className="w-[140%] max-w-none h-auto object-contain absolute bottom-[-15%]"
+                />
                 {/* Simulated drop shadow for mascot */}
-                <div className="absolute -bottom-4 w-32 h-6 bg-black/60 blur-[10px] rounded-full -z-10" />
+                <div className="absolute -bottom-2 w-24 h-4 bg-black/60 blur-[10px] rounded-full -z-10" />
               </div>
             </div>
             
