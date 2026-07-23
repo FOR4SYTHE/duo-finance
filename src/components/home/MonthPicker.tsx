@@ -131,7 +131,6 @@ export function MonthPicker({ onClose, onSelectMonth }: MonthPickerProps) {
       : [...MONTH_NAMES].reverse();
 
   return (
-    <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -222,6 +221,5 @@ export function MonthPicker({ onClose, onSelectMonth }: MonthPickerProps) {
           </div>
         </div>
       </motion.div>
-    </AnimatePresence>
   );
 }

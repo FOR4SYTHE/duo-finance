@@ -252,8 +252,12 @@ export function BillsCalendarCard() {
       </div>
 
       {/* Full Calendar Overlay */}
-      {showCalendar && typeof document !== 'undefined' && createPortal(
-        <BillsCalendar onClose={() => setShowCalendar(false)} />,
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showCalendar && (
+            <BillsCalendar onClose={() => setShowCalendar(false)} />
+          )}
+        </AnimatePresence>,
         document.body
       )}
     </>

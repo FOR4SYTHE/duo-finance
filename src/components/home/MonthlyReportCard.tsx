@@ -9,6 +9,7 @@ import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { formatCurrency } from "@/lib/format";
 import { MonthPicker } from "./MonthPicker";
 import { MonthlySummary } from "./MonthlySummary";
+import { AnimatePresence } from "framer-motion";
 
 interface PhotoData {
   url: string;
@@ -211,20 +212,28 @@ export function MonthlyReportCard() {
       </div>
 
       {/* Month Picker Overlay — portaled to body to escape transform context */}
-      {showMonthPicker && typeof document !== 'undefined' && createPortal(
-        <MonthPicker
-          onClose={() => setShowMonthPicker(false)}
-          onSelectMonth={handleMonthSelect}
-        />,
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showMonthPicker && (
+            <MonthPicker
+              onClose={() => setShowMonthPicker(false)}
+              onSelectMonth={handleMonthSelect}
+            />
+          )}
+        </AnimatePresence>,
         document.body
       )}
 
       {/* Monthly Summary Overlay — portaled to body to escape transform context */}
-      {showSummary && typeof document !== 'undefined' && createPortal(
-        <MonthlySummary
-          monthKey={summaryMonth}
-          onClose={() => setShowSummary(false)}
-        />,
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showSummary && (
+            <MonthlySummary
+              monthKey={summaryMonth}
+              onClose={() => setShowSummary(false)}
+            />
+          )}
+        </AnimatePresence>,
         document.body
       )}
     </>
