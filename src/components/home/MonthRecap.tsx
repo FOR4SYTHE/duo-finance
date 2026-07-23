@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, Trophy, TrendingUp, TrendingDown, Minus, Receipt, ShoppingCart } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
+import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { formatCurrency } from "@/lib/format";
 
 const MONTH_NAMES = [
@@ -184,8 +185,14 @@ function SlideHit({ topCategory, topAmount }: any) {
   );
 }
 
-// Slide 4: Outro
-function SlideOutro({ onClose, currentMonthName }: any) {
+import { useRouter } from "next/navigation";
+
+// Slide 4: Outro (Budget Renewal)
+function SlideOutro({ onClose, currentMonthName, config }: any) {
+  const router = useRouter();
+  const { exchangeRate } = useCurrencyStore();
+  const zarBudget = Math.round(config.targetAmount * exchangeRate);
+
   return (
     <div className="w-full h-full bg-[#0A0A0C] flex flex-col items-center justify-center px-8 relative">
       <motion.div
@@ -194,21 +201,37 @@ function SlideOutro({ onClose, currentMonthName }: any) {
         viewport={{ margin: "-100px" }}
         className="text-center w-full max-w-sm"
       >
-        <div className="w-20 h-20 bg-gradient-to-tr from-[#30D158] to-[#64D2FF] rounded-full mx-auto mb-8 shadow-[0_0_40px_rgba(48,209,88,0.3)]" />
-        <h2 className="text-4xl font-semibold text-white tracking-tight mb-4">
-          Ready for <br/> {currentMonthName}?
+        <div className="w-20 h-20 bg-gradient-to-tr from-[#30D158] to-[#64D2FF] rounded-full mx-auto mb-8 shadow-[0_0_40px_rgba(48,209,88,0.3)] flex items-center justify-center">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        
+        <h2 className="text-3xl font-semibold text-white tracking-tight mb-4 leading-tight">
+          Set up your budget <br/> for {currentMonthName}
         </h2>
-        <p className="text-white/50 text-sm font-medium mb-12">
-          Your recap is saved in your Notification Center. Let's start fresh.
+        
+        <p className="text-white/50 text-sm font-medium mb-10 leading-relaxed">
+          Your target budget was <span className="text-white">₱{formatCurrency(config.targetAmount)}</span> (≈ R{formatCurrency(zarBudget)}) last month.
         </p>
         
-        <button
-          onClick={onClose}
-          className="w-full flex items-center justify-center gap-3 px-6 py-5 bg-white text-black rounded-[24px] font-bold text-[17px] hover:bg-white/90 transition-transform active:scale-[0.98] shadow-[0_8px_32px_rgba(255,255,255,0.15)]"
-        >
-          Start Dashboard
-          <ArrowRight className="w-5 h-5" />
-        </button>
+        <div className="flex flex-col gap-4">
+          <button
+            onClick={onClose}
+            className="w-full flex items-center justify-center gap-3 px-6 py-5 bg-white text-black rounded-[24px] font-bold text-[17px] hover:bg-white/90 transition-transform active:scale-[0.98] shadow-[0_8px_32px_rgba(255,255,255,0.15)]"
+          >
+            Keep Previous Budget
+            <ArrowRight className="w-5 h-5" />
+          </button>
+          
+          <button
+            onClick={() => {
+              onClose();
+              router.push('/budget');
+            }}
+            className="w-full flex items-center justify-center gap-3 px-6 py-5 bg-[#1C1C1E] text-white rounded-[24px] font-bold text-[17px] hover:bg-[#2C2C2E] transition-transform active:scale-[0.98] border border-white/10"
+          >
+            Adjust Allocations
+          </button>
+        </div>
       </motion.div>
     </div>
   );
@@ -321,7 +344,7 @@ export function MonthRecap({ lastSeenMonthKey, currentMonthKey, onClose }: Month
             {page === 0 && <SlideCover monthName={lastMonthName} photoUrl={photoUrl} />}
             {page === 1 && <SlideScore config={config} monthEntries={monthEntries} remaining={remaining} isOver={isOver} />}
             {page === 2 && <SlideHit topCategory={topCategory} topAmount={topAmount} />}
-            {page === 3 && <SlideOutro onClose={onClose} currentMonthName={currentMonthName} />}
+            {page === 3 && <SlideOutro onClose={onClose} currentMonthName={currentMonthName} config={config} />}
           </motion.div>
         </AnimatePresence>
       </div>
