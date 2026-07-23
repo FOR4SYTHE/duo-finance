@@ -226,7 +226,7 @@ export function LiveTripTracker() {
                         >
                             ₱{Math.abs(remaining).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                         </motion.span>
-                        <div className="flex items-center justify-center gap-2 mt-1 text-white/50 text-[10px] font-light tracking-wide">
+                        <div className="flex items-center justify-center gap-2 mt-1 text-white/50 text-[10px] font-normal tracking-wide">
                             <span>≈ R{(Math.abs(remaining) * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             {vatAmount > 0 && (
                                 <>
