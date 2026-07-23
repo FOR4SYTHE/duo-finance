@@ -25,7 +25,7 @@ export function TripSetup() {
     useEffect(() => {
         if (numericValue > 0 && bottomRef.current) {
             setTimeout(() => {
-                bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100); // Small delay to allow framer-motion layout to start expanding
         }
     }, [numericValue > 0]); // Only trigger when we cross the 0 threshold
