@@ -186,7 +186,7 @@ export default function SpendJarPage() {
         </div>
         <button 
           onClick={() => setIsSettingsModalOpen(true)}
-          className="w-11 h-11 rounded-full bg-white/[0.05] backdrop-blur-xl flex items-center justify-center border border-white/[0.08] hover:bg-white/[0.1] transition-all shadow-lg active:scale-95"
+          className="w-11 h-11 rounded-full bg-[#1c1c1e] flex items-center justify-center border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:bg-white/[0.1] transition-all active:scale-95"
         >
           <Settings2 className="w-5 h-5 text-white/90" />
         </button>
@@ -269,7 +269,7 @@ export default function SpendJarPage() {
           {/* Subtle Status Pill */}
           {totalSpent > 0 && (
             <div 
-              className="mt-6 px-5 py-2 rounded-full border backdrop-blur-md shadow-xl transition-all duration-500 w-fit mx-auto"
+              className="mt-6 px-5 py-2 rounded-full border bg-[#111111] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] transition-all duration-500 w-fit mx-auto"
               style={{ backgroundColor: `${ringColor}15`, borderColor: `${ringColor}30` }}
             >
               <span className="text-[10px] uppercase tracking-[0.15em] font-bold" style={{ color: ringColor, textShadow: `0 0 16px ${ringColor}60` }}>

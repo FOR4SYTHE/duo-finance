@@ -156,7 +156,7 @@ export function LiveTripTracker() {
                                 
                                 {/* Content (Icon and Label) placed cleanly at the bottom */}
                                 <div className="relative z-10 w-full flex flex-col items-center gap-3 mt-auto">
-                                    <div className="w-[44px] h-[44px] rounded-full flex items-center justify-center bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
+                                    <div className="w-[44px] h-[44px] rounded-full flex items-center justify-center bg-[#1c1c1e] border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.8),inset_0_1px_2px_rgba(255,255,255,0.1)]">
                                         <Icon className="w-[18px] h-[18px]" style={{ color: cat.color }} strokeWidth={2.5} />
                                     </div>
                                     <span className="text-white font-semibold tracking-wide text-sm drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{cat.name}</span>
@@ -408,7 +408,7 @@ export function LiveTripTracker() {
                 <div className="flex justify-between items-center px-2 pt-2 mb-8 relative z-30 shrink-0">
                     <button 
                         onClick={() => setShowList(true)}
-                        className="flex items-center gap-2 bg-white/[0.04] backdrop-blur-md border border-white/[0.05] px-4 py-2.5 rounded-full hover:bg-white/[0.08] transition-colors"
+                        className="flex items-center gap-2 bg-[#1c1c1e] border border-white/[0.05] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] px-4 py-2.5 rounded-full hover:bg-white/[0.08] transition-colors"
                     >
                         <ShoppingCart className="w-4 h-4 text-white/70" />
                         <span className="text-white/70 font-medium text-sm tracking-wide">Cart</span>
@@ -539,10 +539,10 @@ export function LiveTripTracker() {
                                         let textClasses = "";
                                         
                                         if (btn.type === "num") {
-                                            btnClasses = "bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.06] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_8px_20px_rgba(0,0,0,0.5)] hover:from-white/[0.12] hover:to-white/[0.06]";
+                                            btnClasses = "bg-white/[0.05] border border-white/[0.02] hover:bg-white/[0.08]";
                                             textClasses = "text-white font-light text-[30px]";
                                         } else if (btn.type === "action") {
-                                            btnClasses = "bg-gradient-to-b from-black/40 to-black/60 border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_20px_rgba(0,0,0,0.5)] hover:from-black/30 hover:to-black/50";
+                                            btnClasses = "bg-white/[0.02] border border-white/[0.02] hover:bg-white/[0.05]";
                                             textClasses = "text-white/40 font-medium text-[24px] tracking-wide";
                                         }
 
@@ -555,7 +555,6 @@ export function LiveTripTracker() {
                                                     ${btnClasses}
                                                 `}
                                             >
-                                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                                                 <span className={`relative z-10 ${textClasses}`}>
                                                     {btn.label === "⌫" ? <Delete className="w-6 h-6" strokeWidth={1.5} /> : btn.label}
                                                 </span>
