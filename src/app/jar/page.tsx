@@ -161,12 +161,17 @@ export default function SpendJarPage() {
       variants={containerVariants}
       initial={isInitialLoad ? "hidden" : false}
       animate="visible"
-      className="relative flex flex-col w-full h-full overflow-hidden transition-colors duration-1000 ease-in-out"
-      style={{ background: bgGradient }}
+      className="relative flex flex-col w-full min-h-full"
     >
       
-      {/* Floating Header */}
-      <motion.div variants={itemVariants} className="absolute top-12 left-6 right-6 flex justify-between items-center z-50">
+      {/* Fixed Background to cover the layout padding */}
+      <div 
+        className="fixed inset-0 w-full max-w-xl mx-auto -z-10 transition-colors duration-1000 ease-in-out"
+        style={{ background: bgGradient }}
+      />
+
+      {/* Header (Scrolls naturally) */}
+      <motion.div variants={itemVariants} className="pt-12 px-6 flex justify-between items-center z-50">
         <div className="flex flex-col gap-1">
             <div className="flex items-center gap-3">
               <h1 className="text-3xl text-white font-medium tracking-tight drop-shadow-md">Spend Jar</h1>
@@ -187,8 +192,8 @@ export default function SpendJarPage() {
         </button>
       </motion.div>
 
-      {/* Main Scrollable Content */}
-      <div className="flex-1 overflow-y-auto no-scrollbar relative z-10 pt-[20vh] pb-32">
+      {/* Main Content */}
+      <div className="flex-1 relative z-10 pt-10 pb-32">
         
         {/* Massive Arch & Mascot Section */}
         <motion.div variants={itemVariants} className="relative w-full flex flex-col items-center justify-center shrink-0">

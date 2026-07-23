@@ -29,6 +29,17 @@ export function LiveTripTracker() {
     
     // Focus tracking for quantity adjustments
     const [activeAdjustId, setActiveAdjustId] = useState<string | null>(null);
+    const bottomRef = useRef<HTMLDivElement>(null);
+    const prevItemsLength = useRef(items.length);
+
+    useEffect(() => {
+        if (items.length > prevItemsLength.current) {
+            setTimeout(() => {
+                bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 150);
+        }
+        prevItemsLength.current = items.length;
+    }, [items.length]);
 
     const handleAdjust = (id: string, action: 'inc' | 'dec') => {
         setActiveAdjustId(id);
@@ -170,7 +181,7 @@ export function LiveTripTracker() {
     };
 
     const heroCardJSX = (
-        <div className="sticky top-2 z-40 shrink-0 w-full mb-6 flex flex-col">
+        <div className="relative z-40 shrink-0 w-full mb-6 flex flex-col">
                 <motion.div 
                     layout
                     className="w-full rounded-[56px] overflow-hidden bg-black flex flex-col border border-white/[0.12] pt-11 pb-6 relative"
@@ -692,7 +703,7 @@ export function LiveTripTracker() {
                 )}
             </motion.div>
 
-            {/* Floating Action Button */}
+            {/* Inline Action Button */}
             <AnimatePresence>
                 {items.length > 0 && (
                     <motion.div 
@@ -700,11 +711,12 @@ export function LiveTripTracker() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.8, y: 20 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="fixed bottom-24 left-0 right-0 flex justify-center z-50 pointer-events-none"
+                        className="w-full flex justify-center mt-6 pt-4 pb-12 z-50"
+                        ref={bottomRef}
                     >
                         <button 
                             onClick={() => setIsAddingNew(true)}
-                            className="pointer-events-auto w-[64px] h-[64px] rounded-full bg-white text-black shadow-[0_12px_32px_rgba(255,255,255,0.25)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+                            className="w-[64px] h-[64px] rounded-full bg-white text-black shadow-[0_12px_32px_rgba(255,255,255,0.15)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
                         >
                             <Plus className="w-8 h-8" strokeWidth={2} />
                         </button>
