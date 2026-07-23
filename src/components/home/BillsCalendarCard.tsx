@@ -91,25 +91,25 @@ export function BillsCalendarCard() {
   return (
     <>
       <div
-        className="relative shrink-0 w-full bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-[28px] p-6 mb-6 overflow-hidden"
+        className="relative shrink-0 w-full bg-[#111111] rounded-[32px] p-6 mb-6 overflow-hidden"
       >
         {/* Header - Clickable to open full calendar */}
         <div 
           onClick={() => setShowCalendar(true)}
-          className="flex items-center justify-between mb-5 cursor-pointer group active:opacity-70 transition-opacity"
+          className="flex items-center justify-between mb-8 cursor-pointer group active:opacity-70 transition-opacity"
         >
           <div className="flex items-center gap-4">
-            <div className="w-11 h-11 rounded-full bg-white/10 border border-white/5 flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] group-hover:bg-white/20 transition-colors">
-              <CalendarDays className="w-5 h-5 text-white/90" />
+            <div className="w-10 h-10 rounded-full bg-[#2A2A2A] flex items-center justify-center transition-colors">
+              <CalendarDays className="w-4 h-4 text-[#A1A1A1]" />
             </div>
             <div>
-              <h3 className="text-[13px] font-bold text-white tracking-wide">Calendar & Bills</h3>
-              <p className="text-[11px] font-medium text-white/40 mt-0.5">
+              <h3 className="text-[15px] font-bold text-white tracking-wide">Calendar & Bills</h3>
+              <p className="text-[12px] font-medium text-[#737373] mt-0.5">
                 {upcomingBills.length} upcoming this week
               </p>
             </div>
           </div>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white/30 group-hover:text-white/80 group-hover:bg-white/10 transition-all">
+          <div className="w-8 h-8 rounded-full flex items-center justify-end text-[#404040] group-hover:text-white transition-all">
             <ChevronRight className="w-5 h-5" />
           </div>
         </div>
@@ -127,10 +127,10 @@ export function BillsCalendarCard() {
                 className="w-full h-full flex flex-col justify-center"
               >
                 {/* 2-Week Compact Calendar Grid */}
-                <div className="grid grid-cols-7 gap-y-3 gap-x-1">
+                <div className="grid grid-cols-7 gap-y-4 gap-x-1">
                   {/* Day Headers */}
                   {dayLabels.map((d, i) => (
-                    <div key={i} className="text-center text-[10px] text-white/30 font-semibold mb-0.5 uppercase tracking-widest">
+                    <div key={i} className="text-center text-[10px] text-[#737373] font-semibold mb-1 uppercase tracking-wider">
                       {d}
                     </div>
                   ))}
@@ -144,22 +144,19 @@ export function BillsCalendarCard() {
                         onClick={() => handleDateSelect(day.fullDate)}
                       >
                         <div
-                          className={`w-[36px] h-[36px] flex flex-col items-center justify-center rounded-full text-[14px] relative transition-all duration-300 ${
+                          className={`flex flex-col items-center justify-center rounded-full relative transition-all duration-300 ${
                             isSelected
-                              ? "bg-white text-black font-bold shadow-[0_4px_12px_rgba(255,255,255,0.3)] scale-110 z-10"
-                              : day.isToday
-                              ? "bg-white/10 text-white font-bold border border-white/20"
-                              : "text-white/70 font-medium hover:bg-white/5"
+                              ? day.hasBill
+                                ? "w-[38px] h-[38px] bg-[#FF9F0A] text-black font-bold shadow-[0_0_24px_rgba(255,159,10,0.25)] z-10"
+                                : "w-[38px] h-[38px] bg-[#E5E5E5] text-black font-bold shadow-[0_0_30px_rgba(255,255,255,0.15)] z-10"
+                              : "w-[38px] h-[38px] text-[#A1A1A1] font-medium hover:text-white"
                           }`}
                         >
-                          <span>{day.date}</span>
+                          <span className="text-[15px] relative z-10">{day.date}</span>
                           
-                          {/* Breathing room for indicator dot - anchored to bottom */}
+                          {/* Dot for bill */}
                           {day.hasBill && !isSelected && (
-                            <div className={`w-1 h-1 rounded-full absolute bottom-[3px] ${day.isToday ? "bg-white/80" : "bg-white/30"}`} />
-                          )}
-                          {day.hasBill && isSelected && (
-                            <div className="w-1 h-1 rounded-full bg-black/60 absolute bottom-[3px]" />
+                            <div className="w-1 h-1 rounded-full absolute bottom-[3px] bg-[#525252]" />
                           )}
                         </div>
                       </div>
@@ -174,7 +171,7 @@ export function BillsCalendarCard() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="w-full h-full flex gap-4 items-center justify-start cursor-pointer"
+                className="w-full h-full flex gap-5 items-center justify-start cursor-pointer"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 onDragEnd={(e, { offset }) => {
@@ -183,50 +180,42 @@ export function BillsCalendarCard() {
               >
                 {/* Giant Date Presentation */}
                 <div className="flex flex-col shrink-0 min-w-[70px] justify-center items-center">
-                  <span className="text-[10px] font-bold text-[#FF9F0A] uppercase tracking-widest mb-0.5 text-center">
+                  <span className="text-[11px] font-bold text-[#FF9F0A] uppercase tracking-widest mb-1 text-center">
                     {isSelectedToday ? "Today" : selectedDayName.slice(0, 3)}
                   </span>
                   <div className="flex flex-col items-center leading-none">
-                    <span className="text-[44px] font-black text-white tracking-tighter leading-[0.8]">{selectedDayNum}</span>
-                    <span className="text-[14px] font-bold text-white/40 tracking-tight mt-1">{selectedMonthName}</span>
+                    <span className="text-[48px] font-black text-[#E5E5E5] tracking-tighter leading-[0.8]">{selectedDayNum}</span>
+                    <span className="text-[13px] font-bold text-[#737373] tracking-widest uppercase mt-2">{selectedMonthName}</span>
                   </div>
                 </div>
 
                 {/* Right: Luxury Information Card */}
-                <div className="flex-1 h-full py-1">
-                  <div className="w-full h-full rounded-[20px] bg-white/[0.03] border border-white/[0.05] p-3.5 flex flex-col justify-between shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] relative overflow-hidden">
-                    {/* Subtle gradient glow inside the card depending on state */}
-                    <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full blur-[30px] opacity-20 pointer-events-none ${selectedBills.length > 0 ? "bg-[#FF9F0A]" : "bg-white/20"}`} />
-                    
+                <div className="flex-1 h-full py-0.5">
+                  <div className="w-full h-full rounded-[24px] bg-[#1C1C1E] p-4 flex flex-col justify-center items-center relative overflow-hidden transition-colors">
                     {selectedBills.length > 0 ? (
-                      <>
+                      <div className="w-full h-full flex flex-col justify-between">
                         <div className="flex items-start justify-between relative z-10">
-                          <span className="text-[14px] font-bold text-white/90 leading-tight">
-                            {selectedBills.length > 1 ? `${selectedBills.length} Bills Scheduled` : selectedBills[0].name}
+                          <span className="text-[15px] font-bold text-[#E5E5E5] leading-tight">
+                            {selectedBills.length > 1 ? `${selectedBills.length} Bills Due` : selectedBills[0].name}
                           </span>
-                          <div className="px-2 py-0.5 rounded-full bg-white/10 text-white/80 text-[9px] font-bold uppercase tracking-wider backdrop-blur-md">
-                            Due
-                          </div>
                         </div>
-                        
                         <div className="flex items-end justify-between relative z-10 mt-auto">
                           <div className="flex flex-col">
-                            <span className="text-[10px] text-white/40 font-medium uppercase tracking-widest mb-0.5">Amount</span>
-                            <span className="text-[18px] font-bold text-white leading-none tracking-tight">
-                              <span className="text-white/50 text-[14px] mr-0.5">₱</span>
+                            <span className="text-[10px] text-[#737373] font-medium uppercase tracking-widest mb-0.5">Amount</span>
+                            <span className="text-[18px] font-bold text-[#E5E5E5] leading-none tracking-tight">
+                              <span className="text-[#A1A1A1] text-[14px] mr-0.5">₱</span>
                               {selectedBills.length > 1 
                                 ? formatCurrency(selectedBills.reduce((acc, curr) => acc + curr.amount, 0)) 
                                 : formatCurrency(selectedBills[0].amount)}
                             </span>
                           </div>
-
                         </div>
-                      </>
+                      </div>
                     ) : (
                       <div className="w-full h-full flex flex-col justify-center items-center text-center relative z-10">
-                        <CheckCircle2 className="w-6 h-6 text-white/20 mb-2" />
-                        <span className="text-[13px] font-semibold text-white/60">No bills scheduled</span>
-                        <span className="text-[10px] text-white/30 mt-0.5">You're all caught up</span>
+                        <CheckCircle2 className="w-6 h-6 text-[#525252] mb-2" />
+                        <span className="text-[14px] font-bold text-[#A1A1A1]">No bills scheduled</span>
+                        <span className="text-[11px] text-[#525252] mt-1 font-medium">You're all caught up</span>
                       </div>
                     )}
                   </div>
@@ -237,15 +226,15 @@ export function BillsCalendarCard() {
         </div>
 
         {/* Pagination Dots */}
-        <div className="flex justify-center gap-2 mt-4">
+        <div className="flex justify-center gap-2 mt-6">
           <button 
             onClick={() => setView('grid')}
-            className={`h-1.5 rounded-full transition-all duration-300 ${view === 'grid' ? 'w-4 bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.4)]' : 'w-1.5 bg-white/20 hover:bg-white/40'}`}
+            className={`h-1.5 rounded-full transition-all duration-300 ${view === 'grid' ? 'w-4 bg-[#E5E5E5]' : 'w-1.5 bg-[#404040]'}`}
             aria-label="View Calendar Grid"
           />
           <button 
             onClick={() => setView('presentation')}
-            className={`h-1.5 rounded-full transition-all duration-300 ${view === 'presentation' ? 'w-4 bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.4)]' : 'w-1.5 bg-white/20 hover:bg-white/40'}`}
+            className={`h-1.5 rounded-full transition-all duration-300 ${view === 'presentation' ? 'w-4 bg-[#E5E5E5]' : 'w-1.5 bg-[#404040]'}`}
             aria-label="View Bill Details"
           />
         </div>
