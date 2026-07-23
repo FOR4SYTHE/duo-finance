@@ -898,12 +898,11 @@ function SwipeableCartItem({
                 dragElastic={0.05}
                 onDragEnd={handleDragEnd}
                 animate={{
-                    x: isSwiped ? -80 : 0,
-                    filter: isFocused ? 'brightness(1.15) drop-shadow(0 4px 24px rgba(255,255,255,0.15))' : 'brightness(1) drop-shadow(0 0px 0px rgba(0,0,0,0))'
+                    x: isSwiped ? -80 : 0
                 }}
-                transition={{ type: 'tween', ease: 'easeOut', duration: 0.2 }}
-                className={`relative w-full rounded-[32px] flex z-10 backdrop-blur-3xl border transition-all duration-300 ${
-                    isFocused ? 'py-5 px-3' : isOtherFocused ? 'py-2 px-3' : 'p-3'
+                transition={{ type: 'tween', ease: 'easeOut', duration: 0.1 }}
+                className={`relative w-full rounded-[32px] flex z-10 backdrop-blur-3xl border transition-all duration-200 ${
+                    isFocused ? 'py-5 px-3 brightness-110 shadow-[0_4px_24px_rgba(255,255,255,0.15)]' : isOtherFocused ? 'py-2 px-3' : 'p-3 shadow-none'
                 } ${
                     isStillNeed 
                         ? 'bg-[#141414] border-white/[0.06]' 
