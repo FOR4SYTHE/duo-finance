@@ -14,7 +14,8 @@ A personal finance app for a couple relocating together in the Philippines — o
 2. Country-specific budgeting for moving in together and running a household.
 3. A continuous "Spend Jar" that logs everyday spending against the set budget, week by week or month by month.
 4. A live shopping-trip budget tracker ("Cartify") for grocery/retail runs.
-5. (Later) A camera-based shopping assistant that identifies items and surfaces curated buying options.
+5. Insurance Tracker & Benefits Reader (household active plans, benefits reader templates, gap analyzer, and renewal calendar integration).
+6. (Later) A camera-based shopping assistant that identifies items and surfaces curated buying options.
 
 **Non-negotiable usability bar:** every core action must be usable by a "lazy" person or an older person with no tech background — one thumb, minimal taps, nothing hidden behind menus for the primary action.
 
@@ -206,6 +207,22 @@ The everyday counterpart to a savings piggy bank, but for outgoing spend: instea
 - Present results as a "bento box" grid: image, short description, price, link, location — not a generic search results list.
 - **Scoping reality check:** a true live price-comparison/deal-aggregation engine across PH retailers is its own full product and will exceed any free tier if built for real. For v1: either (a) generate the search query and deep-link out to retailer search pages (Lazada, Shopee, local appliance stores) rather than scraping/aggregating results yourself, or (b) build a polished bento-grid UI with a handful of hardcoded real examples (oven, fridge, aircon) and be explicit in the portfolio case study that live aggregation is a v2 roadmap item.
 
+### 4.6 Insurance Tracker & Benefits Reader (Phase 6 — Post-Supabase Migration)
+
+This feature plugs directly into the `household_id` Supabase migration model. Do not build a separate, disconnected data model.
+
+**Four Main Views/Tabs:**
+1. **Explore / Compare:** For households shopping for plans. Browse `insurance_plan_templates` public reference data grouped by plan type (Life, HMO, Gov't Health, VUL, Critical Illness). Each template card has a "Log this as mine" button that pre-fills the My Plans form.
+2. **My Plans:** Standard CRUD for household policies. Fields: insurer, plan type, premium, frequency, coverage, dependents, renewal date, status, and `custom_fields` (JSONB for MBL, OPD limit, ER cover, fund value).
+3. **Benefits Reader:** Matches logged policies (`insurer_name` + `plan_name`) against `insurance_plan_templates` to display structured benefit breakdowns with optional per-policy custom field overrides.
+4. **What to Get (Gap Analyzer):** Client-side rule-based suggestions (e.g. no Life policy -> suggest life cover; no dental rider -> suggest dental rider).
+5. **Renewal Reminders:** Automatically feeds into the shared `Bills/Due-Date Calendar` (Section 4.0).
+6. **Phase 2 (Optional/Later):** Document scanner via Claude/Anthropic API to pre-fill policy forms from uploaded PDFs.
+
+**Supabase Schema:**
+- `insurance_policies` (Household-scoped, RLS protected): `id`, `household_id`, `insurer_name`, `plan_name`, `plan_type`, `premium_amount`, `premium_frequency`, `coverage_amount`, `dependents_count`, `renewal_date`, `status`, `custom_fields` (JSONB).
+- `insurance_plan_templates` (Public reference data, authenticated read, admin write): `id`, `insurer_name`, `plan_name`, `plan_type`, `benefit_fields` (JSONB), `last_updated`.
+
 ---
 
 ## 5. Build Order
@@ -217,6 +234,7 @@ The everyday counterpart to a savings piggy bank, but for outgoing spend: instea
 5. Cartify — shopping trip tracker built on the same expense-entries model as Spend Jar, Simple mode first, then Categorized.
 6. Shopping scanner — scoped per the note above; treat as a stretch/polish feature, not core v1.
 7. **Supabase & Auth Migration (Joint Accounts)** — Once all UI design and client-side Zustand stores are 100% finalized and approved, implement Supabase Auth, `households` schema with RLS, invite code flow, and Zustand-to-Supabase background sync.
+8. **Insurance Tracker & Benefits Reader** — Implement `insurance_policies` and `insurance_plan_templates` tables on Supabase, My Plans CRUD, Benefits Reader templates, Gap Analyzer, and renewal sync with the Bills Calendar.
 
 Do not start full functionality on Phase 3 onward until the App Shell (step 1) is in place — seeing the whole app's shape first is the point of this reordering.
 
