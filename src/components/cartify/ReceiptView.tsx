@@ -50,7 +50,7 @@ export function ReceiptView() {
     }
 
     return (
-        <div className="flex flex-col w-full h-full relative z-20 overflow-y-auto no-scrollbar">
+        <div className="flex flex-col w-full min-h-full relative z-20">
             
             <div className="flex items-center justify-between mb-6 pt-4 px-4 shrink-0">
                 <button onClick={hideReceipt} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">

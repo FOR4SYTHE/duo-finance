@@ -63,7 +63,7 @@ export function TripSetup() {
     ];
 
     return (
-        <div className="flex flex-col w-full h-full relative z-20 flex-1 overflow-y-auto no-scrollbar pb-24 pt-2">
+        <div className="flex flex-col w-full min-h-full relative z-20 flex-1 pb-24 pt-2">
             
             {/* Premium Top Island */}
             <div className="relative z-20 shrink-0 bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.08] rounded-[40px] p-6 mb-6 shadow-[0_16px_40px_rgba(0,0,0,0.3)] overflow-hidden">

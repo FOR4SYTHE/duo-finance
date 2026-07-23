@@ -30,7 +30,7 @@ export default function CartifyPage() {
             variants={containerVariants}
             initial={isInitialLoad ? "hidden" : false}
             animate="visible"
-            className="flex flex-col w-full h-full px-6 pt-12 pb-8 relative overflow-y-auto no-scrollbar"
+            className="flex flex-col w-full min-h-full px-6 pt-12 pb-32 relative"
         >
             
             {/* Header Area */}

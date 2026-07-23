@@ -617,7 +617,7 @@ export function LiveTripTracker() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="flex flex-col w-full h-full relative z-20 overflow-y-auto no-scrollbar pb-24"
+            className="flex flex-col w-full min-h-full relative z-20 pb-24"
         >
             
             {heroCardJSX}

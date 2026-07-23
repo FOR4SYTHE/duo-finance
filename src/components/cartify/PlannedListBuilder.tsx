@@ -17,7 +17,7 @@ export function PlannedListBuilder() {
     };
 
     return (
-        <div className="flex flex-col w-full h-full relative z-20 overflow-y-auto no-scrollbar pb-10">
+        <div className="flex flex-col w-full min-h-full relative z-20 pb-10">
             <div className="flex items-center gap-3 mb-6 mt-4">
                 <div className="w-10 h-10 rounded-full bg-white/[0.05] flex items-center justify-center border border-white/[0.05]">
                     <ListTodo className="w-5 h-5 text-white/70" />
