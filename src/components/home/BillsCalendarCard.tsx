@@ -152,6 +152,11 @@ export function BillsCalendarCard() {
                               : "w-[38px] h-[38px] text-[#A1A1A1] font-medium hover:text-white"
                           }`}
                         >
+                          {/* Premium warning beam pulse for selected bills */}
+                          {isSelected && day.hasBill && (
+                            <div className="absolute inset-0 rounded-full bg-[#FF9F0A] animate-[ping_2.5s_cubic-bezier(0,0,0.2,1)_infinite] opacity-40 pointer-events-none -z-10" />
+                          )}
+
                           <span className="text-[15px] relative z-10">{day.date}</span>
                           
                           {/* Dot for bill */}
