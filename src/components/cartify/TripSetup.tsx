@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useCartifyStore, CartifyMode } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
-import { Delete, ChevronRight, Check, ArrowUpDown, ShoppingCart } from "lucide-react";
+import { Delete, ChevronRight, Check, ArrowUpDown, ShoppingCart, Zap, ListTodo } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function TripSetup() {
@@ -99,44 +99,105 @@ export function TripSetup() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2 mb-1 px-1">
-                            <div className="w-1 h-1 rounded-full bg-[#30D158]/50" />
-                            <span className="text-white/40 text-[10px] font-semibold tracking-widest uppercase">Shopping Mode</span>
+                    <div className="flex flex-col gap-3 mt-4">
+                        <div className="flex justify-between items-center px-1">
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#30D158] shadow-[0_0_8px_#30D158]" />
+                                <span className="text-white/50 text-[10px] font-bold tracking-[0.2em] uppercase">Shopping Mode</span>
+                            </div>
                         </div>
                         
-                        {(['simple', 'unplanned', 'planned'] as CartifyMode[]).map(mode => (
-                            <button 
-                                key={mode}
-                                onClick={() => setSelectedMode(mode)}
-                                className={`w-full p-3.5 rounded-[20px] flex items-center justify-between transition-all duration-300 active:scale-[0.98] ${
-                                    selectedMode === mode 
-                                        ? 'bg-black/40 border border-[#30D158]/30 shadow-[0_0_20px_rgba(48,209,88,0.05)] backdrop-blur-md' 
-                                        : 'bg-black/10 border border-transparent hover:bg-black/20'
-                                }`}
-                            >
-                                <div className="flex flex-col items-start text-left">
-                                    <span className={`text-sm font-medium capitalize tracking-wide transition-colors ${selectedMode === mode ? 'text-[#30D158]' : 'text-white/80'}`}>
-                                        {mode === 'unplanned' ? 'Organized (On the fly)' : mode === 'planned' ? 'Organized (Pre-planned)' : 'Simple & Fast'}
-                                    </span>
-                                    <span className={`text-[11px] mt-0.5 transition-colors ${selectedMode === mode ? 'text-[#30D158]/60' : 'text-white/40'}`}>
-                                        {mode === 'simple' && "Just log prices as you go."}
-                                        {mode === 'unplanned' && "Categorize items in store."}
-                                        {mode === 'planned' && "Build a list before leaving."}
-                                    </span>
-                                </div>
-                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-300 ${
-                                    selectedMode === mode ? 'border-[#30D158] bg-[#30D158]/20' : 'border-white/20'
-                                }`}>
+                        <div className="grid grid-cols-3 gap-3">
+                            {(['simple', 'unplanned', 'planned'] as CartifyMode[]).map(mode => (
+                                <button 
+                                    key={mode}
+                                    onClick={() => setSelectedMode(mode)}
+                                    className="relative p-3 rounded-[24px] flex flex-col items-center justify-center overflow-hidden group active:scale-[0.95] transition-transform duration-200"
+                                    style={{ WebkitTapHighlightColor: 'transparent' }}
+                                >
+                                    {/* Active Background - Framer Motion slide */}
                                     {selectedMode === mode && (
                                         <motion.div 
-                                            layoutId="modeCheckCartify"
-                                            className="w-2.5 h-2.5 rounded-full bg-[#30D158]"
+                                            layoutId="activeModeBackgroundCartify"
+                                            className="absolute inset-0 bg-gradient-to-b from-[#30D158]/10 to-transparent border-[1.5px] border-[#30D158]/50 shadow-[0_8px_32px_rgba(48,209,88,0.15),inset_0_1px_1px_rgba(255,255,255,0.2)] rounded-[24px]"
+                                            initial={false}
+                                            transition={{ type: "spring", stiffness: 500, damping: 35, mass: 1 }}
                                         />
                                     )}
-                                </div>
-                            </button>
-                        ))}
+                                    
+                                    {/* Active Green Glow */}
+                                    {selectedMode === mode && (
+                                        <motion.div 
+                                            layoutId="activeModeGlowCartify"
+                                            className="absolute inset-0 bg-[#30D158]/20 blur-2xl pointer-events-none rounded-[24px]"
+                                            initial={false}
+                                            transition={{ type: "spring", stiffness: 500, damping: 35, mass: 1 }}
+                                        />
+                                    )}
+                                    
+                                    {/* Base background for unselected (to give it shape) */}
+                                    {selectedMode !== mode && (
+                                        <div className="absolute inset-0 bg-white/[0.02] border border-white/[0.04] rounded-[24px] transition-colors duration-200 group-hover:bg-white/[0.04] shadow-sm" />
+                                    )}
+
+                                    {/* Icon (No circle, just icon, with micro-animations) */}
+                                    <div className={`relative z-10 transition-colors duration-200 mt-2 mb-1 origin-center ${
+                                        selectedMode === mode 
+                                            ? 'text-[#30D158] drop-shadow-[0_0_12px_rgba(48,209,88,0.8)]' 
+                                            : 'text-white/40 group-hover:text-white/60'
+                                    }`}>
+                                        {mode === 'simple' && (
+                                            <motion.div
+                                                animate={selectedMode === 'simple' ? { 
+                                                    scale: [1, 1.3, 0.85, 1],
+                                                    rotate: [0, -15, 15, 0] 
+                                                } : { scale: 1, rotate: 0 }}
+                                                transition={{ duration: 0.4, times: [0, 0.3, 0.6, 1], ease: "easeInOut" }}
+                                            >
+                                                <Zap className="w-6 h-6" strokeWidth={1.5} />
+                                            </motion.div>
+                                        )}
+                                        {mode === 'unplanned' && (
+                                            <motion.div
+                                                animate={selectedMode === 'unplanned' ? { 
+                                                    y: [0, -8, 0],
+                                                    rotate: [0, -12, 0],
+                                                    scale: [1, 1.1, 1]
+                                                } : { y: 0, rotate: 0, scale: 1 }}
+                                                transition={{ duration: 0.4, times: [0, 0.4, 1], ease: "backOut" }}
+                                            >
+                                                <ShoppingCart className="w-6 h-6" strokeWidth={1.5} />
+                                            </motion.div>
+                                        )}
+                                        {mode === 'planned' && (
+                                            <motion.div
+                                                animate={selectedMode === 'planned' ? { 
+                                                    scale: [1, 0.8, 1.15, 1],
+                                                    rotate: [0, 10, -5, 0]
+                                                } : { scale: 1, rotate: 0 }}
+                                                transition={{ duration: 0.4, times: [0, 0.3, 0.7, 1], ease: "backOut" }}
+                                            >
+                                                <ListTodo className="w-6 h-6" strokeWidth={1.5} />
+                                            </motion.div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex flex-col items-center text-center relative z-10 w-full mb-1">
+                                        <span className={`text-[11px] font-bold uppercase tracking-wider transition-colors duration-200 mb-0.5 ${selectedMode === mode ? 'text-white' : 'text-white/60 group-hover:text-white/90'}`}>
+                                            {mode === 'unplanned' ? 'Detailed' : mode === 'planned' ? 'Planned' : 'Express'}
+                                        </span>
+                                        <span className={`text-[9px] leading-tight transition-colors duration-200 ${selectedMode === mode ? 'text-white/70' : 'text-white/30'}`}>
+                                            {mode === 'simple' && "Prices only"}
+                                            {mode === 'unplanned' && "Sort in store"}
+                                            {mode === 'planned' && "Pre-build list"}
+                                        </span>
+                                    </div>
+                                    
+                                    {/* Subtle gloss effect on the glass card */}
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
