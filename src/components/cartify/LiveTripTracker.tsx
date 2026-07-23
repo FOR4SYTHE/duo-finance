@@ -22,6 +22,7 @@ export function LiveTripTracker() {
     
     const [sortMode, setSortMode] = useState<'default' | 'asc' | 'desc'>('default');
     const [activeEditId, setActiveEditId] = useState<string | null>(null);
+    const [activeSwipeId, setActiveSwipeId] = useState<string | null>(null);
     const [isAddingNew, setIsAddingNew] = useState(false);
     const [newItemName, setNewItemName] = useState("");
     const [isSwitchingCategory, setIsSwitchingCategory] = useState(false);
@@ -667,10 +668,12 @@ export function LiveTripTracker() {
                                 exchangeRate={exchangeRate}
                                 isFocused={activeAdjustId === item.id}
                                 isOtherFocused={activeAdjustId !== null && activeAdjustId !== item.id}
-                                onEdit={() => setActiveEditId(item.id)}
-                                onIncrement={() => handleAdjust(item.id, 'inc')}
-                                onDecrement={() => handleAdjust(item.id, 'dec')}
-                                onDelete={() => removeItem(item.id)}
+                                activeSwipeId={activeSwipeId}
+                                onSwipeStart={setActiveSwipeId}
+                                onEdit={() => { setActiveEditId(item.id); setActiveSwipeId(null); }}
+                                onIncrement={() => { handleAdjust(item.id, 'inc'); setActiveSwipeId(null); }}
+                                onDecrement={() => { handleAdjust(item.id, 'dec'); setActiveSwipeId(null); }}
+                                onDelete={() => { removeItem(item.id); setActiveSwipeId(null); }}
                             />
                         </motion.div>
                     ))}
@@ -857,21 +860,24 @@ function SwipeableCartItem({
     exchangeRate, 
     isFocused,
     isOtherFocused,
+    activeSwipeId,
+    onSwipeStart,
     onEdit, 
     onIncrement, 
     onDecrement, 
     onDelete 
 }: any) {
     const { toggleItemVatable } = useCartifyStore();
-    const controls = useAnimation();
     const isStillNeed = item.status === 'still-need';
+    const isSwiped = activeSwipeId === item.id;
 
     const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         const offset = info.offset.x;
-        if (offset < -60) {
-            controls.start({ x: -80 }); // Snap open to reveal delete button
+        // If swiped far enough, open it. Otherwise, close it.
+        if (offset < -40) {
+            onSwipeStart(item.id);
         } else {
-            controls.start({ x: 0 }); // Snap closed
+            onSwipeStart(null);
         }
     };
 
@@ -887,16 +893,15 @@ function SwipeableCartItem({
             </div>
             
             <motion.div
-                layout
                 drag="x"
                 dragConstraints={{ left: -80, right: 0 }}
-                dragElastic={0}
+                dragElastic={0.05}
                 onDragEnd={handleDragEnd}
                 animate={{
-                    x: 0,
+                    x: isSwiped ? -80 : 0,
                     filter: isFocused ? 'brightness(1.15) drop-shadow(0 4px 24px rgba(255,255,255,0.15))' : 'brightness(1) drop-shadow(0 0px 0px rgba(0,0,0,0))'
                 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                transition={{ type: 'tween', ease: 'easeOut', duration: 0.2 }}
                 className={`relative w-full rounded-[32px] flex z-10 backdrop-blur-3xl border transition-all duration-300 ${
                     isFocused ? 'py-5 px-3' : isOtherFocused ? 'py-2 px-3' : 'p-3'
                 } ${
