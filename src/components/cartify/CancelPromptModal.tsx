@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { CartifyMode } from "@/store/useCartifyStore";
+import { useCartifyStore, CartifyMode } from "@/store/useCartifyStore";
 
 interface CancelPromptModalProps {
     isOpen: boolean;
@@ -102,6 +102,28 @@ export function CancelPromptModal({ isOpen, onClose, onConfirm, mode }: CancelPr
                     </p>
                     
                     <div className="flex flex-col gap-3 w-full relative z-10">
+                        {mode === 'unplanned' && (
+                            <button 
+                                onClick={() => {
+                                    useCartifyStore.getState().setActiveCategory(null);
+                                    onClose();
+                                }}
+                                className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-medium transition-colors border border-white/10 shadow-[0_4px_12px_rgba(255,255,255,0.05)] active:scale-[0.98]"
+                            >
+                                Change Category
+                            </button>
+                        )}
+                        {mode === 'planned' && (
+                            <button 
+                                onClick={() => {
+                                    useCartifyStore.getState().resumeBuildingList();
+                                    onClose();
+                                }}
+                                className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-medium transition-colors border border-white/10 shadow-[0_4px_12px_rgba(255,255,255,0.05)] active:scale-[0.98]"
+                            >
+                                Edit Shopping List
+                            </button>
+                        )}
                         <button 
                             onClick={() => {
                                 onClose();
@@ -113,9 +135,9 @@ export function CancelPromptModal({ isOpen, onClose, onConfirm, mode }: CancelPr
                         </button>
                         <button 
                             onClick={onClose}
-                            className="w-full py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors active:scale-[0.98]"
+                            className="w-full py-4 rounded-2xl bg-transparent hover:bg-white/5 text-white/50 hover:text-white font-medium transition-colors active:scale-[0.98]"
                         >
-                            Keep Shopping
+                            Cancel
                         </button>
                     </div>
                 </motion.div>

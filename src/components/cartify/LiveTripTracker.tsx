@@ -96,12 +96,12 @@ export function LiveTripTracker() {
     };
 
     const categories = [
-        { name: "Groceries", icon: ShoppingCart, color: "#8E9B90" },
-        { name: "Clothes", icon: Shirt, color: "#899BB4" },
-        { name: "Furniture", icon: Armchair, color: "#C49C73" },
-        { name: "Electronics", icon: Laptop, color: "#9A8EA6" },
-        { name: "Pharmacy", icon: Pill, color: "#B38382" },
-        { name: "Hardware", icon: Wrench, color: "#8A939A" },
+        { name: "Groceries", icon: ShoppingCart, color: "#8E9B90", image: "/categories/groceries.png" },
+        { name: "Clothes", icon: Shirt, color: "#899BB4", image: "/categories/clothes.png" },
+        { name: "Furniture", icon: Armchair, color: "#C49C73", image: "/categories/furniture.png" },
+        { name: "Electronics", icon: Laptop, color: "#9A8EA6", image: "/categories/electronics.png" },
+        { name: "Pharmacy", icon: Pill, color: "#B38382", image: "/categories/pharmacy.png" },
+        { name: "Hardware", icon: Wrench, color: "#8A939A", image: "/categories/hardware.png" },
     ];
 
     if (mode === 'unplanned' && (!activeCategory || isSwitchingCategory)) {
@@ -115,7 +115,7 @@ export function LiveTripTracker() {
                         </button>
                     )}
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 pb-12">
                     {categories.map(cat => {
                         const Icon = cat.icon;
                         return (
@@ -125,12 +125,25 @@ export function LiveTripTracker() {
                                     setActiveCategory(cat.name);
                                     setIsSwitchingCategory(false);
                                 }}
-                                className="flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-[#111] to-black border border-white/5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-[32px] p-6 hover:border-white/10 active:scale-[0.97] transition-all group"
+                                className="relative overflow-hidden group flex flex-col justify-end bg-[#0a0a0a] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_24px_rgba(0,0,0,0.4)] rounded-[32px] p-5 hover:border-white/20 active:scale-[0.97] transition-all aspect-[4/5]"
                             >
-                                <div className="w-[64px] h-[64px] rounded-full flex items-center justify-center bg-black border border-white/5 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_8px_16px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-500">
-                                    <Icon className="w-8 h-8" style={{ color: cat.color }} strokeWidth={1.5} />
+                                {/* Background Image with slow zoom */}
+                                <div className="absolute inset-0 z-0 bg-[#0a0a0a]">
+                                    <div 
+                                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 opacity-100 brightness-110"
+                                        style={{ backgroundImage: `url(${cat.image})` }}
+                                    />
+                                    {/* Tight, intense gradient strictly at the bottom behind the icon/text */}
+                                    <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black via-black/80 to-transparent" />
                                 </div>
-                                <span className="text-white/80 font-medium tracking-wide">{cat.name}</span>
+                                
+                                {/* Content (Icon and Label) placed cleanly at the bottom */}
+                                <div className="relative z-10 w-full flex flex-col items-center gap-3 mt-auto">
+                                    <div className="w-[44px] h-[44px] rounded-full flex items-center justify-center bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
+                                        <Icon className="w-[18px] h-[18px]" style={{ color: cat.color }} strokeWidth={2.5} />
+                                    </div>
+                                    <span className="text-white font-semibold tracking-wide text-sm drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{cat.name}</span>
+                                </div>
                             </button>
                         );
                     })}
@@ -577,13 +590,24 @@ export function LiveTripTracker() {
             <div className="flex flex-col flex-1 pb-32">
                 <div className="flex justify-between items-center mb-4 px-2">
                     <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Scanned Items ({items.length})</h2>
-                    <button 
-                        onClick={() => setSortMode(prev => prev === 'default' ? 'desc' : prev === 'desc' ? 'asc' : 'default')}
-                        className={`flex items-center gap-1 hover:bg-white/[0.1] px-2.5 py-1.5 rounded-full transition-colors ${sortMode !== 'default' ? 'bg-white/[0.15]' : 'bg-white/[0.05]'}`}
-                    >
-                        <span className="text-white/70 text-[10px] uppercase tracking-wider font-bold">Sort</span>
-                        <ArrowUpDown className="w-3 h-3 text-white/70" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {items.length > 0 && (
+                            <button 
+                                onClick={() => showReceipt()}
+                                className="flex items-center gap-1.5 bg-white text-black px-3 py-1.5 rounded-full hover:bg-white/90 transition-colors shadow-[0_0_12px_rgba(255,255,255,0.2)] active:scale-95"
+                            >
+                                <span className="font-bold text-[11px] uppercase tracking-wider">Done</span>
+                                <ReceiptText className="w-3.5 h-3.5" strokeWidth={2.5} />
+                            </button>
+                        )}
+                        <button 
+                            onClick={() => setSortMode(prev => prev === 'default' ? 'desc' : prev === 'desc' ? 'asc' : 'default')}
+                            className={`flex items-center gap-1 hover:bg-white/[0.1] px-2.5 py-1.5 rounded-full transition-colors ${sortMode !== 'default' ? 'bg-white/[0.15]' : 'bg-white/[0.05]'}`}
+                        >
+                            <span className="text-white/70 text-[10px] uppercase tracking-wider font-bold">Sort</span>
+                            <ArrowUpDown className="w-3 h-3 text-white/70" />
+                        </button>
+                    </div>
                 </div>
 
                 <AnimatePresence mode="popLayout">

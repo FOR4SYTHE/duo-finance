@@ -16,6 +16,7 @@ interface CartifyState {
     // Actions
     startTrip: (budget: number, mode: CartifyMode) => void;
     finishBuildingList: () => void;
+    resumeBuildingList: () => void;
     endTrip: () => void;
     showReceipt: () => void;
     hideReceipt: () => void;
@@ -59,6 +60,7 @@ export const useCartifyStore = create<CartifyState>()(
             }),
 
             finishBuildingList: () => set({ isBuildingList: false }),
+            resumeBuildingList: () => set({ isBuildingList: true }),
 
             endTrip: () => set({ 
                 isActive: false, 
