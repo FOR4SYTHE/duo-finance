@@ -7,6 +7,15 @@ import { PriceEntryModal } from "./PriceEntryModal";
 import { Activity, Plus, ShoppingCart, Trash2, ArrowUpDown, ReceiptText, Delete, ShoppingBag, Shirt, Armchair, Laptop, Pill, Wrench, Milk, Egg, Croissant, Cookie, Drumstick, Fish, Carrot, Apple, CupSoda, Coffee, Beer, Wine, Pizza, Cake, Banana, Cherry, Grape, Package, Droplets, X } from "lucide-react";
 import { motion, useAnimation, PanInfo, AnimatePresence } from "framer-motion";
 
+const categorySuggestions: Record<string, string[]> = {
+    'Groceries': ['Eggs', 'Milk', 'Bread', 'Rice', 'Chicken', 'Beef', 'Water', 'Onion', 'Garlic', 'Coffee', 'Snacks'],
+    'Clothes': ['T-Shirt', 'Jeans', 'Socks', 'Underwear', 'Shoes', 'Jacket', 'Shorts'],
+    'Furniture': ['Chair', 'Table', 'Lamp', 'Bed Sheet', 'Pillow', 'Hangers'],
+    'Electronics': ['Batteries', 'Cable', 'Charger', 'Bulb', 'Extension Cord'],
+    'Pharmacy': ['Paracetamol', 'Vitamins', 'Band-Aid', 'Alcohol', 'Tissue', 'Soap', 'Toothpaste'],
+    'Hardware': ['Tape', 'Nails', 'Screws', 'Tools', 'Glue', 'Paint']
+};
+
 export function LiveTripTracker() {
     const { items, budget, mode, activeCategory, setActiveCategory, updateItemPrice, incrementQuantity, decrementQuantity, removeItem, addItem, showReceipt } = useCartifyStore();
     const { exchangeRate } = useCurrencyStore();
@@ -16,6 +25,15 @@ export function LiveTripTracker() {
     const [isAddingNew, setIsAddingNew] = useState(false);
     const [newItemName, setNewItemName] = useState("");
     const [isSwitchingCategory, setIsSwitchingCategory] = useState(false);
+    
+    // Focus tracking for quantity adjustments
+    const [activeAdjustId, setActiveAdjustId] = useState<string | null>(null);
+
+    const handleAdjust = (id: string, action: 'inc' | 'dec') => {
+        setActiveAdjustId(id);
+        if (action === 'inc') incrementQuantity(id);
+        else decrementQuantity(id);
+    };
     
     // Simple mode numpad state
     const [simpleDisplayValue, setSimpleDisplayValue] = useState("0");
@@ -553,45 +571,7 @@ export function LiveTripTracker() {
             
             {heroCardJSX}
 
-            {mode === 'unplanned' && activeCategory && (
-                <div className="flex justify-center items-center gap-5 overflow-x-auto no-scrollbar pb-4 px-2 shrink-0 snap-x w-full">
-                    {categories.map(cat => {
-                        const Icon = cat.icon;
-                        return (
-                            <div key={cat.name} className="flex flex-col items-center gap-2 shrink-0 snap-start">
-                                <button
-                                    onClick={() => setActiveCategory(cat.name)}
-                                    className={`w-[54px] h-[54px] rounded-full flex items-center justify-center transition-all duration-300 active:scale-[0.85] border ${
-                                        activeCategory === cat.name 
-                                            ? 'bg-gradient-to-b from-[#1a1a1a] to-black shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_4px_16px_rgba(0,0,0,0.8)]' 
-                                            : 'bg-gradient-to-b from-[#111] to-black border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:border-white/20'
-                                    }`}
-                                    style={{
-                                        borderColor: activeCategory === cat.name ? cat.color + '60' : undefined
-                                    }}
-                                >
-                                    <Icon 
-                                        className={`w-6 h-6 transition-all duration-300 ${activeCategory === cat.name ? 'scale-110 opacity-100' : 'opacity-40 grayscale-[0.8]'}`}
-                                        style={{ 
-                                            color: activeCategory === cat.name ? cat.color : '#ffffff',
-                                            filter: activeCategory === cat.name ? `drop-shadow(0 2px 8px ${cat.color}60)` : 'none'
-                                        }}
-                                        strokeWidth={activeCategory === cat.name ? 2 : 1.5}
-                                    />
-                                </button>
-                                <span 
-                                    className={`text-[10px] font-semibold tracking-wide transition-colors ${
-                                        activeCategory === cat.name ? 'opacity-100' : 'text-white/40'
-                                    }`}
-                                    style={{ color: activeCategory === cat.name ? cat.color : undefined }}
-                                >
-                                    {cat.name}
-                                </span>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+
 
             {/* Cart Items List */}
             <div className="flex flex-col flex-1 pb-32">
@@ -610,17 +590,19 @@ export function LiveTripTracker() {
                     {sortedItems.map((item, i) => (
                         <motion.div
                             key={item.id}
-                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 30, delay: i * 0.05 }}
+                            initial={{ opacity: 0, y: 30, scale: 0.92, filter: 'blur(8px)' }}
+                            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                            exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)', transition: { duration: 0.2 } }}
+                            transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                         >
                             <SwipeableCartItem 
                                 item={item} 
                                 exchangeRate={exchangeRate}
+                                isFocused={activeAdjustId === item.id}
+                                isOtherFocused={activeAdjustId !== null && activeAdjustId !== item.id}
                                 onEdit={() => setActiveEditId(item.id)}
-                                onIncrement={() => incrementQuantity(item.id)}
-                                onDecrement={() => decrementQuantity(item.id)}
+                                onIncrement={() => handleAdjust(item.id, 'inc')}
+                                onDecrement={() => handleAdjust(item.id, 'dec')}
                                 onDelete={() => removeItem(item.id)}
                             />
                         </motion.div>
@@ -667,29 +649,70 @@ export function LiveTripTracker() {
                 title={activeEditId ? "Set Price" : `Price for ${newItemName}`}
             />
 
-            {/* Simple New Item Name Modal */}
-            {isAddingNew && !newItemName && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
-                    <div className="bg-[#111] border border-white/10 rounded-[32px] p-6 w-full max-w-[360px]">
-                        <h3 className="text-white font-medium mb-4">Add Item</h3>
-                        <input 
-                            autoFocus
-                            type="text"
-                            placeholder="Item name..."
-                            className="w-full h-12 bg-white/[0.05] border border-white/10 rounded-[16px] px-4 text-white outline-none focus:border-white/20 mb-4"
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    setNewItemName(e.currentTarget.value);
-                                }
-                            }}
-                            onBlur={(e) => {
-                                if (!e.target.value) setIsAddingNew(false);
-                            }}
-                        />
-                        <p className="text-white/40 text-xs text-center">Press Enter to continue</p>
-                    </div>
-                </div>
-            )}
+            {/* Apple Style New Item Name Modal */}
+            <AnimatePresence>
+                {isAddingNew && !newItemName && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-end sm:items-center justify-center p-4 sm:p-6 pb-8"
+                        onClick={() => setIsAddingNew(false)}
+                    >
+                        <motion.div 
+                            initial={{ y: 200, opacity: 0, scale: 0.95 }}
+                            animate={{ y: 0, opacity: 1, scale: 1 }}
+                            exit={{ y: 200, opacity: 0, scale: 0.95 }}
+                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                            className="bg-[#1c1c1e]/90 backdrop-blur-xl border border-white/10 rounded-[32px] p-6 w-full max-w-[400px] shadow-[0_24px_48px_rgba(0,0,0,0.5)] overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex justify-between items-center mb-5">
+                                <h3 className="text-white font-semibold text-lg tracking-tight">Add Item</h3>
+                                <button 
+                                    onClick={() => setIsAddingNew(false)}
+                                    className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                                >
+                                    <X className="w-4 h-4 text-white/70" />
+                                </button>
+                            </div>
+
+                            <input 
+                                autoFocus
+                                type="text"
+                                placeholder="What are you buying?"
+                                className="w-full h-14 bg-white/[0.08] border border-white/[0.05] shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] rounded-[16px] px-5 text-white text-[16px] outline-none focus:bg-white/[0.12] focus:border-white/20 transition-all mb-4 placeholder-white/30 font-medium"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                                        setNewItemName(e.currentTarget.value.trim());
+                                    }
+                                }}
+                            />
+                            
+                            {activeCategory && categorySuggestions[activeCategory] && (
+                                <div className="mt-2">
+                                    <h4 className="text-white/40 text-xs font-semibold uppercase tracking-wider mb-3">Suggestions</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {categorySuggestions[activeCategory].map(sug => (
+                                            <button
+                                                key={sug}
+                                                onPointerDown={(e) => {
+                                                    e.preventDefault(); // Prevents input blur
+                                                    setNewItemName(sug);
+                                                }}
+                                                className="px-4 py-2 rounded-full bg-white/5 border border-white/5 hover:bg-white/15 active:scale-95 transition-all text-white/80 text-[14px] tracking-wide font-medium flex items-center gap-1.5"
+                                            >
+                                                <Plus className="w-3.5 h-3.5 text-white/50" />
+                                                {sug}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
@@ -755,23 +778,19 @@ const getItemArt = (name: string) => {
     return { icon: Package, color: 'from-gray-500/20 to-gray-500/5', text: 'text-gray-400' };
 };
 
-function SwipeableCartItem({ item, exchangeRate, onEdit, onIncrement, onDecrement, onDelete }: any) {
+function SwipeableCartItem({ 
+    item, 
+    exchangeRate, 
+    isFocused,
+    isOtherFocused,
+    onEdit, 
+    onIncrement, 
+    onDecrement, 
+    onDelete 
+}: any) {
     const { toggleItemVatable } = useCartifyStore();
     const controls = useAnimation();
     const isStillNeed = item.status === 'still-need';
-
-    const prevQty = useRef(item.quantity);
-    const [flash, setFlash] = useState(false);
-    
-    // Simple flash effect when quantity increases
-    useEffect(() => {
-        if (item.quantity > prevQty.current) {
-            setFlash(true);
-            const t = setTimeout(() => setFlash(false), 200);
-            return () => clearTimeout(t);
-        }
-        prevQty.current = item.quantity;
-    }, [item.quantity]);
 
     const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         const offset = info.offset.x;
@@ -799,12 +818,19 @@ function SwipeableCartItem({ item, exchangeRate, onEdit, onIncrement, onDecremen
                 dragConstraints={{ left: -80, right: 0 }}
                 dragElastic={0}
                 onDragEnd={handleDragEnd}
-                animate={controls}
-                className={`relative w-full rounded-[32px] p-3 flex z-10 transition-all duration-200 backdrop-blur-3xl border ${
-                    flash ? 'brightness-150 border-white/20' :
+                animate={{
+                    x: 0,
+                    filter: isFocused ? 'brightness(1.15) drop-shadow(0 4px 24px rgba(255,255,255,0.15))' : 'brightness(1) drop-shadow(0 0px 0px rgba(0,0,0,0))'
+                }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                className={`relative w-full rounded-[32px] flex z-10 backdrop-blur-3xl border transition-all duration-300 ${
+                    isFocused ? 'py-5 px-3' : isOtherFocused ? 'py-2 px-3' : 'p-3'
+                } ${
                     isStillNeed 
                         ? 'bg-[#141414] border-white/[0.06]' 
-                        : 'bg-black bg-gradient-to-b from-white/[0.08] to-white/[0.02] border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
+                        : isFocused
+                            ? 'bg-[#0a0a0a] bg-gradient-to-b from-white/[0.12] to-white/[0.04] border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
+                            : 'bg-black bg-gradient-to-b from-white/[0.08] to-white/[0.02] border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
                 }`}
             >
                 {/* Apple Watch Style Quantity Adjuster */}
