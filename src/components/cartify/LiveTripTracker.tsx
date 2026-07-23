@@ -499,7 +499,7 @@ export function LiveTripTracker() {
                             <motion.div 
                                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                 onClick={() => setShowCalc(false)}
-                                className="absolute inset-0 bg-black/60 backdrop-blur-md z-[100]" 
+                                className="absolute inset-0 bg-black/95 z-[100]" 
                             />
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
@@ -571,7 +571,7 @@ export function LiveTripTracker() {
                             <motion.div 
                                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                 onClick={() => setShowList(false)}
-                                className="absolute inset-0 bg-black/60 backdrop-blur-md z-[100]" 
+                                className="absolute inset-0 bg-black/95 z-[100]" 
                             />
                             <motion.div
                                 initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
@@ -658,9 +658,9 @@ export function LiveTripTracker() {
                     {sortedItems.map((item, i) => (
                         <motion.div
                             key={item.id}
-                            initial={{ opacity: 0, y: 30, scale: 0.92, filter: 'blur(8px)' }}
-                            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-                            exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)', transition: { duration: 0.2 } }}
+                            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                             transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                         >
                             <SwipeableCartItem 
@@ -733,7 +733,7 @@ export function LiveTripTracker() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-end sm:items-center justify-center p-4 sm:p-6 pb-8"
+                        className="fixed inset-0 bg-black/95 z-[100] flex items-end sm:items-center justify-center p-4 sm:p-6 pb-8"
                         onClick={() => setIsAddingNew(false)}
                     >
                         <motion.div 
@@ -741,7 +741,7 @@ export function LiveTripTracker() {
                             animate={{ y: 0, opacity: 1, scale: 1 }}
                             exit={{ y: 200, opacity: 0, scale: 0.95 }}
                             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="bg-[#1c1c1e]/90 backdrop-blur-xl border border-white/10 rounded-[32px] p-6 w-full max-w-[400px] shadow-[0_24px_48px_rgba(0,0,0,0.5)] overflow-hidden"
+                            className="bg-[#1c1c1e] border border-white/10 rounded-[32px] p-6 w-full max-w-[400px] shadow-[0_24px_48px_rgba(0,0,0,0.5)] overflow-hidden"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="flex justify-between items-center mb-5">
@@ -901,7 +901,7 @@ function SwipeableCartItem({
                     x: isSwiped ? -80 : 0
                 }}
                 transition={{ type: 'tween', ease: 'easeOut', duration: 0.1 }}
-                className={`relative w-full rounded-[32px] flex z-10 backdrop-blur-3xl border transition-all duration-200 ${
+                className={`relative w-full rounded-[32px] flex z-10 border transition-all duration-200 ${
                     isFocused ? 'py-5 px-3 brightness-110 shadow-[0_4px_24px_rgba(255,255,255,0.15)]' : isOtherFocused ? 'py-2 px-3' : 'p-3 shadow-none'
                 } ${
                     isStillNeed 
@@ -941,7 +941,7 @@ function SwipeableCartItem({
                                     <div className={`absolute inset-0 bg-gradient-to-br ${Art.color} blur-[12px] opacity-60 scale-125 rounded-full`} />
                                     
                                     {/* 3D Glass Badge */}
-                                    <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center border border-white/[0.15] relative overflow-hidden bg-[#1c1c1e]/80 backdrop-blur-xl shadow-[0_8px_16px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.3),inset_0_-4px_12px_rgba(0,0,0,0.5)]`}>
+                                    <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center border border-white/[0.15] relative overflow-hidden bg-[#1c1c1e] shadow-[0_8px_16px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.3),inset_0_-4px_12px_rgba(0,0,0,0.5)]`}>
                                         {/* Subtle inner reflection */}
                                         <div className="absolute inset-0 bg-gradient-to-br from-white/[0.12] to-transparent pointer-events-none" />
                                         

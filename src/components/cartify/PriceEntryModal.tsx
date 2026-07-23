@@ -58,7 +58,7 @@ export function PriceEntryModal({ isOpen, onClose, onConfirm, title }: PriceEntr
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/80 backdrop-blur-[2px]"
+                        className="absolute inset-0 bg-black/95"
                     />
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
