@@ -43,6 +43,19 @@ export function LiveTripTracker() {
         prevOverBudget.current = isOverBudget;
     }, [isOverBudget]);
 
+    // Energy Pulse State (Triggers on any spend increase or decrease)
+    const prevSpentRef = useRef(totalSpent);
+    const [pulse, setPulse] = useState({ id: 0, direction: 'forward' });
+
+    useEffect(() => {
+        if (totalSpent > prevSpentRef.current) {
+            setPulse(p => ({ id: p.id + 1, direction: 'forward' }));
+        } else if (totalSpent < prevSpentRef.current) {
+            setPulse(p => ({ id: p.id + 1, direction: 'backward' }));
+        }
+        prevSpentRef.current = totalSpent;
+    }, [totalSpent]);
+
     const sortedItems = useMemo(() => {
         return [...items].sort((a, b) => {
             if (a.status === 'still-need' && b.status === 'in-cart') return 1;
@@ -136,12 +149,22 @@ export function LiveTripTracker() {
                     {/* The Premium Volumetric Q-Tip Beam */}
                     <div className="absolute left-[70px] right-[70px] top-0 bottom-0 pointer-events-none z-10 flex items-center justify-center">
                         
-                        {/* Energy Pulse (Triggered only when a NEW item is logged, not on +/- adjustments) */}
-                        {items.length > 0 && (
+                        {/* Energy Pulse (Triggered when spent changes, direction depends on increase/decrease) */}
+                        {pulse.id > 0 && (
                             <motion.div 
-                                key={`pulse-${items.length}`}
-                                initial={{ left: "0%", x: "-100%", opacity: 0, scaleX: 0.5 }}
-                                animate={{ left: "100%", x: "-50%", opacity: [0, 1, 1, 0], scaleX: 1.5 }}
+                                key={`pulse-${pulse.id}`}
+                                initial={{ 
+                                    left: pulse.direction === 'forward' ? "0%" : "100%", 
+                                    x: pulse.direction === 'forward' ? "-100%" : "-50%", 
+                                    opacity: 0, 
+                                    scaleX: 0.5 
+                                }}
+                                animate={{ 
+                                    left: pulse.direction === 'forward' ? "100%" : "0%", 
+                                    x: pulse.direction === 'forward' ? "-50%" : "-100%", 
+                                    opacity: [0, 1, 1, 0], 
+                                    scaleX: 1.5 
+                                }}
                                 transition={{ duration: 1.5, ease: "easeInOut" }}
                                 className="absolute top-1/2 -translate-y-1/2 w-[120px] h-[36px] rounded-full blur-[12px] mix-blend-screen z-20"
                                 style={{ backgroundColor: 'rgba(255,255,255,0.6)' }}
