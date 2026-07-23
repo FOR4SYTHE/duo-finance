@@ -76,12 +76,12 @@ export function LiveTripTracker() {
     };
 
     const categories = [
-        { name: "Groceries", image: "/categories/groceries.png", color: "bg-[#8E9B90]" },
-        { name: "Clothes", image: "/categories/clothes.png", color: "bg-[#899BB4]" },
-        { name: "Furniture", image: "/categories/furniture.png", color: "bg-[#C49C73]" },
-        { name: "Electronics", image: "/categories/electronics.png", color: "bg-[#9A8EA6]" },
-        { name: "Pharmacy", image: "/categories/pharmacy.png", color: "bg-[#B38382]" },
-        { name: "Hardware", image: "/categories/hardware.png", color: "bg-[#8A939A]" },
+        { name: "Groceries", icon: ShoppingCart, color: "#8E9B90" },
+        { name: "Clothes", icon: Shirt, color: "#899BB4" },
+        { name: "Furniture", icon: Armchair, color: "#C49C73" },
+        { name: "Electronics", icon: Laptop, color: "#9A8EA6" },
+        { name: "Pharmacy", icon: Pill, color: "#B38382" },
+        { name: "Hardware", icon: Wrench, color: "#8A939A" },
     ];
 
     if (mode === 'unplanned' && (!activeCategory || isSwitchingCategory)) {
@@ -97,6 +97,7 @@ export function LiveTripTracker() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                     {categories.map(cat => {
+                        const Icon = cat.icon;
                         return (
                             <button
                                 key={cat.name}
@@ -104,17 +105,12 @@ export function LiveTripTracker() {
                                     setActiveCategory(cat.name);
                                     setIsSwitchingCategory(false);
                                 }}
-                                className="relative overflow-hidden p-5 rounded-[24px] bg-[#0A0A0A] border border-white/[0.05] flex flex-col items-start hover:bg-[#111] active:scale-[0.98] transition-all h-[120px] group"
+                                className="flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-[#111] to-black border border-white/5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-[32px] p-6 hover:border-white/10 active:scale-[0.97] transition-all group"
                             >
-                                <span className="text-white/90 font-medium text-[15px] relative z-10 tracking-wide drop-shadow-md">{cat.name}</span>
-                                
-                                {/* Glow Orb */}
-                                <div className={`absolute -right-6 -bottom-6 w-32 h-32 rounded-full ${cat.color} opacity-20 blur-[24px] transition-opacity duration-500 group-hover:opacity-40 pointer-events-none`} />
-                                
-                                {/* 3D Image */}
-                                <div className="absolute -right-4 -bottom-4 w-[110px] h-[110px] transition-transform duration-500 group-hover:scale-110 pointer-events-none mix-blend-screen opacity-90 group-hover:opacity-100">
-                                    <img src={cat.image} alt={cat.name} className="w-full h-full object-contain" />
+                                <div className="w-[64px] h-[64px] rounded-full flex items-center justify-center bg-black border border-white/5 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_8px_16px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-500">
+                                    <Icon className="w-8 h-8" style={{ color: cat.color }} strokeWidth={1.5} />
                                 </div>
+                                <span className="text-white/80 font-medium tracking-wide">{cat.name}</span>
                             </button>
                         );
                     })}
@@ -556,23 +552,42 @@ export function LiveTripTracker() {
             {heroCardJSX}
 
             {mode === 'unplanned' && activeCategory && (
-                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-4 -mx-6 px-6 shrink-0 snap-x">
-                    {categories.map(cat => (
-                        <button
-                            key={cat.name}
-                            onClick={() => setActiveCategory(cat.name)}
-                            className={`snap-start shrink-0 px-4 py-2 rounded-full border transition-all duration-300 flex items-center gap-2 ${
-                                activeCategory === cat.name 
-                                    ? 'bg-[#30D158]/10 border-[#30D158]/30 shadow-[0_4px_16px_rgba(48,209,88,0.1)]' 
-                                    : 'bg-white/5 border-white/5 hover:bg-white/10'
-                            }`}
-                        >
-                            <img src={cat.image} alt={cat.name} className="w-5 h-5 object-contain" />
-                            <span className={`text-[11px] font-bold tracking-wide ${activeCategory === cat.name ? 'text-[#30D158]' : 'text-white/60'}`}>
-                                {cat.name}
-                            </span>
-                        </button>
-                    ))}
+                <div className="flex justify-center items-center gap-5 overflow-x-auto no-scrollbar pb-4 px-2 shrink-0 snap-x w-full">
+                    {categories.map(cat => {
+                        const Icon = cat.icon;
+                        return (
+                            <div key={cat.name} className="flex flex-col items-center gap-2 shrink-0 snap-start">
+                                <button
+                                    onClick={() => setActiveCategory(cat.name)}
+                                    className={`w-[54px] h-[54px] rounded-full flex items-center justify-center transition-all duration-300 active:scale-[0.85] border ${
+                                        activeCategory === cat.name 
+                                            ? 'bg-gradient-to-b from-[#1a1a1a] to-black shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_4px_16px_rgba(0,0,0,0.8)]' 
+                                            : 'bg-gradient-to-b from-[#111] to-black border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:border-white/20'
+                                    }`}
+                                    style={{
+                                        borderColor: activeCategory === cat.name ? cat.color + '60' : undefined
+                                    }}
+                                >
+                                    <Icon 
+                                        className={`w-6 h-6 transition-all duration-300 ${activeCategory === cat.name ? 'scale-110 opacity-100' : 'opacity-40 grayscale-[0.8]'}`}
+                                        style={{ 
+                                            color: activeCategory === cat.name ? cat.color : '#ffffff',
+                                            filter: activeCategory === cat.name ? `drop-shadow(0 2px 8px ${cat.color}60)` : 'none'
+                                        }}
+                                        strokeWidth={activeCategory === cat.name ? 2 : 1.5}
+                                    />
+                                </button>
+                                <span 
+                                    className={`text-[10px] font-semibold tracking-wide transition-colors ${
+                                        activeCategory === cat.name ? 'opacity-100' : 'text-white/40'
+                                    }`}
+                                    style={{ color: activeCategory === cat.name ? cat.color : undefined }}
+                                >
+                                    {cat.name}
+                                </span>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
 
@@ -771,15 +786,21 @@ function SwipeableCartItem({ item, exchangeRate, onEdit, onIncrement, onDecremen
                         : 'bg-gradient-to-b from-white/[0.08] to-white/[0.02] border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
                 }`}
             >
-                {/* Unified Quantity Adjuster */}
+                {/* Apple Watch Style Quantity Adjuster */}
                 {!isStillNeed && (
-                    <div className="flex flex-col items-center justify-between w-10 bg-black/40 rounded-[20px] py-2 shrink-0 border border-white/5 mr-3">
-                        <button onClick={onIncrement} className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-full active:scale-90 transition-all text-white/70">
-                            <Plus className="w-4 h-4" />
+                    <div className="flex flex-col items-center justify-between w-10 shrink-0 mr-3 py-1 gap-2">
+                        <button 
+                            onClick={onIncrement} 
+                            className="w-[34px] h-[34px] flex items-center justify-center rounded-full bg-[#1A1A1A] border border-white/[0.12] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_4px_12px_rgba(0,0,0,0.6)] active:scale-[0.85] transition-all text-white hover:bg-[#222]"
+                        >
+                            <Plus className="w-4 h-4 drop-shadow-md" strokeWidth={2.5} />
                         </button>
-                        <span className="text-white text-xs font-bold my-1">{item.quantity}</span>
-                        <button onClick={onDecrement} className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-full active:scale-90 transition-all text-white/70">
-                            <span className="w-3 h-0.5 bg-current rounded-full" />
+                        <span className="text-white text-[13px] font-bold tracking-tight leading-none my-0.5">{item.quantity}</span>
+                        <button 
+                            onClick={onDecrement} 
+                            className="w-[34px] h-[34px] flex items-center justify-center rounded-full bg-[#1A1A1A] border border-white/[0.12] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_4px_12px_rgba(0,0,0,0.6)] active:scale-[0.85] transition-all text-white hover:bg-[#222]"
+                        >
+                            <span className="w-3 h-[2px] bg-white rounded-full drop-shadow-md" />
                         </button>
                     </div>
                 )}
