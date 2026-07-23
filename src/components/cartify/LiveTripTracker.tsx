@@ -11,7 +11,7 @@ export function LiveTripTracker() {
     const { items, budget, mode, activeCategory, setActiveCategory, updateItemPrice, incrementQuantity, decrementQuantity, removeItem, addItem, showReceipt } = useCartifyStore();
     const { exchangeRate } = useCurrencyStore();
     
-    const [sortAsc, setSortAsc] = useState(false);
+    const [sortMode, setSortMode] = useState<'default' | 'asc' | 'desc'>('default');
     const [activeEditId, setActiveEditId] = useState<string | null>(null);
     const [isAddingNew, setIsAddingNew] = useState(false);
     const [newItemName, setNewItemName] = useState("");
@@ -60,9 +60,11 @@ export function LiveTripTracker() {
         return [...items].sort((a, b) => {
             if (a.status === 'still-need' && b.status === 'in-cart') return 1;
             if (a.status === 'in-cart' && b.status === 'still-need') return -1;
-            return sortAsc ? a.amount - b.amount : b.amount - a.amount;
+            if (sortMode === 'desc') return b.amount - a.amount;
+            if (sortMode === 'asc') return a.amount - b.amount;
+            return a.timestamp - b.timestamp; // Explicitly sort by chronological order
         });
-    }, [items, sortAsc]);
+    }, [items, sortMode]);
 
     const handleConfirmPrice = (price: number) => {
         if (activeEditId) {
@@ -596,8 +598,8 @@ export function LiveTripTracker() {
                 <div className="flex justify-between items-center mb-4 px-2">
                     <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Scanned Items ({items.length})</h2>
                     <button 
-                        onClick={() => setSortAsc(!sortAsc)}
-                        className="flex items-center gap-1 bg-white/[0.05] hover:bg-white/[0.1] px-2.5 py-1.5 rounded-full transition-colors"
+                        onClick={() => setSortMode(prev => prev === 'default' ? 'desc' : prev === 'desc' ? 'asc' : 'default')}
+                        className={`flex items-center gap-1 hover:bg-white/[0.1] px-2.5 py-1.5 rounded-full transition-colors ${sortMode !== 'default' ? 'bg-white/[0.15]' : 'bg-white/[0.05]'}`}
                     >
                         <span className="text-white/70 text-[10px] uppercase tracking-wider font-bold">Sort</span>
                         <ArrowUpDown className="w-3 h-3 text-white/70" />
@@ -758,32 +760,51 @@ function SwipeableCartItem({ item, exchangeRate, onEdit, onIncrement, onDecremen
     const controls = useAnimation();
     const isStillNeed = item.status === 'still-need';
 
+    const prevQty = useRef(item.quantity);
+    const [flash, setFlash] = useState(false);
+    
+    // Simple flash effect when quantity increases
+    useEffect(() => {
+        if (item.quantity > prevQty.current) {
+            setFlash(true);
+            const t = setTimeout(() => setFlash(false), 200);
+            return () => clearTimeout(t);
+        }
+        prevQty.current = item.quantity;
+    }, [item.quantity]);
+
     const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         const offset = info.offset.x;
-        if (offset < -100) {
-            controls.start({ x: -1000, opacity: 0 }).then(() => onDelete());
+        if (offset < -60) {
+            controls.start({ x: -80 }); // Snap open to reveal delete button
         } else {
-            controls.start({ x: 0 });
+            controls.start({ x: 0 }); // Snap closed
         }
     };
 
     return (
-        <div className="relative w-full rounded-[32px] overflow-hidden group mb-4 shadow-[0_16px_32px_rgba(0,0,0,0.3)]">
-            <div className="absolute inset-0 bg-red-500 flex items-center justify-end px-8">
-                <Trash2 className="w-7 h-7 text-white" />
+        <div className="relative w-full rounded-[32px] overflow-hidden group mb-4 shadow-[0_16px_32px_rgba(0,0,0,0.3)] bg-black">
+            <div className="absolute inset-y-0 right-0 w-24 flex items-center justify-end px-6 rounded-r-[32px]">
+                <button 
+                    onPointerDown={(e) => { e.stopPropagation(); onDelete(); }}
+                    className="w-full h-full flex items-center justify-end active:scale-90 transition-transform"
+                >
+                    <Trash2 className="w-6 h-6 text-red-500 drop-shadow-[0_0_12px_rgba(239,68,68,0.5)]" />
+                </button>
             </div>
             
             <motion.div
                 layout
                 drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={{ left: 0.8, right: 0 }}
+                dragConstraints={{ left: -80, right: 0 }}
+                dragElastic={0}
                 onDragEnd={handleDragEnd}
                 animate={controls}
-                className={`relative w-full rounded-[32px] p-3 flex z-10 transition-colors backdrop-blur-3xl border ${
+                className={`relative w-full rounded-[32px] p-3 flex z-10 transition-all duration-200 backdrop-blur-3xl border ${
+                    flash ? 'brightness-150 border-white/20' :
                     isStillNeed 
-                        ? 'bg-black/80 border-white/[0.03] opacity-60' 
-                        : 'bg-gradient-to-b from-white/[0.08] to-white/[0.02] border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
+                        ? 'bg-[#141414] border-white/[0.06]' 
+                        : 'bg-black bg-gradient-to-b from-white/[0.08] to-white/[0.02] border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
                 }`}
             >
                 {/* Apple Watch Style Quantity Adjuster */}
