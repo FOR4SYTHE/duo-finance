@@ -681,26 +681,33 @@ export function LiveTripTracker() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         onClick={() => setIsAddingNew(true)}
-                        className="w-full border border-dashed border-white/10 hover:border-white/20 rounded-[32px] p-6 flex flex-col items-center justify-center gap-3 bg-white/[0.01] hover:bg-white/[0.03] transition-all text-white/40 text-sm font-medium py-12"
+                        className="w-full border border-dashed border-white/10 hover:border-white/20 rounded-[32px] p-6 flex flex-col items-center justify-center gap-3 bg-white/[0.01] hover:bg-white/[0.03] transition-all text-white/40 text-sm font-medium py-12 group"
                     >
-                        <div className="w-12 h-12 rounded-full bg-[#30D158]/10 flex items-center justify-center border border-[#30D158]/20">
-                            <Plus className="w-6 h-6 text-[#30D158]" />
-                        </div>
+                        <Plus className="w-8 h-8 text-white/40 group-hover:text-white transition-colors" strokeWidth={1.5} />
                         <span>Scan your first item</span>
                     </motion.button>
                 )}
             </motion.div>
 
             {/* Floating Action Button */}
-            <div className="fixed bottom-24 left-0 right-0 flex justify-center z-50 pointer-events-none px-6">
-                <button 
-                    onClick={() => setIsAddingNew(true)}
-                    className="pointer-events-auto bg-gradient-to-r from-[#30D158] to-[#25A645] text-black border border-white/20 shadow-[0_8px_32px_rgba(48,209,88,0.4)] px-6 py-3.5 rounded-full flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all w-full max-w-[200px]"
-                >
-                    <Plus className="w-5 h-5" strokeWidth={2.5} />
-                    <span className="font-bold tracking-wide text-[15px]">Add Item</span>
-                </button>
-            </div>
+            <AnimatePresence>
+                {items.length > 0 && (
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                        className="fixed bottom-24 left-0 right-0 flex justify-center z-50 pointer-events-none"
+                    >
+                        <button 
+                            onClick={() => setIsAddingNew(true)}
+                            className="pointer-events-auto w-[64px] h-[64px] rounded-full bg-white text-black shadow-[0_12px_32px_rgba(255,255,255,0.25)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+                        >
+                            <Plus className="w-8 h-8" strokeWidth={2} />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Modals */}
             <PriceEntryModal 
@@ -925,9 +932,18 @@ function SwipeableCartItem({
                             const Art = getItemArt(item.name);
                             const Icon = Art.icon;
                             return (
-                                <div className={`w-14 h-14 shrink-0 rounded-[22px] flex items-center justify-center border border-white/10 relative overflow-hidden bg-gradient-to-br ${Art.color} shadow-lg ml-1`}>
-                                    <div className="absolute inset-0 opacity-20 bg-white/20 mix-blend-overlay" />
-                                    <Icon className={`w-6 h-6 ${Art.text} drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]`} strokeWidth={1.5} />
+                                <div className="relative shrink-0 ml-1 flex items-center justify-center">
+                                    {/* Ambient Radial Glow (Bleeding out behind the badge) */}
+                                    <div className={`absolute inset-0 bg-gradient-to-br ${Art.color} blur-[12px] opacity-60 scale-125 rounded-full`} />
+                                    
+                                    {/* 3D Glass Badge */}
+                                    <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center border border-white/[0.15] relative overflow-hidden bg-[#1c1c1e]/80 backdrop-blur-xl shadow-[0_8px_16px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.3),inset_0_-4px_12px_rgba(0,0,0,0.5)]`}>
+                                        {/* Subtle inner reflection */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.12] to-transparent pointer-events-none" />
+                                        
+                                        {/* Icon (Neon glowing) */}
+                                        <Icon className={`relative z-10 w-5 h-5 ${Art.text} drop-shadow-[0_0_8px_currentColor]`} strokeWidth={2} />
+                                    </div>
                                 </div>
                             );
                         })()}
