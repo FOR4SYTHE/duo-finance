@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { X, Copy, Check, Radar, Clock, Flame, Navigation, Database } from "lucide-react";
 import { ThinkingOrb } from "thinking-orbs";
+import { BorderBeam } from 'border-beam';
 
 interface Deal {
   id: string;
@@ -270,20 +271,15 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
 
       {scanStatus === "idle" && (
           <div className="flex-1 flex flex-col justify-center px-6 pb-32 relative z-10">
-              {/* Rotating Topological Grid Background (Hardware Accelerated) */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10 opacity-20 mix-blend-screen transform-gpu">
-                  <motion.div 
-                      animate={{ rotate: 360 }} 
-                      transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
-                      className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 will-change-transform"
+              {/* Static Dotted Canvas Background */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10 opacity-30">
+                  <div 
+                      className="absolute inset-0"
                       style={{
-                          backgroundImage: `
-                              linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
-                          `,
-                          backgroundSize: '40px 40px',
-                          maskImage: 'radial-gradient(circle at center, black 0%, transparent 60%)',
-                          WebkitMaskImage: 'radial-gradient(circle at center, black 0%, transparent 60%)'
+                          backgroundImage: 'radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px)',
+                          backgroundSize: '16px 16px',
+                          maskImage: 'linear-gradient(to bottom, black 0%, transparent 80%)',
+                          WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 80%)'
                       }}
                   />
               </div>
@@ -295,7 +291,7 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                   className="flex flex-col gap-10 w-full max-w-sm mx-auto relative"
               >
                   <div className="text-center flex flex-col items-center">
-                      <div className="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                      <div className="w-16 h-16 rounded-3xl bg-[#1A1A1A] border border-white/10 flex items-center justify-center mb-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.5)]">
                           <Navigation className="w-8 h-8 text-white/80 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]" />
                       </div>
                       <h3 className="text-white text-[28px] font-medium tracking-tight mb-2">Target Location</h3>
@@ -305,13 +301,13 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                   <div className="flex flex-col gap-5">
                       <div className="relative group">
                           {/* Inner glow effect on focus/hover */}
-                          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-indigo-500/10 to-purple-500/10 rounded-3xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                           <input 
                               type="text" 
                               value={location}
                               onChange={(e) => setLocation(e.target.value)}
                               placeholder="e.g. Metro Manila, Cebu..."
-                              className="relative w-full bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl px-6 py-5 text-white text-[19px] font-medium placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_10px_20px_rgba(0,0,0,0.3)] z-10"
+                              className="relative w-full bg-[#121212] border border-white/10 rounded-3xl px-6 py-5 text-white text-[19px] font-medium placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_10px_20px_rgba(0,0,0,0.3)] z-10"
                           />
                       </div>
                       
@@ -320,10 +316,10 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                               <button
                                   key={loc}
                                   onClick={() => setLocation(loc)}
-                                  className={`px-4 py-2.5 rounded-full text-[13px] font-semibold tracking-wide transition-all border backdrop-blur-md relative overflow-hidden group ${
+                                  className={`px-4 py-2.5 rounded-full text-[13px] font-semibold tracking-wide transition-all border relative overflow-hidden group ${
                                       location === loc
                                           ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.4)]"
-                                          : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white"
+                                          : "bg-[#1C1C1E] text-white/60 border-white/10 hover:bg-[#2C2C2E] hover:text-white"
                                   }`}
                               >
                                   {/* Glass sheen on hover */}
@@ -334,28 +330,23 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                       </div>
                   </div>
 
-                  <motion.button 
-                      onClick={startScan}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="relative w-full mt-2 group overflow-hidden rounded-[24px]"
-                  >
-                      {/* Holographic animated background */}
-                      <motion.div 
-                          animate={{ filter: ["hue-rotate(0deg)", "hue-rotate(360deg)"] }}
-                          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                          className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 opacity-80 group-hover:opacity-100 transition-opacity"
-                      />
-                      {/* Glass overlay for depth */}
-                      <div className="absolute inset-[1px] rounded-[23px] bg-black/20 backdrop-blur-sm" />
-                      
-                      <div className="relative px-6 py-5 flex items-center justify-center gap-3 z-10">
-                          <Radar className="w-5 h-5 text-white drop-shadow-md" />
-                          <span className="text-white font-bold tracking-[0.15em] uppercase text-[15px] drop-shadow-md">
-                              Initialize Scan
-                          </span>
-                      </div>
-                  </motion.button>
+                  <div className="relative w-full mt-4">
+                      <BorderBeam size="pulse-inner" colorVariant="colorful">
+                          <motion.button 
+                              onClick={startScan}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              className="w-full relative group overflow-hidden rounded-[24px] bg-[#111]"
+                          >
+                              <div className="relative px-6 py-5 flex items-center justify-center gap-3 z-10">
+                                  <Radar className="w-5 h-5 text-white drop-shadow-md" />
+                                  <span className="text-white font-bold tracking-[0.15em] uppercase text-[15px] drop-shadow-md">
+                                      Initialize Scan
+                                  </span>
+                              </div>
+                          </motion.button>
+                      </BorderBeam>
+                  </div>
 
                   {/* MOCK DATA BUTTON */}
                   <motion.button 
