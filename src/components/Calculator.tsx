@@ -69,7 +69,7 @@ export function Calculator() {
             variants={containerVariants}
             initial={isInitialLoad ? "hidden" : false}
             animate="visible"
-            className={`w-full h-full min-h-0 bg-transparent text-foreground flex flex-col font-sans transition-all duration-700 relative px-5 pb-4 pt-6`}
+            className={`w-full h-full min-h-0 bg-transparent text-foreground flex flex-col justify-between font-sans transition-all duration-700 relative px-5 pb-4 pt-6`}
         >
             
             {/* Header: Minimal Apple-style */}
