@@ -68,7 +68,7 @@ export function EducationTab() {
                     idx === 1 ? "/childcare/art_workshop.png" : 
                     "/childcare/robotics_camp.png"
                   } 
-                  alt={activity.title || activity.name}
+                  alt={activity.title}
                   className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-110"
                 />
                 
@@ -81,7 +81,7 @@ export function EducationTab() {
                     <span className="text-white/50 text-[8px]">/ R{zarCost.toLocaleString()}</span>
                   </span>
                   <span className="text-[14px] font-bold text-white leading-tight">
-                    {activity.title || activity.name}
+                    {activity.title}
                   </span>
                   <span className="text-[11px] font-medium text-white/50 mt-1">
                     {activity.duration || "Summer Term"}
