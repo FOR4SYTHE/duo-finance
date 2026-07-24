@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useChildCareStore } from "@/store/useChildCareStore";
 import Link from "next/link";
 import { X, MapPin } from "lucide-react";
+import { Map } from "pigeon-maps";
 
 export function ChildCareOnboarding() {
   const { profile, updateProfile, completeOnboarding } = useChildCareStore();
@@ -261,15 +262,37 @@ export function ChildCareOnboarding() {
                 </div>
               </div>
 
-              {/* Map Placeholder */}
-              <div className="w-full aspect-square bg-[#1A1A1A] border border-white/10 rounded-[32px] mb-12 flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
-                <div className="w-16 h-16 bg-[#FF7B54]/20 rounded-full flex items-center justify-center">
-                  <div className="w-8 h-8 bg-[#FF7B54] rounded-full border-2 border-white shadow-lg flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full" />
+              {/* Premium Detailed Map (Pigeon Maps + CartoDB Dark Matter) */}
+              <div className="w-full aspect-square bg-[#0A0A0A] border border-white/10 rounded-[32px] mb-12 relative overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)]">
+                
+                <Map 
+                  height={400} 
+                  defaultCenter={[14.8433, 120.8114]} 
+                  defaultZoom={13}
+                  provider={(x, y, z, dpr) => {
+                    return `https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/${z}/${x}/${y}${dpr >= 2 ? '@2x' : ''}.png`;
+                  }}
+                  mouseEvents={false}
+                  touchEvents={false}
+                />
+
+                {/* Center Pin & Pulse (Overlaid perfectly in the center) */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+                  {/* Pulse Animation */}
+                  <motion.div 
+                    animate={{ scale: [1, 2, 2.5], opacity: [0.5, 0, 0] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
+                    className="absolute w-12 h-12 bg-[#FF7B54] rounded-full"
+                  />
+                  {/* Glass Pin Base */}
+                  <div className="relative z-10 w-14 h-14 bg-black/40 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-lg">
+                    {/* Glowing Core */}
+                    <div className="w-4 h-4 bg-[#FF7B54] rounded-full shadow-[0_0_15px_#FF7B54]" />
                   </div>
                 </div>
-                <span className="absolute bottom-4 text-white/30 text-xs font-bold uppercase tracking-widest">Map Asset Here</span>
+
+                {/* Dark Vignette Scrim to blend the edges perfectly into the dark app theme */}
+                <div className="absolute inset-0 shadow-[inset_0_0_60px_40px_#0A0A0A] pointer-events-none" />
               </div>
 
               <button 

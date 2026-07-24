@@ -61,16 +61,16 @@ export function EducationTab() {
                 key={activity.id} 
                 className="relative aspect-square rounded-[24px] overflow-hidden group shadow-[0_8px_24px_rgba(0,0,0,0.2)] border border-white/10"
               >
-                {/* Background Art Placeholder */}
-                <div 
-                  className={`absolute inset-0 bg-gradient-to-br ${
-                    idx % 3 === 0 ? 'from-[#FF7B54]/40 to-[#FF7B54]/10' :
-                    idx % 3 === 1 ? 'from-[#B9E0F2]/40 to-[#B9E0F2]/10' :
-                    'from-[#FCD34D]/40 to-[#F87171]/10'
-                  }`} 
+                {/* Background Art */}
+                <img 
+                  src={
+                    idx === 0 ? "/childcare/swimming_clinic.png" : 
+                    idx === 1 ? "/childcare/art_workshop.png" : 
+                    "/childcare/robotics_camp.png"
+                  } 
+                  alt={activity.title || activity.name}
+                  className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
-                <div className="absolute top-2 right-2 text-[8px] font-bold uppercase tracking-widest text-white/30 border border-white/10 px-2 py-0.5 rounded-full backdrop-blur-md">Art</div>
                 
                 {/* Dark Scrim for text legibility */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent" />
