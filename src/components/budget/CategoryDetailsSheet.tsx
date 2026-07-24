@@ -85,7 +85,7 @@ export function CategoryDetailsSheet({ isOpen, onClose, categoryId }: CategoryDe
 
                             <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-3 pb-6">
                                 {subCategories.map((sub) => {
-                                    const converted = isPhpPrimary ? sub.amount / exchangeRate : sub.amount * exchangeRate;
+                                    const converted = isPhpPrimary ? sub.amount * exchangeRate : sub.amount / exchangeRate;
                                     return (
                                         <button
                                             key={sub.id}

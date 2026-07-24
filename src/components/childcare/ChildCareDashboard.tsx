@@ -19,13 +19,21 @@ export function ChildCareDashboard() {
   return (
     <div className="relative z-10 w-full flex flex-col gap-6 pt-12">
       
-      {/* Exit Button */}
-      <Link 
-        href="/"
-        className="absolute top-0 right-0 w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors z-50"
-      >
-        <X className="w-5 h-5" />
-      </Link>
+      {/* Header Actions */}
+      <div className="absolute top-0 right-0 flex items-center gap-3 z-50">
+        <button
+          onClick={() => useChildCareStore.getState().reset()}
+          className="px-3 py-1.5 h-10 bg-[#FF453A]/10 border border-[#FF453A]/20 rounded-full flex items-center justify-center text-[#FF453A] hover:bg-[#FF453A]/20 transition-colors text-xs font-bold tracking-widest uppercase"
+        >
+          Reset Setup
+        </button>
+        <Link 
+          href="/"
+          className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </Link>
+      </div>
 
 
 

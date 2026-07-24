@@ -45,6 +45,7 @@ interface ChildCareState {
   updateProfile: (profile: Partial<ChildProfile>) => void;
   completeOnboarding: () => void;
   mockTriggerAIUpdate: () => Promise<void>;
+  reset: () => void;
 }
 
 // Baseline mock data for Malolos, Bulacan
@@ -98,7 +99,13 @@ export const useChildCareStore = create<ChildCareState>()(
             ]
           }
         }));
-      }
+      },
+
+      reset: () => set({
+        profile: { nickname: '', age: null, gender: null, location: 'Malolos, Bulacan' },
+        hasCompletedOnboarding: false,
+        cachedData: INITIAL_DATA
+      })
     }),
     {
       name: 'child-care-storage',
