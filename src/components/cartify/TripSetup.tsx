@@ -76,7 +76,7 @@ export function TripSetup() {
                         <span className="text-white/50 text-[11px] font-semibold tracking-[0.2em] uppercase">Trip Budget</span>
                         <button 
                             onClick={toggleCurrency} 
-                            className="flex items-center gap-1.5 bg-black/20 hover:bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full transition-all group"
+                            className="flex items-center gap-1.5 bg-black/20 hover:bg-black/40 border border-white/10 px-3 py-1.5 rounded-full transition-all group"
                         >
                             <ArrowUpDown className="w-3 h-3 text-white/60 group-hover:text-white transition-colors" />
                             <span className="text-white/80 text-[10px] uppercase font-bold tracking-widest">
@@ -91,7 +91,7 @@ export function TripSetup() {
                                 <span className="text-3xl text-white/40 font-medium">{isPhpPrimary ? '₱' : 'R'}</span>
                                 <span>{displayValue || "0"}</span>
                             </div>
-                            <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full bg-black/20 backdrop-blur-md border border-white/5">
+                            <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full bg-black/20 border border-white/5">
                                 <span className="text-white/50 font-medium tracking-wide text-sm">
                                     ≈ {targetCurrency === 'PHP' ? '₱' : 'R'}{convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                                 </span>

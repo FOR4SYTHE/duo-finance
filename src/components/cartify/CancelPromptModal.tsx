@@ -62,14 +62,14 @@ export function CancelPromptModal({ isOpen, onClose, onConfirm, mode }: CancelPr
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-md" 
+                        className="absolute inset-0 bg-black/80" 
                     />
                     
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        transition={{ type: "tween", duration: 0.15, ease: "easeOut" }}
                         className="relative w-full max-w-[340px] mx-6 bg-gradient-to-b from-[#1C1C1E] to-[#151516] border border-white/10 rounded-[32px] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col items-center text-center"
                     >
                     {/* Ambient glow */}
