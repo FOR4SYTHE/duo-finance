@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { X, Copy, Check, Radar, Clock, Flame, Navigation, Database } from "lucide-react";
+import { ThinkingOrb } from "thinking-orbs";
 
 interface Deal {
   id: string;
@@ -401,34 +402,7 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
             >
                 {scanStatus === "scanning" ? (
                 <div className="flex flex-col items-center justify-center h-40 gap-6 opacity-70 mt-10">
-                    {/* Custom State Variant 3 Animation (Matte & Precise) */}
-                    <div className="w-[64px] h-[64px] rounded-full overflow-hidden flex flex-col justify-center items-center gap-[2px] relative bg-black/40 border border-white/5">
-                        {Array.from({ length: 11 }).map((_, i) => {
-                            const hasBlock = [1, 3, 4, 6, 8, 9].includes(i);
-                            const delay = (i * 0.25) % 1.5;
-                            const duration = 1.4 + (i % 3) * 0.4;
-                            const width = 15 + (i % 3) * 10; 
-                            
-                            return (
-                                <div key={i} className="w-full h-[3px] bg-white/[0.08] relative shrink-0">
-                                    {hasBlock && (
-                                        <motion.div
-                                            className="absolute top-0 bottom-0 bg-[#D1D1D6] rounded-[1px]"
-                                            style={{ width: `${width}%` }}
-                                            initial={{ left: "-50%" }}
-                                            animate={{ left: "100%" }}
-                                            transition={{
-                                                duration,
-                                                repeat: Infinity,
-                                                ease: "linear",
-                                                delay
-                                            }}
-                                        />
-                                    )}
-                                </div>
-                            )
-                        })}
-                    </div>
+                    <ThinkingOrb state="solving" size={64} speed={1.15} />
                     <span className="text-white/60 text-xs font-bold tracking-[0.2em] uppercase text-center px-4">
                         Scanning for deals in {location || 'the Philippines'}...
                     </span>

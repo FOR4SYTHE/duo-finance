@@ -335,8 +335,8 @@ export default function Home() {
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             className="w-[68px] h-[68px] bg-gradient-to-b from-white/[0.08] to-transparent border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_8px_16px_rgba(0,0,0,0.4)] flex items-center justify-center overflow-hidden relative"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-[#D4AF37]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Target className="w-7 h-7 text-[#D4AF37] drop-shadow-md relative z-10" strokeWidth={1.5} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#30D158]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Target className="w-7 h-7 text-[#30D158] drop-shadow-md relative z-10" strokeWidth={1.5} />
           </motion.div>
           <span className="text-[11px] font-semibold text-white/70 tracking-wide group-hover:text-white transition-colors">
             Goals

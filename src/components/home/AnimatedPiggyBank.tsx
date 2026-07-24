@@ -48,12 +48,12 @@ export function AnimatedPiggyBank() {
 
           // --- Idle Breathing based on state ---
           if (state === "safe") {
-            await pigControls.start({ y: [0, -6, 0], transition: { duration: 3, ease: "easeInOut", repeat: 2 } });
+            await pigControls.start({ y: [0, -3, 0], transition: { duration: 4, ease: "easeInOut", repeat: 2 } });
           } else if (state === "warning") {
-            await pigControls.start({ y: [0, -3, 0], transition: { duration: 1.5, ease: "easeInOut", repeat: 4 } });
+            await pigControls.start({ y: [0, -1.5, 0], transition: { duration: 2, ease: "easeInOut", repeat: 4 } });
           } else {
-            // Danger: nervous shaking
-            await pigControls.start({ x: [-2, 2, -2, 2, 0], y: [0, -1, 0, -1, 0], transition: { duration: 0.4, repeat: 10 } });
+            // Danger: nervous shaking (subtle)
+            await pigControls.start({ x: [-1, 1, -1, 1, 0], y: [0, -0.5, 0, -0.5, 0], transition: { duration: 0.5, repeat: 10 } });
           }
 
           if (!mounted) break;
