@@ -11,7 +11,7 @@ interface JarSettingsModalProps {
 }
 
 export function JarSettingsModal({ isOpen, onClose }: JarSettingsModalProps) {
-    const { config, setJarPercentage } = useBudgetStore();
+    const { config, categories, setJarPercentage } = useBudgetStore();
     const [percentage, setPercentage] = useState<string>("");
 
     useEffect(() => {
@@ -28,9 +28,12 @@ export function JarSettingsModal({ isOpen, onClose }: JarSettingsModalProps) {
         }
     };
 
-    // Calculate smart suggestion (e.g., 20% of the target amount)
+    // Calculate smart suggestion based on unallocated budget
+    const totalAllocated = categories.reduce((sum, cat) => sum + (cat.targetAmount || 0), 0);
+    const unallocatedAmount = Math.max(0, config.targetAmount - totalAllocated);
+
     const suggestedPercentage = 20;
-    const suggestedAmount = config.targetAmount * (suggestedPercentage / 100);
+    const suggestedAmount = unallocatedAmount * (suggestedPercentage / 100);
 
     return (
         <AnimatePresence>
@@ -94,7 +97,7 @@ export function JarSettingsModal({ isOpen, onClose }: JarSettingsModalProps) {
                                         <span className="text-[#30D158] text-xs font-bold uppercase tracking-widest">Smart Suggestion</span>
                                     </div>
                                     <span className="text-white/80 text-sm leading-relaxed">
-                                        Set to <span className="font-bold text-white">{suggestedPercentage}%</span> of your {config.period} budget.
+                                        Set to <span className="font-bold text-white">{suggestedPercentage}%</span> of your unallocated {config.period} budget.
                                     </span>
                                     <span className="text-white/40 text-xs mt-1">
                                         (₱{suggestedAmount.toLocaleString()} allowed)

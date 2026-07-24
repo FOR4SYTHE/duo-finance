@@ -19,7 +19,7 @@ export default function SpendJarPage() {
   const router = useRouter();
   // Always animate on mount for a premium page transition feel
 
-  const { config } = useBudgetStore();
+  const { config, categories } = useBudgetStore();
   const { entries, addExpense, clearEntries } = useSpendStore();
   const { exchangeRate } = useCurrencyStore();
   
@@ -52,10 +52,12 @@ export default function SpendJarPage() {
     }
   }, [entries.length]);
 
-  // Calculate totals based on allowed percentage
+  // Calculate totals based on allowed percentage of UNALLOCATED budget
+  const totalAllocated = categories.reduce((sum, cat) => sum + (cat.targetAmount || 0), 0);
+  const unallocatedAmount = Math.max(0, config.targetAmount - totalAllocated);
   const totalSpent = entries.reduce((sum, entry) => sum + entry.amount, 0);
-  const allowedSpend = config.targetAmount * ((config.jarAllowedPercentage || 20) / 100);
-  const isBudgetSet = allowedSpend > 0;
+  const allowedSpend = unallocatedAmount * ((config.jarAllowedPercentage || 20) / 100);
+  const isBudgetSet = config.targetAmount > 0;
   
   const remainingAllowed = isBudgetSet ? allowedSpend - totalSpent : 0;
   const percentage = isBudgetSet ? Math.min((totalSpent / allowedSpend) * 100, 100) : 0;
