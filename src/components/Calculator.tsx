@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
-import { premiumPageVariants } from "@/utils/animations";
+import { simplePageVariants } from "@/utils/animations";
 import { ArrowUpDown, Delete, ChevronRight, History } from "lucide-react";
 
 export function Calculator() {
@@ -57,11 +57,7 @@ export function Calculator() {
     };
 
     return (
-        <motion.div 
-            key="calculator-page"
-            variants={premiumPageVariants}
-            initial="hidden"
-            animate="visible"
+        <div 
             className={`w-full h-full min-h-0 bg-transparent text-foreground flex flex-col justify-between font-sans transition-all duration-700 relative px-5 pb-4 pt-6`}
         >
             
@@ -286,6 +282,6 @@ export function Calculator() {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </motion.div>
+        </div>
     );
 }
