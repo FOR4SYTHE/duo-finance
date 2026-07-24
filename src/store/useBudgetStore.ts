@@ -23,6 +23,8 @@ interface BudgetState {
     setRunwayMultiplier: (multiplier: number) => void;
     setCardSkin: (skin: string) => void;
     setCardName: (name: string) => void;
+    setCustomPhoto: (key: string, dataUrl: string) => void;
+    removeCustomPhoto: (key: string) => void;
     setActiveMonth: (month: string) => void;
     setLastSeenMonth: (month: string) => void;
     addCategory: (category: Omit<BudgetCategory, 'id'>) => void;
@@ -101,6 +103,7 @@ export const useBudgetStore = create<BudgetState>()(
                 runwayMultiplier: 3,
                 cardSkin: 'default-dark',
                 cardName: 'BL',
+                customPhotos: {},
                 activeMonth: new Date().toISOString().slice(0, 7), // "YYYY-MM" format
                 lastSeenMonth: new Date().toISOString().slice(0, 7)
             },
@@ -123,6 +126,19 @@ export const useBudgetStore = create<BudgetState>()(
                 set((state) => ({ config: { ...state.config, cardSkin: skin } })),
             setCardName: (name: string) =>
                 set((state) => ({ config: { ...state.config, cardName: name } })),
+            setCustomPhoto: (key: string, dataUrl: string) =>
+                set((state) => ({ 
+                    config: { 
+                        ...state.config, 
+                        customPhotos: { ...state.config.customPhotos, [key]: dataUrl } 
+                    } 
+                })),
+            removeCustomPhoto: (key: string) =>
+                set((state) => {
+                    const newPhotos = { ...state.config.customPhotos };
+                    delete newPhotos[key];
+                    return { config: { ...state.config, customPhotos: newPhotos } };
+                }),
             setActiveMonth: (month: string) =>
                 set((state) => ({ config: { ...state.config, activeMonth: month } })),
             setLastSeenMonth: (month: string) =>
@@ -270,6 +286,7 @@ export const useBudgetStore = create<BudgetState>()(
                 if (!merged.config.lastSeenMonth) {
                     merged.config.lastSeenMonth = merged.config.activeMonth || new Date().toISOString().slice(0, 7);
                 }
+                if (!merged.config.customPhotos) merged.config.customPhotos = {};
                 if (!merged.config.cardSkin) merged.config.cardSkin = 'default-dark';
                 if (!merged.config.cardName) merged.config.cardName = 'BL';
                 if (!persistedState.goals) {

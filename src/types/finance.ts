@@ -44,6 +44,7 @@ export interface BudgetConfig {
     cardName?: string; // Custom name for the hero card
     activeMonth?: string; // "YYYY-MM" for filtering expenses
     lastSeenMonth?: string; // Tracks the last calendar month the user opened the app
+    customPhotos?: Record<string, string>; // Base64 images keyed by identifier (e.g. "budget-card", "2026-07")
 }
 
 export interface AppNotification {

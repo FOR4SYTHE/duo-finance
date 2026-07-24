@@ -6,6 +6,7 @@ import * as Icons from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { premiumPageVariants } from "@/utils/animations";
 import { useBudgetStore } from "@/store/useBudgetStore";
+import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { BudgetPeriod, BudgetCategory } from "@/types/finance";
 import { SmartTools } from "@/components/budget/SmartTools";
@@ -29,6 +30,7 @@ export default function BudgetPage() {
     // Always animate on mount for a premium page transition feel
 
   const { config, categories, setBudget, updateCategory, _hasHydrated, setActiveMonth } = useBudgetStore();
+  const { entries } = useSpendStore();
   const { exchangeRate } = useCurrencyStore();
   
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
@@ -40,7 +42,8 @@ export default function BudgetPage() {
   const [isCardSettingsOpen, setIsCardSettingsOpen] = useState(false);
 
   // Computed Values
-  const { displayTarget, displayAllocated, displayUnallocated } = calculateAllocations(config, categories);
+  const totalSpent = entries.reduce((sum, entry) => sum + entry.amount, 0);
+  const { displayTarget, displayAllocated, displayUnallocated } = calculateAllocations(config, categories, totalSpent);
 
   const handleHeroSave = (amount: number) => {
       const canonical = getCanonicalValue(amount, config.period);
@@ -144,6 +147,7 @@ export default function BudgetPage() {
   };
 
   const skin = getCardSkinStyle(config.cardSkin);
+  const customBg = config.customPhotos?.['budget-card'];
 
   if (!_hasHydrated) {
       return (
@@ -226,14 +230,22 @@ export default function BudgetPage() {
           onClick={() => setIsHeroModalOpen(true)}
           className={`w-full rounded-[24px] p-6 mb-8 relative z-20 cursor-pointer overflow-hidden border ${skin.border} group shadow-2xl flex flex-col justify-between aspect-[1.58/1] transition-all duration-500`}
         style={{
-            background: skin.background,
+            background: customBg ? 'transparent' : skin.background,
             boxShadow: skin.boxShadow
         }}
       >
-        {/* Sheen effect */}
-        <div className={`absolute inset-0 ${skin.sheen} pointer-events-none transition-all duration-700`} />
+        {/* Custom Background Image */}
+        {customBg && (
+            <div 
+                className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 pointer-events-none z-0"
+                style={{ backgroundImage: `url(${customBg})` }}
+            />
+        )}
+        
+        {/* Sheen effect & Gradients over custom bg */}
+        <div className={`absolute inset-0 ${customBg ? 'bg-black/40 ' : ''}${skin.sheen} pointer-events-none transition-all duration-700 z-0`} />
         {config.cardSkin !== 'revolut-metal' && config.cardSkin !== 'amex-platinum' && (
-            <div className="absolute top-0 right-0 w-[200%] h-[200%] bg-white/[0.03] rounded-full blur-[80px] -mr-[100%] -mt-[100%] transition-opacity group-hover:opacity-100 opacity-50 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[200%] h-[200%] bg-white/[0.03] rounded-full blur-[80px] -mr-[100%] -mt-[100%] transition-opacity group-hover:opacity-100 opacity-50 pointer-events-none z-0" />
         )}
 
         {config.cardSkin === 'amex-platinum' && (
@@ -283,26 +295,43 @@ export default function BudgetPage() {
                     )}
 
                     {(displayTarget > 0 || displayAllocated > 0) && (
-                        <div className="flex items-center gap-2 text-xs">
-                            {displayAllocated > displayTarget ? (
-                                <>
-                                    <div className="w-2 h-2 rounded-full bg-[#FF453A] shadow-[0_0_8px_rgba(255,69,58,0.5)] shrink-0" />
-                                    <span className={`${skin.textSecondary}`}>
-                                        Allocated: ₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                    </span>
-                                    <span className={`${skin.textTertiary} mx-1`}>·</span>
-                                    <span className="text-[#FF453A] font-medium">Over by ₱{(displayAllocated - displayTarget).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="w-2 h-2 rounded-full bg-[#30D158] shadow-[0_0_8px_rgba(48,209,88,0.5)] shrink-0" />
-                                    <span className={`${skin.textSecondary}`}>
-                                        Allocated: ₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})} of ₱{displayTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                    </span>
-                                    <span className={`${skin.textTertiary} mx-1`}>·</span>
-                                    <span className={`${skin.textTertiary}`}>₱{displayUnallocated.toLocaleString(undefined, {maximumFractionDigits: 0})} unallocated</span>
-                                </>
-                            )}
+                        <div className="flex items-center gap-5 mt-2">
+                            {/* Allocated Column */}
+                            <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-1.5">
+                                    <div className={`w-2 h-2 rounded-full ${displayAllocated > displayTarget ? 'bg-[#FF453A] shadow-[0_0_8px_rgba(255,69,58,0.5)]' : 'bg-[#30D158] shadow-[0_0_8px_rgba(48,209,88,0.5)]'} shrink-0`} />
+                                    <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Allocated</span>
+                                </div>
+                                <div className="flex items-baseline gap-1">
+                                    <span className={`font-semibold ${skin.textColor} text-[15px]`}>₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                    <span className={`${skin.textTertiary} text-[10px] font-medium tracking-wide`}>/ ₱{displayTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className={`w-[1px] h-7 border-l ${skin.border}`} />
+
+                            {/* Unallocated / Over Budget Column */}
+                            <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-1.5">
+                                    {displayAllocated > displayTarget ? (
+                                        <>
+                                            <div className="w-2 h-2 rounded-full bg-[#FF453A] shadow-[0_0_8px_rgba(255,69,58,0.5)] shrink-0" />
+                                            <span className={`text-[#FF453A] text-[10px] uppercase tracking-widest font-bold`}>Over Budget</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="w-2 h-2 rounded-full border border-current opacity-40 shrink-0" style={{ color: skin.textSecondary.split('-')[1] || '#fff' }} />
+                                            <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Unallocated</span>
+                                        </>
+                                    )}
+                                </div>
+                                <span className={`font-semibold text-[15px] ${displayAllocated > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
+                                    ₱{displayAllocated > displayTarget 
+                                        ? (displayAllocated - displayTarget).toLocaleString(undefined, {maximumFractionDigits: 0}) 
+                                        : displayUnallocated.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                </span>
+                            </div>
                         </div>
                     )}
                     {/* Discretionary Spend Jar Allocation */}

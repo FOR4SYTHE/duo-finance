@@ -1,9 +1,10 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check } from "lucide-react";
+import { X, Check, ImagePlus, Trash2 } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { processAndCompressImage } from "@/utils/imageUpload";
 
 interface CardSettingsSheetProps {
     isOpen: boolean;
@@ -18,8 +19,9 @@ const SKINS = [
 ];
 
 export function CardSettingsSheet({ isOpen, onClose }: CardSettingsSheetProps) {
-    const { config, setCardSkin, setCardName } = useBudgetStore();
+    const { config, setCardSkin, setCardName, setCustomPhoto, removeCustomPhoto } = useBudgetStore();
     const [tempName, setTempName] = useState(config.cardName || 'BL');
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -30,6 +32,17 @@ export function CardSettingsSheet({ isOpen, onClose }: CardSettingsSheetProps) {
     const handleSave = () => {
         setCardName(tempName.trim() || 'BL');
         onClose();
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+            const dataUrl = await processAndCompressImage(file);
+            setCustomPhoto('budget-card', dataUrl);
+        } catch (err) {
+            console.error("Failed to process image", err);
+        }
     };
 
     if (!isOpen) return null;
@@ -98,6 +111,36 @@ export function CardSettingsSheet({ isOpen, onClose }: CardSettingsSheetProps) {
                                             )}
                                         </button>
                                     ))}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <label className="text-white/50 text-xs font-semibold tracking-widest uppercase mb-1">Custom Background</label>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="flex-1 h-14 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 flex items-center justify-center gap-2 text-sm font-medium text-white/80 transition-colors"
+                                    >
+                                        <ImagePlus className="w-4 h-4 text-white/50" />
+                                        Upload Image
+                                    </button>
+                                    
+                                    <input 
+                                        type="file" 
+                                        ref={fileInputRef} 
+                                        onChange={handleFileUpload}
+                                        accept="image/*"
+                                        className="hidden" 
+                                    />
+                                    
+                                    {config.customPhotos?.['budget-card'] && (
+                                        <button
+                                            onClick={() => removeCustomPhoto('budget-card')}
+                                            className="w-14 h-14 rounded-xl border border-[#FF453A]/20 bg-[#FF453A]/5 hover:bg-[#FF453A]/10 flex items-center justify-center text-[#FF453A] transition-colors"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 

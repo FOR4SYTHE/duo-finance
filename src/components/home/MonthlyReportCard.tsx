@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRef } from "react";
 import { createPortal } from "react-dom";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, ImagePlus, Trash2 } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { formatCurrency } from "@/lib/format";
 import { MonthPicker } from "./MonthPicker";
 import { MonthlySummary } from "./MonthlySummary";
+import { processAndCompressImage } from "@/utils/imageUpload";
+import { calculateAllocations } from "@/utils/budgetMath";
 import { AnimatePresence } from "framer-motion";
 
 interface PhotoData {
@@ -29,8 +32,9 @@ export function MonthlyReportCard() {
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [summaryMonth, setSummaryMonth] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { config, categories } = useBudgetStore();
+  const { config, categories, setCustomPhoto, removeCustomPhoto } = useBudgetStore();
   const { entries } = useSpendStore();
   const { exchangeRate } = useCurrencyStore();
 
@@ -39,8 +43,6 @@ export function MonthlyReportCard() {
   const currentMonthName = now.toLocaleString("en-US", { month: "long" });
 
   // Budget calculations
-  const totalBudget = config.targetAmount;
-  const totalAllocated = categories.reduce((s, c) => s + c.targetAmount, 0);
   const monthEntries = entries.filter((e) => {
     const d = new Date(e.timestamp);
     return (
@@ -48,9 +50,14 @@ export function MonthlyReportCard() {
     );
   });
   const totalSpent = monthEntries.reduce((s, e) => s + e.amount, 0);
-  const remaining = totalBudget - totalSpent;
+  
+  const { displayTarget, displayAllocated, displayUnallocated } = calculateAllocations(config, categories, totalSpent);
+  
+  const effectiveSpent = displayAllocated + totalSpent;
+  const remaining = displayUnallocated;
   const remainingZAR = remaining * exchangeRate;
-  const spendRatio = totalBudget > 0 ? totalSpent / totalBudget : 0;
+  
+  const spendRatio = displayTarget > 0 ? effectiveSpent / displayTarget : 0;
   const progressPct = Math.min(Math.max(spendRatio * 100, 0), 100);
 
   const statusColor =
@@ -103,6 +110,19 @@ export function MonthlyReportCard() {
     setShowSummary(true);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const dataUrl = await processAndCompressImage(file);
+      setCustomPhoto(currentMonthKey, dataUrl);
+    } catch (err) {
+      console.error("Failed to process image", err);
+    }
+  };
+
+  const customPhotoUrl = config.customPhotos?.[currentMonthKey];
+
   return (
     <>
       {/* Hero Card */}
@@ -111,7 +131,12 @@ export function MonthlyReportCard() {
         className="relative w-full aspect-[16/10] min-h-[220px] rounded-[24px] overflow-hidden cursor-pointer mb-6 active:scale-[0.985] transition-transform duration-200"
       >
         {/* Photo Background */}
-        {photo && !error ? (
+        {customPhotoUrl ? (
+          <div
+            className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 ease-out scale-[1.02]"
+            style={{ backgroundImage: `url(${customPhotoUrl})` }}
+          />
+        ) : photo && !error ? (
           <div
             className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 ease-out scale-[1.02]"
             style={{
@@ -177,13 +202,60 @@ export function MonthlyReportCard() {
             {/* Empty placeholder spacer for left side of top row flex */}
             <div />
 
-            {/* Overflow button → Month Picker */}
-            <button
-              onClick={handleOverflowTap}
-              className="w-9 h-9 rounded-full bg-white/5 backdrop-blur-xl flex items-center justify-center border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)] hover:bg-white/10 transition-colors z-20"
+            {/* Actions Container */}
+            <div 
+              className="flex items-center gap-1.5 z-20"
+              onClick={(e) => e.stopPropagation()}
             >
-              <MoreHorizontal className="w-4 h-4 text-white/90" />
-            </button>
+              <div className="flex items-center bg-white/5 backdrop-blur-xl rounded-full border border-white/10 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)] p-0.5">
+                {/* Remove Custom Photo Button */}
+                {customPhotoUrl && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeCustomPhoto(currentMonthKey);
+                      }}
+                      className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+                      title="Remove Custom Photo"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="w-[1px] h-3.5 bg-white/10 mx-0.5" />
+                  </>
+                )}
+
+                {/* Upload Custom Photo Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fileInputRef.current?.click();
+                  }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+                  title="Upload Custom Photo"
+                >
+                  <ImagePlus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              
+              {/* Hidden file input */}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onClick={(e) => e.stopPropagation()}
+                onChange={handleFileUpload}
+                accept="image/*"
+                className="hidden" 
+              />
+
+              {/* Overflow button → Month Picker */}
+              <button
+                onClick={handleOverflowTap}
+                className="w-9 h-9 rounded-full bg-white/5 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1)] hover:bg-white/10 transition-colors"
+              >
+                <MoreHorizontal className="w-4 h-4 text-white/80" />
+              </button>
+            </div>
           </div>
 
           {/* Bottom: Giant Liquid Glass month text */}

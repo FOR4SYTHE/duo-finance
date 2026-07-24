@@ -16,10 +16,10 @@ export function getCanonicalValue(displayValue: number, period: BudgetPeriod) {
     return displayValue * periodMultipliers[period];
 }
 
-export function calculateAllocations(config: BudgetConfig, categories: BudgetCategory[]) {
+export function calculateAllocations(config: BudgetConfig, categories: BudgetCategory[], totalSpent: number = 0) {
     const displayTarget = getDisplayValue(config.targetAmount, config.period);
     const displayAllocated = categories.reduce((sum, cat) => sum + getDisplayValue(cat.targetAmount, config.period), 0);
-    const displayUnallocated = Math.max(0, displayTarget - displayAllocated);
+    const displayUnallocated = Math.max(0, displayTarget - displayAllocated - totalSpent);
     
     return {
         displayTarget,
