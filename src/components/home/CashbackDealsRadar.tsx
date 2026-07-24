@@ -42,7 +42,7 @@ const DealCard = ({ deal, index, getBrandColor, getBrandArtwork, handleCopy, cop
         className="sticky top-[40px] will-change-transform"
         initial={{ opacity: 0, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: Math.min(index * 0.05, 0.5), type: "spring", damping: 25, stiffness: 200 }}
+        transition={{ delay: Math.min(index * 0.05, 0.5), type: "tween", duration: 0.15, ease: "easeOut" }}
         style={{
           scale,
           opacity,
@@ -230,7 +230,7 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
       initial={{ y: "100%", opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: "100%", opacity: 0 }}
-      transition={{ type: "spring", damping: 25, stiffness: 200 }}
+      transition={{ type: "tween", duration: 0.2, ease: "easeOut" }}
       className="fixed inset-0 z-[100] flex flex-col bg-[#0A0A0C] overflow-hidden"
     >
       {/* Scanning Radar Background Effect */}
@@ -287,7 +287,7 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
               <motion.div 
                   initial={{ opacity: 0, scale: 0.95, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                  transition={{ type: "tween", duration: 0.15, ease: "easeOut" }}
                   className="flex flex-col gap-10 w-full max-w-sm mx-auto relative"
               >
                   <div className="text-center flex flex-col items-center">
@@ -307,7 +307,7 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                               value={location}
                               onChange={(e) => setLocation(e.target.value)}
                               placeholder="e.g. Metro Manila, Cebu..."
-                              className="relative w-full bg-[#121212] border border-white/10 rounded-3xl px-6 py-5 text-white text-[19px] font-medium placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_10px_20px_rgba(0,0,0,0.3)] z-10"
+                              className="relative w-full bg-[#121212] border border-white/10 rounded-3xl px-6 py-5 text-white text-[19px] font-medium placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-colors shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_10px_20px_rgba(0,0,0,0.3)] z-10"
                           />
                       </div>
                       
