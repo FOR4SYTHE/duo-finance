@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
-import { containerVariants, itemVariants } from "@/utils/animations";
+import { premiumPageVariants } from "@/utils/animations";
 import { ArrowUpDown, Delete, ChevronRight, History } from "lucide-react";
 
 export function Calculator() {
@@ -21,17 +21,10 @@ export function Calculator() {
         history,
         clearHistory
     } = useCurrencyStore();
-
     const [mounted, setMounted] = React.useState(false);
-    const [isInitialLoad, setIsInitialLoad] = React.useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
-
     useEffect(() => {
         setMounted(true);
-        if (!sessionStorage.getItem('hasSeenCalculatorAnimation')) {
-            setIsInitialLoad(true);
-            sessionStorage.setItem('hasSeenCalculatorAnimation', 'true');
-        }
         
         // Clear input when user leaves the calculator page
         return () => clearInput();
@@ -65,15 +58,15 @@ export function Calculator() {
 
     return (
         <motion.div 
-            key={isInitialLoad ? "animate" : "static"}
-            variants={containerVariants}
-            initial={isInitialLoad ? "hidden" : false}
+            key="calculator-page"
+            variants={premiumPageVariants}
+            initial="hidden"
             animate="visible"
             className={`w-full h-full min-h-0 bg-transparent text-foreground flex flex-col justify-between font-sans transition-all duration-700 relative px-5 pb-4 pt-6`}
         >
             
             {/* Header: Minimal Apple-style */}
-            <motion.div variants={itemVariants} className="flex justify-between items-center mb-4 relative z-20 shrink-0">
+            <div className="flex justify-between items-center mb-4 relative z-20 shrink-0">
                 <div className="flex items-center gap-3">
                     {history.length > 0 ? (
                         <button 
@@ -94,10 +87,10 @@ export function Calculator() {
                         Rate {exchangeRate.toFixed(2)}
                     </span>
                 </div>
-            </motion.div>
+            </div>
 
             {/* Display Area */}
-            <motion.div variants={itemVariants} className="flex-1 flex flex-col items-center justify-center relative min-h-0 z-20 w-full mb-2">
+            <div className="flex-1 flex flex-col items-center justify-center relative min-h-0 z-20 w-full mb-2">
                 
                 {/* Huge Primary Currency */}
                 <div className="flex flex-col items-center">
@@ -193,10 +186,10 @@ export function Calculator() {
                     </div>
                 </div>
                 
-            </motion.div>
+            </div>
 
             {/* Premium Duo-Finance Glassmorphic Numpad */}
-            <motion.div variants={itemVariants} className="grid grid-cols-4 grid-rows-5 gap-2 sm:gap-3 z-20 max-w-[420px] mx-auto w-full flex-[1.2] min-h-[280px] max-h-[50vh]">
+            <div className="grid grid-cols-4 grid-rows-5 gap-2 sm:gap-3 z-20 max-w-[420px] mx-auto w-full flex-[1.2] min-h-[280px] max-h-[50vh]">
                 {buttons.map((btn) => {
                     let btnClasses = "";
                     let textClasses = "";
@@ -236,7 +229,7 @@ export function Calculator() {
                         </motion.button>
                     )
                 })}
-            </motion.div>
+            </div>
 
             {/* History Sheet Modal */}
             <AnimatePresence>

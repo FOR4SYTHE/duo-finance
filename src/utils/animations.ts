@@ -25,3 +25,34 @@ export const itemVariants: Variants = {
     }
   }
 };
+
+// A much simpler, lighter animation for inner pages to prevent lag
+export const simplePageVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut"
+    }
+  }
+};
+
+// Subtle, premium animation without lag-inducing blur filters
+export const premiumPageVariants: Variants = {
+  hidden: { 
+    opacity: 0, 
+    y: 15,
+    scale: 0.985
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1] // Apple-like smooth cubic-bezier deceleration
+    }
+  }
+};

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Settings2, PiggyBank, AlertTriangle, Lock } from "lucide-react";
 import { motion } from "framer-motion";
-import { containerVariants, itemVariants } from "@/utils/animations";
+import { premiumPageVariants } from "@/utils/animations";
 import { useEffect, useRef } from "react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
@@ -17,13 +17,7 @@ import { AnimatePresence } from "framer-motion";
 
 export default function SpendJarPage() {
   const router = useRouter();
-  const [isInitialLoad, setIsInitialLoad] = useState(false);
-  useEffect(() => {
-    if (!sessionStorage.getItem('hasSeenJarAnimation')) {
-      setIsInitialLoad(true);
-      sessionStorage.setItem('hasSeenJarAnimation', 'true');
-    }
-  }, []);
+  // Always animate on mount for a premium page transition feel
 
   const { config } = useBudgetStore();
   const { entries, addExpense, clearEntries } = useSpendStore();
@@ -169,22 +163,23 @@ export default function SpendJarPage() {
     'radial-gradient(140% 120% at 50% 0%, #06210f 0%, #000000 100%)';
 
   return (
-    <motion.div 
-      key={isInitialLoad ? "animate" : "static"}
-      variants={containerVariants}
-      initial={isInitialLoad ? "hidden" : false}
-      animate="visible"
-      className="relative flex flex-col w-full min-h-full"
-    >
-      
-      {/* Fixed Background to cover the layout padding */}
+    <>
+      {/* Fixed Background to cover the layout padding (moved outside motion.div to prevent transform jumping) */}
       <div 
         className="fixed inset-0 w-full max-w-xl mx-auto -z-10 transition-colors duration-1000 ease-in-out"
         style={{ background: bgGradient }}
       />
 
+      <motion.div 
+        key="jar-page"
+        variants={premiumPageVariants}
+        initial="hidden"
+        animate="visible"
+        className="relative flex flex-col w-full min-h-full"
+      >
+
       {/* Header (Scrolls naturally) */}
-      <motion.div variants={itemVariants} className="pt-12 px-6 flex justify-between items-center z-50">
+      <div className="pt-12 px-6 flex justify-between items-center z-50">
         <div className="flex flex-col gap-1">
             <div className="flex items-center gap-3">
               <h1 className="text-3xl text-white font-medium tracking-tight drop-shadow-md">Spend Jar</h1>
@@ -203,13 +198,13 @@ export default function SpendJarPage() {
         >
           <Settings2 className="w-5 h-5 text-white/90" />
         </button>
-      </motion.div>
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 relative z-10 pt-10 pb-32">
         
         {/* Massive Arch & Mascot Section */}
-        <motion.div variants={itemVariants} className="relative w-full flex flex-col items-center justify-center shrink-0">
+        <div className="relative w-full flex flex-col items-center justify-center shrink-0">
           
           <div className="relative w-[340px] h-[200px] flex justify-center overflow-visible">
             {/* The Thick Arch (Behind Mascot) */}
@@ -262,10 +257,10 @@ export default function SpendJarPage() {
               ₱{Math.round(allowedSpend/1000)}k
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Hero Typography Section */}
-        <motion.div variants={itemVariants} className="flex flex-col items-center justify-center text-center mt-12 relative z-20">
+        <div className="flex flex-col items-center justify-center text-center mt-12 relative z-20">
           <span className="text-white/40 text-[10px] font-bold tracking-[0.25em] uppercase mb-3">
             Spent {config.period === 'monthly' ? 'this month' : 'this week'}
           </span>
@@ -290,10 +285,10 @@ export default function SpendJarPage() {
               </span>
             </div>
           )}
-        </motion.div>
+        </div>
 
         {/* Solid Premium Action Button Area */}
-        <motion.div variants={itemVariants} className="w-[85%] mx-auto mt-12 relative z-20">
+        <div className="w-[85%] mx-auto mt-12 relative z-20">
           {!isBudgetSet && (
             <div className="w-full rounded-[24px] p-5 mb-6 flex items-start gap-4 border shadow-xl transition-colors duration-500 bg-[#111111] border-white/10">
               <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0 text-white/40" />
@@ -352,10 +347,10 @@ export default function SpendJarPage() {
               {!isBudgetSet ? 'Setup Budget' : isLocked ? 'Jar Locked' : 'Quick Log Spend'}
             </span>
           </button>
-        </motion.div>
+        </div>
 
         {/* Premium Solid Recent Entries Feed */}
-        <motion.div variants={itemVariants} className="w-[85%] mx-auto mt-12 flex flex-col gap-3 relative z-20">
+        <div className="w-[85%] mx-auto mt-12 flex flex-col gap-3 relative z-20">
           <div className="flex justify-between items-center mb-3 px-1">
             <h2 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase">Recent Drops ({entries.length})</h2>
             <button 
@@ -394,7 +389,7 @@ export default function SpendJarPage() {
               <span className="text-xs font-medium tracking-widest uppercase">No expenses logged yet</span>
             </div>
           )}
-        </motion.div>
+        </div>
 
       </div>
 
@@ -422,5 +417,6 @@ export default function SpendJarPage() {
         onComplete={() => setAnimationType(null)}
       />
     </motion.div>
+    </>
   );
 }

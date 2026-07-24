@@ -9,32 +9,26 @@ import { ReceiptView } from "@/components/cartify/ReceiptView";
 import { CancelPromptModal } from "@/components/cartify/CancelPromptModal";
 import { MoreHorizontal, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { containerVariants, itemVariants } from "@/utils/animations";
+import { premiumPageVariants } from "@/utils/animations";
 import { useEffect } from "react";
 
 export default function CartifyPage() {
-    const [isInitialLoad, setIsInitialLoad] = useState(false);
-    useEffect(() => {
-        if (!sessionStorage.getItem('hasSeenCartifyAnimation')) {
-            setIsInitialLoad(true);
-            sessionStorage.setItem('hasSeenCartifyAnimation', 'true');
-        }
-    }, []);
+    // Always animate on mount for a premium page transition feel
 
     const { isActive, isBuildingList, isReceiptView, endTrip, mode } = useCartifyStore();
     const [showCancelPrompt, setShowCancelPrompt] = useState(false);
 
     return (
         <motion.div 
-            key={isInitialLoad ? "animate" : "static"}
-            variants={containerVariants}
-            initial={isInitialLoad ? "hidden" : false}
+            key="cartify-page"
+            variants={premiumPageVariants}
+            initial="hidden"
             animate="visible"
             className="flex flex-col w-full min-h-full px-6 pt-12 pb-32 relative"
         >
             
             {/* Header Area */}
-            <motion.div variants={itemVariants} className="flex justify-between items-center mb-8 relative z-20 shrink-0">
+            <div className="flex justify-between items-center mb-8 relative z-20 shrink-0">
                 <h1 className="text-3xl text-white font-light tracking-tight">Cartify</h1>
                 {isActive && !isReceiptView && (
                     <button 
@@ -45,10 +39,10 @@ export default function CartifyPage() {
                         <X className="w-5 h-5 text-white/70" />
                     </button>
                 )}
-            </motion.div>
+            </div>
 
             {/* Smart Container Rendering */}
-            <motion.div variants={itemVariants} className="flex-1 flex flex-col relative z-20 min-h-[min-content]">
+            <div className="flex-1 flex flex-col relative z-20 min-h-[min-content]">
                 {isReceiptView ? (
                     <ReceiptView />
                 ) : !isActive ? (
@@ -58,7 +52,7 @@ export default function CartifyPage() {
                 ) : (
                     <LiveTripTracker />
                 )}
-            </motion.div>
+            </div>
 
             <CancelPromptModal 
                 isOpen={showCancelPrompt}
