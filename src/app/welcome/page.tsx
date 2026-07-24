@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { AuthSheet } from "@/components/auth/AuthSheet";
 import { ArrowRight } from "lucide-react";
 import { WelcomeShader } from "@/components/auth/WelcomeShader";
+import { BorderBeam } from "border-beam";
 
 export default function WelcomePage() {
   const [authMode, setAuthMode] = useState<"email" | "magic-link">("email");
@@ -72,7 +73,7 @@ export default function WelcomePage() {
             Budgeting, together.
           </h2>
           <p className="text-[18px] text-[#cfc4c5] font-normal leading-relaxed max-w-[280px] mx-auto">
-            The premium way to sync your finances with your partner.
+            The best way to sync your finances with your loved one.
           </p>
         </motion.div>
 
@@ -83,19 +84,25 @@ export default function WelcomePage() {
           transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
           className="w-full flex flex-col gap-4"
         >
-          {/* Primary Button (Get Started) - Apple Green */}
-          <button
-            onClick={() => openSheet("magic-link")}
-            className="w-full h-[56px] rounded-[18px] bg-[#30D158] text-[#000000] font-semibold text-[17px] hover:bg-[#34E35F] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_8px_16px_rgba(48,209,88,0.25)]"
+          {/* Primary Button (Get Started) - Dark Glass with BorderBeam */}
+          <BorderBeam 
+            size="pulse-inner" 
+            colorVariant="sunset" 
+            style={{ "--beam-hue-base": "150deg" } as React.CSSProperties}
           >
-            <span>Get Started</span>
-            <ArrowRight className="w-[18px] h-[18px]" strokeWidth={2.5} />
-          </button>
+            <button
+              onClick={() => openSheet("magic-link")}
+              className="w-full h-[56px] rounded-[18px] bg-[#1c1c1e]/60 backdrop-blur-xl text-[#e4e2e4] font-semibold text-[17px] hover:bg-[#2c2c2e]/80 transition-colors active:scale-[0.98] flex items-center justify-center gap-2 border border-white/[0.08]"
+            >
+              <span>Get Started</span>
+              <ArrowRight className="w-[18px] h-[18px]" strokeWidth={2.5} />
+            </button>
+          </BorderBeam>
           
           {/* Secondary Button (Sign In) - Clean Dark Glass */}
           <button
             onClick={() => openSheet("email")}
-            className="w-full h-[56px] rounded-[18px] bg-[#1c1c1e] text-[#e4e2e4] font-semibold text-[17px] hover:bg-[#2c2c2e] transition-colors active:scale-[0.98] border border-white/5 shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
+            className="w-full h-[56px] rounded-[18px] bg-[#1c1c1e]/40 backdrop-blur-xl text-[#cfc4c5] font-medium text-[16px] hover:bg-[#2c2c2e]/60 transition-colors active:scale-[0.98] border border-white/[0.05]"
           >
             Sign In
           </button>
