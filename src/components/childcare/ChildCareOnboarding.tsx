@@ -47,7 +47,9 @@ export function ChildCareOnboarding() {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-start min-h-[100dvh] w-full px-6 py-12 overflow-y-auto no-scrollbar bg-[#0A0A0A]">
+    <div className="relative flex flex-col items-center justify-start min-h-[100dvh] w-full px-6 pt-12 pb-24 overflow-y-auto no-scrollbar bg-[#0A0A0A]">
+      {/* Fixed Background Layer to prevent black overscroll revealing the body background */}
+      <div className="fixed inset-0 bg-[#0A0A0A] -z-10 pointer-events-none" />
       
       {/* Exit Button */}
       <Link 
@@ -76,15 +78,38 @@ export function ChildCareOnboarding() {
                 A nurturing space to track, learn, and grow together.
               </p>
               
-              {/* Image Placeholder */}
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-[#FF7B54]/20 to-[#B9E0F2]/20 rounded-[40px] border border-white/10 flex items-center justify-center mb-16 relative">
-                <div className="absolute top-[-20px] right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
+              {/* Slanted Polaroid Image */}
+              <div className="relative mb-14 mt-6 flex justify-center w-full">
+                <motion.div 
+                  initial={{ rotate: -10, scale: 0.9, opacity: 0 }}
+                  animate={{ rotate: -5, scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", damping: 15, stiffness: 100 }}
+                  className="w-[200px] sm:w-[240px] bg-[#F9F9F9] p-2 sm:p-3 pb-10 sm:pb-12 rounded-sm shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)] border border-white/10 relative z-10"
+                >
+                  <div className="relative w-full aspect-[512/770] bg-[#1A1A1A] overflow-hidden rounded-sm shadow-inner">
+                    <img 
+                      src="/ChildCareHub_1.webp" 
+                      alt="Child Care Hub Welcome" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </motion.div>
+                
+                {/* Decorative floating elements */}
+                <motion.div 
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute top-[-10px] right-[15%] w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-xl z-20"
+                >
                   <span className="text-2xl text-[#FF7B54]">☆</span>
-                </div>
-                <div className="absolute bottom-[-15px] left-8 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
+                </motion.div>
+                <motion.div 
+                  animate={{ y: [0, 8, 0] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                  className="absolute bottom-[-15px] left-[10%] w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-xl z-20"
+                >
                   <span className="text-xl text-[#B9E0F2]">♡</span>
-                </div>
-                <span className="text-white/30 text-sm font-semibold tracking-widest uppercase">Art Asset Here</span>
+                </motion.div>
               </div>
 
               {/* Progress Dots */}
