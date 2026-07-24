@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Navigation } from "@/components/Navigation";
 import "./globals.css";
+import { Hanken_Grotesk } from "next/font/google";
 
 const geistSans = {
   variable: "font-sans",
@@ -9,6 +10,12 @@ const geistSans = {
 const geistMono = {
   variable: "font-mono",
 };
+
+const hankenGrotesk = Hanken_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-hanken",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Duo Finance",
@@ -23,10 +30,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${hankenGrotesk.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <main className="min-h-[100dvh] w-full bg-[#050505] flex flex-col font-sans relative">
+      <body className="min-h-full flex flex-col font-hanken">
+        <main className="min-h-[100dvh] w-full bg-[#050505] flex flex-col font-hanken relative">
           
           {/* 
             Responsive App Canvas 

@@ -222,8 +222,14 @@ export default function Home() {
             <button 
               title="Test Auth Flow"
               onClick={() => {
-                const { useRouter } = require('next/navigation');
-                // Simple hack to route without top-level hook if we don't want to modify imports
+                // Clear the state by directly mutating localStorage
+                localStorage.removeItem('duo-auth-storage');
+                const { useAuthStore } = require('@/store/useAuthStore');
+                if (useAuthStore.getState) {
+                  useAuthStore.getState().logout();
+                }
+                
+                // Hard redirect
                 window.location.href = '/welcome';
               }}
               className="w-3 h-3 rounded-full bg-[#FF375F] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(255,55,95,0.5)]"

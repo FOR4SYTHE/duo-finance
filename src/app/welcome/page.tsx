@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { AuthSheet } from "@/components/auth/AuthSheet";
-import { Apple, Mail, KeyRound } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { WelcomeShader } from "@/components/auth/WelcomeShader";
 
 export default function WelcomePage() {
   const [authMode, setAuthMode] = useState<"email" | "magic-link">("email");
@@ -15,91 +16,82 @@ export default function WelcomePage() {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-[100dvh] px-6 py-12 relative overflow-hidden bg-[#050505] selection:bg-white/10">
+    <div className="flex flex-col w-full fixed inset-0 z-50 overflow-hidden bg-[#000000] selection:bg-white/10 font-sans">
       
-      {/* 
-        Slow-Moving Dark Gradient Orb Background 
-        (Thinking Orb / Premium AI Style)
-      */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none flex items-center justify-center">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 90, 180, 270, 360],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="w-[150vw] h-[150vw] sm:w-[800px] sm:h-[800px] opacity-40 mix-blend-screen blur-[80px]"
-          style={{
-            background: "conic-gradient(from 180deg at 50% 50%, #2a8af6 0deg, #a853ba 180deg, #e92a67 360deg)",
-          }}
-        />
-        
-        {/* Central Dark Void to make it a ring/orb effect */}
-        <div className="absolute inset-0 flex items-center justify-center">
-           <div className="w-[80vw] h-[80vw] sm:w-[400px] sm:h-[400px] bg-[#050505] rounded-full blur-[40px]" />
-        </div>
-      </div>
+      {/* Background WebGL Shader (Green Orbs) */}
+      <WelcomeShader />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col justify-center items-center relative z-10 pt-16">
-        <motion.div
+      {/* Top Header - Chrome Logo */}
+      <header className="relative z-10 w-full flex justify-center pt-[12dvh]">
+        <motion.h1 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="text-[48px] font-extrabold uppercase tracking-[0.2em] relative"
+          style={{
+            // Premium Chrome/Metal 3D Text Effect
+            background: "linear-gradient(to bottom, #ffffff 0%, #b3b3b3 40%, #4a4a4a 45%, #909090 55%, #e0e0e0 80%, #ffffff 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            filter: "drop-shadow(0px 4px 12px rgba(0,0,0,0.8))",
+          }}
+        >
+          DUO
+          {/* Subtle reflection overlay */}
+          <span 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 40%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          />
+        </motion.h1>
+      </header>
+
+      {/* Main Content & Actions Area */}
+      <main className="relative z-10 w-full max-w-md mx-auto flex flex-col items-center justify-end flex-grow pb-12 px-6">
+        
+        {/* Text Block */}
+        <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="text-center"
+          className="text-center mb-12 space-y-3 w-full"
         >
-          {/* Logo / Mark placeholder */}
-          <div className="w-16 h-16 mx-auto bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] mb-8 backdrop-blur-md">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white">
-              <path d="M12 2L2 22H22L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl font-semibold text-white tracking-tight mb-4">
-            Welcome
-          </h1>
-          <p className="text-lg text-white/50 font-medium tracking-wide">
-            Your journey starts from here
+          <h2 className="text-[36px] md:text-[48px] font-bold text-[#e4e2e4] leading-tight tracking-[-0.02em]">
+            Budgeting, together.
+          </h2>
+          <p className="text-[18px] text-[#cfc4c5] font-normal leading-relaxed max-w-[280px] mx-auto">
+            The premium way to sync your finances with your partner.
           </p>
         </motion.div>
-      </div>
 
-      {/* Action Buttons */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-        className="flex flex-col gap-4 relative z-10 mt-auto pb-8"
-      >
-        <button
-          onClick={() => openSheet("magic-link")}
-          className="w-full h-14 bg-white text-black rounded-2xl font-semibold text-base flex items-center justify-center gap-3 hover:bg-white/90 transition-all shadow-[0_0_30px_rgba(255,255,255,0.15)] active:scale-[0.98]"
+        {/* Vision Pro / Apple Glass Action Card */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+          className="w-full bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[24px] p-6 flex flex-col gap-4 shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
         >
-          <KeyRound className="w-5 h-5" /> Continue with Magic Link
-        </button>
-
-        <button
-          className="w-full h-14 bg-[#1C1C1E] text-white rounded-2xl font-semibold text-base flex items-center justify-center gap-3 hover:bg-[#2C2C2E] transition-all border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] active:scale-[0.98]"
-        >
-          <Apple className="w-5 h-5" /> Continue with Apple
-        </button>
-
-        <button
-          onClick={() => openSheet("email")}
-          className="w-full h-14 bg-transparent text-white/70 rounded-2xl font-semibold text-base flex items-center justify-center gap-3 hover:bg-white/[0.04] transition-all active:scale-[0.98]"
-        >
-          <Mail className="w-5 h-5 text-white/40" /> Continue with Email
-        </button>
-
-        <p className="text-center text-[11px] text-white/30 font-medium mt-4 leading-relaxed">
-          By pressing on "Continue with..." you agree <br />
-          to our <a href="#" className="text-white/50 underline underline-offset-2">Terms of Service</a> and <a href="#" className="text-white/50 underline underline-offset-2">Privacy Policy</a>
-        </p>
-      </motion.div>
+          {/* Primary Button (Get Started) */}
+          <button
+            onClick={() => openSheet("magic-link")}
+            className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-[#5E5CE6] to-[#4c4ab3] text-white font-semibold text-[15px] hover:opacity-90 transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(94,92,230,0.15)]"
+          >
+            <span>Get Started</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+          
+          {/* Secondary Button (Sign In) */}
+          <button
+            onClick={() => openSheet("email")}
+            className="w-full py-4 px-6 rounded-xl border-[0.5px] border-white/10 bg-white/5 text-[#e4e2e4] font-semibold text-[15px] hover:bg-white/10 transition-colors active:scale-[0.98]"
+          >
+            Sign In
+          </button>
+        </motion.div>
+      </main>
 
       {/* The Auth Modal Sheet */}
       <AuthSheet 

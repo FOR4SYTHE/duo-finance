@@ -1,6 +1,9 @@
 @import "tailwindcss" source("..");
 
 @theme {
+  --font-sans: var(--font-hanken), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-hanken: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  
   --color-background: #000000;
   --color-panel: #0A0A0A;
   --color-card: #1C1C1E;
@@ -20,7 +23,7 @@
   body {
     background-color: var(--color-panel);
     color: var(--color-foreground);
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--font-hanken), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
