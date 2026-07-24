@@ -1,20 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { AuthSheet } from "@/components/auth/AuthSheet";
 import { ArrowRight } from "lucide-react";
 import { WelcomeShader } from "@/components/auth/WelcomeShader";
 import { BorderBeam } from "border-beam";
+import { useRouter } from "next/navigation";
 
 export default function WelcomePage() {
-  const [authMode, setAuthMode] = useState<"email" | "magic-link">("email");
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-  const openSheet = (mode: "email" | "magic-link") => {
-    setAuthMode(mode);
-    setIsSheetOpen(true);
-  };
+  const router = useRouter();
 
   return (
     <div className="flex flex-col w-full fixed inset-0 z-50 overflow-hidden bg-[#000000] selection:bg-white/10 font-sans">
@@ -91,7 +84,7 @@ export default function WelcomePage() {
             style={{ "--beam-hue-base": "150deg" } as React.CSSProperties}
           >
             <button
-              onClick={() => openSheet("magic-link")}
+              onClick={() => router.push("/signup")}
               className="w-full h-[56px] rounded-[18px] bg-[#1c1c1e]/60 backdrop-blur-xl text-[#e4e2e4] font-semibold text-[17px] hover:bg-[#2c2c2e]/80 transition-colors active:scale-[0.98] flex items-center justify-center gap-2 border border-white/[0.08]"
             >
               <span>Get Started</span>
@@ -101,20 +94,13 @@ export default function WelcomePage() {
           
           {/* Secondary Button (Sign In) - Clean Dark Glass */}
           <button
-            onClick={() => openSheet("email")}
+            onClick={() => router.push("/login")}
             className="w-full h-[56px] rounded-[18px] bg-[#1c1c1e]/40 backdrop-blur-xl text-[#cfc4c5] font-medium text-[16px] hover:bg-[#2c2c2e]/60 transition-colors active:scale-[0.98] border border-white/[0.05]"
           >
             Sign In
           </button>
         </motion.div>
       </main>
-
-      {/* The Auth Modal Sheet */}
-      <AuthSheet 
-        isOpen={isSheetOpen} 
-        onClose={() => setIsSheetOpen(false)} 
-        mode={authMode} 
-      />
     </div>
   );
 }
