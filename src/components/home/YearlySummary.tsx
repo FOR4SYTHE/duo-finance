@@ -395,26 +395,14 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
                   </h3>
                 </div>
                 <div className="flex flex-col gap-4">
-                  {(() => {
-                    const displayGoals = [...goals];
-                    // Inject mock goal so the user can verify the animation!
-                    displayGoals.push({
-                      id: "mock-emergency-test",
-                      name: "Test Emergency Fund (Mock)",
-                      savedAmount: 37500,
-                      targetAmount: 74997,
-                      color: "#D4AF37",
-                    } as any);
-
-                    return displayGoals.map((g) => (
-                      <GoalBar
-                        key={g.id}
-                        name={g.name}
-                        saved={g.savedAmount}
-                        target={g.targetAmount}
-                      />
-                    ));
-                  })()}
+                  {goals.map((g) => (
+                    <GoalBar
+                      key={g.id}
+                      name={g.name}
+                      saved={g.savedAmount}
+                      target={g.targetAmount}
+                    />
+                  ))}
                 </div>
               </div>
             )}

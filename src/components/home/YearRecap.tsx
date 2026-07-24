@@ -72,8 +72,16 @@ function SlideCover({ year }: { year: number }) {
         transition={{ duration: 1 }}
         className="relative z-10 text-center"
       >
-        <div className="flex justify-center items-center mb-8">
-          <span className="text-4xl drop-shadow-[0_0_12px_rgba(212,175,55,0.8)]" role="img" aria-label="sparkles">✨</span>
+        <div className="flex justify-center items-center mb-4 relative">
+          <span className="text-4xl drop-shadow-[0_0_12px_rgba(212,175,55,0.8)] absolute -left-4 top-0" role="img" aria-label="sparkles">✨</span>
+          <motion.img 
+            initial={{ scale: 0.7, opacity: 0, y: 30 }}
+            whileInView={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.2 }}
+            src="/mascot/dufi-host.webp" 
+            alt="Dufi Host" 
+            className="w-52 h-52 sm:w-60 sm:h-60 object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)] mb-2"
+          />
         </div>
         <h1 
           className="font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-[#FFF4D0] to-[#D4AF37] leading-[0.9] pb-[0.3em] -mb-[0.3em]"
@@ -102,8 +110,16 @@ function SlideTotals({ totalEntries, totalSpent, config }: any) {
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          className="bg-black/40 border border-[#D4AF37]/20 rounded-[32px] p-8 backdrop-blur-xl shadow-[0_0_40px_rgba(212,175,55,0.05)]"
+          className="bg-black/40 border border-[#D4AF37]/20 rounded-[32px] p-8 backdrop-blur-xl shadow-[0_0_40px_rgba(212,175,55,0.05)] relative"
         >
+          {/* Dufi Champion peeking over the top card */}
+          <motion.img 
+            initial={{ y: 50, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.25, type: "spring", stiffness: 260, damping: 22 }}
+            src="/mascot/dufi-champion.webp" 
+            className="absolute -top-[95px] right-2 w-[150px] h-[150px] object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)] z-20 pointer-events-none"
+          />
           <span className="text-[#D4AF37] text-[11px] font-bold tracking-[0.2em] uppercase mb-4 block">
             The Grand Total
           </span>
@@ -154,9 +170,19 @@ function SlideHit({ topCategory, topAmount }: any) {
         whileInView={{ opacity: 1, x: 0 }}
         className="relative z-10"
       >
-        <div className="w-20 h-20 bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/30 mb-8 rounded-full overflow-hidden relative shadow-[0_0_30px_rgba(212,175,55,0.1)]">
-           <PremiumStarBurst className="w-24 h-24 text-[#D4AF37] absolute -right-4 -bottom-4 opacity-30" />
-           <span className="text-4xl relative z-10 drop-shadow-lg" role="img" aria-label="crown">👑</span>
+        <div className="flex justify-between items-start mb-4">
+          <div className="w-20 h-20 bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/30 rounded-full overflow-hidden relative shadow-[0_0_30px_rgba(212,175,55,0.1)]">
+             <PremiumStarBurst className="w-24 h-24 text-[#D4AF37] absolute -right-4 -bottom-4 opacity-30" />
+             <span className="text-4xl relative z-10 drop-shadow-lg" role="img" aria-label="crown">👑</span>
+          </div>
+          <motion.img 
+            initial={{ scale: 0.7, opacity: 0, rotate: -5 }}
+            whileInView={{ scale: 1, opacity: 1, rotate: 0 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 20 }}
+            src="/mascot/dufi-analyst.webp" 
+            alt="Dufi Analyst" 
+            className="w-44 h-44 sm:w-52 sm:h-52 object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)] -mt-10 -mr-6 pointer-events-none"
+          />
         </div>
         <span className="text-[#D4AF37] text-sm font-bold tracking-[0.2em] uppercase mb-4 block">
           The Heavyweight Champion
@@ -241,9 +267,14 @@ function SlideOutro({ onClose, nextYear, config }: any) {
         whileInView={{ opacity: 1, y: 0 }}
         className="text-center w-full max-w-sm relative z-10"
       >
-        <div className="w-20 h-20 bg-gradient-to-tr from-[#D4AF37] to-[#AA8529] rounded-full mx-auto mb-8 shadow-[0_0_40px_rgba(212,175,55,0.4)] flex items-center justify-center">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        </div>
+        <motion.div 
+          initial={{ y: 20, opacity: 0, scale: 0.8 }}
+          whileInView={{ y: 0, opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 20 }}
+          className="mx-auto mb-4 flex justify-center"
+        >
+          <img src="/mascot/dufi-guardian.webp" alt="Dufi Guardian" className="w-44 h-44 sm:w-48 sm:h-48 object-contain drop-shadow-[0_0_50px_rgba(212,175,55,0.5)]" />
+        </motion.div>
         
         <h2 className="text-3xl font-semibold text-white tracking-tight mb-4 leading-tight">
           Set up your budget <br/> for {nextYear}

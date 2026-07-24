@@ -39,6 +39,14 @@ function SlideCover({ monthName, photoUrl }: { monthName: string, photoUrl: stri
         viewport={{ once: true }}
         className="relative z-10"
       >
+        <motion.img 
+          initial={{ scale: 0.7, opacity: 0, y: 30 }}
+          whileInView={{ scale: 1, opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.2 }}
+          src="/mascot/dufi-host.webp" 
+          alt="Dufi Host" 
+          className="w-52 h-52 sm:w-60 sm:h-60 object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)] mb-2"
+        />
         <span className="text-white/60 text-sm font-semibold tracking-[0.2em] uppercase mb-4 block">
           Month in Review
         </span>
@@ -69,16 +77,26 @@ function SlideScore({ config, monthEntries, remaining, isOver }: any) {
     
   return (
     <div className="w-full h-full bg-[#E5E5EA] flex flex-col px-6 pt-16 pb-12">
-      <div className="flex-1 flex flex-col justify-center gap-3 max-w-sm mx-auto w-full">
+      <div className="flex-1 flex flex-col justify-center gap-3 max-w-sm mx-auto w-full relative">
         
         {/* Top White Card */}
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ margin: "-100px" }}
-          className="bg-white rounded-[32px] p-8 shadow-sm flex flex-col"
-        >
-          <span className="text-black/40 text-[11px] font-bold tracking-[0.2em] uppercase mb-4">
+        <div className="relative">
+          {/* Dufi Guardian peeking over the top card */}
+          <motion.img 
+            initial={{ y: 50, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            viewport={{ margin: "-100px" }}
+            transition={{ delay: 0.25, type: "spring", stiffness: 260, damping: 22 }}
+            src={isOver ? "/mascot/difu-danger-1.webp" : "/mascot/dufi-guardian.webp"} 
+            className="absolute -top-[95px] right-2 w-[150px] h-[150px] object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.3)] z-20 pointer-events-none"
+          />
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ margin: "-100px" }}
+            className="bg-white rounded-[32px] p-8 shadow-sm flex flex-col relative z-10"
+          >
+            <span className="text-black/40 text-[11px] font-bold tracking-[0.2em] uppercase mb-4">
             Statistics
           </span>
           <h2 className="text-3xl font-medium tracking-tight text-black leading-tight mb-8">
@@ -97,6 +115,7 @@ function SlideScore({ config, monthEntries, remaining, isOver }: any) {
             </div>
           </div>
         </motion.div>
+        </div>
 
         {/* Middle Yellow Card */}
         <motion.div 
@@ -164,9 +183,20 @@ function SlideHit({ topCategory, topAmount }: any) {
         viewport={{ margin: "-100px" }}
         className="relative z-10"
       >
-        <span className="text-[#0A84FF] text-sm font-bold tracking-[0.2em] uppercase mb-6 block">
-          The Breakdown
-        </span>
+        <div className="flex justify-between items-start mb-4">
+          <span className="text-[#0A84FF] text-sm font-bold tracking-[0.2em] uppercase block pt-2">
+            The Breakdown
+          </span>
+          <motion.img 
+            initial={{ scale: 0.7, opacity: 0, rotate: -5 }}
+            whileInView={{ scale: 1, opacity: 1, rotate: 0 }}
+            viewport={{ margin: "-100px" }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 20 }}
+            src="/mascot/dufi-analyst.webp" 
+            alt="Dufi Analyst" 
+            className="w-44 h-44 sm:w-52 sm:h-52 object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)] -mt-10 -mr-6 pointer-events-none"
+          />
+        </div>
         <h2 className="text-4xl font-light text-white tracking-tight leading-tight mb-8">
           Your biggest <br/> expense was <br/>
           <span className="font-semibold text-white">{topCategory}</span>.
@@ -201,9 +231,14 @@ function SlideOutro({ onClose, currentMonthName, config }: any) {
         viewport={{ margin: "-100px" }}
         className="text-center w-full max-w-sm"
       >
-        <div className="w-20 h-20 bg-gradient-to-tr from-[#30D158] to-[#64D2FF] rounded-full mx-auto mb-8 shadow-[0_0_40px_rgba(48,209,88,0.3)] flex items-center justify-center">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        </div>
+        <motion.div 
+          initial={{ y: 20, opacity: 0, scale: 0.8 }}
+          whileInView={{ y: 0, opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 20 }}
+          className="mx-auto mb-4 flex justify-center"
+        >
+          <img src="/mascot/dufi-champion.webp" alt="Dufi Champion" className="w-44 h-44 sm:w-48 sm:h-48 object-contain drop-shadow-[0_0_50px_rgba(48,209,88,0.4)]" />
+        </motion.div>
         
         <h2 className="text-3xl font-semibold text-white tracking-tight mb-4 leading-tight">
           Set up your budget <br/> for {currentMonthName}

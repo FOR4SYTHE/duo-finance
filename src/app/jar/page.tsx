@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Settings2, PiggyBank, AlertTriangle, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants, itemVariants } from "@/utils/animations";
@@ -15,6 +16,7 @@ import { LogAnimationOverlay } from "@/components/jar/LogAnimationOverlay";
 import { AnimatePresence } from "framer-motion";
 
 export default function SpendJarPage() {
+  const router = useRouter();
   const [isInitialLoad, setIsInitialLoad] = useState(false);
   useEffect(() => {
     if (!sessionStorage.getItem('hasSeenJarAnimation')) {
@@ -59,11 +61,13 @@ export default function SpendJarPage() {
   // Calculate totals based on allowed percentage
   const totalSpent = entries.reduce((sum, entry) => sum + entry.amount, 0);
   const allowedSpend = config.targetAmount * ((config.jarAllowedPercentage || 20) / 100);
-  const remainingAllowed = allowedSpend - totalSpent;
-  const percentage = Math.min((totalSpent / allowedSpend) * 100, 100);
+  const isBudgetSet = allowedSpend > 0;
   
-  const isLocked = totalSpent >= allowedSpend;
-  const isNearingCap = percentage >= 85 && !isLocked;
+  const remainingAllowed = isBudgetSet ? allowedSpend - totalSpent : 0;
+  const percentage = isBudgetSet ? Math.min((totalSpent / allowedSpend) * 100, 100) : 0;
+  
+  const isLocked = isBudgetSet && totalSpent >= allowedSpend;
+  const isNearingCap = isBudgetSet && percentage >= 85 && !isLocked;
 
   // Visuals for ring
   let ringColor = percentage === 0 ? "transparent" : "#30D158"; // Green
@@ -93,7 +97,9 @@ export default function SpendJarPage() {
   };
 
   const handleMainAction = () => {
-      if (isLocked) {
+      if (!isBudgetSet) {
+          router.push('/budget');
+      } else if (isLocked) {
           setIsLockedModalOpen(true);
           setMascotReaction('locked_click');
           setTimeout(() => setMascotReaction('idle'), 3000);
@@ -124,8 +130,10 @@ export default function SpendJarPage() {
   // Get active mascot state image
   const getMascotImage = () => {
     let state = 'safe';
-    if (percentage >= 85) state = 'danger';
-    else if (percentage >= 50) state = 'warning';
+    if (isBudgetSet) {
+        if (percentage >= 85) state = 'danger';
+        else if (percentage >= 50) state = 'warning';
+    }
 
     let suffix = '1'; // default idle
 
@@ -281,6 +289,19 @@ export default function SpendJarPage() {
 
         {/* Solid Premium Action Button Area */}
         <motion.div variants={itemVariants} className="w-[85%] mx-auto mt-12 relative z-20">
+          {!isBudgetSet && (
+            <div className="w-full rounded-[24px] p-5 mb-6 flex items-start gap-4 border shadow-xl transition-colors duration-500 bg-[#111111] border-white/10">
+              <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0 text-white/40" />
+              <div className="flex flex-col">
+                <span className="font-semibold tracking-wide mb-1 text-white/80">
+                  Setup Required
+                </span>
+                <span className="text-white/50 text-sm leading-relaxed">
+                  Please set a household target budget to unlock the Spend Jar.
+                </span>
+              </div>
+            </div>
+          )}
           {(isNearingCap || isLocked) && (
             <div 
               className={`w-full rounded-[24px] p-5 mb-6 flex items-start gap-4 border shadow-xl transition-colors duration-500 ${
@@ -307,19 +328,23 @@ export default function SpendJarPage() {
           <button 
             onClick={handleMainAction}
             className={`w-full h-14 rounded-full flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_8px_20px_rgba(0,0,0,0.3)]
-              ${isLocked 
+              ${!isBudgetSet
+                ? 'bg-[#1a1a1a] text-white/50 border border-white/10'
+                : isLocked 
                 ? 'bg-[#1a0a0a] text-[#FF453A] border border-[#FF453A]/30 cursor-not-allowed opacity-80' 
                 : 'bg-white text-black active:scale-[0.97] hover:bg-white/90'
               }
             `}
           >
-            {isLocked ? (
+            {!isBudgetSet ? (
+              <Settings2 className="w-4 h-4" strokeWidth={2.5} />
+            ) : isLocked ? (
               <Lock className="w-4 h-4" strokeWidth={2.5} />
             ) : (
               <Plus className="w-5 h-5" strokeWidth={2.5} />
             )}
             <span className="font-bold tracking-widest text-xs uppercase">
-              {isLocked ? 'Jar Locked' : 'Quick Log Spend'}
+              {!isBudgetSet ? 'Setup Budget' : isLocked ? 'Jar Locked' : 'Quick Log Spend'}
             </span>
           </button>
         </motion.div>

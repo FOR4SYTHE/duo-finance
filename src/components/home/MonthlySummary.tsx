@@ -407,28 +407,15 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
                   </h3>
                 </div>
                 <div className="flex flex-col gap-4">
-                  {(() => {
-                    const displayGoals = [...goals];
-                    // Inject mock goal so the user can verify the animation!
-                    displayGoals.push({
-                      id: "mock-emergency-test",
-                      name: "Test Emergency Fund (Mock)",
-                      savedAmount: 37500,
-                      targetAmount: 74997,
-                      icon: "Target",
-                      color: "#BF5AF2",
-                    } as any);
-
-                    return displayGoals.map((g) => (
-                      <GoalBar
-                        key={g.id}
-                        name={g.name}
-                        saved={g.savedAmount}
-                        target={g.targetAmount}
-                        icon={g.icon}
-                      />
-                    ));
-                  })()}
+                  {goals.map((g) => (
+                    <GoalBar
+                      key={g.id}
+                      name={g.name}
+                      saved={g.savedAmount}
+                      target={g.targetAmount}
+                      icon={g.icon}
+                    />
+                  ))}
                 </div>
               </div>
             )}
