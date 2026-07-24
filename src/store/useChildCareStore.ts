@@ -60,8 +60,8 @@ const INITIAL_DATA: ChildCareData = {
     { id: '3', name: "Malolos Maternity Hospital", type: "Private / Pediatrics", emergencyHotline: "(044) 662-7292" }
   ],
   summerActivities: [
-    { id: '1', name: "Malolos Sports Complex Swimming Clinic", cost: 1500, duration: "10 Sessions" },
-    { id: '2', name: "Summer Art Workshop (Barasoain)", cost: 2000, duration: "4 Weeks" }
+    { id: '1', title: "Malolos Sports Complex Swimming Clinic", cost: 1500, duration: "10 Sessions" },
+    { id: '2', title: "Summer Art Workshop (Barasoain)", cost: 2000, duration: "4 Weeks" }
   ],
   monthlyEssentialsCost: 3500 // Base for diapers, milk, vitamins
 };
