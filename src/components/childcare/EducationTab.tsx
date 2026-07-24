@@ -1,63 +1,97 @@
 "use client";
 
 import { useChildCareStore } from "@/store/useChildCareStore";
+import { ArrowRight, GraduationCap, Palette } from "lucide-react";
 
 export function EducationTab() {
   const { cachedData } = useChildCareStore();
 
   return (
-    <div className="flex flex-col gap-6">
-      <section>
-        <div className="flex justify-between items-end mb-3">
-          <h3 className="text-lg font-bold text-white">Schools in Malolos</h3>
-        </div>
-        <div className="flex flex-col gap-3">
-          {cachedData.schools.map((school) => (
-            <div key={school.id} className="bg-[#1A1A1A] rounded-[24px] p-4 border border-white/5">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h4 className="font-semibold text-white leading-tight">{school.name}</h4>
-                  <p className="text-xs text-white/50 mt-1">{school.type}</p>
+    <div className="flex flex-col gap-4">
+      {/* Schools Section */}
+      {cachedData.schools.map((school) => {
+        const zarTuition = Math.round(school.monthlyTuition * 0.27);
+        return (
+          <div key={school.id} className="bg-[#1A1A1A] rounded-[24px] p-5 relative overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.2)] border border-white/5">
+            {/* Decorative Corner Shape */}
+            <div className="absolute top-[-20%] right-[-10%] w-[120px] h-[120px] bg-[#B9E0F2]/10 rounded-full blur-[20px] pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[80px] h-[80px] bg-[#FF7B54]/5 rounded-bl-full pointer-events-none" />
+  
+            <div className="relative z-10 flex flex-col gap-5">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-[#B9E0F2] flex items-center justify-center flex-shrink-0 shadow-inner">
+                  <GraduationCap className="w-6 h-6 text-[#0A0A0A]" />
+                </div>
+                <div className="flex flex-col">
+                  <h4 className="font-bold text-white text-[15px] leading-tight">{school.name}</h4>
+                  <p className="text-[12px] font-medium text-white/50 mt-0.5">{school.type}</p>
                 </div>
               </div>
-              
-              <div className="flex justify-between items-end mt-4 pt-4 border-t border-white/5">
+  
+              <div className="border-t border-white/5 pt-4 flex justify-between items-end">
                 <div>
-                  <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Monthly Tuition</div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-lg font-semibold text-white">₱{school.monthlyTuition.toLocaleString()}</span>
-                    <span className="text-xs text-white/50">/ R{Math.round(school.monthlyTuition * 0.27).toLocaleString()}</span>
+                  <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Est. Tuition</div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-lg font-black text-[#FF7B54]">₱{school.monthlyTuition.toLocaleString()}</span>
+                    <span className="text-[12px] font-medium text-white/50">/ R{zarTuition.toLocaleString()}</span>
+                    <span className="text-[10px] font-medium text-white/40 ml-0.5">/yr</span>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Supplies/Term</div>
-                  <div className="flex items-baseline gap-1.5 justify-end">
-                    <span className="text-sm font-medium text-white">₱{school.suppliesPerTerm.toLocaleString()}</span>
-                  </div>
-                </div>
+                <button className="w-8 h-8 rounded-full bg-[#B9E0F2]/20 flex items-center justify-center hover:bg-[#B9E0F2]/30 transition-colors">
+                  <ArrowRight className="w-4 h-4 text-[#B9E0F2]" />
+                </button>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        );
+      })}
 
-      <section>
-        <h3 className="text-lg font-bold text-white mb-3">Summer Activities</h3>
-        <div className="flex flex-col gap-3">
-          {cachedData.summerActivities.map((activity) => (
-            <div key={activity.id} className="bg-[#1A1A1A] rounded-2xl p-4 border border-white/5 flex justify-between items-center">
-              <div>
-                <h4 className="font-semibold text-white text-sm">{activity.title || activity.name}</h4>
-                <p className="text-xs text-white/50 mt-0.5">{activity.duration}</p>
-              </div>
-              <div className="text-right">
-                <div className="text-sm font-medium text-white">₱{activity.cost.toLocaleString()}</div>
-                <div className="text-[10px] text-white/40">R{Math.round(activity.cost * 0.27).toLocaleString()}</div>
-              </div>
-            </div>
-          ))}
+      {/* Activities Section */}
+      <div className="mt-4 flex flex-col gap-3">
+        <div className="flex items-center gap-2 px-2">
+          <Palette className="w-5 h-5 text-white/80" />
+          <h4 className="font-bold text-white text-[15px]">Available Activities</h4>
         </div>
-      </section>
+        
+        <div className="grid grid-cols-2 gap-3">
+          {cachedData.summerActivities.map((activity, idx) => {
+            const zarCost = Math.round((activity.cost || 5000) * 0.27);
+            return (
+              <div 
+                key={activity.id} 
+                className="relative aspect-square rounded-[24px] overflow-hidden group shadow-[0_8px_24px_rgba(0,0,0,0.2)] border border-white/10"
+              >
+                {/* Background Art Placeholder */}
+                <div 
+                  className={`absolute inset-0 bg-gradient-to-br ${
+                    idx % 3 === 0 ? 'from-[#FF7B54]/40 to-[#FF7B54]/10' :
+                    idx % 3 === 1 ? 'from-[#B9E0F2]/40 to-[#B9E0F2]/10' :
+                    'from-[#FCD34D]/40 to-[#F87171]/10'
+                  }`} 
+                />
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
+                <div className="absolute top-2 right-2 text-[8px] font-bold uppercase tracking-widest text-white/30 border border-white/10 px-2 py-0.5 rounded-full backdrop-blur-md">Art</div>
+                
+                {/* Dark Scrim for text legibility */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent" />
+                
+                <div className="absolute inset-0 p-4 flex flex-col justify-end">
+                  <span className="text-[10px] font-bold text-[#FF7B54] uppercase tracking-widest mb-1 flex items-baseline gap-1">
+                    ₱{activity.cost?.toLocaleString() || "5,000"} 
+                    <span className="text-white/50 text-[8px]">/ R{zarCost.toLocaleString()}</span>
+                  </span>
+                  <span className="text-[14px] font-bold text-white leading-tight">
+                    {activity.title || activity.name}
+                  </span>
+                  <span className="text-[11px] font-medium text-white/50 mt-1">
+                    {activity.duration || "Summer Term"}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

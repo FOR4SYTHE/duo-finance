@@ -9,30 +9,29 @@ export function ChildCareTabs() {
   const [activeTab, setActiveTab] = useState<"education" | "health">("education");
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6 mt-2">
       {/* Tab Selector */}
-      <div className="bg-[#1A1A1A] p-1 rounded-2xl flex relative border border-white/5 shadow-[inset_0_1px_2px_rgba(255,255,255,0.02)]">
+      <div className="flex gap-3">
         <button
           onClick={() => setActiveTab("education")}
-          className={`flex-1 py-2.5 text-sm font-semibold z-10 transition-colors ${activeTab === "education" ? "text-white" : "text-white/50"}`}
+          className={`flex-1 py-3.5 text-[13px] font-bold rounded-full transition-all ${
+            activeTab === "education" 
+              ? "bg-[#FF7B54] text-white shadow-[0_4px_16px_rgba(255,123,84,0.3)]" 
+              : "bg-[#B9E0F2]/10 text-white/60 border border-white/5 hover:bg-[#B9E0F2]/20 hover:text-white"
+          }`}
         >
           Education & Camp
         </button>
         <button
           onClick={() => setActiveTab("health")}
-          className={`flex-1 py-2.5 text-sm font-semibold z-10 transition-colors ${activeTab === "health" ? "text-white" : "text-white/50"}`}
+          className={`flex-1 py-3.5 text-[13px] font-bold rounded-full transition-all ${
+            activeTab === "health" 
+              ? "bg-[#FF7B54] text-white shadow-[0_4px_16px_rgba(255,123,84,0.3)]" 
+              : "bg-[#B9E0F2]/10 text-white/60 border border-white/5 hover:bg-[#B9E0F2]/20 hover:text-white"
+          }`}
         >
           Health & Essentials
         </button>
-
-        {/* Animated Background Pill */}
-        <motion.div
-          layoutId="childcare-active-tab"
-          className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white/10 rounded-xl border border-white/10 shadow-sm"
-          initial={false}
-          animate={{ x: activeTab === "education" ? 0 : "100%" }}
-          transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-        />
       </div>
 
       {/* Tab Content */}

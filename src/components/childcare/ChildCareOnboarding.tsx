@@ -1,65 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChildCareStore } from "@/store/useChildCareStore";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { X, MapPin } from "lucide-react";
 
 export function ChildCareOnboarding() {
   const { profile, updateProfile, completeOnboarding } = useChildCareStore();
   const [step, setStep] = useState(1);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    dragRef.current.isDown = true;
+    dragRef.current.startX = e.pageX - scrollRef.current.offsetLeft;
+    dragRef.current.scrollLeft = scrollRef.current.scrollLeft;
+  };
+  const onMouseLeaveOrUp = () => { dragRef.current.isDown = false; };
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!dragRef.current.isDown || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - dragRef.current.startX) * 2;
+    scrollRef.current.scrollLeft = dragRef.current.scrollLeft - walk;
+  };
   
   const ages = Array.from({ length: 18 }, (_, i) => i + 1); // 1 to 18
 
   const nextStep = () => {
-    if (step < 4) setStep(step + 1);
+    if (step < 3) setStep(step + 1);
     else completeOnboarding();
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-[100dvh] w-full px-6 py-12 overflow-hidden">
+    <div className="relative flex flex-col items-center justify-start min-h-[100dvh] w-full px-6 py-12 overflow-y-auto no-scrollbar bg-[#0A0A0A]">
       
       {/* Exit Button */}
       <Link 
         href="/"
-        className="absolute top-6 right-6 w-10 h-10 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-colors z-50 shadow-lg"
+        className="absolute top-6 left-6 w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-colors z-50 shadow-lg"
       >
         <X className="w-5 h-5" />
       </Link>
 
-      {/* Fluid Art Background (Siri/Wallet Style) */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none flex items-center justify-center">
-        <motion.div 
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 90, 180, 270, 360],
-            borderRadius: ["40%", "50%", "30%", "50%", "40%"]
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute w-[120vw] h-[120vw] max-w-[600px] max-h-[600px] bg-gradient-to-tr from-[#A855F7]/30 via-[#EC4899]/20 to-[#3B82F6]/30 blur-[80px] opacity-70 mix-blend-screen"
-        />
-        <motion.div 
-          animate={{
-            scale: [1, 1.5, 1],
-            rotate: [360, 180, 0],
-            borderRadius: ["50%", "30%", "50%", "40%", "50%"]
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute w-[100vw] h-[100vw] max-w-[500px] max-h-[500px] bg-gradient-to-bl from-[#FCD34D]/20 via-[#F87171]/20 to-transparent blur-[60px] opacity-60 mix-blend-screen"
-        />
-      </div>
-
-      {/* Glassmorphic Container */}
-      <div className="relative z-10 w-full max-w-sm bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[40px] p-8 shadow-[0_0_60px_rgba(0,0,0,0.5)]">
+      <div className="relative z-10 w-full max-w-sm pt-8">
         
-        {/* Progress Dots */}
-        <div className="flex justify-center gap-2 mb-10">
-          {[1, 2, 3, 4].map((s) => (
-            <div key={s} className={`h-1.5 rounded-full transition-all duration-500 ${step === s ? 'w-6 bg-white' : 'w-1.5 bg-white/20'}`} />
-          ))}
-        </div>
-
         <AnimatePresence mode="wait">
           {/* STEP 1: Welcome */}
           {step === 1 && (
@@ -68,136 +55,195 @@ export function ChildCareOnboarding() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              className="flex flex-col items-center text-center"
+              className="flex flex-col items-center text-center w-full"
             >
-              <h2 className="text-3xl font-black tracking-tight text-white mb-4 leading-tight">
-                Set up the future<br />of your child.
+              <h2 className="text-3xl font-black tracking-tight text-white mb-3">
+                Shape their future.
               </h2>
-              <p className="text-white/60 font-medium mb-12 text-sm">
-                Financial planning and logistics,<br/>tailored beautifully for your family.
+              <p className="text-white/60 font-medium mb-12 text-[15px] max-w-[260px] leading-relaxed">
+                A nurturing space to track, learn, and grow together.
               </p>
+              
+              {/* Image Placeholder */}
+              <div className="w-full aspect-[4/3] bg-gradient-to-br from-[#FF7B54]/20 to-[#B9E0F2]/20 rounded-[40px] border border-white/10 flex items-center justify-center mb-16 relative">
+                <div className="absolute top-[-20px] right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-2xl text-[#FF7B54]">☆</span>
+                </div>
+                <div className="absolute bottom-[-15px] left-8 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-xl text-[#B9E0F2]">♡</span>
+                </div>
+                <span className="text-white/30 text-sm font-semibold tracking-widest uppercase">Art Asset Here</span>
+              </div>
+
+              {/* Progress Dots */}
+              <div className="flex justify-center gap-2 mb-8">
+                {[1, 2, 3].map((s) => (
+                  <div key={s} className={`h-1.5 rounded-full transition-all duration-500 ${step === s ? 'w-6 bg-[#FF7B54]' : 'w-1.5 bg-[#B9E0F2]/30'}`} />
+                ))}
+              </div>
+
               <button 
                 onClick={nextStep}
-                className="w-full bg-white text-black font-bold text-lg py-4 rounded-full shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:scale-[0.98] transition-transform"
+                className="w-full bg-[#FF7B54] text-white font-bold text-lg py-4 rounded-[24px] shadow-[0_8px_30px_rgba(255,123,84,0.3)] hover:scale-[0.98] transition-transform"
               >
-                Let's Begin
+                Get Started
               </button>
             </motion.div>
           )}
 
-          {/* STEP 2: Nickname */}
+          {/* STEP 2: Child Info (Combined Nickname, Age, Gender) */}
           {step === 2 && (
             <motion.div 
               key="step2"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              className="flex flex-col items-center text-center"
+              className="flex flex-col items-center w-full"
             >
-              <h2 className="text-2xl font-bold tracking-tight text-white mb-8">
-                What's their nickname?
+              <h2 className="text-3xl font-black tracking-tight text-white mb-2">
+                Child Info
               </h2>
-              <input
-                autoFocus
-                type="text"
-                placeholder="Optional"
-                value={profile.nickname || ''}
-                onChange={(e) => updateProfile({ nickname: e.target.value })}
-                onKeyDown={(e) => e.key === 'Enter' && nextStep()}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-center text-2xl font-bold text-white placeholder-white/20 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all mb-12"
-              />
+              <p className="text-white/60 font-medium mb-10 text-[15px]">
+                Let's personalize their experience.
+              </p>
+              
+              <div className="w-full flex flex-col gap-8 mb-10">
+                {/* Nickname */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-[13px] font-bold text-white/80 ml-1">What's their nickname?</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Leo"
+                    value={profile.nickname || ''}
+                    onChange={(e) => updateProfile({ nickname: e.target.value })}
+                    className="w-full bg-[#1A1A1A] border border-white/10 rounded-[20px] px-5 py-4 text-lg font-semibold text-white placeholder-white/30 focus:outline-none focus:border-[#FF7B54]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]"
+                  />
+                </div>
+
+                {/* Age */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-[13px] font-bold text-white/80 ml-1">How old will they turn this year?</label>
+                  <div className="w-full bg-[#FF7B54] rounded-[24px] p-4 relative overflow-hidden shadow-[0_8px_30px_rgba(255,123,84,0.2)]">
+                    <div 
+                      ref={scrollRef}
+                      onMouseDown={onMouseDown}
+                      onMouseLeave={onMouseLeaveOrUp}
+                      onMouseUp={onMouseLeaveOrUp}
+                      onMouseMove={onMouseMove}
+                      className="flex overflow-x-auto gap-3 -mx-4 px-4 hide-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory" 
+                      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    >
+                      {ages.map((age) => (
+                        <button
+                          key={age}
+                          onClick={() => updateProfile({ age })}
+                          className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-[22px] font-bold transition-all snap-center
+                            ${profile.age === age ? 'bg-white text-[#FF7B54] shadow-md scale-110' : 'bg-black/10 text-white hover:bg-black/20'}`}
+                        >
+                          {age}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Gender */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-[13px] font-bold text-white/80 ml-1">Gender</label>
+                  <div className="flex bg-[#B9E0F2]/10 p-1.5 rounded-[24px] w-full border border-white/5 relative">
+                    {['boy', 'girl'].map((g) => {
+                      const isActive = profile.gender === g;
+                      return (
+                        <button
+                          key={g}
+                          onClick={() => updateProfile({ gender: g as any })}
+                          className={`flex-1 py-3 text-[15px] font-bold capitalize rounded-[20px] transition-colors relative z-10 ${isActive ? 'text-[#0A0A0A]' : 'text-white/60 hover:text-white'}`}
+                        >
+                          {g}
+                        </button>
+                      );
+                    })}
+                    {/* Active Pill Background */}
+                    {profile.gender && (
+                      <motion.div
+                        layoutId="gender-pill"
+                        className="absolute top-1.5 bottom-1.5 w-[calc(50%-4px)] bg-white rounded-[20px] shadow-sm z-0"
+                        initial={false}
+                        animate={{ 
+                          x: profile.gender === 'boy' ? 0 : '100%' 
+                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress Dots */}
+              <div className="flex justify-center gap-2 mb-8">
+                {[1, 2, 3].map((s) => (
+                  <div key={s} className={`h-1.5 rounded-full transition-all duration-500 ${step === s ? 'w-6 bg-[#FF7B54]' : 'w-1.5 bg-[#B9E0F2]/30'}`} />
+                ))}
+              </div>
+
               <button 
                 onClick={nextStep}
-                className="w-full bg-white text-black font-bold text-lg py-4 rounded-full shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:scale-[0.98] transition-transform"
+                disabled={!profile.age || !profile.gender}
+                className="w-full bg-[#FF7B54] text-white font-bold text-lg py-4 rounded-[24px] shadow-[0_8px_30px_rgba(255,123,84,0.3)] hover:scale-[0.98] transition-transform disabled:opacity-50 disabled:hover:scale-100 mt-auto"
               >
                 Continue
               </button>
             </motion.div>
           )}
 
-          {/* STEP 3: Age & Gender */}
+          {/* STEP 3: Location */}
           {step === 3 && (
             <motion.div 
               key="step3"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              className="flex flex-col items-center text-center w-full"
+              className="flex flex-col items-center w-full"
             >
-              <h2 className="text-2xl font-bold tracking-tight text-white mb-6">
-                Age & Gender
+              <div className="text-white/40 font-bold tracking-widest text-[11px] uppercase mb-4">Step 3 of 3</div>
+              <h2 className="text-2xl font-black tracking-tight text-white mb-3 text-center">
+                Where are you based?
               </h2>
+              <p className="text-white/60 font-medium mb-10 text-[15px] text-center max-w-[280px]">
+                We'll tailor schools and hospitals to your area.
+              </p>
               
-              {/* Gender Toggle */}
-              <div className="flex bg-white/5 p-1 rounded-2xl w-full mb-8 border border-white/5">
-                {['boy', 'girl', 'other'].map((g) => (
-                  <button
-                    key={g}
-                    onClick={() => updateProfile({ gender: g as any })}
-                    className={`flex-1 py-3 text-sm font-bold capitalize rounded-xl transition-all ${profile.gender === g ? 'bg-white text-black shadow-md' : 'text-white/50 hover:text-white'}`}
-                  >
-                    {g}
-                  </button>
-                ))}
-              </div>
-
-              {/* Age Scroll */}
-              <div className="w-full relative mb-12">
-                <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#111] to-transparent z-10 pointer-events-none" />
-                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#111] to-transparent z-10 pointer-events-none" />
-                
-                <div className="flex overflow-x-auto gap-4 py-2 px-8 -mx-8 hide-scrollbar snap-x snap-mandatory" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                  {ages.map((age) => (
-                    <button
-                      key={age}
-                      onClick={() => updateProfile({ age })}
-                      className={`flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold transition-all snap-center
-                        ${profile.age === age ? 'bg-white text-black shadow-[0_4px_20px_rgba(255,255,255,0.3)] scale-110' : 'bg-white/10 text-white/50 border border-white/5 hover:bg-white/15'}`}
-                    >
-                      {age}
-                    </button>
-                  ))}
+              <div className="w-full flex flex-col gap-2 mb-8">
+                <label className="text-[13px] font-bold text-white/80 ml-1">Current City or Town</label>
+                <div className="relative">
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#FF7B54]" />
+                  <input
+                    type="text"
+                    value={profile.location || ''}
+                    onChange={(e) => updateProfile({ location: e.target.value })}
+                    onKeyDown={(e) => e.key === 'Enter' && nextStep()}
+                    className="w-full bg-[#1A1A1A] border border-[#FF7B54]/30 rounded-[20px] pl-12 pr-5 py-4 text-lg font-semibold text-white focus:outline-none focus:border-[#FF7B54] transition-all shadow-[0_4px_20px_rgba(255,123,84,0.1)]"
+                  />
                 </div>
               </div>
 
-              <button 
-                onClick={nextStep}
-                disabled={!profile.age || !profile.gender}
-                className="w-full bg-white text-black font-bold text-lg py-4 rounded-full shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:scale-[0.98] transition-transform disabled:opacity-50 disabled:hover:scale-100"
-              >
-                Continue
-              </button>
-            </motion.div>
-          )}
+              {/* Map Placeholder */}
+              <div className="w-full aspect-square bg-[#1A1A1A] border border-white/10 rounded-[32px] mb-12 flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
+                <div className="w-16 h-16 bg-[#FF7B54]/20 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-[#FF7B54] rounded-full border-2 border-white shadow-lg flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                  </div>
+                </div>
+                <span className="absolute bottom-4 text-white/30 text-xs font-bold uppercase tracking-widest">Map Asset Here</span>
+              </div>
 
-          {/* STEP 4: Location */}
-          {step === 4 && (
-            <motion.div 
-              key="step4"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="flex flex-col items-center text-center"
-            >
-              <h2 className="text-2xl font-bold tracking-tight text-white mb-4">
-                Where are you based?
-              </h2>
-              <p className="text-white/60 font-medium mb-8 text-sm">
-                We'll tailor schools, hospitals, and activities to your specific area.
-              </p>
-              
-              <input
-                type="text"
-                value={profile.location || ''}
-                onChange={(e) => updateProfile({ location: e.target.value })}
-                onKeyDown={(e) => e.key === 'Enter' && nextStep()}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-center text-xl font-bold text-white focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all mb-12"
-              />
               <button 
                 onClick={nextStep}
-                className="w-full bg-white text-black font-bold text-lg py-4 rounded-full shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:scale-[0.98] transition-transform"
+                className="w-full bg-[#FF7B54] text-white font-bold text-lg py-4 rounded-[24px] shadow-[0_8px_30px_rgba(255,123,84,0.3)] hover:scale-[0.98] transition-transform flex items-center justify-center gap-2 mt-auto"
               >
-                Finish Setup
+                Complete Setup
+                <span className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[10px]">✓</span>
               </button>
             </motion.div>
           )}
