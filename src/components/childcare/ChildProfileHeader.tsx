@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useChildCareStore } from "@/store/useChildCareStore";
 import { motion } from "framer-motion";
 
@@ -20,12 +20,22 @@ export function ChildProfileHeader() {
     if (!dragRef.current.isDown || !scrollRef.current) return;
     e.preventDefault();
     const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - dragRef.current.startX) * 2;
+    const walk = (x - dragRef.current.startX) * 1.5;
     scrollRef.current.scrollLeft = dragRef.current.scrollLeft - walk;
   };
-  
-  // Dashboard Age Selector - Full scrollable range (1 to 18)
+
+  const itemWidth = 60;
   const dashboardAges = Array.from({ length: 18 }, (_, i) => i + 1);
+  
+  // Set initial scroll position based on current age
+  useEffect(() => {
+    if (scrollRef.current && profile.age) {
+      const index = dashboardAges.indexOf(profile.age);
+      if (index !== -1) {
+        scrollRef.current.scrollLeft = index * itemWidth;
+      }
+    }
+  }, []);
 
   // Compute total monthly overhead
   const totalTuition = cachedData.schools[0]?.monthlyTuition || 0;
@@ -53,32 +63,45 @@ export function ChildProfileHeader() {
       </p>
 
       {/* Dashboard Age Selector Pill */}
-      <div className="relative w-full max-w-[280px] mb-8 bg-[#B9E0F2]/10 rounded-full border border-white/5 overflow-hidden shadow-inner">
+      <div className="relative w-full max-w-[280px] mb-8 bg-[#B9E0F2]/10 rounded-full border border-white/5 overflow-hidden shadow-inner h-[60px] flex items-center">
+        {/* Fixed Highlight Circle */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-[#FF7B54] rounded-full shadow-[0_4px_12px_rgba(255,123,84,0.4)] pointer-events-none z-0" />
+        
         <div 
           ref={scrollRef}
           onMouseDown={onMouseDown}
           onMouseLeave={onMouseLeaveOrUp}
           onMouseUp={onMouseLeaveOrUp}
           onMouseMove={onMouseMove}
-          className="px-4 py-2 flex items-center gap-3 overflow-x-auto hide-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory" 
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          onScroll={(e) => {
+            const scrollLeft = e.currentTarget.scrollLeft;
+            const index = Math.round(scrollLeft / itemWidth);
+            const newAge = dashboardAges[index];
+            if (newAge && newAge !== profile.age) {
+              updateProfile({ age: newAge });
+            }
+          }}
+          className="flex items-center w-full h-full overflow-x-auto hide-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory relative z-10" 
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            paddingLeft: `calc(50% - ${itemWidth / 2}px)`,
+            paddingRight: `calc(50% - ${itemWidth / 2}px)`
+          }}
         >
           {dashboardAges.map((age) => {
             const isActive = profile.age === age;
             return (
               <button
                 key={age}
-                onClick={() => updateProfile({ age })}
-                className={`flex-shrink-0 relative w-12 h-12 flex items-center justify-center font-bold text-lg transition-colors snap-center rounded-full ${isActive ? 'text-white' : 'text-white/50 hover:text-white/80 hover:bg-white/5'}`}
+                onClick={() => {
+                  const index = dashboardAges.indexOf(age);
+                  scrollRef.current?.scrollTo({ left: index * itemWidth, behavior: 'smooth' });
+                }}
+                className={`flex-shrink-0 flex items-center justify-center font-bold text-lg transition-colors snap-center h-full`}
+                style={{ width: itemWidth }}
               >
-                {isActive && (
-                  <motion.div 
-                    layoutId="dashboard-age-pill"
-                    className="absolute inset-0 bg-[#FF7B54] rounded-full shadow-[0_4px_12px_rgba(255,123,84,0.4)]"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <span className="relative z-10">{age}</span>
+                <span className={`relative z-10 ${isActive ? 'text-white' : 'text-white/40 hover:text-white/60'}`}>{age}</span>
               </button>
             );
           })}

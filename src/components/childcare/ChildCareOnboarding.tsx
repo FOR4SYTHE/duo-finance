@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChildCareStore } from "@/store/useChildCareStore";
 import Link from "next/link";
@@ -23,11 +23,22 @@ export function ChildCareOnboarding() {
     if (!dragRef.current.isDown || !scrollRef.current) return;
     e.preventDefault();
     const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - dragRef.current.startX) * 2;
+    const walk = (x - dragRef.current.startX) * 1.5;
     scrollRef.current.scrollLeft = dragRef.current.scrollLeft - walk;
   };
   
   const ages = Array.from({ length: 18 }, (_, i) => i + 1); // 1 to 18
+  const itemWidth = 60;
+
+  // Set initial scroll position based on current age
+  useEffect(() => {
+    if (scrollRef.current && profile.age) {
+      const index = ages.indexOf(profile.age);
+      if (index !== -1) {
+        scrollRef.current.scrollLeft = index * itemWidth;
+      }
+    }
+  }, [step]); // re-run when step changes because the dom node might remount
 
   const nextStep = () => {
     if (step < 3) setStep(step + 1);
@@ -123,26 +134,49 @@ export function ChildCareOnboarding() {
                 {/* Age */}
                 <div className="flex flex-col gap-2">
                   <label className="text-[13px] font-bold text-white/80 ml-1">How old will they turn this year?</label>
-                  <div className="w-full bg-[#FF7B54] rounded-[24px] p-4 relative overflow-hidden shadow-[0_8px_30px_rgba(255,123,84,0.2)]">
+                  <div className="w-full bg-[#FF7B54] rounded-[24px] relative overflow-hidden shadow-[0_8px_30px_rgba(255,123,84,0.2)] h-[72px] flex items-center">
+                    
+                    {/* Fixed Highlight Circle (White for Onboarding) */}
+                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 bg-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.1)] pointer-events-none z-0" />
+
                     <div 
                       ref={scrollRef}
                       onMouseDown={onMouseDown}
                       onMouseLeave={onMouseLeaveOrUp}
                       onMouseUp={onMouseLeaveOrUp}
                       onMouseMove={onMouseMove}
-                      className="flex overflow-x-auto gap-3 -mx-4 px-4 hide-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory" 
-                      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                      onScroll={(e) => {
+                        const scrollLeft = e.currentTarget.scrollLeft;
+                        const index = Math.round(scrollLeft / itemWidth);
+                        const newAge = ages[index];
+                        if (newAge && newAge !== profile.age) {
+                          updateProfile({ age: newAge });
+                        }
+                      }}
+                      className="flex items-center w-full h-full overflow-x-auto hide-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory relative z-10" 
+                      style={{ 
+                        scrollbarWidth: 'none', 
+                        msOverflowStyle: 'none',
+                        paddingLeft: `calc(50% - ${itemWidth / 2}px)`,
+                        paddingRight: `calc(50% - ${itemWidth / 2}px)`
+                      }}
                     >
-                      {ages.map((age) => (
-                        <button
-                          key={age}
-                          onClick={() => updateProfile({ age })}
-                          className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-[22px] font-bold transition-all snap-center
-                            ${profile.age === age ? 'bg-white text-[#FF7B54] shadow-md scale-110' : 'bg-black/10 text-white hover:bg-black/20'}`}
-                        >
-                          {age}
-                        </button>
-                      ))}
+                      {ages.map((age) => {
+                        const isActive = profile.age === age;
+                        return (
+                          <button
+                            key={age}
+                            onClick={() => {
+                              const index = ages.indexOf(age);
+                              scrollRef.current?.scrollTo({ left: index * itemWidth, behavior: 'smooth' });
+                            }}
+                            className={`flex-shrink-0 flex items-center justify-center font-bold transition-colors snap-center h-full ${isActive ? 'text-[#FF7B54] text-xl' : 'text-white/60 hover:text-white text-lg'}`}
+                            style={{ width: itemWidth }}
+                          >
+                            <span className="relative z-10">{age}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
