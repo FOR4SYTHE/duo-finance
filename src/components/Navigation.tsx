@@ -11,6 +11,7 @@ export function Navigation() {
   const { isActive } = useCartifyStore();
 
   const isCartifyTripActive = pathname === '/cartify' && isActive;
+  const isHiddenRoute = isCartifyTripActive || pathname.startsWith('/childcare');
 
   const tabs = [
     { name: "Home", href: "/", icon: Home },
@@ -22,7 +23,7 @@ export function Navigation() {
 
   return (
     <AnimatePresence>
-      {!isCartifyTripActive && (
+      {!isHiddenRoute && (
         <motion.div 
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

@@ -244,6 +244,26 @@ This feature plugs directly into the `household_id` Supabase migration model. Do
 - `insurance_policies` (Household-scoped, RLS protected): `id`, `household_id`, `insurer_name`, `plan_name`, `plan_type`, `premium_amount`, `premium_frequency`, `coverage_amount`, `dependents_count`, `renewal_date`, `status`, `custom_fields` (JSONB).
 - `insurance_plan_templates` (Public reference data, authenticated read, admin write): `id`, `insurer_name`, `plan_name`, `plan_type`, `benefit_fields` (JSONB), `last_updated`.
 
+### 4.7 Child Care Hub
+
+A dedicated full-page module (`/childcare`) focusing on financial and logistical planning for a child, specifically targeted at Malolos, Bulacan.
+
+**Core Architecture (Cached + On-Demand AI):**
+- To prevent heavy AI credit consumption, the page relies on a **Cached Baseline** stored in the database (or mock Zustand store for v1). This includes curated data for top schools (e.g., Lord's Angels Montessori, CEU Malolos), pediatric hospitals (e.g., Bulacan Medical Center, Sacred Heart), and standard vitamin costs.
+- **"Generate Latest 2026 AI Report" Button:** The user can manually trigger an AI search (Gemini 3.6 Flash + Grounding) to fetch real-time updates for tuition, hospital rates, and summer activities. This runs *once* per request and saves the result to the cache, costing one credit per deliberate action instead of per page load.
+
+**UI Structure:**
+1. **Header (The Context Engine):**
+   - Child's Nickname (Optional).
+   - Age/Stage Selector (Toddler, Pre-K, Primary, etc.) which filters the suggestions.
+   - Dual Currency Snapshot of total monthly child-related overhead.
+2. **Education & Summer Tab:**
+   - Curated list of schools in Malolos, Bulacan with tuition estimators (monthly/term, supplies, uniforms).
+   - Upcoming summer activities/camps tailored to the selected age bracket.
+3. **Health & Essentials Tab:**
+   - Top pediatric hospitals and clinics in Bulacan with emergency contacts.
+   - Age-appropriate essentials (vitamins, healthy snack calculators).
+
 ---
 
 ## 5. Build Order

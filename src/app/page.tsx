@@ -403,7 +403,7 @@ export default function Home() {
           </div>
 
           {/* Child Care Card */}
-          <div className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-3.5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
+          <Link href="/childcare" className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-3.5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
              <div className="flex justify-between items-start relative z-10 w-full">
               <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-md backdrop-blur-md">
                 <Baby className="w-4 h-4 text-blue-400" strokeWidth={2.5} />
@@ -414,7 +414,7 @@ export default function Home() {
               <span className="text-white text-[16px] font-black tracking-tight leading-none">Child Care</span>
             </div>
             <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-blue-500/20 blur-2xl rounded-full pointer-events-none" />
-          </div>
+          </Link>
 
           {/* Spend Jar (Modeled after USDC card) */}
           <Link href="/jar" className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-3.5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
