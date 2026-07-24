@@ -12,6 +12,7 @@ import {
   PieChart,
   Shield,
   Sparkles,
+  Baby,
 } from "lucide-react";
 import { MonthlyReportCard } from "@/components/home/MonthlyReportCard";
 import { BillsCalendarCard } from "@/components/home/BillsCalendarCard";
@@ -384,32 +385,64 @@ export default function Home() {
         </h2>
         <div className="grid grid-cols-2 gap-4">
           
+          {/* Daily Insight Card */}
+          <div className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-3.5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
+            <div className="flex justify-between items-start relative z-10 w-full">
+              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-md backdrop-blur-md">
+                <Sparkles className="w-4 h-4 text-amber-400" strokeWidth={2.5} />
+              </div>
+            </div>
+            <div className="relative z-10 mt-auto">
+              <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-1 block">Daily Insight</span>
+              <p className="text-white/90 text-[11px] font-medium leading-tight">
+                Prioritize your emergency fund first this month.
+              </p>
+            </div>
+            {/* Subtle glow */}
+            <div className="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/20 blur-2xl rounded-full pointer-events-none" />
+          </div>
+
+          {/* Child Care Card */}
+          <div className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-3.5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
+             <div className="flex justify-between items-start relative z-10 w-full">
+              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-md backdrop-blur-md">
+                <Baby className="w-4 h-4 text-blue-400" strokeWidth={2.5} />
+              </div>
+            </div>
+            <div className="relative z-10 mt-auto flex flex-col items-start">
+              <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-0.5">Kids & School</span>
+              <span className="text-white text-[16px] font-black tracking-tight leading-none">Child Care</span>
+            </div>
+            <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-blue-500/20 blur-2xl rounded-full pointer-events-none" />
+          </div>
+
           {/* Spend Jar (Modeled after USDC card) */}
-          <Link href="/jar" className="aspect-square bg-[#1A1A1A] rounded-[36px] p-5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
+          <Link href="/jar" className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-3.5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
             {/* Animated Piggy Background */}
             <AnimatedPiggyBank />
             
-            <div className="flex justify-between items-start relative z-10 w-full">
-              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-md backdrop-blur-md">
-                <PiggyBank className="w-4 h-4 text-white" strokeWidth={2.5} />
+            <div className="absolute top-3.5 left-3.5 z-10">
+              <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-md backdrop-blur-md">
+                <PiggyBank className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
               </div>
+            </div>
               
-              <div className="flex flex-col items-end text-right">
-                <span className="text-white/50 text-[10px] font-bold tracking-widest uppercase mb-0.5">Spend Jar</span>
-                <span className={`${phpColor} text-[28px] font-black tracking-tighter leading-none mb-1 transition-colors duration-300`}>
-                  ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
-                </span>
-                <span className={`${zarColor} text-[11px] font-semibold tracking-wide transition-colors duration-300`}>
-                  ≈ R{zarTotalSpent.toLocaleString()}
-                </span>
-              </div>
+            <div className="flex flex-col items-center text-center relative z-10 mt-1">
+              <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-0.5">Spend Jar</span>
+              <span className={`${phpColor} text-[20px] font-black tracking-tighter leading-none mb-0.5 transition-colors duration-300`}>
+                ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+              </span>
+              <span className={`${zarColor} text-[9px] font-semibold tracking-wide transition-colors duration-300`}>
+                ≈ R{zarTotalSpent.toLocaleString()}
+              </span>
             </div>
           </Link>
 
-          {/* Insurance Tracker (Family Line Art Animation) */}
-          <div className="aspect-square bg-[#1A1A1A] border border-white/5 rounded-[36px] relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)]">
-            {/* The Line Art Background */}
-            <div className="absolute inset-0 w-full h-full opacity-60 invert mix-blend-screen">
+          {/* Insurance Tracker */}
+          <div className="aspect-[5/3] bg-[#1A1A1A] border border-white/5 rounded-[28px] relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)]">
+            
+            {/* Art Background */}
+            <div className="absolute inset-0 w-full h-full opacity-60 invert mix-blend-screen pointer-events-none [mask-image:linear-gradient(to_right,black_40%,transparent_100%)]">
               <AnimatePresence mode="wait">
                 {showInsuranceFamily ? (
                   <motion.div
@@ -421,11 +454,11 @@ export default function Home() {
                     className="absolute inset-0"
                   >
                     <Image 
-                      src="/insurance-family-waving.png" 
+                      src="/insurance-family-waving.webp" 
                       alt="Family Waving Art" 
                       fill 
                       priority
-                      className="object-cover object-bottom" 
+                      className="object-cover object-left-bottom scale-[1.15] translate-x-4 translate-y-1" 
                       sizes="(max-width: 768px) 50vw, 33vw"
                     />
                   </motion.div>
@@ -439,22 +472,22 @@ export default function Home() {
                     className="absolute inset-0"
                   >
                     <Image 
-                      src="/insurance-bg-only.png" 
+                      src="/insurance-bg-only.webp" 
                       alt="House Background Art" 
                       fill 
                       priority
-                      className="object-cover object-bottom" 
+                      className="object-cover object-left-bottom scale-[1.15] translate-x-4 translate-y-1" 
                       sizes="(max-width: 768px) 50vw, 33vw"
                     />
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-            
-            {/* The Text Foreground - moved to top left, away from art */}
-            <div className="flex flex-col items-start relative z-10 p-2 mt-4 ml-4">
-              <span className="text-white/50 text-[10px] font-bold tracking-widest uppercase mb-0.5">Car & Health</span>
-              <span className="text-white text-2xl font-black tracking-tight leading-none">Insurance</span>
+
+            {/* The Text Foreground */}
+            <div className="flex flex-col items-end text-right relative z-10 pt-3 pr-3 pointer-events-none w-full">
+              <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-0.5">Life & Health</span>
+              <span className="text-white text-[16px] font-black tracking-tight leading-none">Insurance</span>
             </div>
           </div>
 
