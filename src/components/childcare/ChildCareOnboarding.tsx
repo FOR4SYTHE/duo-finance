@@ -295,7 +295,7 @@ export function ChildCareOnboarding() {
                   defaultCenter={[14.8433, 120.8114]} 
                   defaultZoom={13}
                   provider={(x, y, z, dpr) => {
-                    return `https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/${z}/${x}/${y}${dpr >= 2 ? '@2x' : ''}.png`;
+                    return `https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/${z}/${x}/${y}${dpr && dpr >= 2 ? '@2x' : ''}.png`;
                   }}
                   mouseEvents={false}
                   touchEvents={false}
