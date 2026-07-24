@@ -72,10 +72,6 @@ export function CancelPromptModal({ isOpen, onClose, onConfirm, mode }: CancelPr
                         transition={{ type: "tween", duration: 0.15, ease: "easeOut" }}
                         className="relative w-full max-w-[340px] mx-6 bg-gradient-to-b from-[#1C1C1E] to-[#151516] border border-white/10 rounded-[32px] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col items-center text-center"
                     >
-                    {/* Ambient glow */}
-                    <div className="absolute -top-24 -left-24 w-48 h-48 bg-red-500/10 rounded-full blur-[50px] pointer-events-none" />
-                    <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-[#30D158]/5 rounded-full blur-[50px] pointer-events-none" />
-
                     <div className="relative w-32 h-32 mb-4 drop-shadow-xl z-10 flex items-center justify-center">
                         {/* 
                           Since the images are not generated yet, we use an img tag with an onError handler 
