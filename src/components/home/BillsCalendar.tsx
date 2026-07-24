@@ -317,7 +317,11 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                   </div>
                 ) : (
                   <div className="text-center py-10 bg-white/[0.02] rounded-[24px] border border-white/[0.04]">
-                    <Check className="w-8 h-8 text-white/20 mx-auto mb-3" />
+                    <img 
+                        src="/mascot/dufi-bills-relaxed.webp" 
+                        alt="No bills" 
+                        className="w-20 h-20 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)] mx-auto mb-3"
+                    />
                     <p className="text-sm font-semibold text-white/60">No bills scheduled</p>
                     <p className="text-[11px] text-white/30 mt-1">Enjoy your free day</p>
                   </div>

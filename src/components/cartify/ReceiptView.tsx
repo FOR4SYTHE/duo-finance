@@ -4,6 +4,8 @@ import { useCartifyStore } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { ChevronLeft, Receipt, CheckCircle2, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
+import confetti from "canvas-confetti";
+import { useEffect } from "react";
 
 export function ReceiptView() {
     const { items, budget, endTrip, hideReceipt } = useCartifyStore();
@@ -19,6 +21,18 @@ export function ReceiptView() {
 
     const isOverBudget = totalSpent > budget;
     const overage = totalSpent - budget;
+
+    useEffect(() => {
+        if (!isOverBudget && totalSpent > 0) {
+            // Trigger celebration for staying under budget!
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.3 },
+                colors: ['#30D158', '#64D2FF', '#FFD60A', '#FFFFFF']
+            });
+        }
+    }, [isOverBudget, totalSpent]);
 
     // Basic rule-based suggestions (no LLM for now per spec)
     const suggestions = [];
@@ -68,11 +82,22 @@ export function ReceiptView() {
                     style={{ filter: 'drop-shadow(0 20px 40px rgba(255,255,255,0.05))' }}
                 >
                     {/* Main Receipt Body */}
-                    <div className="w-full bg-[#fcfcfc] rounded-t-[32px] overflow-hidden flex flex-col relative">
+                    <div className="w-full bg-[#fcfcfc] rounded-t-[32px] flex flex-col relative">
                         {/* Receipt Header */}
-                        <div className="flex flex-col items-center pt-10 pb-6 px-6 relative">
-                            <div className="mb-4 text-4xl">🎉</div>
-                            <h2 className="text-black text-[2.5rem] font-medium tracking-tight mb-2">
+                        <div className="flex flex-col items-center pt-12 pb-6 px-6 relative">
+                            {(!isOverBudget && totalSpent > 0) ? (
+                                <motion.img 
+                                    initial={{ scale: 0, opacity: 0, x: -20 }}
+                                    animate={{ scale: 1, opacity: 1, x: 0 }}
+                                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                                    src="/mascot/dufi-host.webp"
+                                    alt="Dufi Host"
+                                    className="w-28 h-28 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.15)] absolute -left-6 top-2 z-20"
+                                />
+                            ) : (
+                                <div className="mb-4 text-4xl">🎉</div>
+                            )}
+                            <h2 className="text-black text-[2.5rem] font-medium tracking-tight mb-2 mt-4">
                                 ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                             </h2>
                             <span className="text-black/40 font-medium tracking-wide">

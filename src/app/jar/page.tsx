@@ -129,6 +129,11 @@ export default function SpendJarPage() {
 
   // Get active mascot state image
   const getMascotImage = () => {
+    // Empty jar state!
+    if (isBudgetSet && totalSpent === 0 && mascotReaction === 'idle') {
+        return '/mascot/dufi-jar-empty.webp';
+    }
+
     let state = 'safe';
     if (isBudgetSet) {
         if (percentage >= 85) state = 'danger';

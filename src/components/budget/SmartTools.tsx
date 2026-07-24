@@ -6,6 +6,7 @@ import { useBudgetStore } from "../../store/useBudgetStore";
 import { useCurrencyStore } from "../../store/useCurrencyStore";
 import { formatCurrency } from "@/lib/format";
 import * as Icons from "lucide-react";
+import confetti from "canvas-confetti";
 import { AddGoalSheet, EditGoalSheet, GoalMenuSheet } from "./GoalSheets";
 import { AmountInputModal } from "./AmountInputModal";
 
@@ -180,6 +181,17 @@ function EmergencyRunwayContent() {
                 onConfirm={(amount) => {
                     if (emergencyGoal) {
                         updateGoal(emergencyGoal.id, { savedAmount: savedSoFar + amount });
+                        if (targetRunway > 0) {
+                            const newTotal = savedSoFar + amount;
+                            if (newTotal >= targetRunway && savedSoFar < targetRunway) {
+                                confetti({
+                                    particleCount: 150,
+                                    spread: 80,
+                                    origin: { y: 0.6 },
+                                    colors: ['#30D158', '#64D2FF', '#FFFFFF']
+                                });
+                            }
+                        }
                     }
                     setIsLogging(false);
                 }}
@@ -199,10 +211,25 @@ function GoalsContent() {
     const [menuGoalId, setMenuGoalId] = useState<string | null>(null);
     const [editGoalId, setEditGoalId] = useState<string | null>(null);
     const [addMoneyGoalId, setAddMoneyGoalId] = useState<string | null>(null);
+    const [celebrationGoal, setCelebrationGoal] = useState<{name: string, target: number} | null>(null);
 
     return (
         <ToolCardShell title="Savings Goals">
             <div className="flex flex-col gap-4">
+                <button 
+                    onClick={() => {
+                        confetti({
+                            particleCount: 150,
+                            spread: 80,
+                            origin: { y: 0.6 },
+                            colors: ['#BF5AF2', '#64D2FF', '#FFFFFF']
+                        });
+                        setCelebrationGoal({ name: "Dream Vacation", target: 50000 });
+                    }}
+                    className="p-3 bg-[#BF5AF2]/10 hover:bg-[#BF5AF2]/20 text-[#BF5AF2] text-xs font-bold rounded-xl uppercase tracking-wider text-center w-full border border-[#BF5AF2]/20 transition-colors"
+                >
+                    [TEST] Trigger Goal Celebration
+                </button>
                 {goals.map(goal => {
                     const progress = goal.targetAmount > 0 ? Math.min(100, (goal.savedAmount / goal.targetAmount) * 100) : 0;
                     const Icon = (Icons as any)[goal.icon] || HelpCircle;
@@ -285,6 +312,45 @@ function GoalsContent() {
                 goalId={editGoalId} 
             />
 
+            <AnimatePresence>
+                {celebrationGoal && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-6" onClick={() => setCelebrationGoal(null)}>
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: -20 }}
+                            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                            className="relative z-10 flex flex-col items-center text-center"
+                        >
+                            <motion.img 
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.1 }}
+                                src="/mascot/dufi-champion.webp"
+                                alt="Dufi Champion"
+                                className="w-48 h-48 object-contain drop-shadow-[0_20px_40px_rgba(191,90,242,0.4)] mb-6"
+                            />
+                            <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">Goal Reached! 🎉</h2>
+                            <p className="text-white/70 text-base mb-6 max-w-[240px] leading-relaxed">
+                                You just fully funded <strong className="text-white">"{celebrationGoal.name}"</strong> (₱{formatCurrency(celebrationGoal.target)}). Incredible work!
+                            </p>
+                            <button 
+                                onClick={() => setCelebrationGoal(null)}
+                                className="px-8 py-3 rounded-full bg-white text-black font-bold tracking-wide hover:scale-105 transition-transform"
+                            >
+                                Awesome!
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             <AmountInputModal
                 isOpen={!!addMoneyGoalId}
                 onClose={() => setAddMoneyGoalId(null)}
@@ -292,7 +358,22 @@ function GoalsContent() {
                 initialAmount={0}
                 onConfirm={(amountPHP) => {
                     if (addMoneyGoalId && amountPHP > 0) {
+                        const goal = goals.find(g => g.id === addMoneyGoalId);
                         addMoneyToGoal(addMoneyGoalId, amountPHP);
+                        
+                        if (goal && goal.targetAmount > 0) {
+                            const newTotal = goal.savedAmount + amountPHP;
+                            if (newTotal >= goal.targetAmount && goal.savedAmount < goal.targetAmount) {
+                                // Trigger confetti
+                                confetti({
+                                    particleCount: 150,
+                                    spread: 80,
+                                    origin: { y: 0.6 },
+                                    colors: ['#BF5AF2', '#64D2FF', '#FFFFFF']
+                                });
+                                setCelebrationGoal({ name: goal.name, target: goal.targetAmount });
+                            }
+                        }
                     }
                     setAddMoneyGoalId(null);
                 }}

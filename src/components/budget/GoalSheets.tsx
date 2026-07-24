@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Edit3, Target, Calendar, HelpCircle } from "lucide-react";
 import * as Icons from "lucide-react";
+import confetti from "canvas-confetti";
 import { useBudgetStore, Goal } from "@/store/useBudgetStore";
 import { AmountInputModal } from "./AmountInputModal";
 
@@ -174,6 +175,14 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
                 targetDate: date || undefined,
                 savedAmount
             });
+            if (goal.targetAmount > 0 && savedAmount >= goal.targetAmount && goal.savedAmount < goal.targetAmount) {
+                confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#BF5AF2', '#64D2FF', '#FFFFFF']
+                });
+            }
         }
         onClose();
         setName(""); setIcon("Target"); setDate("");

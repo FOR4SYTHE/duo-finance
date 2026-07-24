@@ -217,10 +217,16 @@ export function BillsCalendarCard() {
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full h-full flex flex-col justify-center items-center text-center relative z-10">
-                        <CheckCircle2 className="w-6 h-6 text-[#525252] mb-2" />
-                        <span className="text-[14px] font-bold text-[#A1A1A1]">No bills scheduled</span>
-                        <span className="text-[11px] text-[#525252] mt-1 font-medium">You're all caught up</span>
+                      <div className="w-full h-full flex items-center justify-center gap-4 relative z-10 px-2">
+                        <img 
+                          src="/mascot/dufi-bills-relaxed.webp" 
+                          alt="No bills" 
+                          className="w-24 h-24 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.3)]"
+                        />
+                        <div className="flex flex-col text-left">
+                          <span className="text-[14px] font-bold text-[#E5E5E5]">No bills scheduled</span>
+                          <span className="text-[12px] text-[#A1A1A1] mt-0.5 font-medium">You're all caught up</span>
+                        </div>
                       </div>
                     )}
                   </div>
