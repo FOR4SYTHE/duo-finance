@@ -21,16 +21,25 @@ export default function WelcomePage() {
       {/* Background WebGL Shader (Green Orbs) */}
       <WelcomeShader />
 
-      {/* Top Header - Chrome Logo */}
+      {/* Top Header - Chrome Logo with Shine Animation */}
       <header className="relative z-10 w-full flex justify-center pt-[12dvh]">
         <motion.h1 
           initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          animate={{ 
+            opacity: 1, 
+            y: 0,
+            backgroundPosition: ["0% 50%", "200% 50%"] 
+          }}
+          transition={{ 
+            opacity: { duration: 1, ease: "easeOut" },
+            y: { duration: 1, ease: "easeOut" },
+            backgroundPosition: { duration: 5, repeat: Infinity, ease: "linear" } 
+          }}
           className="text-[48px] font-extrabold uppercase tracking-[0.2em] relative"
           style={{
-            // Premium Chrome/Metal 3D Text Effect
-            background: "linear-gradient(to bottom, #ffffff 0%, #b3b3b3 40%, #4a4a4a 45%, #909090 55%, #e0e0e0 80%, #ffffff 100%)",
+            // Premium Chrome/Metal 3D Text Effect with a sweeping shine
+            background: "linear-gradient(110deg, #b3b3b3 0%, #ffffff 25%, #4a4a4a 50%, #ffffff 75%, #b3b3b3 100%)",
+            backgroundSize: "200% auto",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             filter: "drop-shadow(0px 4px 12px rgba(0,0,0,0.8))",
@@ -50,7 +59,7 @@ export default function WelcomePage() {
       </header>
 
       {/* Main Content & Actions Area */}
-      <main className="relative z-10 w-full max-w-md mx-auto flex flex-col items-center justify-end flex-grow pb-12 px-6">
+      <main className="relative z-10 w-full max-w-sm mx-auto flex flex-col items-center justify-end flex-grow pb-[8dvh] px-6">
         
         {/* Text Block */}
         <motion.div 
@@ -67,26 +76,26 @@ export default function WelcomePage() {
           </p>
         </motion.div>
 
-        {/* Vision Pro / Apple Glass Action Card */}
+        {/* Action Buttons (No outer container) */}
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-          className="w-full bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[24px] p-6 flex flex-col gap-4 shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
+          className="w-full flex flex-col gap-4"
         >
-          {/* Primary Button (Get Started) */}
+          {/* Primary Button (Get Started) - Apple Green */}
           <button
             onClick={() => openSheet("magic-link")}
-            className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-[#5E5CE6] to-[#4c4ab3] text-white font-semibold text-[15px] hover:opacity-90 transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(94,92,230,0.15)]"
+            className="w-full h-[56px] rounded-[18px] bg-[#30D158] text-[#000000] font-semibold text-[17px] hover:bg-[#34E35F] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_8px_16px_rgba(48,209,88,0.25)]"
           >
             <span>Get Started</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-[18px] h-[18px]" strokeWidth={2.5} />
           </button>
           
-          {/* Secondary Button (Sign In) */}
+          {/* Secondary Button (Sign In) - Clean Dark Glass */}
           <button
             onClick={() => openSheet("email")}
-            className="w-full py-4 px-6 rounded-xl border-[0.5px] border-white/10 bg-white/5 text-[#e4e2e4] font-semibold text-[15px] hover:bg-white/10 transition-colors active:scale-[0.98]"
+            className="w-full h-[56px] rounded-[18px] bg-[#1c1c1e] text-[#e4e2e4] font-semibold text-[17px] hover:bg-[#2c2c2e] transition-colors active:scale-[0.98] border border-white/5 shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
           >
             Sign In
           </button>

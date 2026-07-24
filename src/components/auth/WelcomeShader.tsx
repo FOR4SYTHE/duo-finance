@@ -49,7 +49,7 @@ export function WelcomeShader() {
           vec2 mouse = u_mouse / u_resolution;
           
           // Deep dark base
-          vec3 color = vec3(0.02, 0.02, 0.03);
+          vec3 color = vec3(0.01, 0.02, 0.01);
           
           // Moving orbs
           for(float i = 0.0; i < 4.0; i++) {
@@ -66,11 +66,12 @@ export function WelcomeShader() {
               float strength = 0.4 / (dist + 0.5);
               strength = pow(strength, 4.0);
               
-              // Green orbs instead of purple/indigo
-              vec3 orbColor = vec3(0.0, 0.6, 0.3); // Forest green
-              if(mod(i, 2.0) == 0.0) orbColor = vec3(0.18, 0.82, 0.34); // Apple Green (#30D158)
+              // Soft green orbs instead of purple/indigo
+              vec3 orbColor = vec3(0.0, 0.6, 0.3); // Emerald
+              if(mod(i, 2.0) == 0.0) orbColor = vec3(0.15, 0.8, 0.35); // Bright Apple Green
               
-              color += orbColor * strength * 0.12;
+              // Bumped multiplier from 0.15 to 0.22 to up visibility a notch
+              color += orbColor * strength * 0.22;
           }
           
           // Add some subtle grain/noise
@@ -147,7 +148,7 @@ export function WelcomeShader() {
 
   return (
     <div className="absolute inset-0 z-0 bg-[#000]">
-      <canvas ref={canvasRef} className="w-full h-full object-cover opacity-70 block" />
+      <canvas ref={canvasRef} className="w-full h-full object-cover opacity-90 block" />
       <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0B]/30 via-transparent to-[#0A0A0B]/90" />
     </div>
   );
