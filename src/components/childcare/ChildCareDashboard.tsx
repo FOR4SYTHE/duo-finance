@@ -27,13 +27,7 @@ export function ChildCareDashboard() {
         <X className="w-5 h-5" />
       </Link>
 
-      {/* DEV: Mock Button to Trigger Onboarding */}
-      <button
-        onClick={() => useChildCareStore.setState({ hasCompletedOnboarding: false })}
-        className="absolute top-0 left-0 bg-red-500/20 text-red-300 border border-red-500/50 px-3 py-2 rounded-xl text-[10px] font-bold z-50 hover:bg-red-500/40"
-      >
-        DEV: Mock Onboarding
-      </button>
+
 
       {/* Header (Context Engine) */}
       <ChildProfileHeader />

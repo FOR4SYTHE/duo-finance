@@ -49,9 +49,17 @@ export function ChildProfileHeader() {
   
   return (
     <div className="flex flex-col items-center w-full pt-4">
-      {/* Avatar Placeholder */}
-      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#B9E0F2] to-[#FF7B54]/20 border-[4px] border-[#0A0A0A] shadow-[0_0_0_2px_rgba(255,255,255,0.05)] flex items-center justify-center mb-4 relative">
-         <span className="text-3xl">👦</span>
+      {/* Avatar Image */}
+      <div className="w-24 h-24 rounded-[32px] bg-[#1A1A1A] border-[4px] border-[#0A0A0A] shadow-[0_10px_30px_rgba(0,0,0,0.5),0_0_0_2px_rgba(255,255,255,0.05)] overflow-hidden flex items-center justify-center mb-5 relative z-20">
+        {profile.gender ? (
+          <img 
+            src={profile.gender === 'boy' ? '/ChildCareBoy.webp' : '/ChildCareGirl.webp'} 
+            alt="Child Profile"
+            className="w-full h-full object-cover scale-[1.15]"
+          />
+        ) : (
+          <span className="text-3xl">👦</span>
+        )}
       </div>
 
       {/* Dashboard Title */}
@@ -108,26 +116,54 @@ export function ChildProfileHeader() {
         </div>
       </div>
 
-      {/* Estimated Monthly Overhead Card */}
-      <div className="w-full bg-gradient-to-b from-[#B9E0F2]/10 to-[#1A1A1A] border border-white/5 rounded-[32px] p-6 flex flex-col items-center shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
-        <span className="text-[10px] font-bold tracking-widest uppercase text-white/60 mb-3">
-          Estimated Monthly Overhead
-        </span>
-        <div className="flex items-baseline gap-2 mb-5">
-          <span className="text-[34px] font-black tracking-tighter text-[#FF7B54]">
+      {/* Dynamic Island Monthly Overhead */}
+      <div className="w-full bg-[#000000] rounded-[42px] p-6 shadow-[0_30px_60px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.1)] border border-white/5 flex flex-col relative overflow-hidden z-20">
+        
+        {/* Top Row: Label & Status */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            {/* Live Indicator */}
+            <div className="w-6 h-6 rounded-full bg-[#FF7B54]/10 flex items-center justify-center">
+              <span className="w-2 h-2 bg-[#FF7B54] rounded-full shadow-[0_0_10px_#FF7B54]" />
+            </div>
+            <span className="text-[11px] font-bold tracking-widest uppercase text-white/60">
+              Monthly Overhead
+            </span>
+          </div>
+          {/* Top Right Actions / Badge */}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/30 bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
+              Live
+            </span>
+          </div>
+        </div>
+
+        {/* Middle Row: Big Numbers */}
+        <div className="flex items-baseline gap-2 mb-8 ml-1">
+          <span className="text-[42px] leading-none font-black tracking-tighter text-white">
             ₱{totalCostPHP.toLocaleString()}
           </span>
-          <span className="text-sm font-semibold text-white/40">
-            / R{Math.round(totalCostZAR).toLocaleString()}
-          </span>
+          <div className="bg-[#FF7B54]/10 px-2 py-1 rounded-lg ml-1">
+            <span className="text-sm font-bold text-[#FF7B54]">
+              R{Math.round(totalCostZAR).toLocaleString()}
+            </span>
+          </div>
         </div>
         
-        <button 
-          onClick={handleEditProfile}
-          className="bg-[#B9E0F2]/20 hover:bg-[#B9E0F2]/30 transition-colors px-6 py-2.5 rounded-full flex items-center gap-2 border border-[#B9E0F2]/10"
-        >
-          <span className="text-xs font-bold text-[#B9E0F2]">✎ Edit Assessment Info</span>
-        </button>
+        {/* Bottom Row: Dynamic Actions */}
+        <div className="flex gap-3">
+          <button 
+            onClick={handleEditProfile}
+            className="flex-1 bg-white/5 hover:bg-white/10 transition-colors py-4 rounded-[24px] flex items-center justify-center gap-2 border border-white/5"
+          >
+            <span className="text-[13px] font-bold text-white">Edit Profile</span>
+          </button>
+          <button 
+            className="flex-1 bg-white/5 hover:bg-white/10 transition-colors py-4 rounded-[24px] flex items-center justify-center gap-2 border border-white/5"
+          >
+            <span className="text-[13px] font-bold text-white">Breakdown</span>
+          </button>
+        </div>
       </div>
     </div>
   );

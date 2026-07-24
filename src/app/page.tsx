@@ -403,17 +403,23 @@ export default function Home() {
           </div>
 
           {/* Child Care Card */}
-          <Link href="/childcare" className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-3.5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
-             <div className="flex justify-between items-start relative z-10 w-full">
-              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-md backdrop-blur-md">
-                <Baby className="w-4 h-4 text-blue-400" strokeWidth={2.5} />
-              </div>
-            </div>
-            <div className="relative z-10 mt-auto flex flex-col items-start">
+          <Link href="/childcare" className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-4 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
+            {/* Title moved to top left */}
+            <div className="relative z-20 flex flex-col items-start w-full">
               <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-0.5">Kids & School</span>
-              <span className="text-white text-[16px] font-black tracking-tight leading-none">Child Care</span>
+              <span className="text-white text-[17px] font-black tracking-tight leading-none">Child Care</span>
             </div>
-            <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-blue-500/20 blur-2xl rounded-full pointer-events-none" />
+            
+            {/* Art Asset in the background/right */}
+            <div className="absolute top-0 right-[-10px] bottom-0 w-[65%] z-10 opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500">
+              <img 
+                src="/ChildCare-CardArt.webp" 
+                alt="Child Care Art" 
+                className="w-full h-full object-cover object-left" 
+              />
+              {/* Fade gradient to blend smoothly into the dark card */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A] via-transparent to-transparent w-full" />
+            </div>
           </Link>
 
           {/* Spend Jar (Modeled after USDC card) */}
