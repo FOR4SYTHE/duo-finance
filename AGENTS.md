@@ -75,7 +75,7 @@ If a UI change can't honestly clear all four, it goes back for another pass befo
 - **Backend/data:** Supabase free tier — Postgres + Auth, shared between two accounts (the couple shares budget data).
 - **Hosting:** Vercel free tier.
 - **Currency rates:** Frankfurter API (free, no key, ECB-based) as primary; exchangerate-api.com free tier as fallback. Cache rate + timestamp; refresh hourly, not per keystroke.
-- **Vision/scanning (Phase 5 only):** Google Cloud Vision API free tier, or a vision-capable LLM call (Gemini or Claude) sent the photo directly, prompted to identify the item and generate a search query.
+- **Vision/scanning & AI Chat:** Gemini 3.6 Flash (or newest/smartest cost-effective model) handles item identification from photos with Google Search grounding, and powers the grounded token-by-token streaming AI Chat — single provider, one free tier to manage.
 - **Budget/AI check-ins (optional, later):** a single LLM call at period-end (Spend Jar) or trip-end (Cartify) — never per-entry — summarizing status and suggesting adjustments. Keep these rare and cheap to stay within free tiers.
 
 **Everything must run on free tiers only.** Flag any feature that would require a paid API before building it, and propose a free-tier-compatible alternative or a scoped-down mock version instead.
@@ -209,11 +209,24 @@ The everyday counterpart to a savings piggy bank, but for outgoing spend: instea
 - **"Done Shopping"** (available per category section, and for the trip as a whole) generates a polished digital receipt: itemized list, VAT-exempt subtotal, VATable subtotal, VAT amount, grand total, always dual currency. Style this as a premium receipt within the existing dark design system — dashed or perforated divider details, generous tabular alignment for the numbers — not a literal skeuomorphic white paper mockup, which would clash with the rest of the app.
 - If the trip is over budget at "Done Shopping," surface the existing rule-based over-budget suggestions (above) on the receipt screen — the warning is about the total exceeding budget, not about VAT causing an overage, since VAT is not an additional charge on top of what was entered.
 
-### 4.5 Shopping Scanner (Phase 5 — build last, scope carefully)
+### 4.5 Shopping Scanner & AI Corner (AI Features)
 
-- User photographs an item (e.g. an oven). A vision call (Vision API or a vision-capable LLM) identifies the item and generates a smart search query.
-- Present results as a "bento box" grid: image, short description, price, link, location — not a generic search results list.
-- **Scoping reality check:** a true live price-comparison/deal-aggregation engine across PH retailers is its own full product and will exceed any free tier if built for real. For v1: either (a) generate the search query and deep-link out to retailer search pages (Lazada, Shopee, local appliance stores) rather than scraping/aggregating results yourself, or (b) build a polished bento-grid UI with a handful of hardcoded real examples (oven, fridge, aircon) and be explicit in the portfolio case study that live aggregation is a v2 roadmap item.
+Group these two AI-powered features together in the UI as an "AI Corner" — a dedicated, discoverable area rather than scattering AI features across different modules. Both build on the same Gemini setup (using Gemini 3.6 Flash or the newest/smartest cost-effective model available, `response.text` used correctly, server-side routes only, graceful non-mutating failure states) — one provider, one free tier to manage.
+
+**Shopping Scanner — upgraded scope:**
+1. **Identify the item:** Photo -> sent to Gemini's vision capability directly (no separate Vision API needed).
+2. **Find real current listings:** Identified item -> Gemini call with **Google Search grounding** enabled (free — 5,000 grounded prompts/month on Gemini 3.x Flash, comfortably enough for personal use) to search for real current PH retailer listings and best prices.
+3. **Display:** Render results in the existing "bento box" grid pattern: image, short description, price (dual PHP/ZAR), source/link.
+4. **UI Copy Transparency:** Explicitly state in the UI that these are real, current search-grounded results from online retailers (Lazada, Shopee, appliance sites), not verified real-time in-stock physical store inventory.
+
+**AI Chat — grounded household assistant:**
+1. **Grounded Context:** On each message, include a concise summary of current household data (budget status, category spend, goals progress) as context — a short summary, not the raw dataset, keeping prompts lean and fast.
+2. **Model:** Gemini 3.6 Flash (or newest cost-effective model) for fast, token-efficient, conversational replies.
+3. **Token-by-Token Streaming:** Stream responses token-by-token so replies appear instantly as a smooth typing effect instead of waiting for a single delayed block.
+4. **Optimistic UI:** The user's sent message appears in the chat log immediately on send (no blank/frozen state while waiting).
+5. **Bounded Conversation History:** Cap prior conversation history sent as context (e.g. last N exchanges) so token usage and latency stay controlled as conversations grow.
+6. **Isolated Store & Code Splitting:** Chat history lives in its own Zustand store separate from real financial data. Code-split the chat UI so it only loads when AI Corner is opened.
+7. **Graceful In-App Error Handling:** If a rate limit or API error occurs, show a clear in-app toast/banner (no native browser dialogs).
 
 ### 4.6 Insurance Tracker & Benefits Reader (Phase 6 — Post-Supabase Migration)
 
@@ -240,7 +253,7 @@ This feature plugs directly into the `household_id` Supabase migration model. Do
 3. Budgeting Module — categories, periods, move-in cost estimator (planning/target-setting only at this stage).
 4. Spend Jar — the shared expense-entries data model, quick-add flow, and period accumulation. This is simpler than Cartify and unlocks it, so build it first.
 5. Cartify — shopping trip tracker built on the same expense-entries model as Spend Jar, Simple mode first, then Categorized.
-6. Shopping scanner — scoped per the note above; treat as a stretch/polish feature, not core v1.
+6. **Shopping Scanner & AI Corner (Phase 5)** — Implement Gemini 3.6 Flash vision + Google Search Grounding for real PH retailer price search, and token-by-token streaming AI Chat in a dedicated AI Corner.
 7. **Supabase & Auth Migration (Joint Accounts)** — Once all UI design and client-side Zustand stores are 100% finalized and approved, implement Supabase Auth, `households` schema with RLS, invite code flow, and Zustand-to-Supabase background sync.
 8. **Insurance Tracker & Benefits Reader** — Implement `insurance_policies` and `insurance_plan_templates` tables on Supabase, My Plans CRUD, Benefits Reader templates, Gap Analyzer, and renewal sync with the Bills Calendar.
 
@@ -256,3 +269,18 @@ Do not start full functionality on Phase 3 onward until the App Shell (step 1) i
 - Prefer small, working increments (Phase 1 fully working before Phase 2 starts) over building all four phases in parallel.
 - **No bland or plain UI is acceptable at any phase.** See the strict rule and self-check list in Section 2 — run it before marking any screen or component as finished, not just at the end of the project.
 - **Always verify before reporting success.** A dev server that won't boot in the sandbox means visual claims can't be self-verified — say so plainly and hand off for a screenshot rather than describing unseen output as working. Logic (calculator math, currency conversion direction, budget math) CAN be verified without a browser via unit tests run directly in the sandbox — there's no excuse to skip that verification. And a passing test suite only proves something if a test actually targets the specific bug that was reported; add one when a bug is fixed, don't just point at unrelated tests passing.
+
+---
+
+## 7. Security, Database Protection & Codebase Guardians
+
+### 7.1 Database Security Architecture (Supabase & PostgreSQL)
+- **Row Level Security (RLS) — Mandatory Security Shield:** Every table (`expenses`, `goals`, `insurance_policies`, `households`) MUST have RLS enabled. Data access is strictly scoped via SQL policies ensuring users can only access rows matching their authenticated `household_id`. Unauthenticated or cross-household queries must return `0 rows` at the database engine level.
+- **Zero Raw Secret Key Exposure:** Client-side Next.js applications use ONLY the `anon` public key (`NEXT_PUBLIC_SUPABASE_ANON_KEY`). The `service_role` master secret key must NEVER be included in client code or pushed to Git.
+- **Disaster Recovery & Data Export:** Automated daily backups via Supabase, plus an in-app JSON/CSV export feature allowing users to download local backups of their complete financial history.
+
+### 7.2 Automated Codebase Security Warriors (CI/CD & Repository Shields)
+- **Automated Dependency Patching (Dependabot / Snyk):** Configured on GitHub to continuously audit NPM packages and automatically submit pull requests for security vulnerabilities.
+- **Secret & Static Code Analysis (CodeQL & GitHub Secret Scanning):** Scans all commits and PRs to prevent accidental credential leaks or unsafe code patterns.
+- **Input Sanitization & XSS Defense:** All user inputs (notes, category names, custom goal titles) are strictly escaped and sanitized before rendering to eliminate Cross-Site Scripting risks.
+- **Hosting & Network Protection (Vercel Edge & CSP):** Protected via Vercel's global edge network (DDoS mitigation, CORS headers, Content Security Policy).
