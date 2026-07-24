@@ -69,11 +69,11 @@ export function Calculator() {
             variants={containerVariants}
             initial={isInitialLoad ? "hidden" : false}
             animate="visible"
-            className={`w-full h-full bg-transparent text-foreground flex flex-col font-sans transition-all duration-700 relative px-6 pb-10 pt-14 sm:pt-10`}
+            className={`w-full h-full min-h-0 bg-transparent text-foreground flex flex-col font-sans transition-all duration-700 relative px-5 pb-4 pt-6`}
         >
             
             {/* Header: Minimal Apple-style */}
-            <motion.div variants={itemVariants} className="flex justify-between items-center mb-8 relative z-20">
+            <motion.div variants={itemVariants} className="flex justify-between items-center mb-4 relative z-20 shrink-0">
                 <div className="flex items-center gap-3">
                     {history.length > 0 ? (
                         <button 
@@ -97,7 +97,7 @@ export function Calculator() {
             </motion.div>
 
             {/* Display Area */}
-            <motion.div variants={itemVariants} className="flex-1 flex flex-col items-center justify-center relative min-h-[220px] z-20 w-full mb-4">
+            <motion.div variants={itemVariants} className="flex-1 flex flex-col items-center justify-center relative min-h-0 z-20 w-full mb-2">
                 
                 {/* Huge Primary Currency */}
                 <div className="flex flex-col items-center">
@@ -108,8 +108,10 @@ export function Calculator() {
                         <span className="text-white/40 font-medium tracking-widest text-[10px] uppercase">{primaryCurrency}</span>
                     </div>
                     <div className="flex items-baseline gap-2 justify-center">
-                        <span className="text-3xl text-white/30 font-light">{isPhpPrimary ? '₱' : 'R'}</span>
-                        <div className="text-[4.5rem] sm:text-[5.5rem] leading-none text-white font-light tracking-tight drop-shadow-2xl flex items-center">
+                        <span className="text-3xl text-white/30 font-light">
+                            {isPhpPrimary ? '₱' : 'R'}
+                        </span>
+                        <div className="text-[clamp(3.5rem,10vh,5.5rem)] leading-none text-white font-light tracking-tight drop-shadow-2xl flex items-center">
                             {Array.from(displayValue || "0").map((char, index) => (
                                 <motion.span
                                     key={`${index}-${char}`}
@@ -126,7 +128,7 @@ export function Calculator() {
                 </div>
 
                 {/* Beautiful Swap Pill */}
-                <div className="relative flex items-center justify-center w-full my-6">
+                <div className="relative flex items-center justify-center w-full my-3 shrink-0">
                     {/* Subtle glowing line behind */}
                     <div className="absolute inset-x-8 top-1/2 -translate-y-1/2 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                     
@@ -143,8 +145,10 @@ export function Calculator() {
                 {/* Converted Currency */}
                 <div className="flex flex-col items-center opacity-80 mt-1">
                     <div className="flex items-baseline gap-2 justify-center">
-                        <span className="text-xl text-white/30 font-light">{isPhpPrimary ? 'R' : '₱'}</span>
-                        <span className="text-[2.5rem] sm:text-[3rem] leading-none text-white font-light tracking-tight flex items-center min-h-[48px] sm:min-h-[56px]">
+                        <span className="text-xl text-white/30 font-light">
+                            {isPhpPrimary ? 'R' : '₱'}
+                        </span>
+                        <span className="text-[clamp(2.25rem,6vh,3rem)] leading-none text-white font-light tracking-tight flex items-center min-h-[40px] sm:min-h-[56px]">
                             {Number.isNaN(convertedAmount) ? (
                                 <div className="relative w-8 h-8 opacity-60 ml-2">
                                     {Array.from({ length: 8 }).map((_, i) => (
@@ -192,7 +196,7 @@ export function Calculator() {
             </motion.div>
 
             {/* Premium Duo-Finance Glassmorphic Numpad */}
-            <motion.div variants={itemVariants} className="grid grid-cols-4 gap-3 sm:gap-4 mb-6 z-20 max-w-[420px] mx-auto w-full">
+            <motion.div variants={itemVariants} className="grid grid-cols-4 grid-rows-5 gap-2 sm:gap-3 z-20 max-w-[420px] mx-auto w-full flex-[1.2] min-h-[280px] max-h-[50vh]">
                 {buttons.map((btn) => {
                     let btnClasses = "";
                     let textClasses = "";
@@ -218,7 +222,7 @@ export function Calculator() {
                             whileTap={{ scale: 0.9, y: 2 }}
                             transition={{ type: "spring", stiffness: 400, damping: 25 }}
                             className={`
-                                relative flex items-center justify-center rounded-[26px] h-[72px] sm:h-[78px] transition-colors duration-300 overflow-hidden group
+                                relative flex items-center justify-center rounded-[22px] sm:rounded-[26px] h-full w-full transition-colors duration-300 overflow-hidden group
                                 ${btn.cols ? 'col-span-2' : ''}
                                 ${btnClasses}
                             `}
