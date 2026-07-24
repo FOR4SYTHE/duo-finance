@@ -24,12 +24,7 @@ interface BillsState {
 export const useBillsStore = create<BillsState>()(
   persist(
     (set) => ({
-      bills: [
-        { id: 'bill-rent', name: 'Rent', amount: 18000, currency: 'PHP', dueDay: 1, category: 'Housing', isRecurring: true, reminderEnabled: true, icon: 'Home' },
-        { id: 'bill-wifi', name: 'Internet', amount: 1899, currency: 'PHP', dueDay: 15, category: 'Utilities', isRecurring: true, reminderEnabled: true, icon: 'Wifi' },
-        { id: 'bill-electric', name: 'Electricity', amount: 3500, currency: 'PHP', dueDay: 20, category: 'Utilities', isRecurring: true, reminderEnabled: false, icon: 'Zap' },
-        { id: 'bill-water', name: 'Water', amount: 800, currency: 'PHP', dueDay: 25, category: 'Utilities', isRecurring: true, reminderEnabled: false, icon: 'Droplets' },
-      ],
+      bills: [],
 
       addBill: (bill) =>
         set((state) => ({
@@ -54,7 +49,7 @@ export const useBillsStore = create<BillsState>()(
         })),
     }),
     {
-      name: 'duo-bills-storage',
+      name: 'duo-bills-storage-v2',
     }
   )
 );

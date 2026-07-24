@@ -242,7 +242,7 @@ export const useBudgetStore = create<BudgetState>()(
                 set({ notifications: [] })
         }),
         {
-            name: 'duo-budget-storage',
+            name: 'duo-budget-storage-v2',
             merge: (persistedState: any, currentState) => {
                 if (!persistedState) return currentState;
                 const merged = { ...currentState, ...persistedState };

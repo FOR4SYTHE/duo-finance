@@ -186,7 +186,7 @@ export const useCartifyStore = create<CartifyState>()(
             }
         }),
         {
-            name: 'cartify-storage',
+            name: 'cartify-storage-v2',
         }
     )
 );

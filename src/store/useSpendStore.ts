@@ -38,7 +38,7 @@ export const useSpendStore = create<SpendState>()(
             }))
         }),
         {
-            name: 'duo-spend-storage'
+            name: 'duo-spend-storage-v2'
         }
     )
 );
