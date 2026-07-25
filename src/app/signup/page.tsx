@@ -36,22 +36,24 @@ export default function SignupPage() {
       {/* Background WebGL Shader */}
       <WelcomeShader />
 
-      <div className="relative z-10 w-full h-full flex flex-col items-center overflow-y-auto no-scrollbar pt-[8dvh] pb-[6dvh] px-6">
+      <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-5">
         
         {/* Top Header - Chrome Logo with Shine Animation */}
         <motion.h1 
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
           animate={{ 
             opacity: 1, 
             y: 0,
+            filter: "blur(0px)",
             backgroundPosition: ["0% 50%", "200% 50%"] 
           }}
           transition={{ 
-            opacity: { duration: 1, ease: "easeOut" },
-            y: { duration: 1, ease: "easeOut" },
+            opacity: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
+            y: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
+            filter: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
             backgroundPosition: { duration: 5, repeat: Infinity, ease: "linear" } 
           }}
-          className="text-[40px] font-extrabold uppercase tracking-[0.2em] relative mb-2"
+          className="text-[32px] sm:text-[40px] font-extrabold uppercase tracking-[0.2em] relative mb-1"
           style={{
             background: "linear-gradient(110deg, #b3b3b3 0%, #ffffff 25%, #4a4a4a 50%, #ffffff 75%, #b3b3b3 100%)",
             backgroundSize: "200% auto",
@@ -72,22 +74,22 @@ export default function SignupPage() {
         </motion.h1>
 
         <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-          className="text-[17px] text-[#cfc4c5] font-medium mb-[6dvh]"
+          initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 1.2, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="text-[15px] sm:text-[17px] text-[#cfc4c5] font-medium mb-3 sm:mb-6"
         >
           Create your shared space
         </motion.p>
 
         {/* The Auth Card */}
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="w-full max-w-[380px] bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[28px] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)]"
+          initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 1.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-[380px] bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[28px] p-5 sm:p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)]"
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             
             {/* Name Input */}
             <div>
@@ -97,7 +99,7 @@ export default function SignupPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full bg-white/[0.04] border border-white/10 rounded-[16px] py-4 px-5 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[16px]"
+                className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 px-5 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
               />
             </div>
 
@@ -109,7 +111,7 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-white/[0.04] border border-white/10 rounded-[16px] py-4 px-5 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[16px]"
+                className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 px-5 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
               />
             </div>
 
@@ -121,7 +123,7 @@ export default function SignupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-white/[0.04] border border-white/10 rounded-[16px] py-4 pl-5 pr-12 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[16px]"
+                className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 pl-5 pr-12 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
               />
               <button
                 type="button"
@@ -140,17 +142,17 @@ export default function SignupPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full bg-white/[0.04] border border-white/10 rounded-[16px] py-4 pl-5 pr-12 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[16px]"
+                className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 pl-5 pr-12 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
               />
             </div>
 
-            <div className="pt-2" />
+            <div className="pt-1" />
 
             {/* Sign Up Button */}
             <button
               type="submit"
               disabled={isLoading || !email || !password || password !== confirmPassword}
-              className="w-full h-[56px] bg-[#111111] border border-white/10 text-white rounded-[16px] font-semibold text-[16px] flex items-center justify-center gap-2 hover:bg-[#1a1a1a] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]"
+              className="w-full h-[48px] sm:h-[52px] bg-[#111111] border border-white/10 text-white rounded-[14px] sm:rounded-[16px] font-semibold text-[15px] sm:text-[16px] flex items-center justify-center gap-2 hover:bg-[#1a1a1a] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]"
             >
               {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "SIGN UP"}
             </button>
@@ -165,7 +167,7 @@ export default function SignupPage() {
             {/* Google Button */}
             <button
               type="button"
-              className="w-full h-[56px] bg-white/[0.03] border border-white/10 text-[#e4e2e4] rounded-[16px] font-medium text-[16px] flex items-center justify-center gap-3 hover:bg-white/[0.06] transition-all active:scale-[0.98]"
+              className="w-full h-[48px] sm:h-[52px] bg-white/[0.03] border border-white/10 text-[#e4e2e4] rounded-[14px] sm:rounded-[16px] font-medium text-[15px] sm:text-[16px] flex items-center justify-center gap-3 hover:bg-white/[0.06] transition-all active:scale-[0.98]"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -179,7 +181,7 @@ export default function SignupPage() {
             {/* Magic Link Button */}
             <button
               type="button"
-              className="w-full h-[56px] bg-transparent border border-white/5 text-[#cfc4c5] rounded-[16px] font-medium text-[16px] flex items-center justify-center gap-3 hover:bg-white/[0.03] transition-all active:scale-[0.98]"
+              className="w-full h-[48px] sm:h-[52px] bg-transparent border border-white/5 text-[#cfc4c5] rounded-[14px] sm:rounded-[16px] font-medium text-[15px] sm:text-[16px] flex items-center justify-center gap-3 hover:bg-white/[0.03] transition-all active:scale-[0.98]"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <defs>
@@ -201,10 +203,10 @@ export default function SignupPage() {
 
         {/* Footer */}
         <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-          className="mt-8 mb-4"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-6 sm:mt-8 mb-2"
         >
           <button 
             onClick={() => router.push("/login")}

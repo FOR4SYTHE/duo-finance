@@ -58,15 +58,17 @@ export default function SetupPage() {
         
         {/* Top Header - Chrome Logo with Shine Animation */}
         <motion.h1 
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
           animate={{ 
             opacity: 1, 
             y: 0,
+            filter: "blur(0px)",
             backgroundPosition: ["0% 50%", "200% 50%"] 
           }}
           transition={{ 
-            opacity: { duration: 1, ease: "easeOut" },
-            y: { duration: 1, ease: "easeOut" },
+            opacity: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
+            y: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
+            filter: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
             backgroundPosition: { duration: 5, repeat: Infinity, ease: "linear" } 
           }}
           className="text-[40px] font-extrabold uppercase tracking-[0.2em] relative mb-2"
@@ -90,9 +92,9 @@ export default function SetupPage() {
         </motion.h1>
 
         <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+          initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 1.2, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-center mb-[5dvh]"
         >
           <h2 className="text-[20px] text-white font-semibold mb-1">
@@ -109,18 +111,19 @@ export default function SetupPage() {
             {!success ? (
               <motion.div
                 key="setup-content"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
+                initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                transition={{ duration: 1.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full flex flex-col gap-4"
               >
                 {step === "choose" ? (
                   <motion.div
                     key="choose-cards"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -15, filter: "blur(5px)" }}
+                    animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, x: -15, filter: "blur(5px)" }}
+                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                     className="space-y-4"
                   >
                     {/* Create Household Card */}
@@ -162,9 +165,10 @@ export default function SetupPage() {
                 ) : (
                   <motion.div
                     key="join-form"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, x: 15, filter: "blur(5px)" }}
+                    animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, x: 15, filter: "blur(5px)" }}
+                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                     className="w-full bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[28px] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)]"
                   >
                     <form onSubmit={handleJoin} className="space-y-6">
@@ -210,8 +214,9 @@ export default function SetupPage() {
             ) : (
               <motion.div
                 key="success-state"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                 className="flex flex-col items-center justify-center text-center w-full py-10 bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[28px] shadow-[0_24px_48px_rgba(0,0,0,0.5)]"
               >
                 <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6 relative">

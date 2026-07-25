@@ -19,13 +19,7 @@ export default function CartifyPage() {
     const [showCancelPrompt, setShowCancelPrompt] = useState(false);
 
     return (
-        <motion.div 
-            key="cartify-page"
-            variants={premiumPageVariants}
-            initial="hidden"
-            animate="visible"
-            className="flex flex-col w-full min-h-full px-6 pt-12 pb-32 relative"
-        >
+        <div className="flex flex-col w-full min-h-full px-6 pt-12 pb-32 relative">
             
             {/* Header Area */}
             <div className="flex justify-between items-center mb-8 relative z-20 shrink-0">
@@ -63,6 +57,6 @@ export default function CartifyPage() {
                 }}
                 mode={mode}
             />
-        </motion.div>
+        </div>
     );
 }

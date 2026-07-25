@@ -59,8 +59,7 @@ export function WelcomeShader() {
                   0.5 + 0.2 * cos(t * 0.8 + i)
               );
               
-              // Influence from mouse
-              pos += (mouse - 0.5) * 0.1 * (1.0 - i * 0.2);
+              // Influence from mouse removed for performance/preference
               
               float dist = distance(uv, pos);
               float strength = 0.4 / (dist + 0.5);
@@ -112,28 +111,13 @@ export function WelcomeShader() {
 
     const uTime = gl.getUniformLocation(prog, "u_time");
     const uRes = gl.getUniformLocation(prog, "u_resolution");
-    const uMouse = gl.getUniformLocation(prog, "u_mouse");
 
-    const mouse = { x: canvas.width / 2, y: canvas.height / 2 };
-
-    const handleMouseMove = (event: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      if (rect.width && rect.height) {
-        const nx = (event.clientX - rect.left) / rect.width;
-        const ny = 1.0 - (event.clientY - rect.top) / rect.height;
-        mouse.x = nx * canvas.width;
-        mouse.y = ny * canvas.height;
-      }
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
 
     function render(t: number) {
       if (!gl || !canvas) return;
       gl.viewport(0, 0, canvas.width, canvas.height);
       if (uTime) gl.uniform1f(uTime, t * 0.001);
       if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
-      if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       animationFrameId = requestAnimationFrame(render);
     }
@@ -141,7 +125,6 @@ export function WelcomeShader() {
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      window.removeEventListener("mousemove", handleMouseMove);
       observer.disconnect();
     };
   }, []);

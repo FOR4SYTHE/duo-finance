@@ -65,8 +65,8 @@ export default function WelcomePage() {
           <h2 className="text-[36px] md:text-[48px] font-bold text-[#e4e2e4] leading-tight tracking-[-0.02em]">
             Budgeting, together.
           </h2>
-          <p className="text-[18px] text-[#cfc4c5] font-normal leading-relaxed max-w-[280px] mx-auto">
-            The best way to sync your finances with your loved one.
+          <p className="text-[17px] text-[#cfc4c5] font-medium mb-[6dvh] max-w-[280px] leading-relaxed">
+            Build better money habits with the person who matters most.
           </p>
         </motion.div>
 
