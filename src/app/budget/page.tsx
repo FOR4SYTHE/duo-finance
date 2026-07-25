@@ -169,7 +169,13 @@ export default function BudgetPage() {
   const activePeriodLabel = PERIODS.find(p => p.value === config.period)?.label || 'Monthly';
 
   return (
-    <div className="flex flex-col w-full pb-8 pt-12 px-6">
+    <motion.div 
+      key="budget-page"
+      variants={premiumPageVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex flex-col w-full pb-8 pt-12 px-6"
+    >
       
       {/* Header */}
       <div className="flex justify-between items-center mb-6 relative z-30 shrink-0">
@@ -487,6 +493,6 @@ export default function BudgetPage() {
         isOpen={isAddCategoryOpen}
         onClose={() => setIsAddCategoryOpen(false)}
       />
-    </div>
+    </motion.div>
   );
 }
