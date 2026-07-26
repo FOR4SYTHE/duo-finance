@@ -370,7 +370,7 @@ export default function Home() {
 
           {/* Spend Jar */}
           <div 
-            className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] relative overflow-hidden group hover:scale-[0.97] transition-transform shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5 cursor-pointer"
+            className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] relative overflow-hidden group hover:scale-[0.97] transition-transform shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5 cursor-pointer [-webkit-tap-highlight-color:transparent] select-none"
             onClick={(e) => {
               // Trigger the spew coins explosion from the ATM's position (left side)
               const event = new CustomEvent('spew-coins', {
@@ -386,12 +386,12 @@ export default function Home() {
             <AnimatedPiggyBank />
             
             <div className="flex flex-row items-center justify-between w-full h-full relative z-20 px-5 pointer-events-none">
-              {/* ATM Hero Image (Left side) */}
-              <div className="w-[45%] h-full flex items-center justify-center relative">
+              {/* ATM Hero Image (Left side) with edge fading mask */}
+              <div className="w-[45%] h-full flex items-center justify-center relative [mask-image:linear-gradient(to_right,black_60%,transparent_100%)]">
                 <img 
-                  src="/images/spend-machine.png" 
+                  src="/images/spend-machine.webp" 
                   alt="Spend Machine" 
-                  className="w-[160%] max-w-none h-auto object-contain drop-shadow-[0_12px_32px_rgba(0,0,0,0.9)] translate-y-1 -translate-x-3 group-hover:scale-[1.08] transition-transform duration-500 ease-out" 
+                  className="w-[160%] max-w-none h-auto object-contain drop-shadow-[0_12px_32px_rgba(0,0,0,0.9)] translate-y-1 -translate-x-3 group-hover:scale-[1.08] group-active:scale-[0.92] transition-transform duration-300 ease-out" 
                 />
               </div>
               

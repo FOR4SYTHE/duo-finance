@@ -6,7 +6,7 @@ import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 
 export function AnimatedPiggyBank() {
-  const [coins, setCoins] = useState<{ id: number; tx: number; ty: number; delay: number; duration: number; startX: number; startY: number; state: string; currency: string }[]>([]);
+  const [coins, setCoins] = useState<{ id: number; peakX: number; peakY: number; endX: number; endY: number; delay: number; duration: number; startX: number; startY: number; state: string; currency: string }[]>([]);
 
   // Get Spend Jar state
   const { config } = useBudgetStore();
@@ -46,20 +46,31 @@ export function AnimatedPiggyBank() {
       const newCoins = Array.from({ length: numCoins }).map((_, i) => {
         const isPHP = Math.random() > 0.5;
         
-        // Smooth Radial Explosion Physics
-        // Spread outward and upward (mostly from -30 to -150 degrees)
-        const angle = (Math.random() * 120 + 210) * (Math.PI / 180); 
-        // Random distance to travel before fading
-        const distance = 80 + Math.random() * 120;
+        // Match the reference video physics:
+        // Explode mostly upward and slightly outward
+        const angle = (Math.random() * 80 + 230) * (Math.PI / 180); 
+        
+        // Initial explosive force
+        const velocity = 100 + Math.random() * 80;
+        
+        // Calculate the peak of the explosion arc (highest point)
+        const peakX = originX + Math.cos(angle) * velocity;
+        const peakY = originY + Math.sin(angle) * velocity;
+        
+        // Calculate the final resting place (falling down past the card)
+        const endX = peakX + (Math.random() * 40 - 20); // Drift slightly while falling
+        const endY = originY + 250; // Fall all the way down
         
         return {
           id: Date.now() + i + Math.random(),
           startX: originX,
           startY: originY,
-          tx: originX + Math.cos(angle) * distance,
-          ty: originY + Math.sin(angle) * distance + 50, // Slight gravity effect by dropping end Y down
-          delay: Math.random() * 0.15, 
-          duration: 1.0 + Math.random() * 0.5,
+          peakX: peakX,
+          peakY: peakY,
+          endX: endX,
+          endY: endY,
+          delay: Math.random() * 0.1, 
+          duration: 1.5 + Math.random() * 0.5, // slightly longer for the floaty fall
           state: state,
           currency: isPHP ? '₱' : 'R'
         };
@@ -90,8 +101,8 @@ export function AnimatedPiggyBank() {
         {currentState === "warning" && <div className="absolute inset-0 bg-[#FF9F0A] blur-3xl" />}
       </div>
 
-      {/* Falling Coins (Layered below text: z-0) */}
-      <div className="absolute inset-0 overflow-hidden z-[5] pointer-events-none">
+      {/* Falling Coins (Layered above everything: z-30) */}
+      <div className="absolute inset-0 overflow-hidden z-[30] pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-full">
           {coins.map((coin) => {
             const coinStyles = 
@@ -101,7 +112,7 @@ export function AnimatedPiggyBank() {
                   ? { bg: "linear-gradient(135deg, #FFE4B5 0%, #FF9F0A 40%, #D97706 100%)", border: "#FFE8C2", shadow: "rgba(255, 159, 10, 0.5)", text: "#663C00" }
                   : { bg: "linear-gradient(135deg, #FFF7D6 0%, #FFD700 40%, #F5A623 100%)", border: "#FFE787", shadow: "rgba(200, 130, 0, 0.5)", text: "#A05A00" };
 
-            // Explode outward smoothly and fade
+            // Physics: Explode out, peak, and fall with gravity
             return (
               <motion.div
                 key={coin.id}
@@ -113,15 +124,22 @@ export function AnimatedPiggyBank() {
                   rotate: 0 
                 }}
                 animate={{
-                  y: coin.ty,
-                  x: coin.tx,
-                  scale: 1,
-                  opacity: [0, 1, 1, 0],
-                  rotate: Math.random() > 0.5 ? 360 : -360
+                  // Y: Start -> shoot up to peak -> fall down past the card
+                  y: [coin.startY, coin.peakY, coin.endY],
+                  // X: Start -> shoot out -> drift slightly while falling
+                  x: [coin.startX, coin.peakX, coin.endX],
+                  // Scale: pop in, stay full size, then fade out at the very end
+                  scale: [0.2, 1, 1],
+                  opacity: [1, 1, 0],
+                  // Spin rapidly while shooting out, then slowly while falling
+                  rotate: [0, Math.random() > 0.5 ? 360 : -360, Math.random() > 0.5 ? 540 : -540]
                 }}
                 transition={{
                   duration: coin.duration,
-                  ease: "easeOut",
+                  // Keyframe timing: 0% start, 35% reach peak, 100% hit bottom
+                  times: [0, 0.35, 1],
+                  // Custom easing: explosive easeOut for the pop, then accelerate down (easeIn)
+                  ease: ["easeOut", "easeIn"],
                   delay: coin.delay
                 }}
                 className="absolute w-7 h-7 rounded-full flex items-center justify-center -ml-3.5 -mt-3.5 z-20 shadow-lg"
