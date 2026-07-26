@@ -368,27 +368,45 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Spend Jar (Modeled after USDC card) */}
-          <Link href="/jar" className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-3.5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
-            {/* Animated Piggy Background */}
+          {/* Spend Jar */}
+          <div 
+            className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] relative overflow-hidden group hover:scale-[0.97] transition-transform shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5 cursor-pointer"
+            onClick={(e) => {
+              // Trigger the spew coins explosion from the ATM's position (left side)
+              const event = new CustomEvent('spew-coins', {
+                detail: {
+                  x: 60, // approximate center of the ATM image
+                  y: 60
+                }
+              });
+              window.dispatchEvent(event);
+            }}
+          >
+            {/* Animated Piggy Background (now shoots coins from center-left) */}
             <AnimatedPiggyBank />
             
-            <div className="absolute top-3.5 left-3.5 z-10">
-              <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-md backdrop-blur-md">
-                <PiggyBank className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+            <div className="flex flex-row items-center justify-between w-full h-full relative z-20 px-5 pointer-events-none">
+              {/* ATM Hero Image (Left side) */}
+              <div className="w-[45%] h-full flex items-center justify-center relative">
+                <img 
+                  src="/images/spend-machine.png" 
+                  alt="Spend Machine" 
+                  className="w-[160%] max-w-none h-auto object-contain drop-shadow-[0_12px_32px_rgba(0,0,0,0.9)] translate-y-1 -translate-x-3 group-hover:scale-[1.08] transition-transform duration-500 ease-out" 
+                />
+              </div>
+              
+              {/* Text Area (Right side) */}
+              <div className="flex flex-col items-end text-right w-[55%] pt-1">
+                <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-1">Spend Jar</span>
+                <span className={`${phpColor} text-[22px] font-black tracking-tighter leading-none mb-0.5 transition-colors duration-300`}>
+                  ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                </span>
+                <span className={`${zarColor} text-[10px] font-semibold tracking-wide transition-colors duration-300`}>
+                  ≈ R{zarTotalSpent.toLocaleString()}
+                </span>
               </div>
             </div>
-              
-            <div className="flex flex-col items-center text-center relative z-10 mt-1">
-              <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-0.5">Spend Jar</span>
-              <span className={`${phpColor} text-[20px] font-black tracking-tighter leading-none mb-0.5 transition-colors duration-300`}>
-                ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
-              </span>
-              <span className={`${zarColor} text-[9px] font-semibold tracking-wide transition-colors duration-300`}>
-                ≈ R{zarTotalSpent.toLocaleString()}
-              </span>
-            </div>
-          </Link>
+          </div>
 
           {/* Insurance Tracker */}
           <div className="aspect-[5/3] bg-[#1A1A1A] border border-white/5 rounded-[28px] relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)]">

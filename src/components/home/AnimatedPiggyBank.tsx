@@ -6,7 +6,7 @@ import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 
 export function AnimatedPiggyBank() {
-  const [coins, setCoins] = useState<{ id: number; tx: number; ty: number; delay: number; duration: number; startX: number; state: string; currency: string }[]>([]);
+  const [coins, setCoins] = useState<{ id: number; tx: number; ty: number; delay: number; duration: number; startX: number; startY: number; peakY: number; state: string; currency: string }[]>([]);
 
   // Get Spend Jar state
   const { config } = useBudgetStore();
@@ -33,69 +33,53 @@ export function AnimatedPiggyBank() {
   useEffect(() => {
     let mounted = true;
     
-    const runAnimations = async () => {
-      // Wait for Framer Motion components to fully mount
-      await new Promise(r => setTimeout(r, 250));
-
-      while (mounted) {
-        try {
-          const state = percentageRef.current >= 85 ? "danger" : percentageRef.current >= 50 ? "warning" : "safe";
-          const spent = totalSpentRef.current;
-          
-          if (spent > 0) {
-            let numCoins = 0;
-            let intervalTime = 3000;
-            
-            if (state === "safe") {
-              numCoins = 1;
-              intervalTime = 3500;
-            } else if (state === "warning") {
-              numCoins = 3;
-              intervalTime = 2500;
-            } else {
-              numCoins = 8; // Raining harder if danger
-              intervalTime = 1500;
-            }
-            
-            if (mounted) {
-              const newCoins = Array.from({ length: numCoins }).map((_, i) => {
-                const startX = (Math.random() - 0.5) * 160; // Spread across width (card is small)
-                const isPHP = Math.random() > 0.5;
-                return {
-                  id: Date.now() + i + Math.random(),
-                  tx: startX + (Math.random() - 0.5) * 40,
-                  ty: 200, // fall all the way down
-                  startX: startX, 
-                  delay: Math.random() * 0.8, 
-                  duration: 2.5 + Math.random() * 2,
-                  state: state,
-                  currency: isPHP ? '₱' : 'R'
-                };
-              });
-              
-              setCoins(prev => [...prev.slice(-20), ...newCoins]); // Keep a max to avoid lag
-              
-              // Clean up old coins smoothly
-              setTimeout(() => {
-                if (mounted) {
-                  setCoins(prev => prev.filter(c => !newCoins.find(n => n.id === c.id)));
-                }
-              }, 6000);
-            }
-            
-            await new Promise(r => setTimeout(r, intervalTime));
-          } else {
-             await new Promise(r => setTimeout(r, 1000));
-          }
-        } catch {
-          if (!mounted) break;
-          await new Promise(r => setTimeout(r, 500));
+    const handleSpew = (e: Event) => {
+      if (!mounted) return;
+      
+      const customEvent = e as CustomEvent<{ x: number, y: number }>;
+      const originX = customEvent.detail?.x || 40; // Default near top-left ATM icon
+      const originY = customEvent.detail?.y || 40;
+      
+      const state = percentageRef.current >= 85 ? "danger" : percentageRef.current >= 50 ? "warning" : "safe";
+      const numCoins = 15;
+      
+      const newCoins = Array.from({ length: numCoins }).map((_, i) => {
+        const isPHP = Math.random() > 0.5;
+        
+        // Smooth Radial Explosion Physics
+        // Spread outward and upward (mostly from -30 to -150 degrees)
+        const angle = (Math.random() * 120 + 210) * (Math.PI / 180); 
+        // Random distance to travel before fading
+        const distance = 80 + Math.random() * 120;
+        
+        return {
+          id: Date.now() + i + Math.random(),
+          startX: originX,
+          startY: originY,
+          tx: originX + Math.cos(angle) * distance,
+          ty: originY + Math.sin(angle) * distance + 50, // Slight gravity effect by dropping end Y down
+          delay: Math.random() * 0.15, 
+          duration: 1.0 + Math.random() * 0.5,
+          state: state,
+          currency: isPHP ? '₱' : 'R'
+        };
+      });
+      
+      setCoins(prev => [...prev.slice(-30), ...newCoins]);
+      
+      // Cleanup
+      setTimeout(() => {
+        if (mounted) {
+          setCoins(prev => prev.filter(c => !newCoins.find(n => n.id === c.id)));
         }
-      }
+      }, 2500);
     };
 
-    runAnimations();
-    return () => { mounted = false; };
+    window.addEventListener('spew-coins', handleSpew);
+    return () => { 
+      mounted = false; 
+      window.removeEventListener('spew-coins', handleSpew);
+    };
   }, []);
 
   return (
@@ -107,8 +91,8 @@ export function AnimatedPiggyBank() {
       </div>
 
       {/* Falling Coins (Layered below text: z-0) */}
-      <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none opacity-60">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full">
+      <div className="absolute inset-0 overflow-hidden z-[5] pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full">
           {coins.map((coin) => {
             const coinStyles = 
               coin.state === "danger"
@@ -117,29 +101,37 @@ export function AnimatedPiggyBank() {
                   ? { bg: "linear-gradient(135deg, #FFE4B5 0%, #FF9F0A 40%, #D97706 100%)", border: "#FFE8C2", shadow: "rgba(255, 159, 10, 0.5)", text: "#663C00" }
                   : { bg: "linear-gradient(135deg, #FFF7D6 0%, #FFD700 40%, #F5A623 100%)", border: "#FFE787", shadow: "rgba(200, 130, 0, 0.5)", text: "#A05A00" };
 
+            // Explode outward smoothly and fade
             return (
               <motion.div
                 key={coin.id}
-                initial={{ y: -50, x: coin.startX, scale: 0.6, opacity: 0, rotate: 0 }}
+                initial={{ 
+                  y: coin.startY, 
+                  x: coin.startX, 
+                  scale: 0.2, 
+                  opacity: 0, 
+                  rotate: 0 
+                }}
                 animate={{
                   y: coin.ty,
                   x: coin.tx,
+                  scale: 1,
                   opacity: [0, 1, 1, 0],
-                  rotate: [0, 180, 360]
+                  rotate: Math.random() > 0.5 ? 360 : -360
                 }}
                 transition={{
                   duration: coin.duration,
-                  ease: "linear",
+                  ease: "easeOut",
                   delay: coin.delay
                 }}
-                className="absolute top-0 left-1/2 w-8 h-8 rounded-full flex items-center justify-center -translate-x-1/2"
+                className="absolute w-7 h-7 rounded-full flex items-center justify-center -ml-3.5 -mt-3.5 z-20 shadow-lg"
                 style={{
                   background: coinStyles.bg,
                   border: `1.5px solid ${coinStyles.border}`,
-                  boxShadow: `inset 0 -2px 4px ${coinStyles.shadow}, inset 0 1px 2px rgba(255, 255, 255, 0.9), 0 4px 8px rgba(0,0,0,0.15)`
+                  boxShadow: `inset 0 -2px 4px ${coinStyles.shadow}, inset 0 1px 2px rgba(255, 255, 255, 0.9), 0 4px 8px rgba(0,0,0,0.3)`
                 }}
               >
-                <span className="text-[14px] font-black leading-none drop-shadow-sm mt-[1px]" style={{ color: coinStyles.text }}>{coin.currency}</span>
+                <span className="text-[12px] font-black leading-none drop-shadow-sm mt-[1px]" style={{ color: coinStyles.text }}>{coin.currency}</span>
               </motion.div>
             );
           })}
