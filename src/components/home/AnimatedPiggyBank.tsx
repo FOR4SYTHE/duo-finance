@@ -6,7 +6,7 @@ import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 
 export function AnimatedPiggyBank() {
-  const [coins, setCoins] = useState<{ id: number; tx: number; ty: number; delay: number; duration: number; startX: number; startY: number; peakY: number; state: string; currency: string }[]>([]);
+  const [coins, setCoins] = useState<{ id: number; tx: number; ty: number; delay: number; duration: number; startX: number; startY: number; state: string; currency: string }[]>([]);
 
   // Get Spend Jar state
   const { config } = useBudgetStore();
