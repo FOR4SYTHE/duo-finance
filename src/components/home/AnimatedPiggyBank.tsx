@@ -130,7 +130,7 @@ export function AnimatedPiggyBank() {
                   x: [coin.startX, coin.peakX, coin.endX],
                   // Scale: pop in, stay full size, then fade out at the very end
                   scale: [0.2, 1, 1],
-                  opacity: [1, 1, 0],
+                  opacity: [0, 1, 0],
                   // Spin rapidly while shooting out, then slowly while falling
                   rotate: [0, Math.random() > 0.5 ? 360 : -360, Math.random() > 0.5 ? 540 : -540]
                 }}
