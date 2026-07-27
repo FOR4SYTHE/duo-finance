@@ -21,6 +21,7 @@ interface CartifyState {
     showReceipt: () => void;
     hideReceipt: () => void;
     setActiveCategory: (category: string | null) => void;
+    setMode: (mode: CartifyMode) => void;
     
     // Item Actions
     addPlannedItem: (name: string, category?: string) => void;
@@ -76,6 +77,12 @@ export const useCartifyStore = create<CartifyState>()(
             hideReceipt: () => set({ isReceiptView: false }),
 
             setActiveCategory: (category) => set({ activeCategory: category }),
+            
+            setMode: (mode) => set({ 
+                mode,
+                // Automatically adjust isBuildingList if switching to/from planned
+                isBuildingList: mode === 'planned' ? true : false
+            }),
 
             addPlannedItem: (name, category) => {
                 const isVatable = !category?.match(/produce|meat|fish|rice/i);
