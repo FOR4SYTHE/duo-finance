@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, BookOpen, Search, ShoppingBag, ClipboardList, Umbrella } from "lucide-react";
+import { Shield, BookOpen, Search, ShoppingBag, ClipboardList, Umbrella, Check } from "lucide-react";
 
 import { MyPlansTab } from "./MyPlansTab";
 import { BenefitsReaderTab } from "./BenefitsReaderTab";
@@ -55,6 +55,7 @@ export function InsuranceModule() {
     const [isAddPlanOpen, setIsAddPlanOpen] = useState(false);
     const [isManualInputOpen, setIsManualInputOpen] = useState(false);
     const [isLogVisitOpen, setIsLogVisitOpen] = useState(false);
+    const [successPolicy, setSuccessPolicy] = useState<{ provider: string, name: string } | null>(null);
 
     // Only hide nav if we're on the default tab AND have no policies (the true onboarding state)
     const showNav = hasPolicies || activeTab !== 'my-plans';
@@ -160,7 +161,7 @@ export function InsuranceModule() {
                 onClose={() => setIsManualInputOpen(false)}
                 onSave={(data) => {
                     console.log("Saved Policy:", data);
-                    setHasPolicies(true);
+                    setSuccessPolicy({ provider: data.provider, name: data.policyName || 'New Policy' });
                 }}
             />
 
@@ -171,6 +172,61 @@ export function InsuranceModule() {
                     console.log("Logged Visit:", data);
                 }}
             />
+
+            {/* Success Screen Overlay */}
+            <AnimatePresence>
+                {successPolicy && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[120] flex flex-col items-center justify-center bg-[#050505]/95 backdrop-blur-xl px-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", damping: 20, stiffness: 200 }}
+                            className="flex flex-col items-center w-full"
+                        >
+                            <div className="w-20 h-20 rounded-full bg-[#30D158]/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(48,209,88,0.3)]">
+                                <Check className="w-10 h-10 text-[#30D158]" />
+                            </div>
+                            <h2 className="text-white font-black text-[32px] tracking-tight mb-2 text-center">Policy Added</h2>
+                            
+                            <div className="bg-[#1A1A1A] border border-white/5 rounded-[20px] p-6 flex flex-col items-center gap-1 w-full max-w-sm mb-10 text-center">
+                                <span className="text-white/50 text-[11px] font-bold uppercase tracking-widest">{successPolicy.provider}</span>
+                                <span className="text-white font-bold text-[18px]">{successPolicy.name}</span>
+                            </div>
+
+                            <p className="text-white/60 text-[14px] font-medium mb-8 text-center max-w-[260px]">
+                                Your policy is now securely stored and ready to use.
+                            </p>
+
+                            <div className="flex flex-col gap-3 w-full max-w-sm">
+                                <button 
+                                    onClick={() => {
+                                        setSuccessPolicy(null);
+                                        setActiveTab('benefits');
+                                        setHasPolicies(true);
+                                    }}
+                                    className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[15px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)]"
+                                >
+                                    Read My Benefits
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        setSuccessPolicy(null);
+                                        setHasPolicies(true);
+                                    }}
+                                    className="w-full py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[15px] transition-all active:scale-[0.98] border border-white/5"
+                                >
+                                    Done
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

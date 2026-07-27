@@ -31,8 +31,13 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4 }}
-                className="fixed inset-0 z-50 flex flex-col bg-[#0a0a0a]"
+                className="fixed inset-0 z-50 flex flex-col bg-[#0a0a0a] overflow-hidden"
             >
+                {/* Background Watermark Shield */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-[0.05] blur-[2px]">
+                    <Shield className="w-[380px] h-[380px] text-white" strokeWidth={1} />
+                </div>
+
                 {/* Back button and Bell replicating the header but without title */}
                 <motion.div 
                     initial={{ opacity: 0, y: -10 }}
@@ -52,7 +57,7 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                     initial={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
                     animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-                    className="absolute top-32 left-0 right-0 flex flex-col items-center z-20"
+                    className="absolute top-28 left-0 right-0 flex flex-col items-center z-20"
                 >
                     <h1 
                         className="text-[48px] font-extrabold uppercase tracking-[0.2em] relative leading-none mb-1.5"
@@ -74,10 +79,20 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                             }}
                         />
                     </h1>
-                    <div className="flex items-center gap-2">
-                        <span className="h-[1px] w-6 bg-gradient-to-r from-transparent to-[#D4AF37]/40" />
-                        <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#D4AF37]/80">Insurance Hub</span>
-                        <span className="h-[1px] w-6 bg-gradient-to-l from-transparent to-[#D4AF37]/40" />
+                    <div className="flex flex-col items-center gap-1.5">
+                        <div className="flex items-center gap-2">
+                            <span className="h-[1px] w-6 bg-gradient-to-r from-transparent to-[#D4AF37]/40" />
+                            <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#D4AF37]/80">Insurance Hub</span>
+                            <span className="h-[1px] w-6 bg-gradient-to-l from-transparent to-[#D4AF37]/40" />
+                        </div>
+                        <motion.span 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.8, delay: 0.3 }}
+                            className="text-[8px] font-bold tracking-[0.3em] uppercase text-white/30"
+                        >
+                            Protect • Understand • Track
+                        </motion.span>
                     </div>
                 </motion.header>
                 
@@ -85,31 +100,86 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-                    className="relative z-10 w-full max-w-sm mx-auto flex flex-col items-center justify-end flex-grow pb-[8dvh] px-6"
+                    className="relative z-10 w-full max-w-sm mx-auto flex flex-col items-center justify-end flex-grow pb-[5dvh] px-6"
                 >
-                    <h2 className="text-[32px] text-white font-black tracking-tighter leading-tight mb-4 text-center">
+                    <motion.h2 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                        className="text-[30px] text-white font-black tracking-tighter leading-tight mb-3 text-center"
+                    >
                         You haven't logged any<br/>insurance yet
-                    </h2>
+                    </motion.h2>
                     
-                    <p className="text-white/50 text-[13px] font-medium max-w-[280px] leading-relaxed text-center mb-10 relative z-10">
-                        Start tracking your existing coverage or browse options to find the right protection for your household.
-                    </p>
+                    <motion.p 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.4 }}
+                        className="text-white/50 text-[13px] font-medium max-w-[300px] leading-relaxed text-center mb-6 relative z-10"
+                    >
+                        Store your policies, understand your benefits, compare plans, and track medical expenses in one place.
+                    </motion.p>
                     
-                    <div className="flex flex-col gap-3 w-full relative z-10">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.5 }}
+                        className="flex flex-wrap justify-center gap-2 mb-8 w-full px-4"
+                    >
+                        {["Read Benefits", "Compare Plans", "Track Medical Visits", "Never Miss Renewals"].map((bullet, i) => (
+                            <span key={i} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-white/60 text-[11px] font-bold tracking-wide">
+                                • {bullet}
+                            </span>
+                        ))}
+                    </motion.div>
+                    
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.6 }}
+                        className="flex flex-col gap-3 w-full relative z-10 mb-6"
+                    >
                         <button 
                             onClick={onAddPlan}
-                            className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(212,175,55,0.2)]"
+                            className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[14px] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(212,175,55,0.2)]"
                         >
-                            <Plus className="w-4 h-4" />
-                            Add a plan
+                            <Plus className="w-5 h-5" />
+                            Add a Plan
                         </button>
                         <button 
                             onClick={onExplore}
-                            className="w-full py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/5"
+                            className="w-full py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[14px] transition-all active:scale-[0.98] border border-white/5"
                         >
                             Explore & Compare
                         </button>
-                    </div>
+                    </motion.div>
+
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.7 }}
+                        className="w-full flex flex-col gap-2 relative z-10"
+                    >
+                        {/* Disabled Preview Cards */}
+                        <div className="w-full p-4 rounded-[20px] bg-white/[0.02] border border-white/[0.02] opacity-40 select-none flex items-center justify-between">
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-white font-bold text-[14px]">Benefits Reader</span>
+                                <span className="text-white/50 text-[11px] font-medium">Understand exactly what your policy covers.</span>
+                            </div>
+                        </div>
+                        <div className="w-full p-4 rounded-[20px] bg-white/[0.02] border border-white/[0.02] opacity-40 select-none flex items-center justify-between">
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-white font-bold text-[14px]">Medical History</span>
+                                <span className="text-white/50 text-[11px] font-medium">Keep every consultation in one place.</span>
+                            </div>
+                        </div>
+                        <div className="w-full p-4 rounded-[20px] bg-white/[0.02] border border-white/[0.02] opacity-40 select-none flex items-center justify-between">
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-white font-bold text-[14px]">Renewal Calendar</span>
+                                <span className="text-white/50 text-[11px] font-medium">Never forget an upcoming premium.</span>
+                            </div>
+                        </div>
+                    </motion.div>
                 </motion.main>
             </motion.div>,
             document.body

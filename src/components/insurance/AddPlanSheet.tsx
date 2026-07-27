@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ScanLine, Keyboard, Sparkles } from "lucide-react";
+import { X, ScanLine, Keyboard, Sparkles, DownloadCloud } from "lucide-react";
 import { BorderBeam } from "border-beam";
 
 interface AddPlanSheetProps {
@@ -87,10 +87,10 @@ export function AddPlanSheet({ isOpen, onClose, onSelectManual, onSelectScan }: 
                                     </div>
                                     <div className="flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-bold text-[17px]">
-                                                <span className="bg-[linear-gradient(110deg,#D4AF37,#E5E4E2,#D4AF37)] text-transparent bg-clip-text mr-1">AI</span>
-                                                <span className="text-white">Document Scan</span>
-                                            </span>
+                                            <span className="font-bold text-[17px] text-white">Scan Insurance Policy</span>
+                                            <div className="px-1.5 py-0.5 rounded bg-white/10 border border-white/5 flex items-center justify-center">
+                                                <span className="text-[9px] font-black uppercase tracking-wider bg-[linear-gradient(110deg,#D4AF37,#E5E4E2,#D4AF37)] text-transparent bg-clip-text">AI</span>
+                                            </div>
                                         </div>
                                         <span className="text-white/50 text-[13px] font-medium leading-relaxed max-w-[200px]">
                                             Take a photo of your policy. We'll extract the details instantly.
@@ -114,13 +114,33 @@ export function AddPlanSheet({ isOpen, onClose, onSelectManual, onSelectScan }: 
                                         <Keyboard className="w-7 h-7 text-white/50" />
                                     </div>
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-white font-bold text-[17px]">Manual Input</span>
+                                        <span className="text-white font-bold text-[17px]">Manual Entry</span>
                                         <span className="text-white/50 text-[13px] font-medium leading-relaxed max-w-[200px]">
-                                            Type your coverage limits and provider details by hand.
+                                            Add your policy details yourself in just a few minutes.
                                         </span>
                                     </div>
                                 </div>
                             </button>
+
+                            {/* Import Existing (Coming Soon) */}
+                            <div className="w-full relative rounded-[24px] p-6 text-left bg-white/[0.02] border border-white/[0.02] opacity-40 select-none">
+                                <div className="relative z-10 flex gap-5 items-center">
+                                    <div className="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                                        <DownloadCloud className="w-7 h-7 text-white/30" />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-white font-bold text-[17px]">Import Existing</span>
+                                            <div className="px-1.5 py-0.5 rounded bg-white/10 flex items-center justify-center">
+                                                <span className="text-[9px] font-bold text-white/50 uppercase tracking-wider">Coming Soon</span>
+                                            </div>
+                                        </div>
+                                        <span className="text-white/40 text-[13px] font-medium leading-relaxed max-w-[200px]">
+                                            Import your insurance details automatically from supported providers.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </motion.div>
                 </div>
