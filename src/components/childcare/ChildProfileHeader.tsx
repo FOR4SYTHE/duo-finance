@@ -7,22 +7,6 @@ import { motion } from "framer-motion";
 export function ChildProfileHeader() {
   const { profile, updateProfile, cachedData } = useChildCareStore();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
-
-  const onMouseDown = (e: React.MouseEvent) => {
-    if (!scrollRef.current) return;
-    dragRef.current.isDown = true;
-    dragRef.current.startX = e.pageX - scrollRef.current.offsetLeft;
-    dragRef.current.scrollLeft = scrollRef.current.scrollLeft;
-  };
-  const onMouseLeaveOrUp = () => { dragRef.current.isDown = false; };
-  const onMouseMove = (e: React.MouseEvent) => {
-    if (!dragRef.current.isDown || !scrollRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - dragRef.current.startX) * 1.5;
-    scrollRef.current.scrollLeft = dragRef.current.scrollLeft - walk;
-  };
 
   const itemWidth = 60;
   const dashboardAges = Array.from({ length: 18 }, (_, i) => i + 1);
@@ -77,19 +61,7 @@ export function ChildProfileHeader() {
         
         <div 
           ref={scrollRef}
-          onMouseDown={onMouseDown}
-          onMouseLeave={onMouseLeaveOrUp}
-          onMouseUp={onMouseLeaveOrUp}
-          onMouseMove={onMouseMove}
-          onScroll={(e) => {
-            const scrollLeft = e.currentTarget.scrollLeft;
-            const index = Math.round(scrollLeft / itemWidth);
-            const newAge = dashboardAges[index];
-            if (newAge && newAge !== profile.age) {
-              updateProfile({ age: newAge });
-            }
-          }}
-          className="flex items-center w-full h-full overflow-x-auto hide-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory relative z-10" 
+          className="flex items-center w-full h-full relative z-10 pointer-events-none overflow-hidden" 
           style={{ 
             scrollbarWidth: 'none', 
             msOverflowStyle: 'none',
@@ -100,17 +72,13 @@ export function ChildProfileHeader() {
           {dashboardAges.map((age) => {
             const isActive = profile.age === age;
             return (
-              <button
+              <div
                 key={age}
-                onClick={() => {
-                  const index = dashboardAges.indexOf(age);
-                  scrollRef.current?.scrollTo({ left: index * itemWidth, behavior: 'smooth' });
-                }}
                 className={`flex-shrink-0 flex items-center justify-center font-bold text-lg transition-colors snap-center h-full`}
                 style={{ width: itemWidth }}
               >
                 <span className={`relative z-10 ${isActive ? 'text-white' : 'text-white/40 hover:text-white/60'}`}>{age}</span>
-              </button>
+              </div>
             );
           })}
         </div>

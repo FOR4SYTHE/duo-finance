@@ -9,7 +9,7 @@ import { Map } from "pigeon-maps";
 
 export function ChildCareOnboarding() {
   const { profile, updateProfile, completeOnboarding } = useChildCareStore();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(profile.nickname ? 2 : 1);
   const scrollRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
 
