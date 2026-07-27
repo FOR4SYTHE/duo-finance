@@ -317,41 +317,45 @@ export function GrowthCostForecast() {
         </div>
       </div>
 
-      {/* What-If Planner (Only show if School is not configured) */}
-      {!configuration.selectedSchoolId && (
+      {/* What-If Planner (Only show if at least one category is using estimates) */}
+      {(!configuration.selectedSchoolId || configuration.selectedHealthcareProviders.length === 0) && (
         <div className="bg-[#1A1A1A] rounded-[32px] p-6 shadow-[0_8px_24px_rgba(0,0,0,0.2)] border border-[#FF7B54]/20 flex flex-col gap-4 mt-2">
           <div className="flex items-center gap-2">
             <h4 className="text-[14px] font-bold text-white">What-If Planner</h4>
           </div>
           
           <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between bg-white/5 p-3 rounded-2xl">
-              <span className="text-[14px] font-bold text-white pl-1">Private School</span>
-              <div 
-                onClick={() => setIsPrivateSchool(!isPrivateSchool)}
-                className={`w-[50px] h-[30px] rounded-full p-[4px] cursor-pointer transition-colors duration-300 ease-in-out ${isPrivateSchool ? 'bg-[#FF7B54]' : 'bg-[#2C2C2E]'}`}
-              >
-                <motion.div 
-                  animate={{ x: isPrivateSchool ? 20 : 0 }} 
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  className="w-[22px] h-[22px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
-                />
+            {!configuration.selectedSchoolId && (
+              <div className="flex items-center justify-between bg-white/5 p-3 rounded-2xl">
+                <span className="text-[14px] font-bold text-white pl-1">Private School</span>
+                <div 
+                  onClick={() => setIsPrivateSchool(!isPrivateSchool)}
+                  className={`w-[50px] h-[30px] rounded-full p-[4px] cursor-pointer transition-colors duration-300 ease-in-out ${isPrivateSchool ? 'bg-[#FF7B54]' : 'bg-[#2C2C2E]'}`}
+                >
+                  <motion.div 
+                    animate={{ x: isPrivateSchool ? 20 : 0 }} 
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="w-[22px] h-[22px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
+                  />
+                </div>
               </div>
-            </div>
+            )}
             
-            <div className="flex items-center justify-between bg-white/5 p-3 rounded-2xl">
-              <span className="text-[14px] font-bold text-white pl-1">Premium Healthcare</span>
-              <div 
-                onClick={() => setIsPremiumHealth(!isPremiumHealth)}
-                className={`w-[50px] h-[30px] rounded-full p-[4px] cursor-pointer transition-colors duration-300 ease-in-out ${isPremiumHealth ? 'bg-[#FF7B54]' : 'bg-[#2C2C2E]'}`}
-              >
-                <motion.div 
-                  animate={{ x: isPremiumHealth ? 20 : 0 }} 
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  className="w-[22px] h-[22px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
-                />
+            {configuration.selectedHealthcareProviders.length === 0 && (
+              <div className="flex items-center justify-between bg-white/5 p-3 rounded-2xl">
+                <span className="text-[14px] font-bold text-white pl-1">Premium Healthcare</span>
+                <div 
+                  onClick={() => setIsPremiumHealth(!isPremiumHealth)}
+                  className={`w-[50px] h-[30px] rounded-full p-[4px] cursor-pointer transition-colors duration-300 ease-in-out ${isPremiumHealth ? 'bg-[#FF7B54]' : 'bg-[#2C2C2E]'}`}
+                >
+                  <motion.div 
+                    animate={{ x: isPremiumHealth ? 20 : 0 }} 
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="w-[22px] h-[22px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}
