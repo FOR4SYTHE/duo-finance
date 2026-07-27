@@ -203,7 +203,7 @@ export default function Home() {
         variants={containerVariants}
         initial={isInitialLoad ? "hidden" : false}
         animate="visible"
-        className="flex flex-col w-full"
+        className="flex flex-col w-full font-sans"
       >
         {/* Header */}
         <motion.div variants={itemVariants} className="flex justify-between items-center mb-6 relative z-20">
@@ -409,7 +409,7 @@ export default function Home() {
           </div>
 
           {/* Insurance Tracker */}
-          <div className="aspect-[5/3] bg-[#1A1A1A] border border-white/5 rounded-[28px] relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)]">
+          <Link href="/insurance" className="aspect-[5/3] bg-[#1A1A1A] border border-white/5 rounded-[28px] relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)]">
             
             {/* Art Background */}
             <div className="absolute inset-0 w-full h-full opacity-60 invert mix-blend-screen pointer-events-none [mask-image:linear-gradient(to_right,black_40%,transparent_100%)]">
@@ -459,7 +459,7 @@ export default function Home() {
               <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-0.5">Life & Health</span>
               <span className="text-white text-[16px] font-black tracking-tight leading-none">Insurance</span>
             </div>
-          </div>
+          </Link>
 
           {/* Cashback & Deals (Modeled after "It's 3° now" typography card) */}
           <button 

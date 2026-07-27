@@ -230,19 +230,84 @@ Group these two AI-powered features together in the UI as an "AI Corner" — a d
 
 ### 4.6 Insurance Tracker & Benefits Reader (Phase 6 — Post-Supabase Migration)
 
-This feature plugs directly into the `household_id` Supabase migration model. Do not build a separate, disconnected data model.
+*This builds on the earlier plan to move duo-finance from local-only (Zustand + localStorage) to a shared Supabase backend with household-based login. It assumes that migration exists first — Insurance Tracker plugs into the same `household_id` pattern as every other module (Budget, Spend Jar, Cartify, Goals). Do not build a separate, disconnected data model for this feature.*
 
-**Four Main Views/Tabs:**
-1. **Explore / Compare:** For households shopping for plans. Browse `insurance_plan_templates` public reference data grouped by plan type (Life, HMO, Gov't Health, VUL, Critical Illness). Each template card has a "Log this as mine" button that pre-fills the My Plans form.
-2. **My Plans:** Standard CRUD for household policies. Fields: insurer, plan type, premium, frequency, coverage, dependents, renewal date, status, and `custom_fields` (JSONB for MBL, OPD limit, ER cover, fund value).
-3. **Benefits Reader:** Matches logged policies (`insurer_name` + `plan_name`) against `insurance_plan_templates` to display structured benefit breakdowns with optional per-policy custom field overrides.
-4. **What to Get (Gap Analyzer):** Client-side rule-based suggestions (e.g. no Life policy -> suggest life cover; no dental rider -> suggest dental rider).
-5. **Renewal Reminders:** Automatically feeds into the shared `Bills/Due-Date Calendar` (Section 4.0).
-6. **Phase 2 (Optional/Later):** Document scanner via Claude/Anthropic API to pre-fill policy forms from uploaded PDFs.
+#### 1. What This Feature Is
+Five tabs inside the Insurance card (already scaffolded on Home), utilizing the horizontal-scroll pill-row component already built for Smart Tools:
+- **My Plans:** a log of the household's active insurance policies.
+- **Benefits Reader:** shows what each logged plan actually covers, using pre-written templates per insurer/plan — not a live insurer API.
+- **Explore / Compare:** Browse `insurance_plan_templates` directly, with no policy logged first. Allows a user to compare options and "Log this as mine".
+- **What to Get (gap analyzer):** simple rule-based suggestions for what the household hasn't covered yet, based only on what's in the household's own log.
+- **Medical Log:** Out-of-pocket tracking and medical events (doctor's visits, uncovered spending) sharing the same `expense_entries` model used in Spend Jar/Cartify.
 
-**Supabase Schema:**
-- `insurance_policies` (Household-scoped, RLS protected): `id`, `household_id`, `insurer_name`, `plan_name`, `plan_type`, `premium_amount`, `premium_frequency`, `coverage_amount`, `dependents_count`, `renewal_date`, `status`, `custom_fields` (JSONB).
-- `insurance_plan_templates` (Public reference data, authenticated read, admin write): `id`, `insurer_name`, `plan_name`, `plan_type`, `benefit_fields` (JSONB), `last_updated`.
+A later-phase feature: **Scan policy document** — user uploads a policy PDF, Claude extracts the key fields and pre-fills the log form. (Requires paid Anthropic API key, so it's optional).
+
+#### 2. Supabase Schema
+Two new tables, following the `household_id` pattern:
+
+**TABLE: `insurance_policies`** (household-scoped)
+- `id` (uuid, PK)
+- `household_id` (uuid, references households(id)) [RLS scope]
+- `insurer_name` (text, e.g. "Maxicare")
+- `plan_name` (text, e.g. "Prime 100k")
+- `plan_type` (text: Life / HMO / Gov't Health / VUL / Critical Illness)
+- `premium_amount` (numeric)
+- `premium_frequency` (text: monthly / annual)
+- `coverage_amount` (numeric, nullable)
+- `dependents_count` (int, nullable)
+- `renewal_date` (date)
+- `status` (text: active / lapsed / cancelled)
+- `custom_fields` (jsonb, flexible per-plan-type fields like MBL, OPD limit)
+- `created_at` / `updated_at`
+*(RLS policy: standard household_id scope)*
+
+**TABLE: `insurance_plan_templates`** (public reference data, NOT household-scoped)
+- `id` (uuid, PK)
+- `insurer_name` (text)
+- `plan_name` (text)
+- `plan_type` (text)
+- `benefit_fields` (jsonb, structured benefit breakdown)
+- `last_updated` (date, to track stale data)
+*(RLS policy: readable by any authenticated user, writable only via direct admin DB access)*
+
+**TABLE: `medical_events`** (household-scoped)
+- `id` (uuid, PK)
+- `household_id` (uuid, references households(id))
+- `visit_date` (date)
+- `provider_name` (text)
+- `reason` (text, nullable)
+- `total_cost` (numeric)
+- `policy_id` (uuid, references insurance_policies(id), nullable)
+- `covered_amount` (numeric, nullable)
+- `uncovered_amount` (numeric, portion that becomes a real expense_entries row)
+- `expense_entry_id` (uuid, references expense_entries(id), nullable)
+- `created_at`
+
+#### 3. How the Tabs Actually Work
+- **My Plans:** Standard CRUD form reusing the keypad-entry pattern. For new users with zero policies, the empty state serves as onboarding ("You haven't logged any insurance yet" with "+ Add a plan" and "Explore & Compare" actions).
+- **Benefits Reader:** Attempts to match logged plans against `insurance_plan_templates`. Shows read-only breakdown with an option to override specific fields (stored back in the policy's `custom_fields`).
+- **Explore & Compare:** Browse templates grouped by `plan_type`. Each has a "Log this as mine" action.
+- **What to Get (Gap Analyzer):** Pure client-side logic against the household's `insurance_policies` and `medical_events`. Use simple if/else rules (e.g. no 'Life' logged -> suggest life insurance).
+- **Medical Log:** Logs medical visits. The UNCOVERED portion of any visit becomes a real expense entry in the shared `expense_entries` model, tagged to Health. This data feeds into the Gap Analyzer.
+- **Renewal Reminders:** Do NOT build a separate reminder system. Feed `renewal_date` into the shared Bills/Due-Date Calendar on Home.
+
+#### 4. UI/UX Rules & Stitch Design Hand-Off Fixes
+The generated UI mockups (Stitch designs) are visual references only. Apply these STRICT fixes:
+1. **Dual Currency Only:** The Stitch designs used USD ($). EVERY amount must use the app's dual-currency format (₱ primary, ≈R secondary). No exceptions.
+2. **Drop Bottom Nav:** Stitch generated a 4-icon bottom nav. Drop it. Use the exact same **horizontal-scroll pill-row component** built for Smart Tools for the tab switcher (My Plans, Benefits Reader, Explore & Compare, What to Get, Medical Log).
+3. **5 Tabs (Not 4):** Add "Medical Log" as the 5th tab. It must be independent because visits can exist without a linked policy.
+4. **Header Consistency:** Drop Stitch's profile/bell header in this module to match the plain existing page headers (plain title + relevant controls) used across the rest of the app.
+5. **Design System Tokens:** Rebuild the UI using our actual design tokens (`@theme` in globals.css), not Stitch's auto-generated colors. Reuse existing components (pill row, keypad sheet, category badges).
+
+#### 5. Build Order for Insurance Tracker
+1. Wait for Supabase + household migration to be fully complete.
+2. `insurance_policies` table + RLS + My Plans tab (CRUD, empty state onboarding).
+3. `insurance_plan_templates` table + seeding + Benefits Reader tab.
+4. Explore & Compare tab.
+5. `medical_events` table + Medical Log tab (must wire to `expense_entries`).
+6. What to Get gap-analyzer tab.
+7. Wire `renewal_date` into the Home Bills/Due-Date Calendar.
+8. (Later) Scan policy document via Anthropic API.
 
 ### 4.7 Child Care Hub
 
