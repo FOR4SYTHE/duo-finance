@@ -4,16 +4,40 @@ import { Plus, Stethoscope, Hospital, Building2 } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 
-export function MedicalLogTab() {
+interface MedicalLogTabProps {
+    onLogVisit?: () => void;
+}
+
+export function MedicalLogTab({ onLogVisit }: MedicalLogTabProps) {
     const { exchangeRate } = useCurrencyStore();
 
     return (
         <div className="flex flex-col gap-6">
             <div>
-                <p className="text-white/50 text-[13px] font-medium leading-relaxed mb-4">
-                    Track your consultations and coverage status.
+                <p className="text-white/50 text-[13px] font-medium leading-relaxed mb-6">
+                    Track your consultations and out-of-pocket spending.
                 </p>
-                <button className="w-[200px] py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)] flex items-center justify-center gap-2">
+
+                {/* Out of Pocket Portal / Tracker Hero Card */}
+                <div className="w-full bg-gradient-to-br from-[#1A1A1A] to-[#111] rounded-[32px] p-6 mb-6 border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative overflow-hidden">
+                    {/* Subtle red glow indicating personal spending */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF453A]/10 rounded-full blur-[40px] pointer-events-none translate-x-1/2 -translate-y-1/2" />
+                    
+                    <div className="relative z-10 flex flex-col gap-1">
+                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Total Out-of-Pocket · 2024</span>
+                        <div className="flex items-baseline gap-1 mt-1">
+                            <span className="text-white font-black text-[36px] tracking-tight leading-none">₱1,800.00</span>
+                        </div>
+                        <span className="text-[#FF453A] text-[13px] font-bold mt-1">
+                            ≈ R{formatCurrency(1800 * exchangeRate)}
+                        </span>
+                    </div>
+                </div>
+
+                <button 
+                    onClick={onLogVisit}
+                    className="w-[200px] py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)] flex items-center justify-center gap-2"
+                >
                     <Plus className="w-4 h-4" />
                     Log Medical Visit
                 </button>

@@ -1,42 +1,118 @@
 "use client";
 
-import { useState } from "react";
-import { Shield, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
+import { Shield, Plus, ChevronLeft, Bell } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/format";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 
-export function MyPlansTab() {
-    // Scaffold state: change this to true to see the populated list
-    const [hasPolicies, setHasPolicies] = useState(false);
+interface MyPlansTabProps {
+    hasPolicies?: boolean;
+    onAddPlan?: () => void;
+    onExplore?: () => void;
+}
+
+export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlansTabProps) {
     const { exchangeRate } = useCurrencyStore();
+    const router = useRouter();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     if (!hasPolicies) {
-        return (
-            <div className="bg-[#1A1A1A] rounded-[28px] p-8 flex flex-col items-center justify-center text-center min-h-[400px] border border-white/5 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] relative overflow-hidden group">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-[#D4AF37]/10 blur-[40px] rounded-full pointer-events-none" />
-                
-                <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-6 relative z-10 shadow-lg backdrop-blur-md">
-                    <Shield className="w-8 h-8 text-[#D4AF37]" strokeWidth={1.5} />
-                </div>
-                
-                <h2 className="text-3xl text-white font-black tracking-tighter leading-tight mb-3 relative z-10">
-                    You haven't logged any<br/>insurance yet
-                </h2>
-                
-                <p className="text-white/50 text-sm max-w-[260px] leading-relaxed mb-8 relative z-10">
-                    Start tracking your existing coverage or browse options to find the right protection for your household.
-                </p>
-                
-                <div className="flex flex-col gap-3 w-full max-w-[280px] relative z-10">
-                    <button className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
-                        <Plus className="w-4 h-4" />
-                        Add a plan
+        if (!mounted) return null;
+
+        return createPortal(
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+                className="fixed inset-0 z-50 flex flex-col bg-[#0a0a0a]"
+            >
+                {/* Back button and Bell replicating the header but without title */}
+                <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                    className="absolute top-12 left-6 right-6 flex justify-between items-center z-50"
+                >
+                    <button onClick={() => router.push('/')} className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors">
+                        <ChevronLeft className="w-5 h-5 text-white/70" />
                     </button>
-                    <button className="w-full py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/5">
-                        Explore & Compare
+                    <button className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors relative">
+                        <Bell className="w-5 h-5 text-white/70" />
                     </button>
-                </div>
-            </div>
+                </motion.div>
+
+                <motion.header 
+                    initial={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+                    className="absolute top-32 left-0 right-0 flex flex-col items-center z-20"
+                >
+                    <h1 
+                        className="text-[48px] font-extrabold uppercase tracking-[0.2em] relative leading-none mb-1.5"
+                        style={{
+                            background: "linear-gradient(110deg, #D4AF37 0%, #FFF4D2 25%, #8B7321 50%, #FFF4D2 75%, #D4AF37 100%)",
+                            backgroundSize: "200% auto",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            filter: "drop-shadow(0px 4px 12px rgba(212,175,55,0.4))",
+                        }}
+                    >
+                        DUO
+                        <span 
+                            className="absolute inset-0 pointer-events-none"
+                            style={{
+                                background: "linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 40%)",
+                                WebkitBackgroundClip: "text",
+                                WebkitTextFillColor: "transparent",
+                            }}
+                        />
+                    </h1>
+                    <div className="flex items-center gap-2">
+                        <span className="h-[1px] w-6 bg-gradient-to-r from-transparent to-[#D4AF37]/40" />
+                        <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#D4AF37]/80">Insurance Hub</span>
+                        <span className="h-[1px] w-6 bg-gradient-to-l from-transparent to-[#D4AF37]/40" />
+                    </div>
+                </motion.header>
+                
+                <motion.main 
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                    className="relative z-10 w-full max-w-sm mx-auto flex flex-col items-center justify-end flex-grow pb-[8dvh] px-6"
+                >
+                    <h2 className="text-[32px] text-white font-black tracking-tighter leading-tight mb-4 text-center">
+                        You haven't logged any<br/>insurance yet
+                    </h2>
+                    
+                    <p className="text-white/50 text-[13px] font-medium max-w-[280px] leading-relaxed text-center mb-10 relative z-10">
+                        Start tracking your existing coverage or browse options to find the right protection for your household.
+                    </p>
+                    
+                    <div className="flex flex-col gap-3 w-full relative z-10">
+                        <button 
+                            onClick={onAddPlan}
+                            className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(212,175,55,0.2)]"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Add a plan
+                        </button>
+                        <button 
+                            onClick={onExplore}
+                            className="w-full py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/5"
+                        >
+                            Explore & Compare
+                        </button>
+                    </div>
+                </motion.main>
+            </motion.div>,
+            document.body
         );
     }
 
@@ -177,11 +253,17 @@ export function MyPlansTab() {
 
             {/* Actions */}
             <div className="flex flex-col gap-3 mt-4">
-                <button className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
+                <button 
+                    onClick={onAddPlan}
+                    className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(212,175,55,0.2)]"
+                >
                     <Plus className="w-4 h-4" />
                     Add a plan
                 </button>
-                <button className="w-full py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/5">
+                <button 
+                    onClick={onAddPlan}
+                    className="w-full py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/5"
+                >
                     Scan policy document
                 </button>
             </div>

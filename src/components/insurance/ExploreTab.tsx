@@ -5,7 +5,11 @@ import { formatCurrency } from "@/lib/format";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { BriefcaseMedical, TrendingUp, Sun } from "lucide-react";
 
-export function ExploreTab() {
+interface ExploreTabProps {
+    onLogPlan?: () => void;
+}
+
+export function ExploreTab({ onLogPlan }: ExploreTabProps) {
     const { exchangeRate } = useCurrencyStore();
     const [filter, setFilter] = useState('All Plans');
 
@@ -71,7 +75,10 @@ export function ExploreTab() {
                         </div>
                     </div>
                     
-                    <button className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
+                    <button 
+                        onClick={onLogPlan}
+                        className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)]"
+                    >
                         Log this as mine
                     </button>
                 </div>
@@ -109,7 +116,10 @@ export function ExploreTab() {
                         </div>
                     </div>
                     
-                    <button className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
+                    <button 
+                        onClick={onLogPlan}
+                        className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)]"
+                    >
                         Log this as mine
                     </button>
                 </div>
@@ -148,7 +158,10 @@ export function ExploreTab() {
                         </div>
                     </div>
                     
-                    <button className="w-full py-4 rounded-xl bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-colors shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
+                    <button 
+                        onClick={onLogPlan}
+                        className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)]"
+                    >
                         Log this as mine
                     </button>
                 </div>

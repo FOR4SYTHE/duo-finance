@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, BookOpen, Search, ShoppingBag, ClipboardList } from "lucide-react";
+import { Shield, BookOpen, Search, ShoppingBag, ClipboardList, Umbrella } from "lucide-react";
 
 import { MyPlansTab } from "./MyPlansTab";
 import { BenefitsReaderTab } from "./BenefitsReaderTab";
 import { ExploreTab } from "./ExploreTab";
 import { WhatToGetTab } from "./WhatToGetTab";
 import { MedicalLogTab } from "./MedicalLogTab";
+import { AddPlanSheet } from "./AddPlanSheet";
+import { ManualInputSheet } from "./ManualInputSheet";
+import { LogVisitSheet } from "./LogVisitSheet";
 
 interface TabItem {
     id: string;
@@ -46,14 +49,27 @@ const TABS: TabItem[] = [
 
 export function InsuranceModule() {
     const [activeTab, setActiveTab] = useState<string>('my-plans');
+    const [hasPolicies, setHasPolicies] = useState(false);
+    
+    // Modal states
+    const [isAddPlanOpen, setIsAddPlanOpen] = useState(false);
+    const [isManualInputOpen, setIsManualInputOpen] = useState(false);
+    const [isLogVisitOpen, setIsLogVisitOpen] = useState(false);
+
+    // Only hide nav if we're on the default tab AND have no policies (the true onboarding state)
+    const showNav = hasPolicies || activeTab !== 'my-plans';
 
     return (
-        <div className="flex flex-col gap-6 w-full relative z-20 pb-24">
+        <div className="flex flex-col gap-6 w-full relative z-20 pb-48">
             <div className="w-full relative">
                 <AnimatePresence mode="wait">
                     {activeTab === 'my-plans' && (
                         <motion.div key="my-plans" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                            <MyPlansTab />
+                            <MyPlansTab 
+                                hasPolicies={hasPolicies} 
+                                onAddPlan={() => setIsAddPlanOpen(true)} 
+                                onExplore={() => setActiveTab('explore')} 
+                            />
                         </motion.div>
                     )}
                     {activeTab === 'benefits' && (
@@ -63,7 +79,9 @@ export function InsuranceModule() {
                     )}
                     {activeTab === 'explore' && (
                         <motion.div key="explore" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                            <ExploreTab />
+                            <ExploreTab 
+                                onLogPlan={() => setIsAddPlanOpen(true)}
+                            />
                         </motion.div>
                     )}
                     {activeTab === 'what-to-get' && (
@@ -73,14 +91,17 @@ export function InsuranceModule() {
                     )}
                     {activeTab === 'medical-log' && (
                         <motion.div key="medical-log" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                            <MedicalLogTab />
+                            <MedicalLogTab 
+                                onLogVisit={() => setIsLogVisitOpen(true)}
+                            />
                         </motion.div>
                     )}
                 </AnimatePresence>
             </div>
 
             {/* Premium Insurance Bottom Navigation */}
-            <div className="fixed bottom-6 left-4 right-4 z-50 will-change-transform">
+            {showNav && (
+                <div className="fixed bottom-6 left-4 right-4 z-50 will-change-transform">
                 <div className="bg-[#121212]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] p-2 flex items-center justify-between shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_12px_40px_rgba(0,0,0,0.8)] overflow-hidden relative">
                     <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                     
@@ -120,6 +141,36 @@ export function InsuranceModule() {
                     </div>
                 </div>
             </div>
+            )}
+
+            {/* Premium Data Entry Sheets */}
+            <AddPlanSheet 
+                isOpen={isAddPlanOpen}
+                onClose={() => setIsAddPlanOpen(false)}
+                onSelectManual={() => setIsManualInputOpen(true)}
+                onSelectScan={() => {
+                    setIsAddPlanOpen(false);
+                    // In a real flow, this would open camera. For now, mock success:
+                    setTimeout(() => setHasPolicies(true), 500);
+                }}
+            />
+
+            <ManualInputSheet 
+                isOpen={isManualInputOpen}
+                onClose={() => setIsManualInputOpen(false)}
+                onSave={(data) => {
+                    console.log("Saved Policy:", data);
+                    setHasPolicies(true);
+                }}
+            />
+
+            <LogVisitSheet 
+                isOpen={isLogVisitOpen}
+                onClose={() => setIsLogVisitOpen(false)}
+                onSave={(data) => {
+                    console.log("Logged Visit:", data);
+                }}
+            />
         </div>
     );
 }
