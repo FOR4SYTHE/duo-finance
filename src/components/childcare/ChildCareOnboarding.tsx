@@ -69,9 +69,52 @@ export function ChildCareOnboarding() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              className="flex flex-col items-center text-center w-full"
+              className="flex flex-col items-center text-center w-full relative pt-20"
             >
-              <h2 className="text-3xl font-black tracking-tight text-white mb-3">
+              <motion.header 
+                  initial={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+                  className="absolute top-[-40px] left-0 right-0 flex flex-col items-center z-20"
+              >
+                  <h1 
+                      className="text-[42px] font-extrabold uppercase tracking-[0.2em] relative leading-none mb-1.5"
+                      style={{
+                          background: "linear-gradient(110deg, #FF7B54 0%, #FFBCA7 25%, #D46C53 50%, #FFBCA7 75%, #FF7B54 100%)",
+                          backgroundSize: "200% auto",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          filter: "drop-shadow(0px 4px 12px rgba(255,123,84,0.4))",
+                      }}
+                  >
+                      DUO
+                      <span 
+                          className="absolute inset-0 pointer-events-none"
+                          style={{
+                              background: "linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 40%)",
+                              WebkitBackgroundClip: "text",
+                              WebkitTextFillColor: "transparent",
+                          }}
+                      />
+                  </h1>
+                  <div className="flex flex-col items-center gap-1.5">
+                      <div className="flex items-center gap-2">
+                          <span className="h-[1px] w-6 bg-gradient-to-r from-transparent to-[#FF7B54]/40" />
+                          <span className="text-[9px] font-bold tracking-[0.25em] uppercase text-[#FF7B54]/80">Child Care</span>
+                          <span className="h-[1px] w-6 bg-gradient-to-l from-transparent to-[#FF7B54]/40" />
+                      </div>
+                      <motion.span 
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.8, delay: 0.3 }}
+                          className="text-[7.5px] font-bold tracking-[0.3em] uppercase text-white/30"
+                      >
+                          Track • Learn • Grow
+                      </motion.span>
+                  </div>
+              </motion.header>
+
+              <h2 className="text-3xl font-black tracking-tight text-white mb-3 mt-10">
                 Shape their future.
               </h2>
               <p className="text-white/60 font-medium mb-12 text-[15px] max-w-[260px] leading-relaxed">
