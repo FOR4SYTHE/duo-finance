@@ -13,7 +13,7 @@ interface ManualInputSheetProps {
     onSave: (policyData: any) => void;
 }
 
-const POLICY_TYPES = ['Health / HMO', 'Life Insurance', 'VUL / Investment', 'Property', 'Vehicle'];
+const POLICY_TYPES = ['HMO / Health', 'Life / VUL', 'Property / Auto'];
 
 export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetProps) {
     const [mounted, setMounted] = useState(false);
@@ -24,28 +24,37 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
 
     const { exchangeRate } = useCurrencyStore();
     const [provider, setProvider] = useState('');
-    const [policyType, setPolicyType] = useState('Health / HMO');
+    const [policyNumber, setPolicyNumber] = useState('');
+    const [dueDate, setDueDate] = useState('');
+    const [policyType, setPolicyType] = useState('HMO / Health');
     const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
     
     // Using string for inputs to handle empty state naturally
     const [premiumStr, setPremiumStr] = useState('');
     const [coverageStr, setCoverageStr] = useState('');
+    const [fundValueStr, setFundValueStr] = useState('');
 
     const handleSubmit = () => {
         if (!provider || !premiumStr || !coverageStr) return;
         
         onSave({
             provider,
+            policyNumber,
+            dueDate,
             type: policyType,
             premium: parseFloat(premiumStr.replace(/,/g, '')),
-            coverage: parseFloat(coverageStr.replace(/,/g, ''))
+            coverage: parseFloat(coverageStr.replace(/,/g, '')),
+            fundValue: fundValueStr ? parseFloat(fundValueStr.replace(/,/g, '')) : undefined
         });
         
         // Reset form
         setProvider('');
-        setPolicyType('Health / HMO');
+        setPolicyNumber('');
+        setDueDate('');
+        setPolicyType('HMO / Health');
         setPremiumStr('');
         setCoverageStr('');
+        setFundValueStr('');
         onClose();
     };
 
@@ -57,6 +66,16 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
         return parts.join('.');
     };
 
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let val = e.target.value.replace(/\D/g, '');
+        if (val.length >= 3 && val.length <= 4) {
+            val = val.slice(0, 2) + '/' + val.slice(2);
+        } else if (val.length >= 5) {
+            val = val.slice(0, 2) + '/' + val.slice(2, 4) + '/' + val.slice(4, 8);
+        }
+        setDueDate(val);
+    };
+
     const isFormValid = provider.trim() !== '' && premiumStr !== '' && coverageStr !== '';
 
     if (!mounted) return null;
@@ -64,21 +83,12 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[110] flex items-end justify-center sm:items-center sm:p-4">
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
-                        className="absolute inset-0 bg-black/95"
-                    />
-                    
+                <div className="fixed inset-0 z-[110] flex justify-center bg-[#050505]">
                     <motion.div
-                        initial={{ y: "100%" }}
+                        initial={{ y: "100dvh" }}
                         animate={{ y: 0, transition: { type: "spring", damping: 28, stiffness: 300 } }}
-                        exit={{ y: "100%", transition: { type: "tween", duration: 0.2, ease: "easeIn" } }}
-                        className="w-full max-w-md bg-[#111] sm:rounded-[32px] rounded-t-[32px] border border-white/10 p-6 relative z-10 flex flex-col max-h-[90dvh] will-change-transform"
-                        onClick={(e) => e.stopPropagation()}
+                        exit={{ y: "100dvh", transition: { type: "tween", duration: 0.2, ease: "easeIn" } }}
+                        className="w-full h-[100dvh] max-w-[480px] mx-auto bg-[#050505] p-6 pt-10 relative z-10 flex flex-col will-change-transform overflow-hidden"
                     >
                         <div className="flex justify-between items-center mb-8 relative z-20">
                             <h3 className="text-white font-bold text-xl tracking-tight">Manual Input</h3>
@@ -97,7 +107,7 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
                                 <label className="text-[13px] font-bold text-white/80 ml-1">Provider Name</label>
                                 <input
                                     type="text"
-                                    placeholder="e.g., Sun Life, Maxicare"
+                                    placeholder="e.g., Sun Life, Maxicare, Pacific Cross"
                                     value={provider}
                                     onChange={(e) => setProvider(e.target.value)}
                                     className="w-full bg-[#1A1A1A] border border-white/10 rounded-[20px] px-5 py-4 text-[17px] font-semibold text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]"
@@ -138,9 +148,23 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
                                 </AnimatePresence>
                             </div>
 
+                            {/* Policy Number */}
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[13px] font-bold text-white/80 ml-1">Policy / Member ID Number</label>
+                                <input
+                                    type="text"
+                                    placeholder="For hospital admission or claims"
+                                    value={policyNumber}
+                                    onChange={(e) => setPolicyNumber(e.target.value)}
+                                    className="w-full bg-[#1A1A1A] border border-white/10 rounded-[20px] px-5 py-4 text-[17px] font-semibold text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]"
+                                />
+                            </div>
+
+                            <div className="w-full h-px bg-white/5 my-2" />
+
                             {/* Annual Premium */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-[13px] font-bold text-white/80 ml-1">Annual Premium</label>
+                                <label className="text-[13px] font-bold text-white/80 ml-1">Annual Premium (Cost)</label>
                                 <div className="relative">
                                     <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/50 font-bold text-[17px]">₱</span>
                                     <input
@@ -159,9 +183,28 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
                                 )}
                             </div>
 
-                            {/* Total Coverage */}
-                            <div className="flex flex-col gap-2 mb-4">
-                                <label className="text-[13px] font-bold text-white/80 ml-1">Total Coverage / Fund Value</label>
+                            {/* Next Due Date */}
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[13px] font-bold text-white/80 ml-1">Next Premium Due Date</label>
+                                <input
+                                    type="text"
+                                    placeholder="MM/DD/YYYY"
+                                    maxLength={10}
+                                    value={dueDate}
+                                    onChange={handleDateChange}
+                                    className="w-full bg-[#1A1A1A] border border-white/10 rounded-[20px] px-5 py-4 text-[17px] font-semibold text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] tracking-widest"
+                                />
+                            </div>
+
+                            <div className="w-full h-px bg-white/5 my-2" />
+
+                            {/* Dynamic Coverage Field */}
+                            <div className="flex flex-col gap-2 mb-2">
+                                <label className="text-[13px] font-bold text-white/80 ml-1">
+                                    {policyType === 'HMO / Health' ? 'Maximum Benefit Limit (MBL)' : 
+                                     policyType === 'Life / VUL' ? 'Face Amount (Life Cover)' : 
+                                     'Total Coverage Limit'}
+                                </label>
                                 <div className="relative">
                                     <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/50 font-bold text-[17px]">₱</span>
                                     <input
@@ -179,6 +222,33 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
                                     </span>
                                 )}
                             </div>
+
+                            {/* Fund Value for Life / VUL */}
+                            {policyType === 'Life / VUL' && (
+                                <motion.div 
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="flex flex-col gap-2 mb-2 overflow-hidden"
+                                >
+                                    <label className="text-[13px] font-bold text-white/80 ml-1">Current Fund Value (Investment)</label>
+                                    <div className="relative">
+                                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/50 font-bold text-[17px]">₱</span>
+                                        <input
+                                            type="text"
+                                            inputMode="decimal"
+                                            placeholder="0"
+                                            value={fundValueStr}
+                                            onChange={(e) => setFundValueStr(formatNumberInput(e.target.value))}
+                                            className="w-full bg-[#1A1A1A] border border-white/10 rounded-[20px] pl-10 pr-5 py-4 text-[17px] font-semibold text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]"
+                                        />
+                                    </div>
+                                    {fundValueStr && (
+                                        <span className="text-[#D4AF37] text-[11px] font-bold ml-2">
+                                            ≈ R{formatCurrency(parseFloat(fundValueStr.replace(/,/g, '')) * exchangeRate)}
+                                        </span>
+                                    )}
+                                </motion.div>
+                            )}
 
                             <button 
                                 onClick={handleSubmit}

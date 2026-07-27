@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ScanLine, Keyboard, Sparkles } from "lucide-react";
+import { BorderBeam } from "border-beam";
 
 interface AddPlanSheetProps {
     isOpen: boolean;
@@ -71,12 +72,14 @@ export function AddPlanSheet({ isOpen, onClose, onSelectManual, onSelectScan }: 
                             />
 
                             {/* AI Scan Option (Primary) */}
-                            <button 
-                                onClick={() => fileInputRef.current?.click()}
-                                className="w-full relative overflow-hidden rounded-[24px] p-6 text-left group transition-all active:scale-[0.98]"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/20 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
-                                <div className="absolute inset-0 border border-[#D4AF37]/30 rounded-[24px]" />
+                            <div className="w-full relative rounded-[24px]">
+                                <BorderBeam size="md" colorVariant="sunset" strength={0.7}>
+                                    <button 
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="w-full relative overflow-hidden rounded-[24px] p-6 text-left group transition-all active:scale-[0.98]"
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/20 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+                                        <div className="absolute inset-0 border border-white/5 rounded-[24px]" />
                                 
                                 <div className="relative z-10 flex gap-5 items-center">
                                     <div className="w-14 h-14 rounded-full bg-[#D4AF37]/20 flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.3)]">
@@ -84,15 +87,19 @@ export function AddPlanSheet({ isOpen, onClose, onSelectManual, onSelectScan }: 
                                     </div>
                                     <div className="flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-white font-bold text-[17px]">AI Document Scan</span>
-                                            <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                                            <span className="font-bold text-[17px]">
+                                                <span className="bg-[linear-gradient(110deg,#D4AF37,#E5E4E2,#D4AF37)] text-transparent bg-clip-text mr-1">AI</span>
+                                                <span className="text-white">Document Scan</span>
+                                            </span>
                                         </div>
                                         <span className="text-white/50 text-[13px] font-medium leading-relaxed max-w-[200px]">
                                             Take a photo of your policy. We'll extract the details instantly.
                                         </span>
                                     </div>
                                 </div>
-                            </button>
+                                    </button>
+                                </BorderBeam>
+                            </div>
 
                             {/* Manual Entry Option (Secondary) */}
                             <button 
