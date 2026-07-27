@@ -330,23 +330,26 @@ export default function Home() {
           Lifestyle & Integrations
         </h2>
         <div className="grid grid-cols-2 gap-4">
-          
-          {/* Daily Insight Card */}
-          <div className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-3.5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
-            <div className="flex justify-between items-start relative z-10 w-full">
-              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-md backdrop-blur-md">
-                <Sparkles className="w-4 h-4 text-amber-400" strokeWidth={2.5} />
-              </div>
+          {/* Insurance Tracker */}
+          <Link href="/insurance" className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-4 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
+            
+            {/* Title moved to top left */}
+            <div className="relative z-20 flex flex-col items-start w-full">
+              <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-0.5">Life & Health</span>
+              <span className="text-white text-[17px] font-black tracking-tight leading-none">Insurance</span>
             </div>
-            <div className="relative z-10 mt-auto">
-              <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-1 block">Daily Insight</span>
-              <p className="text-white/90 text-[11px] font-medium leading-tight">
-                Prioritize your emergency fund first this month.
-              </p>
+            
+            {/* Art Asset in the background/right */}
+            <div className="absolute top-0 right-[-10px] bottom-0 w-[65%] z-10 opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500">
+              <img 
+                src="/InsuranceCard-Art.webp" 
+                alt="Insurance Art" 
+                className="w-full h-full object-cover object-left" 
+              />
+              {/* Fade gradient to blend smoothly into the dark card */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A] via-transparent to-transparent w-full" />
             </div>
-            {/* Subtle glow */}
-            <div className="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/20 blur-2xl rounded-full pointer-events-none" />
-          </div>
+          </Link>
 
           {/* Child Care Card */}
           <Link href="/childcare" className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-4 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
@@ -408,58 +411,22 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Insurance Tracker */}
-          <Link href="/insurance" className="aspect-[5/3] bg-[#1A1A1A] border border-white/5 rounded-[28px] relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)]">
-            
-            {/* Art Background */}
-            <div className="absolute inset-0 w-full h-full opacity-60 invert mix-blend-screen pointer-events-none [mask-image:linear-gradient(to_right,black_40%,transparent_100%)]">
-              <AnimatePresence mode="wait">
-                {showInsuranceFamily ? (
-                  <motion.div
-                    key="family"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 1.2, ease: "easeInOut" }}
-                    className="absolute inset-0"
-                  >
-                    <Image 
-                      src="/insurance-family-waving.webp" 
-                      alt="Family Waving Art" 
-                      fill 
-                      priority
-                      className="object-cover object-left-bottom scale-[1.15] translate-x-4 translate-y-1" 
-                      sizes="(max-width: 768px) 50vw, 33vw"
-                    />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="bg"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 1.2, ease: "easeInOut" }}
-                    className="absolute inset-0"
-                  >
-                    <Image 
-                      src="/insurance-bg-only.webp" 
-                      alt="House Background Art" 
-                      fill 
-                      priority
-                      className="object-cover object-left-bottom scale-[1.15] translate-x-4 translate-y-1" 
-                      sizes="(max-width: 768px) 50vw, 33vw"
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+          {/* Daily Insight Card */}
+          <div className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-3.5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
+            <div className="flex justify-between items-start relative z-10 w-full">
+              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-md backdrop-blur-md">
+                <Sparkles className="w-4 h-4 text-amber-400" strokeWidth={2.5} />
+              </div>
             </div>
-
-            {/* The Text Foreground */}
-            <div className="flex flex-col items-end text-right relative z-10 pt-3 pr-3 pointer-events-none w-full">
-              <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-0.5">Life & Health</span>
-              <span className="text-white text-[16px] font-black tracking-tight leading-none">Insurance</span>
+            <div className="relative z-10 mt-auto">
+              <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-1 block">Daily Insight</span>
+              <p className="text-white/90 text-[11px] font-medium leading-tight">
+                Prioritize your emergency fund first this month.
+              </p>
             </div>
-          </Link>
+            {/* Subtle glow */}
+            <div className="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/20 blur-2xl rounded-full pointer-events-none" />
+          </div>
 
           {/* Cashback & Deals (Modeled after "It's 3° now" typography card) */}
           <button 
