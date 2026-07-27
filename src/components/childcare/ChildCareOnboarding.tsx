@@ -54,7 +54,7 @@ export function ChildCareOnboarding() {
       {/* Exit Button */}
       <Link 
         href="/"
-        className="absolute top-6 left-6 w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-colors z-50 shadow-lg"
+        className="absolute top-6 right-6 w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-colors z-50 shadow-lg"
       >
         <X className="w-5 h-5" />
       </Link>
