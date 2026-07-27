@@ -69,13 +69,13 @@ export function ChildCareOnboarding() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              className="flex flex-col items-center text-center w-full relative pt-20"
+              className="flex flex-col items-center text-center w-full relative pt-32"
             >
               <motion.header 
                   initial={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
                   animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-                  className="absolute top-[-40px] left-0 right-0 flex flex-col items-center z-20"
+                  className="absolute top-[10px] left-0 right-0 flex flex-col items-center z-20"
               >
                   <h1 
                       className="text-[42px] font-extrabold uppercase tracking-[0.2em] relative leading-none mb-1.5"
