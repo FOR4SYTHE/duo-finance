@@ -92,12 +92,12 @@ export function InsuranceModule() {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className="relative flex flex-col items-center justify-center flex-1 h-[52px] rounded-[24px] transition-all group"
+                                    className="relative flex flex-col items-center justify-center flex-1 h-[52px] rounded-full transition-all active:scale-[0.92] group"
                                 >
                                     {isActive && (
                                         <motion.div
                                             layoutId="active-insurance-tab"
-                                            className="absolute inset-0 bg-[#D4AF37]/10 rounded-[24px] border border-[#D4AF37]/20 shadow-sm"
+                                            className="absolute inset-0 bg-[#D4AF37]/10 rounded-full border border-[#D4AF37]/20 shadow-sm"
                                             initial={false}
                                             transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                         />

@@ -71,7 +71,7 @@ export function ExploreTab() {
                         </div>
                     </div>
                     
-                    <button className="w-full py-4 rounded-xl bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-colors shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
+                    <button className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
                         Log this as mine
                     </button>
                 </div>
@@ -109,7 +109,7 @@ export function ExploreTab() {
                         </div>
                     </div>
                     
-                    <button className="w-full py-4 rounded-xl bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-colors shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
+                    <button className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
                         Log this as mine
                     </button>
                 </div>

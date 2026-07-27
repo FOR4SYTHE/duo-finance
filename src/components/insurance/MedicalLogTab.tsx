@@ -13,7 +13,7 @@ export function MedicalLogTab() {
                 <p className="text-white/50 text-[13px] font-medium leading-relaxed mb-4">
                     Track your consultations and coverage status.
                 </p>
-                <button className="w-[200px] py-4 rounded-2xl bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-colors shadow-[0_4px_16px_rgba(212,175,55,0.2)] flex items-center justify-center gap-2">
+                <button className="w-[200px] py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)] flex items-center justify-center gap-2">
                     <Plus className="w-4 h-4" />
                     Log Medical Visit
                 </button>
@@ -117,7 +117,7 @@ export function MedicalLogTab() {
                     </div>
                 </div>
 
-                <button className="w-full py-4 mt-2 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[13px] transition-colors border border-white/5">
+                <button className="w-full py-4 mt-2 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/5">
                     Load More History
                 </button>
             </div>

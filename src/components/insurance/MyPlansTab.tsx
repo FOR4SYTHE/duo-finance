@@ -28,11 +28,11 @@ export function MyPlansTab() {
                 </p>
                 
                 <div className="flex flex-col gap-3 w-full max-w-[280px] relative z-10">
-                    <button className="w-full py-4 rounded-2xl bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
+                    <button className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
                         <Plus className="w-4 h-4" />
                         Add a plan
                     </button>
-                    <button className="w-full py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-colors border border-white/5">
+                    <button className="w-full py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/5">
                         Explore & Compare
                     </button>
                 </div>
@@ -177,11 +177,11 @@ export function MyPlansTab() {
 
             {/* Actions */}
             <div className="flex flex-col gap-3 mt-4">
-                <button className="w-full py-4 rounded-2xl bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
+                <button className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(212,175,55,0.2)]">
                     <Plus className="w-4 h-4" />
                     Add a plan
                 </button>
-                <button className="w-full py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-colors border border-white/5">
+                <button className="w-full py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/5">
                     Scan policy document
                 </button>
             </div>
