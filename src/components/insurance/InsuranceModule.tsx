@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PillTabRow, TabItem } from "@/components/ui/PillTabRow";
 import { Shield, BookOpen, Search, ShoppingBag, ClipboardList } from "lucide-react";
 
 import { MyPlansTab } from "./MyPlansTab";
@@ -11,58 +10,45 @@ import { ExploreTab } from "./ExploreTab";
 import { WhatToGetTab } from "./WhatToGetTab";
 import { MedicalLogTab } from "./MedicalLogTab";
 
+interface TabItem {
+    id: string;
+    icon: React.ReactNode;
+    label: string;
+}
+
 const TABS: TabItem[] = [
     { 
         id: 'my-plans', 
-        icon: <Shield className="w-4 h-4" />, 
-        label: 'My Plans',
-        activeClass: 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30',
-        hoverClass: 'hover:text-[#D4AF37] hover:border-[#D4AF37]/30'
+        icon: <Shield className="w-5 h-5" />, 
+        label: 'My Plans'
     },
     { 
         id: 'benefits', 
-        icon: <BookOpen className="w-4 h-4" />, 
-        label: 'Benefits Reader',
-        activeClass: 'bg-white/10 text-white border-white/30',
-        hoverClass: 'hover:text-white hover:border-white/30'
+        icon: <BookOpen className="w-5 h-5" />, 
+        label: 'Benefits'
     },
     { 
         id: 'explore', 
-        icon: <Search className="w-4 h-4" />, 
-        label: 'Explore & Compare',
-        activeClass: 'bg-white/10 text-white border-white/30',
-        hoverClass: 'hover:text-white hover:border-white/30'
+        icon: <Search className="w-5 h-5" />, 
+        label: 'Explore'
     },
     { 
         id: 'what-to-get', 
-        icon: <ShoppingBag className="w-4 h-4" />, 
-        label: 'What to Get',
-        activeClass: 'bg-white/10 text-white border-white/30',
-        hoverClass: 'hover:text-white hover:border-white/30'
+        icon: <ShoppingBag className="w-5 h-5" />, 
+        label: 'What to Get'
     },
     { 
         id: 'medical-log', 
-        icon: <ClipboardList className="w-4 h-4" />, 
-        label: 'Medical Log',
-        activeClass: 'bg-[#30D158]/10 text-[#30D158] border-[#30D158]/30',
-        hoverClass: 'hover:text-[#30D158] hover:border-[#30D158]/30'
+        icon: <ClipboardList className="w-5 h-5" />, 
+        label: 'Medical Log'
     }
 ];
 
 export function InsuranceModule() {
     const [activeTab, setActiveTab] = useState<string>('my-plans');
 
-    // Handle clicking the active tab (don't unselect it)
-    const handleSelect = (id: string) => {
-        if (id !== '') {
-            setActiveTab(id);
-        }
-    };
-
     return (
-        <div className="flex flex-col gap-6 w-full relative z-20">
-            <PillTabRow tabs={TABS} activeTab={activeTab} onSelect={handleSelect} />
-
+        <div className="flex flex-col gap-6 w-full relative z-20 pb-24">
             <div className="w-full relative">
                 <AnimatePresence mode="wait">
                     {activeTab === 'my-plans' && (
@@ -91,6 +77,48 @@ export function InsuranceModule() {
                         </motion.div>
                     )}
                 </AnimatePresence>
+            </div>
+
+            {/* Premium Insurance Bottom Navigation */}
+            <div className="fixed bottom-6 left-4 right-4 z-50 will-change-transform">
+                <div className="bg-[#121212]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] p-2 flex items-center justify-between shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_12px_40px_rgba(0,0,0,0.8)] overflow-hidden relative">
+                    <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                    
+                    <div className="flex flex-1 justify-around items-center gap-1">
+                        {TABS.map((tab) => {
+                            const isActive = activeTab === tab.id;
+
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className="relative flex flex-col items-center justify-center flex-1 h-[52px] rounded-[24px] transition-all group"
+                                >
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="active-insurance-tab"
+                                            className="absolute inset-0 bg-[#D4AF37]/10 rounded-[24px] border border-[#D4AF37]/20 shadow-sm"
+                                            initial={false}
+                                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                        />
+                                    )}
+                                    <div className="relative z-10 flex flex-col items-center gap-1">
+                                        <div className={`transition-colors duration-300 ${isActive ? 'text-[#D4AF37]' : 'text-white/40 group-hover:text-white/70'}`}>
+                                            {tab.icon}
+                                        </div>
+                                        <span
+                                            className={`text-[10px] font-bold tracking-wide transition-colors duration-300 ${
+                                                isActive ? "text-[#D4AF37] drop-shadow-sm" : "text-white/40 group-hover:text-white/70"
+                                            }`}
+                                        >
+                                            {tab.label}
+                                        </span>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
             </div>
         </div>
     );

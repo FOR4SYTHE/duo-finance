@@ -19,7 +19,7 @@ export function MyPlansTab() {
                     <Shield className="w-8 h-8 text-[#D4AF37]" strokeWidth={1.5} />
                 </div>
                 
-                <h2 className="text-2xl text-white font-semibold tracking-tight leading-tight mb-3 relative z-10">
+                <h2 className="text-3xl text-white font-black tracking-tighter leading-tight mb-3 relative z-10">
                     You haven't logged any<br/>insurance yet
                 </h2>
                 
@@ -52,38 +52,38 @@ export function MyPlansTab() {
                             <Shield className="w-6 h-6 text-blue-400" />
                         </div>
                         <div>
-                            <h3 className="text-white font-semibold text-lg tracking-tight">Silver Care HMO</h3>
-                            <p className="text-white/50 text-sm">MediTrust</p>
+                            <h3 className="text-white font-bold text-[17px] tracking-tight">{`Silver Care HMO`}</h3>
+                            <p className="text-white/50 text-[13px] font-medium mt-0.5">MediTrust</p>
                         </div>
                     </div>
-                    <div className="px-2.5 py-1 rounded-full bg-[#30D158]/10 border border-[#30D158]/20 flex items-center gap-1.5">
+                    <div className="px-2.5 py-1 rounded-full bg-[#30D158]/10 border border-[#30D158]/20 flex items-center gap-1.5 h-fit mt-1">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#30D158]" />
-                        <span className="text-[#30D158] text-[10px] font-bold uppercase tracking-wider">Active</span>
+                        <span className="text-[#30D158] text-[10px] font-bold uppercase tracking-widest">Active</span>
                     </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
-                        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Premium</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-white font-semibold text-lg">₱1,200</span>
-                            <span className="text-white/50 text-xs">/yr</span>
+                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Premium</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                            <span className="text-white font-black text-[22px] tracking-tight">₱1,200</span>
+                            <span className="text-white/50 text-[13px] font-medium">/yr</span>
                         </div>
-                        <span className="text-white/40 text-xs">≈R{formatCurrency(1200 * exchangeRate)}/yr</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(1200 * exchangeRate)}/yr</span>
                     </div>
                     <div className="flex flex-col gap-1">
-                        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">MBL</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-white font-semibold text-lg">₱50,000</span>
+                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">MBL</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                            <span className="text-white font-black text-[22px] tracking-tight">₱50,000</span>
                         </div>
-                        <span className="text-white/40 text-xs">≈R{formatCurrency(50000 * exchangeRate)}</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(50000 * exchangeRate)}</span>
                     </div>
-                    <div className="flex flex-col gap-1 mt-2">
-                        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">OPD Limit</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-white font-semibold text-lg">₱500</span>
+                    <div className="flex flex-col gap-1 mt-3">
+                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">OPD Limit</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                            <span className="text-white font-black text-[22px] tracking-tight">₱500</span>
                         </div>
-                        <span className="text-white/40 text-xs">≈R{formatCurrency(500 * exchangeRate)}</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(500 * exchangeRate)}</span>
                     </div>
                 </div>
             </div>
@@ -96,38 +96,38 @@ export function MyPlansTab() {
                             <Shield className="w-6 h-6 text-[#D4AF37]" />
                         </div>
                         <div>
-                            <h3 className="text-white font-semibold text-lg tracking-tight">Infinity Life</h3>
-                            <p className="text-white/50 text-sm">SafeGuard</p>
+                            <h3 className="text-white font-bold text-[17px] tracking-tight">{`Infinity Life`}</h3>
+                            <p className="text-white/50 text-[13px] font-medium mt-0.5">SafeGuard</p>
                         </div>
                     </div>
-                    <div className="px-2.5 py-1 rounded-full bg-[#E8A33D]/10 border border-[#E8A33D]/20 flex items-center gap-1.5">
+                    <div className="px-2.5 py-1 rounded-full bg-[#E8A33D]/10 border border-[#E8A33D]/20 flex items-center gap-1.5 h-fit mt-1">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#E8A33D]" />
-                        <span className="text-[#E8A33D] text-[10px] font-bold uppercase tracking-wider">Renewal in 12 days</span>
+                        <span className="text-[#E8A33D] text-[10px] font-bold uppercase tracking-widest">Renewal in 12 days</span>
                     </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
-                        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Premium</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-white font-semibold text-lg">₱2,500</span>
-                            <span className="text-white/50 text-xs">/yr</span>
+                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Premium</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                            <span className="text-white font-black text-[22px] tracking-tight">₱2,500</span>
+                            <span className="text-white/50 text-[13px] font-medium">/yr</span>
                         </div>
-                        <span className="text-white/40 text-xs">≈R{formatCurrency(2500 * exchangeRate)}/yr</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(2500 * exchangeRate)}/yr</span>
                     </div>
                     <div className="flex flex-col gap-1">
-                        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Fund Value</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-[#D4AF37] font-semibold text-lg">₱12,450</span>
+                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Fund Value</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                            <span className="text-[#D4AF37] font-black text-[22px] tracking-tight">₱12,450</span>
                         </div>
-                        <span className="text-white/40 text-xs">≈R{formatCurrency(12450 * exchangeRate)}</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(12450 * exchangeRate)}</span>
                     </div>
-                    <div className="flex flex-col gap-1 mt-2">
-                        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Life Cover</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-white font-semibold text-lg">₱500,000</span>
+                    <div className="flex flex-col gap-1 mt-3">
+                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Life Cover</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                            <span className="text-white font-black text-[22px] tracking-tight">₱500,000</span>
                         </div>
-                        <span className="text-white/40 text-xs">≈R{formatCurrency(500000 * exchangeRate)}</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(500000 * exchangeRate)}</span>
                     </div>
                 </div>
             </div>
@@ -140,37 +140,37 @@ export function MyPlansTab() {
                             <Shield className="w-6 h-6 text-green-400" />
                         </div>
                         <div>
-                            <h3 className="text-white font-semibold text-lg tracking-tight">Public Health Plus</h3>
-                            <p className="text-white/50 text-sm">GovHealth</p>
+                            <h3 className="text-white font-bold text-[17px] tracking-tight">{`Public Health Plus`}</h3>
+                            <p className="text-white/50 text-[13px] font-medium mt-0.5">GovHealth</p>
                         </div>
                     </div>
-                    <div className="px-2.5 py-1 rounded-full bg-[#30D158]/10 border border-[#30D158]/20 flex items-center gap-1.5">
+                    <div className="px-2.5 py-1 rounded-full bg-[#30D158]/10 border border-[#30D158]/20 flex items-center gap-1.5 h-fit mt-1">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#30D158]" />
-                        <span className="text-[#30D158] text-[10px] font-bold uppercase tracking-wider">Active</span>
+                        <span className="text-[#30D158] text-[10px] font-bold uppercase tracking-widest">Active</span>
                     </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
-                        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Premium</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-white font-semibold text-lg">₱300</span>
-                            <span className="text-white/50 text-xs">/yr</span>
+                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Premium</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                            <span className="text-white font-black text-[22px] tracking-tight">₱300</span>
+                            <span className="text-white/50 text-[13px] font-medium">/yr</span>
                         </div>
-                        <span className="text-white/40 text-xs">≈R{formatCurrency(300 * exchangeRate)}/yr</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(300 * exchangeRate)}/yr</span>
                     </div>
                     <div className="flex flex-col gap-1">
-                        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Coverage</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-white font-semibold text-lg">100%</span>
+                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Coverage</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                            <span className="text-white font-black text-[22px] tracking-tight">100%</span>
                         </div>
                     </div>
-                    <div className="flex flex-col gap-1 mt-2">
-                        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Deductible</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-white font-semibold text-lg">₱0</span>
+                    <div className="flex flex-col gap-1 mt-3">
+                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Deductible</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                            <span className="text-white font-black text-[22px] tracking-tight">₱0</span>
                         </div>
-                        <span className="text-white/40 text-xs">≈R0</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈R0</span>
                     </div>
                 </div>
             </div>
