@@ -1,18 +1,22 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useChildCareStore } from "@/store/useChildCareStore";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Calculator } from "lucide-react";
 
 export function ChildProfileHeader() {
-  const { profile, updateProfile, cachedData } = useChildCareStore();
+  const { profile, updateProfile, cachedData, configuration } = useChildCareStore();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const itemWidth = 60;
   const dashboardAges = Array.from({ length: 18 }, (_, i) => i + 1);
   
-  // Set initial scroll position based on current age
   useEffect(() => {
+    setMounted(true);
     if (scrollRef.current && profile.age) {
       const index = dashboardAges.indexOf(profile.age);
       if (index !== -1) {
@@ -21,9 +25,24 @@ export function ChildProfileHeader() {
     }
   }, []);
 
-  // Compute total monthly overhead
-  const totalTuition = cachedData.schools[0]?.monthlyTuition || 0;
-  const totalCostPHP = totalTuition + cachedData.monthlyEssentialsCost;
+  // Compute total monthly overhead dynamically
+  const baseEssentials = cachedData.monthlyEssentialsCost || 3000;
+  
+  // Education
+  const configuredSchool = cachedData.schools.find(s => s.id === configuration.selectedSchoolId);
+  const tuitionCost = configuredSchool ? configuredSchool.monthlyTuition : 5000; // 5000 is regional estimate
+  
+  // Healthcare
+  const hasHealthcare = configuration.selectedHealthcareProviders.length > 0;
+  const healthcareCost = hasHealthcare ? 1500 : 1000; // 1000 is regional estimate
+  
+  // Activities
+  const activitiesCost = configuration.selectedActivities.reduce((total, id) => {
+    const act = cachedData.summerActivities.find(a => a.id === id);
+    return total + ((act?.cost || 0) / 12);
+  }, 0);
+
+  const totalCostPHP = baseEssentials + tuitionCost + healthcareCost + activitiesCost;
   const totalCostZAR = totalCostPHP * 0.27; // Dummy exchange rate for mock
 
   const handleEditProfile = () => {
@@ -137,12 +156,100 @@ export function ChildProfileHeader() {
             <span className="text-[13px] font-bold text-white">Edit Profile</span>
           </button>
           <button 
+            onClick={() => setIsBreakdownOpen(true)}
             className="flex-1 bg-white/5 hover:bg-white/10 transition-colors py-4 rounded-[24px] flex items-center justify-center gap-2 border border-white/5"
           >
             <span className="text-[13px] font-bold text-white">Breakdown</span>
           </button>
         </div>
       </div>
+
+      {/* Breakdown Modal */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {isBreakdownOpen && (
+            <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4 pointer-events-auto">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsBreakdownOpen(false)}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              />
+
+              <motion.div 
+                initial={{ opacity: 0, y: "100%" }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="w-full max-w-md bg-[#1A1A1A] rounded-t-[32px] sm:rounded-[32px] shadow-2xl relative z-10 flex flex-col"
+              >
+                <div className="flex items-center justify-between p-6 border-b border-white/5">
+                  <div className="flex items-center gap-2">
+                    <Calculator className="w-5 h-5 text-[#FF7B54]" />
+                    <h3 className="text-xl font-black text-white">Cost Breakdown</h3>
+                  </div>
+                  <button 
+                    onClick={() => setIsBreakdownOpen(false)}
+                    className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-5 h-5 text-white/50" />
+                  </button>
+                </div>
+
+                <div className="p-6 flex flex-col gap-4">
+                  <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                    <div className="flex flex-col">
+                      <span className="text-[14px] font-bold text-white">Base Essentials</span>
+                      <span className="text-[11px] text-white/50">Food, Diapers, Hygiene</span>
+                    </div>
+                    <span className="text-[15px] font-bold text-white">₱{baseEssentials.toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                    <div className="flex flex-col">
+                      <span className="text-[14px] font-bold text-white">Education</span>
+                      <span className="text-[11px] text-[#FF7B54] font-bold uppercase tracking-wide">
+                        {configuredSchool ? 'Configured' : 'Estimated'}
+                      </span>
+                    </div>
+                    <span className="text-[15px] font-bold text-white">₱{tuitionCost.toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                    <div className="flex flex-col">
+                      <span className="text-[14px] font-bold text-white">Healthcare</span>
+                      <span className="text-[11px] text-[#FF7B54] font-bold uppercase tracking-wide">
+                        {hasHealthcare ? 'Configured' : 'Estimated'}
+                      </span>
+                    </div>
+                    <span className="text-[15px] font-bold text-white">₱{healthcareCost.toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                    <div className="flex flex-col">
+                      <span className="text-[14px] font-bold text-white">Activities (Monthly Avg)</span>
+                      <span className="text-[11px] text-[#FF7B54] font-bold uppercase tracking-wide">
+                        {activitiesCost > 0 ? 'Configured' : 'Estimated'}
+                      </span>
+                    </div>
+                    <span className="text-[15px] font-bold text-white">₱{activitiesCost.toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-[16px] font-black text-white">Total Monthly</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-[20px] font-black text-[#FF7B54]">₱{Math.round(totalCostPHP).toLocaleString()}</span>
+                      <span className="text-[12px] font-bold text-white/50">/ R{Math.round(totalCostZAR).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
