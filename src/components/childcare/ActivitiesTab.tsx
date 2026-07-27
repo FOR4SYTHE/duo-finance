@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useChildCareStore } from "@/store/useChildCareStore";
-import { Plus, Palette } from "lucide-react";
+import { Plus, Palette, CheckCircle2, Info } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function ActivitiesTab() {
-  const { cachedData } = useChildCareStore();
+  const { cachedData, configuration, toggleActivity } = useChildCareStore();
   const [activeActivityCategory, setActiveActivityCategory] = useState<string>("All");
 
   const categories = ["All", "Sports", "Arts", "Learning", "Lifestyle"];
@@ -21,6 +21,16 @@ export function ActivitiesTab() {
             <h4 className="font-bold text-white text-[15px]">Activities & Camp</h4>
           </div>
         </div>
+
+        {configuration.selectedActivities.length === 0 && (
+          <div className="bg-[#FF7B54]/10 border border-[#FF7B54]/20 rounded-2xl p-4 mx-1 flex gap-3 items-start">
+            <Info className="w-5 h-5 text-[#FF7B54] flex-shrink-0 mt-0.5" />
+            <div className="flex flex-col">
+              <span className="text-[13px] font-bold text-white leading-tight">No activities selected</span>
+              <span className="text-[12px] text-white/70 mt-1 leading-snug">Costs shown in forecasts are currently estimated based on regional averages.</span>
+            </div>
+          </div>
+        )}
 
         {/* Categories Horizontal Scroll */}
         <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 px-1 -mx-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
@@ -43,13 +53,16 @@ export function ActivitiesTab() {
           {cachedData.summerActivities
             .filter(a => activeActivityCategory === "All" || a.category === activeActivityCategory)
             .map((activity, idx) => {
+            const isSelected = configuration.selectedActivities.includes(activity.id);
             const zarCost = Math.round((activity.cost || 5000) * 0.27);
             return (
               <motion.div 
                 key={`${activity.id}-${idx}`} 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="relative aspect-[4/5] rounded-[24px] overflow-hidden group shadow-[0_8px_24px_rgba(0,0,0,0.2)] border border-white/10 flex flex-col justify-end"
+                className={`relative aspect-[4/5] rounded-[24px] overflow-hidden group shadow-[0_8px_24px_rgba(0,0,0,0.2)] flex flex-col justify-end transition-all ${
+                  isSelected ? 'border-2 border-emerald-400' : 'border border-white/10'
+                }`}
               >
                 {/* Background Art */}
                 <img 
@@ -83,8 +96,19 @@ export function ActivitiesTab() {
                     <span className="text-[10px] font-bold text-white/50 tracking-wider">
                       {activity.duration || "Summer Term"}
                     </span>
-                    <button className="w-6 h-6 rounded-full bg-[#FF7B54] flex items-center justify-center shadow-[0_2px_8px_rgba(255,123,84,0.4)]">
-                      <Plus className="w-3.5 h-3.5 text-white" />
+                    <button 
+                      onClick={() => toggleActivity(activity.id)}
+                      className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                        isSelected 
+                          ? 'bg-emerald-400 shadow-[0_2px_8px_rgba(52,211,153,0.4)]' 
+                          : 'bg-[#FF7B54] shadow-[0_2px_8px_rgba(255,123,84,0.4)]'
+                      }`}
+                    >
+                      {isSelected ? (
+                        <CheckCircle2 className="w-4 h-4 text-[#0A0A0A]" />
+                      ) : (
+                        <Plus className="w-4 h-4 text-white" />
+                      )}
                     </button>
                   </div>
                 </div>

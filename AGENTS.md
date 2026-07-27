@@ -329,6 +329,16 @@ A dedicated full-page module (`/childcare`) focusing on financial and logistical
    - Top pediatric hospitals and clinics in Bulacan with emergency contacts.
    - Age-appropriate essentials (vitamins, healthy snack calculators).
 
+**Architecture Refinement: Planning vs. Configured Mode (MANDATORY)**
+- The module operates in two blended modes seamlessly without a global toggle switch. If a user has not explicitly selected a specific school, hospital, or activity, the engine defaults to **Planning Mode**, injecting *regional average estimates* into the Growth Cost Forecast and overhead totals, and flagging the UI with an `ESTIMATED` badge.
+- When a user makes an explicit choice (e.g., taps "Select" on a specific school card, or uses the "Add Custom School" manual entry), the engine seamlessly shifts that component to **Configured Mode**. The actual selected costs overwrite the regional estimates instantly across the entire dashboard, and the badge updates to `CONFIGURED`.
+- The rule is: **Actuals > Estimates**. The app can run perfectly in a hybrid state (e.g., 10% configured, 90% estimated) and will smoothly adapt as the user slowly builds out their real-world profile.
+
+**Cross-Module Integration (Insurance Hub):**
+- The Child Care module and the upcoming Insurance Hub (4.6) will share the exact same `household_id` architecture in Supabase.
+- When the user adds a specific insurance policy (e.g., Maxicare) in the Insurance Hub, the Child Care module's Healthcare tab will automatically detect it. It will check the `acceptedInsurances` array on hospitals and flag matching facilities as "In-Network" or "Covered". 
+- Data flows freely between modules via the shared backend — users should NEVER have to manually re-enter data (like their insurance provider) in the Child Care section if they've already logged it in the Insurance Hub.
+
 ---
 
 ## 5. Build Order

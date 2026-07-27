@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useChildCareStore } from "@/store/useChildCareStore";
-import { ArrowRight, HeartPulse, ShieldPlus, MapPin, Clock, CheckCircle2 } from "lucide-react";
+import { ArrowRight, HeartPulse, ShieldPlus, MapPin, Clock, CheckCircle2, Info, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function HealthTab() {
-  const { cachedData } = useChildCareStore();
+  const { cachedData, configuration, toggleHealthcareProvider } = useChildCareStore();
   const [activeCategory, setActiveCategory] = useState<string>("All");
 
   const categories = ["All", "Hospital", "Pediatrician", "Dentist"];
@@ -30,25 +30,39 @@ export function HealthTab() {
         ))}
       </div>
 
+      {configuration.selectedHealthcareProviders.length === 0 && (
+        <div className="bg-[#FF7B54]/10 border border-[#FF7B54]/20 rounded-2xl p-4 flex gap-3 items-start">
+          <Info className="w-5 h-5 text-[#FF7B54] flex-shrink-0 mt-0.5" />
+          <div className="flex flex-col">
+            <span className="text-[13px] font-bold text-white leading-tight">No healthcare configured</span>
+            <span className="text-[12px] text-white/70 mt-1 leading-snug">Estimates are currently applied using standard coverage baselines. Select your providers to refine forecasts.</span>
+          </div>
+        </div>
+      )}
+
       {/* Hospitals / Healthcare Section */}
       <div className="flex flex-col gap-3">
         {cachedData.hospitals
           .filter(h => activeCategory === "All" || h.category === activeCategory)
-          .map((hospital) => (
-          <motion.div 
-            key={hospital.id} 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-[#1A1A1A] rounded-[24px] p-5 relative overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.2)] border border-white/5"
-          >
+          .map((hospital) => {
+            const isSelected = configuration.selectedHealthcareProviders.includes(hospital.id);
+            return (
+              <motion.div 
+                key={hospital.id} 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`bg-[#1A1A1A] rounded-[24px] p-5 relative overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-all ${
+                  isSelected ? 'border-2 border-emerald-400' : 'border border-white/5'
+                }`}
+              >
             {/* Decorative Corner Shape */}
             <div className="absolute top-[-20%] right-[-10%] w-[120px] h-[120px] bg-[#FF7B54]/10 rounded-full blur-[20px] pointer-events-none" />
 
             <div className="relative z-10 flex flex-col gap-4">
               <div className="flex justify-between items-start">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-[#FF7B54]/20 flex items-center justify-center flex-shrink-0">
-                    <HeartPulse className="w-6 h-6 text-[#FF7B54]" />
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-emerald-400/20' : 'bg-[#FF7B54]/20'}`}>
+                    <HeartPulse className={`w-6 h-6 ${isSelected ? 'text-emerald-400' : 'text-[#FF7B54]'}`} />
                   </div>
                   <div className="flex flex-col">
                     <h4 className="font-bold text-white text-[15px] leading-tight pr-4">{hospital.name}</h4>
@@ -87,13 +101,24 @@ export function HealthTab() {
                 <a href={hospital.emergencyHotline ? `tel:${hospital.emergencyHotline}` : "#"} className="text-[12px] font-bold text-[#FF7B54] hover:text-[#FF7B54]/80 transition-colors">
                   {hospital.emergencyHotline ? `Emergency: ${hospital.emergencyHotline}` : "Contact Provider"}
                 </a>
-                <button className="w-8 h-8 rounded-full bg-[#FF7B54]/20 flex items-center justify-center hover:bg-[#FF7B54]/30 transition-colors">
-                  <ArrowRight className="w-4 h-4 text-[#FF7B54]" />
+                <button 
+                  onClick={() => toggleHealthcareProvider(hospital.id)}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
+                    isSelected 
+                      ? 'bg-emerald-400/20 hover:bg-emerald-400/30' 
+                      : 'bg-[#FF7B54]/20 hover:bg-[#FF7B54]/30'
+                  }`}
+                >
+                  {isSelected ? (
+                    <Check className="w-4 h-4 text-emerald-400" />
+                  ) : (
+                    <ArrowRight className="w-4 h-4 text-[#FF7B54]" />
+                  )}
                 </button>
               </div>
             </div>
           </motion.div>
-        ))}
+        )})}
 
         {cachedData.hospitals.filter(h => activeCategory === "All" || h.category === activeCategory).length === 0 && (
           <motion.div 

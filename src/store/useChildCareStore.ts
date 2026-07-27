@@ -17,6 +17,13 @@ export interface School {
   chips?: string[];
   distance?: string;
   rating?: number;
+  annualTuition?: number;
+  enrollmentFee?: number;
+  books?: number;
+  uniform?: number;
+  transportation?: number;
+  notes?: string;
+  isCustom?: boolean;
 }
 
 export interface Hospital {
@@ -47,12 +54,23 @@ export interface ChildCareData {
   monthlyEssentialsCost: number;
 }
 
+export interface ChildConfiguration {
+  selectedSchoolId: string | null;
+  selectedActivities: string[];
+  selectedHealthcareProviders: string[];
+}
+
 interface ChildCareState {
   profile: ChildProfile;
   cachedData: ChildCareData;
+  configuration: ChildConfiguration;
   isUpdatingAI: boolean;
   hasCompletedOnboarding: boolean;
   updateProfile: (profile: Partial<ChildProfile>) => void;
+  selectSchool: (id: string | null) => void;
+  addCustomSchool: (school: Omit<School, 'id'>) => void;
+  toggleActivity: (id: string) => void;
+  toggleHealthcareProvider: (id: string) => void;
   completeOnboarding: () => void;
   mockTriggerAIUpdate: () => Promise<void>;
   reset: () => void;
@@ -84,12 +102,58 @@ export const useChildCareStore = create<ChildCareState>()(
     (set) => ({
       profile: { nickname: '', age: null, gender: null, location: 'Malolos, Bulacan' },
       cachedData: INITIAL_DATA,
+      configuration: {
+        selectedSchoolId: null,
+        selectedActivities: [],
+        selectedHealthcareProviders: []
+      },
       isUpdatingAI: false,
       hasCompletedOnboarding: false,
       
       updateProfile: (profileUpdate) => set((state) => ({
         profile: { ...state.profile, ...profileUpdate }
       })),
+
+      selectSchool: (id) => set((state) => ({
+        configuration: { ...state.configuration, selectedSchoolId: id }
+      })),
+
+      addCustomSchool: (newSchool) => set((state) => {
+        const id = `custom-${Date.now()}`;
+        const schoolWithId = { ...newSchool, id, isCustom: true };
+        return {
+          cachedData: {
+            ...state.cachedData,
+            schools: [...state.cachedData.schools, schoolWithId]
+          },
+          configuration: {
+            ...state.configuration,
+            selectedSchoolId: id
+          }
+        };
+      }),
+
+      toggleActivity: (id) => set((state) => {
+        const activities = state.configuration.selectedActivities;
+        const exists = activities.includes(id);
+        return {
+          configuration: {
+            ...state.configuration,
+            selectedActivities: exists ? activities.filter(a => a !== id) : [...activities, id]
+          }
+        };
+      }),
+
+      toggleHealthcareProvider: (id) => set((state) => {
+        const providers = state.configuration.selectedHealthcareProviders;
+        const exists = providers.includes(id);
+        return {
+          configuration: {
+            ...state.configuration,
+            selectedHealthcareProviders: exists ? providers.filter(p => p !== id) : [...providers, id]
+          }
+        };
+      }),
 
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
 
@@ -116,6 +180,11 @@ export const useChildCareStore = create<ChildCareState>()(
       reset: () => set({
         profile: { nickname: '', age: null, gender: null, location: 'Malolos, Bulacan' },
         hasCompletedOnboarding: false,
+        configuration: {
+          selectedSchoolId: null,
+          selectedActivities: [],
+          selectedHealthcareProviders: []
+        },
         cachedData: INITIAL_DATA
       })
     }),

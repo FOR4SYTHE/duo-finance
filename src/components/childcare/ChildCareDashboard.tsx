@@ -7,10 +7,10 @@ import { GrowthCostForecast } from "@/components/childcare/GrowthCostForecast";
 import { AIRefreshButton } from "@/components/childcare/AIRefreshButton";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { X, CheckCircle2, CircleDashed } from "lucide-react";
 
 export function ChildCareDashboard() {
-  const { isUpdatingAI, hasCompletedOnboarding, updateProfile } = useChildCareStore();
+  const { isUpdatingAI, hasCompletedOnboarding, configuration } = useChildCareStore();
 
   const handleEditProfile = () => {
     // Restart the onboarding flow to edit data
@@ -40,6 +40,72 @@ export function ChildCareDashboard() {
 
       {/* Header (Context Engine) */}
       <ChildProfileHeader />
+
+      {/* Setup Progress */}
+      <div className="flex flex-col gap-3 mt-2">
+        <h4 className="text-[14px] font-bold text-white pl-1">Setup Progress</h4>
+        <div className="bg-[#1A1A1A] rounded-[24px] p-4 border border-white/5 shadow-[0_8px_24px_rgba(0,0,0,0.2)]">
+          <div className="grid grid-cols-2 gap-4">
+            
+            {/* School */}
+            <div className="flex items-center gap-2">
+              {configuration.selectedSchoolId ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              ) : (
+                <CircleDashed className="w-4 h-4 text-[#FF7B54] flex-shrink-0" />
+              )}
+              <div className="flex flex-col">
+                <span className="text-[12px] font-bold text-white leading-tight">School</span>
+                <span className={`text-[10px] font-bold uppercase tracking-widest ${configuration.selectedSchoolId ? 'text-emerald-400/80' : 'text-[#FF7B54]/80'}`}>
+                  {configuration.selectedSchoolId ? 'Selected' : 'Estimated'}
+                </span>
+              </div>
+            </div>
+
+            {/* Activities */}
+            <div className="flex items-center gap-2">
+              {configuration.selectedActivities.length > 0 ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              ) : (
+                <CircleDashed className="w-4 h-4 text-[#FF7B54] flex-shrink-0" />
+              )}
+              <div className="flex flex-col">
+                <span className="text-[12px] font-bold text-white leading-tight">Activities</span>
+                <span className={`text-[10px] font-bold uppercase tracking-widest ${configuration.selectedActivities.length > 0 ? 'text-emerald-400/80' : 'text-[#FF7B54]/80'}`}>
+                  {configuration.selectedActivities.length > 0 ? 'Configured' : 'Estimated'}
+                </span>
+              </div>
+            </div>
+
+            {/* Healthcare */}
+            <div className="flex items-center gap-2">
+              {configuration.selectedHealthcareProviders.length > 0 ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              ) : (
+                <CircleDashed className="w-4 h-4 text-[#FF7B54] flex-shrink-0" />
+              )}
+              <div className="flex flex-col">
+                <span className="text-[12px] font-bold text-white leading-tight">Healthcare</span>
+                <span className={`text-[10px] font-bold uppercase tracking-widest ${configuration.selectedHealthcareProviders.length > 0 ? 'text-emerald-400/80' : 'text-[#FF7B54]/80'}`}>
+                  {configuration.selectedHealthcareProviders.length > 0 ? 'Configured' : 'Estimated'}
+                </span>
+              </div>
+            </div>
+
+            {/* Insurance */}
+            <div className="flex items-center gap-2">
+              <CircleDashed className="w-4 h-4 text-white/30 flex-shrink-0" />
+              <div className="flex flex-col">
+                <span className="text-[12px] font-bold text-white/50 leading-tight">Insurance</span>
+                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
+                  Not Connected
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
 
       {/* Flagship Forecast Feature */}
       <GrowthCostForecast />

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, TrendingUp, AlertCircle, BookOpen, HeartPulse, Palette } from "lucide-react";
 
 export function GrowthCostForecast() {
-  const { profile } = useChildCareStore();
+  const { profile, cachedData, configuration } = useChildCareStore();
   
   // Baseline age
   const baseAge = profile.age || 6;
@@ -14,10 +14,16 @@ export function GrowthCostForecast() {
   // Local state for interactive timeline
   const [selectedAge, setSelectedAge] = useState(baseAge);
   
-  // What-If Scenarios
+  // What-If Scenarios (used only for estimates)
   const [isPrivateSchool, setIsPrivateSchool] = useState(true);
   const [isPremiumHealth, setIsPremiumHealth] = useState(false);
   const [hasActivities, setHasActivities] = useState(true);
+
+  // Configured Data Lookups
+  const selectedSchool = cachedData.schools.find(s => s.id === configuration.selectedSchoolId);
+  const selectedActivitiesCost = cachedData.summerActivities
+    .filter(a => configuration.selectedActivities.includes(a.id))
+    .reduce((sum, a) => sum + (a.cost || 0), 0);
 
   // Milestones
   const milestones = [
@@ -33,16 +39,27 @@ export function GrowthCostForecast() {
   const getCostForAge = (age: number) => {
     let monthly = 5000; // Base essentials
     
-    // Education (scales with age)
+    // Education (scales with age if estimated, fixed if configured)
     if (age >= 6 && age < 18) {
-      monthly += isPrivateSchool ? 8000 + (age * 300) : 1500 + (age * 100);
+      if (selectedSchool) {
+        monthly += selectedSchool.monthlyTuition;
+      } else {
+        monthly += isPrivateSchool ? 8000 + (age * 300) : 1500 + (age * 100);
+      }
     }
     
     // Healthcare
-    monthly += isPremiumHealth ? 3000 : 1000;
+    if (configuration.selectedHealthcareProviders.length > 0) {
+      monthly += 2500; // Configured average
+    } else {
+      monthly += isPremiumHealth ? 3000 : 1000;
+    }
     
-    // Activities (peaks around 10-14)
-    if (hasActivities && age >= 7 && age <= 16) {
+    // Activities
+    if (configuration.selectedActivities.length > 0) {
+      // Amortize summer cost over 12 months
+      monthly += Math.round(selectedActivitiesCost / 12);
+    } else if (hasActivities && age >= 7 && age <= 16) {
       monthly += 2000 + (age === 10 ? 1500 : 0);
     }
     
@@ -99,17 +116,17 @@ export function GrowthCostForecast() {
   const breakdown = [
     { 
       id: "edu", label: "Education", 
-      amount: selectedAge >= 6 && selectedAge < 18 ? (isPrivateSchool ? 8000 + (selectedAge * 300) : 1500 + (selectedAge * 100)) : 0, 
+      amount: selectedAge >= 6 && selectedAge < 18 ? (selectedSchool ? selectedSchool.monthlyTuition : (isPrivateSchool ? 8000 + (selectedAge * 300) : 1500 + (selectedAge * 100))) : 0, 
       icon: BookOpen 
     },
     { 
       id: "health", label: "Healthcare", 
-      amount: isPremiumHealth ? 3000 : 1000, 
+      amount: configuration.selectedHealthcareProviders.length > 0 ? 2500 : (isPremiumHealth ? 3000 : 1000), 
       icon: HeartPulse 
     },
     { 
       id: "act", label: "Activities", 
-      amount: hasActivities && selectedAge >= 7 && selectedAge <= 16 ? 2000 + (selectedAge === 10 ? 1500 : 0) : 0, 
+      amount: configuration.selectedActivities.length > 0 ? Math.round(selectedActivitiesCost / 12) : (hasActivities && selectedAge >= 7 && selectedAge <= 16 ? 2000 + (selectedAge === 10 ? 1500 : 0) : 0), 
       icon: Palette 
     },
     { 
@@ -123,7 +140,14 @@ export function GrowthCostForecast() {
     <div className="flex flex-col gap-6 mt-4 w-full">
       {/* Title */}
       <div className="flex flex-col px-1">
-        <h3 className="text-xl font-black text-white">Growth Cost Forecast</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-xl font-black text-white">Growth Cost Forecast</h3>
+          {configuration.selectedSchoolId ? (
+            <span className="bg-emerald-400/20 text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-emerald-400/20">Configured</span>
+          ) : (
+            <span className="bg-[#FF7B54]/20 text-[#FF7B54] text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-[#FF7B54]/20">Estimated</span>
+          )}
+        </div>
         <p className="text-[13px] font-medium text-white/50 leading-snug mt-1">
           See how your child's estimated monthly and yearly expenses evolve over time.
         </p>
@@ -293,42 +317,44 @@ export function GrowthCostForecast() {
         </div>
       </div>
 
-      {/* What-If Planner */}
-      <div className="bg-[#1A1A1A] rounded-[32px] p-6 shadow-[0_8px_24px_rgba(0,0,0,0.2)] border border-[#FF7B54]/20 flex flex-col gap-4 mt-2">
-        <div className="flex items-center gap-2">
-          <h4 className="text-[14px] font-bold text-white">What-If Planner</h4>
-        </div>
-        
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between bg-white/5 p-3 rounded-2xl">
-            <span className="text-[14px] font-bold text-white pl-1">Private School</span>
-            <div 
-              onClick={() => setIsPrivateSchool(!isPrivateSchool)}
-              className={`w-[50px] h-[30px] rounded-full p-[4px] cursor-pointer transition-colors duration-300 ease-in-out ${isPrivateSchool ? 'bg-[#FF7B54]' : 'bg-[#2C2C2E]'}`}
-            >
-              <motion.div 
-                animate={{ x: isPrivateSchool ? 20 : 0 }} 
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                className="w-[22px] h-[22px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
-              />
-            </div>
+      {/* What-If Planner (Only show if School is not configured) */}
+      {!configuration.selectedSchoolId && (
+        <div className="bg-[#1A1A1A] rounded-[32px] p-6 shadow-[0_8px_24px_rgba(0,0,0,0.2)] border border-[#FF7B54]/20 flex flex-col gap-4 mt-2">
+          <div className="flex items-center gap-2">
+            <h4 className="text-[14px] font-bold text-white">What-If Planner</h4>
           </div>
           
-          <div className="flex items-center justify-between bg-white/5 p-3 rounded-2xl">
-            <span className="text-[14px] font-bold text-white pl-1">Premium Healthcare</span>
-            <div 
-              onClick={() => setIsPremiumHealth(!isPremiumHealth)}
-              className={`w-[50px] h-[30px] rounded-full p-[4px] cursor-pointer transition-colors duration-300 ease-in-out ${isPremiumHealth ? 'bg-[#FF7B54]' : 'bg-[#2C2C2E]'}`}
-            >
-              <motion.div 
-                animate={{ x: isPremiumHealth ? 20 : 0 }} 
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                className="w-[22px] h-[22px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
-              />
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between bg-white/5 p-3 rounded-2xl">
+              <span className="text-[14px] font-bold text-white pl-1">Private School</span>
+              <div 
+                onClick={() => setIsPrivateSchool(!isPrivateSchool)}
+                className={`w-[50px] h-[30px] rounded-full p-[4px] cursor-pointer transition-colors duration-300 ease-in-out ${isPrivateSchool ? 'bg-[#FF7B54]' : 'bg-[#2C2C2E]'}`}
+              >
+                <motion.div 
+                  animate={{ x: isPrivateSchool ? 20 : 0 }} 
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className="w-[22px] h-[22px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between bg-white/5 p-3 rounded-2xl">
+              <span className="text-[14px] font-bold text-white pl-1">Premium Healthcare</span>
+              <div 
+                onClick={() => setIsPremiumHealth(!isPremiumHealth)}
+                className={`w-[50px] h-[30px] rounded-full p-[4px] cursor-pointer transition-colors duration-300 ease-in-out ${isPremiumHealth ? 'bg-[#FF7B54]' : 'bg-[#2C2C2E]'}`}
+              >
+                <motion.div 
+                  animate={{ x: isPremiumHealth ? 20 : 0 }} 
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className="w-[22px] h-[22px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Smart AI Insights */}
       <div className="flex flex-col gap-3 mt-2">
