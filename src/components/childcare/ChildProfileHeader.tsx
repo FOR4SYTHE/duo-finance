@@ -132,20 +132,30 @@ export function ChildProfileHeader() {
           </div>
           {/* Top Right Actions / Badge */}
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/30 bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
-              Live
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#FF7B54] bg-[#FF7B54]/10 px-3 py-1.5 rounded-full border border-[#FF7B54]/20">
+              Updated July 2026
             </span>
           </div>
         </div>
 
         {/* Middle Row: Big Numbers */}
-        <div className="flex items-baseline gap-2 mb-8 ml-1">
-          <span className="text-[42px] leading-none font-black tracking-tighter text-white">
-            ₱{totalCostPHP.toLocaleString()}
-          </span>
-          <div className="bg-[#FF7B54]/10 px-2 py-1 rounded-lg ml-1">
-            <span className="text-sm font-bold text-[#FF7B54]">
-              R{Math.round(totalCostZAR).toLocaleString()}
+        <div className="flex flex-col gap-1 mb-8 ml-1">
+          <div className="flex items-baseline gap-2">
+            <span className="text-[42px] leading-none font-black tracking-tighter text-white">
+              ₱{totalCostPHP.toLocaleString()}
+            </span>
+            <div className="bg-[#FF7B54]/10 px-2 py-1 rounded-lg ml-1">
+              <span className="text-sm font-bold text-[#FF7B54]">
+                R{Math.round(totalCostZAR).toLocaleString()}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 mt-1 opacity-70">
+            <span className="text-[13px] font-bold text-white tracking-wide">
+              Est. Yearly: ₱{(totalCostPHP * 12).toLocaleString()}
+            </span>
+            <span className="text-[12px] font-bold text-white/50">
+              / R{Math.round(totalCostZAR * 12).toLocaleString()}
             </span>
           </div>
         </div>

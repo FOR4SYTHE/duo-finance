@@ -23,7 +23,7 @@ export function AIRefreshButton() {
       )}
       
       <span className="relative z-10">
-        {isUpdatingAI ? "Scanning..." : "Generate Latest 2026 AI Report"}
+        {isUpdatingAI ? "Scanning..." : "Generate Family Planning Report"}
       </span>
     </motion.button>
   );

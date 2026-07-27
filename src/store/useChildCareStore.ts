@@ -14,20 +14,30 @@ export interface School {
   type: string;
   monthlyTuition: number;
   suppliesPerTerm: number;
+  chips?: string[];
+  distance?: string;
+  rating?: number;
 }
 
 export interface Hospital {
   id: string;
   name: string;
   type: string;
-  emergencyHotline: string;
+  category?: 'Hospital' | 'Pediatrician' | 'Dentist' | 'Therapy Center';
+  emergencyHotline?: string;
+  distance?: string;
+  operatingHours?: string;
+  acceptedInsurances?: string[];
 }
 
 export interface Activity {
   id: string;
   title: string;
+  category?: 'Sports' | 'Arts' | 'Learning' | 'Lifestyle';
   cost: number;
   duration: string;
+  distance?: string;
+  ageRange?: string;
 }
 
 export interface ChildCareData {
@@ -51,18 +61,20 @@ interface ChildCareState {
 // Baseline mock data for Malolos, Bulacan
 const INITIAL_DATA: ChildCareData = {
   schools: [
-    { id: '1', name: "Lord's Angels Montessori", type: "Private Montessori", monthlyTuition: 4500, suppliesPerTerm: 2500 },
-    { id: '2', name: "Centro Escolar University Malolos", type: "Private University Prep", monthlyTuition: 6000, suppliesPerTerm: 3000 },
-    { id: '3', name: "Immaculate Conception School for Boys", type: "Private Catholic", monthlyTuition: 5200, suppliesPerTerm: 2800 },
+    { id: '1', name: "Lord's Angels Montessori", type: "Private Montessori", monthlyTuition: 4500, suppliesPerTerm: 2500, chips: ["Private", "Montessori", "School Bus"], distance: "1.2 km", rating: 4.8 },
+    { id: '2', name: "Centro Escolar University Malolos", type: "Private University Prep", monthlyTuition: 6000, suppliesPerTerm: 3000, chips: ["Private", "STEM", "Inclusive Education"], distance: "3.5 km", rating: 4.9 },
+    { id: '3', name: "Immaculate Conception School for Boys", type: "Private Catholic", monthlyTuition: 5200, suppliesPerTerm: 2800, chips: ["Private", "Catholic", "Sports Focus"], distance: "2.1 km", rating: 4.7 },
   ],
   hospitals: [
-    { id: '1', name: "Bulacan Medical Center", type: "Public / Tertiary", emergencyHotline: "(044) 791-0630" },
-    { id: '2', name: "Sacred Heart Hospital", type: "Private Hospital", emergencyHotline: "(044) 791-1653" },
-    { id: '3', name: "Malolos Maternity Hospital", type: "Private / Pediatrics", emergencyHotline: "(044) 662-7292" }
+    { id: '1', name: "Bulacan Medical Center", type: "Public / Tertiary", category: "Hospital", emergencyHotline: "(044) 791-0630", distance: "4.0 km", operatingHours: "24/7", acceptedInsurances: ["PhilHealth"] },
+    { id: '2', name: "Sacred Heart Hospital", type: "Private Hospital", category: "Hospital", emergencyHotline: "(044) 791-1653", distance: "2.8 km", operatingHours: "24/7", acceptedInsurances: ["AXA", "Maxicare", "MediCard"] },
+    { id: '3', name: "Dr. Santos Pediatric Clinic", type: "Private / Pediatrics", category: "Pediatrician", distance: "1.5 km", operatingHours: "Mon-Sat, 9AM-5PM", acceptedInsurances: ["Maxicare", "PhilCare"] },
+    { id: '4', name: "Malolos Smiles Dental", type: "Private / Dental", category: "Dentist", distance: "2.0 km", operatingHours: "Mon-Fri, 10AM-6PM", acceptedInsurances: ["AXA"] }
   ],
   summerActivities: [
-    { id: '1', title: "Malolos Sports Complex Swimming Clinic", cost: 1500, duration: "10 Sessions" },
-    { id: '2', title: "Summer Art Workshop (Barasoain)", cost: 2000, duration: "4 Weeks" }
+    { id: '1', title: "Malolos Sports Complex Swimming Clinic", category: "Sports", cost: 1500, duration: "10 Sessions", distance: "3.2 km", ageRange: "5-12 yrs" },
+    { id: '2', title: "Summer Art Workshop (Barasoain)", category: "Arts", cost: 2000, duration: "4 Weeks", distance: "1.8 km", ageRange: "7-15 yrs" },
+    { id: '3', title: "Junior Coding Bootcamp", category: "Learning", cost: 3500, duration: "6 Weeks", distance: "2.5 km", ageRange: "8-14 yrs" }
   ],
   monthlyEssentialsCost: 3500 // Base for diapers, milk, vitamins
 };
