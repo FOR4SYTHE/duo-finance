@@ -106,8 +106,8 @@ export const useChildCareStore = create<ChildCareState>()(
             ...state.cachedData,
             schools: state.cachedData.schools.map(s => ({ ...s, monthlyTuition: s.monthlyTuition + 150 })), // simulate 2026 inflation
             summerActivities: [
-              ...state.cachedData.summerActivities,
-              { id: '3', title: "Robotics Camp 2026 (Malolos City Hall)", cost: 4500, duration: "5 Weeks" }
+              ...state.cachedData.summerActivities.filter(a => a.title !== "Robotics Camp 2026 (Malolos City Hall)"), // Prevent infinite appending
+              { id: Date.now().toString(), title: "Robotics Camp 2026 (Malolos City Hall)", cost: 4500, duration: "5 Weeks", category: "Learning" }
             ]
           }
         }));

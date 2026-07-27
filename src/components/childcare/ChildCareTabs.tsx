@@ -4,9 +4,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { EducationTab } from "./EducationTab";
 import { HealthTab } from "./HealthTab";
+import { ActivitiesTab } from "./ActivitiesTab";
 
 export function ChildCareTabs() {
-  const [activeTab, setActiveTab] = useState<"education" | "health">("education");
+  const [activeTab, setActiveTab] = useState<"education" | "activities" | "health">("education");
 
   return (
     <div className="flex flex-col gap-6 mt-2">
@@ -14,23 +15,33 @@ export function ChildCareTabs() {
       <div className="flex gap-3">
         <button
           onClick={() => setActiveTab("education")}
-          className={`flex-1 py-3.5 text-[13px] font-bold rounded-full transition-all ${
+          className={`flex-1 py-3.5 px-2 text-[13px] font-bold rounded-full transition-all whitespace-nowrap ${
             activeTab === "education" 
               ? "bg-[#FF7B54] text-white shadow-[0_4px_16px_rgba(255,123,84,0.3)]" 
               : "bg-[#B9E0F2]/10 text-white/60 border border-white/5 hover:bg-[#B9E0F2]/20 hover:text-white"
           }`}
         >
-          Education & Camp
+          Education
+        </button>
+        <button
+          onClick={() => setActiveTab("activities")}
+          className={`flex-1 py-3.5 px-2 text-[13px] font-bold rounded-full transition-all whitespace-nowrap ${
+            activeTab === "activities" 
+              ? "bg-[#FF7B54] text-white shadow-[0_4px_16px_rgba(255,123,84,0.3)]" 
+              : "bg-[#B9E0F2]/10 text-white/60 border border-white/5 hover:bg-[#B9E0F2]/20 hover:text-white"
+          }`}
+        >
+          Activities
         </button>
         <button
           onClick={() => setActiveTab("health")}
-          className={`flex-1 py-3.5 text-[13px] font-bold rounded-full transition-all ${
+          className={`flex-1 py-3.5 px-2 text-[13px] font-bold rounded-full transition-all whitespace-nowrap ${
             activeTab === "health" 
               ? "bg-[#FF7B54] text-white shadow-[0_4px_16px_rgba(255,123,84,0.3)]" 
               : "bg-[#B9E0F2]/10 text-white/60 border border-white/5 hover:bg-[#B9E0F2]/20 hover:text-white"
           }`}
         >
-          Health & Essentials
+          Health
         </button>
       </div>
 
@@ -46,6 +57,16 @@ export function ChildCareTabs() {
               transition={{ duration: 0.2 }}
             >
               <EducationTab />
+            </motion.div>
+          ) : activeTab === "activities" ? (
+            <motion.div
+              key="activities"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ActivitiesTab />
             </motion.div>
           ) : (
             <motion.div

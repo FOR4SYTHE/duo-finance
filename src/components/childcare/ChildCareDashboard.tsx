@@ -3,6 +3,7 @@
 import { useChildCareStore } from "@/store/useChildCareStore";
 import { ChildProfileHeader } from "@/components/childcare/ChildProfileHeader";
 import { ChildCareTabs } from "@/components/childcare/ChildCareTabs";
+import { GrowthCostForecast } from "@/components/childcare/GrowthCostForecast";
 import { AIRefreshButton } from "@/components/childcare/AIRefreshButton";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -39,6 +40,9 @@ export function ChildCareDashboard() {
 
       {/* Header (Context Engine) */}
       <ChildProfileHeader />
+
+      {/* Flagship Forecast Feature */}
+      <GrowthCostForecast />
 
       {/* Content Tabs */}
       <ChildCareTabs />

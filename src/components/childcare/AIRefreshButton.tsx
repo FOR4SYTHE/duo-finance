@@ -2,7 +2,6 @@
 
 import { useChildCareStore } from "@/store/useChildCareStore";
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
 
 export function AIRefreshButton() {
   const { mockTriggerAIUpdate, isUpdatingAI } = useChildCareStore();
@@ -19,7 +18,9 @@ export function AIRefreshButton() {
         }`}
     >
       {!isUpdatingAI && (
-        <Sparkles className="w-5 h-5 text-white" />
+        <div className="flex items-center justify-center bg-white/20 px-2 py-0.5 rounded-[6px] backdrop-blur-sm shadow-sm border border-white/30 mr-1">
+          <span className="text-[10px] font-black tracking-widest text-white">AI</span>
+        </div>
       )}
       
       <span className="relative z-10">
