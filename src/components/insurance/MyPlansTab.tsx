@@ -105,20 +105,11 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                     <motion.h2 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                        className="text-[30px] text-white font-black tracking-tighter leading-tight mb-3 text-center"
-                    >
-                        You haven't logged any<br/>insurance yet
-                    </motion.h2>
-                    
-                    <motion.p 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.4 }}
-                        className="text-white/50 text-[13px] font-medium max-w-[300px] leading-relaxed text-center mb-6 relative z-10"
+                        className="text-[22px] text-white/90 font-semibold tracking-tight leading-snug mb-8 text-center text-balance max-w-[320px] mx-auto relative z-10"
                     >
                         Store your policies, understand your benefits, compare plans, and track medical expenses in one place.
-                    </motion.p>
+                    </motion.h2>
                     
                     <motion.div 
                         initial={{ opacity: 0, y: 10 }}
