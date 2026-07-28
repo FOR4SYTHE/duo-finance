@@ -5,6 +5,7 @@ import { useCartifyStore, CartifyMode } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { Delete, ChevronRight, Check, ArrowUpDown, ShoppingCart, Zap, ListTodo } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { BorderBeam } from "border-beam";
 
 export function TripSetup() {
     const { startTrip, items, budget, mode, resumeTrip, endTrip } = useCartifyStore();
@@ -65,43 +66,54 @@ export function TripSetup() {
     const hasSavedTrip = items.length > 0 || budget > 0;
 
     return (
-        <div className="flex flex-col w-full min-h-full relative z-20 flex-1 pb-24 pt-2">
+        <div className="flex flex-col w-full min-h-full relative z-20 flex-1 pb-32 pt-2">
             
-            {hasSavedTrip ? (
-                <div className="flex-1 flex flex-col items-center justify-center px-4 relative z-30">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="w-full max-w-[360px] bg-gradient-to-b from-[#1C1C1E] to-[#151516] border border-white/10 rounded-[32px] p-6 shadow-2xl flex flex-col items-center text-center"
+            <AnimatePresence>
+                {hasSavedTrip && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: -20, height: 0 }}
+                        animate={{ opacity: 1, y: 0, height: 'auto' }}
+                        exit={{ opacity: 0, y: -20, height: 0 }}
+                        className="px-4 mb-4"
                     >
-                        <div className="w-16 h-16 rounded-full bg-[#30D158]/10 flex items-center justify-center mb-4 border border-[#30D158]/20">
-                            <ShoppingCart className="w-8 h-8 text-[#30D158]" />
-                        </div>
-                        <h3 className="text-xl font-medium text-white mb-2">Saved Trip Found</h3>
-                        <p className="text-white/50 text-sm mb-6">
-                            You have a {mode === 'planned' ? 'Planned' : 'Quick'} trip in progress with a budget of ₱{budget.toLocaleString()}.
-                        </p>
-                        
-                        <div className="flex flex-col gap-3 w-full">
-                            <button
-                                onClick={resumeTrip}
-                                className="w-full h-14 rounded-full bg-[#30D158] text-black font-semibold text-[16px] tracking-wide flex items-center justify-center hover:bg-[#30D158]/90 active:scale-[0.98] transition-all"
-                            >
-                                Resume Trip
-                            </button>
-                            <button
-                                onClick={endTrip}
-                                className="w-full h-12 rounded-full bg-white/5 text-white/70 font-medium text-[15px] flex items-center justify-center hover:bg-white/10 active:scale-[0.98] transition-all"
-                            >
-                                Discard & Start New
-                            </button>
-                        </div>
+                        <BorderBeam size="pulse-outside" colorVariant="mono" strength={0.7} className="rounded-[24px]">
+                            <div className="relative w-full bg-gradient-to-b from-[#1C1C1E] to-[#111112] border border-white/5 rounded-[24px] p-4 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+                                
+                                <div className="flex items-center gap-3 relative z-10">
+                                    <div className="w-10 h-10 rounded-full bg-[#30D158]/10 flex items-center justify-center border border-[#30D158]/20 shadow-[0_0_15px_rgba(48,209,88,0.1)]">
+                                        <ShoppingCart className="w-5 h-5 text-[#30D158]" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-white/90 text-[14px] font-medium tracking-tight">Saved Trip Available</span>
+                                        <span className="text-white/50 text-[12px] font-medium tracking-wide">
+                                            ₱{budget.toLocaleString()} • {items.length} items
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-2 relative z-10">
+                                    <button 
+                                        onClick={resumeTrip}
+                                        className="px-4 py-2 bg-[#30D158]/10 text-[#30D158] text-[13px] font-bold tracking-wide rounded-full border border-[#30D158]/20 active:scale-95 transition-all hover:bg-[#30D158]/20"
+                                    >
+                                        Resume
+                                    </button>
+                                    <button 
+                                        onClick={endTrip}
+                                        className="w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 text-white/40 rounded-full active:scale-95 hover:bg-white/10 hover:text-white transition-all"
+                                        title="Discard Saved Trip"
+                                    >
+                                        <Delete className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </BorderBeam>
                     </motion.div>
-                </div>
-            ) : (
-                <>
-                    {/* Premium Top Island */}
-            <div className="relative z-20 shrink-0 bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.08] rounded-[40px] p-6 mb-6 shadow-[0_16px_40px_rgba(0,0,0,0.3)] overflow-hidden">
+                )}
+            </AnimatePresence>
+
+            {/* Premium Top Island */}
+            <div className="relative z-20 shrink-0 bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.08] rounded-[40px] p-6 mx-4 mb-6 shadow-[0_16px_40px_rgba(0,0,0,0.3)] overflow-hidden">
                 {/* Elegant glow inside the card */}
                 <div className="absolute -top-24 -left-24 w-56 h-56 bg-[#30D158]/20 rounded-full blur-[60px] pointer-events-none" />
                 <div className="absolute -bottom-24 -right-24 w-56 h-56 bg-[#30D158]/10 rounded-full blur-[60px] pointer-events-none" />
@@ -257,7 +269,7 @@ export function TripSetup() {
                 })}
             </div>
 
-            <div ref={bottomRef} className="mt-auto relative z-30 pb-2 flex justify-center w-full min-h-[96px] items-center">
+            <div ref={bottomRef} className="mt-auto relative z-30 pb-12 flex justify-center w-full min-h-[96px] items-center">
                 <motion.button
                     layout
                     whileTap={{ scale: 0.97 }}
@@ -337,8 +349,6 @@ export function TripSetup() {
                 </motion.button>
             </div>
 
-                </>
-            )}
         </div>
     );
 }
