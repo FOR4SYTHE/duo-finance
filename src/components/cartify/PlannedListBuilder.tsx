@@ -145,11 +145,10 @@ export function PlannedListBuilder({ onRequestExit }: PlannedListBuilderProps = 
             <div className="flex-1 flex flex-col gap-8 px-2 overflow-y-auto overflow-x-hidden no-scrollbar pb-4">
                 {/* Active Items */}
                 <div className="flex flex-col gap-2">
-                    <AnimatePresence mode="popLayout">
+                    <AnimatePresence>
                         {items.map((item, idx) => (
                             <motion.div 
                                 key={item.id}
-                                layout
                                 initial={{ opacity: 0, scale: 0.9, y: 10 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, x: -20 }}

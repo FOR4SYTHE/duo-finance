@@ -613,7 +613,7 @@ export function LiveTripTracker() {
                     </div>
                 </div>
 
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence>
                     {sortedItems.map((item, i) => (
                         <motion.div
                             key={item.id}

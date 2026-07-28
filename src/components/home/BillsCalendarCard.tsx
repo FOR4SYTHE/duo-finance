@@ -23,6 +23,11 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
   const { exchangeRate } = useCurrencyStore();
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [view, setView] = useState<'grid' | 'presentation'>('grid');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const today = useMemo(() => new Date(), []);
   const currentDay = today.getDate();
@@ -180,7 +185,8 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
 
         {/* Carousel Area (Grid vs Presentation) */}
         <div className="relative h-[120px] w-full flex items-center justify-center">
-          <AnimatePresence mode="wait">
+          {mounted && (
+            <AnimatePresence mode="wait">
             {view === 'grid' ? (
               <motion.div
                 key="grid"
@@ -353,7 +359,8 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
+            </AnimatePresence>
+          )}
         </div>
 
         {/* Pagination Dots */}

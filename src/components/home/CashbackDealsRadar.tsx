@@ -51,7 +51,7 @@ const DealCard = ({ deal, index, getBrandColor, getBrandArtwork, handleCopy, cop
           zIndex: index,
         }}
       >
-        <div className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_20px_40px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-row h-[220px]">
+        <div className="bg-[#0A0A0C] border border-white/10 rounded-[32px] p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_20px_40px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-row h-[220px]">
           
           {/* Left Side: Content */}
           <div className="flex flex-col gap-5 flex-1 relative z-20 pr-32">
