@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { CalendarDays, ChevronRight, CheckCircle2 } from "lucide-react";
+import { CalendarDays, ChevronRight, CheckCircle2, ShoppingCart } from "lucide-react";
 import { useBillsStore } from "@/store/useBillsStore";
+import { useHouseholdStore } from "@/store/useHouseholdStore";
+import { useCartifyStore } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { formatCurrency } from "@/lib/format";
 import { BillsCalendar } from "./BillsCalendar";
@@ -11,6 +13,8 @@ import { createPortal } from "react-dom";
 
 export function BillsCalendarCard() {
   const { bills } = useBillsStore();
+  const { scheduledTrips } = useHouseholdStore();
+  const { savedTrips } = useCartifyStore();
   const { exchangeRate } = useCurrencyStore();
   const [showCalendar, setShowCalendar] = useState(false);
   const [view, setView] = useState<'grid' | 'presentation'>('grid');
@@ -30,24 +34,58 @@ export function BillsCalendarCard() {
     return () => clearTimeout(timer);
   }, [view, selectedDate]);
 
+  const allEvents = useMemo(() => {
+    const events: any[] = [...bills.map(b => ({ ...b, eventType: 'bill' }))];
+
+    scheduledTrips.forEach(t => {
+      const d = new Date(t.date);
+      events.push({
+        id: t.id,
+        name: t.storeName ? `Trip to ${t.storeName}` : "Scheduled Trip",
+        amount: t.estimatedBudgetPHP || 0,
+        dueDay: d.getDate(),
+        dueMonth: d.getMonth(),
+        dueYear: d.getFullYear(),
+        category: "Cartify",
+        isRecurring: false,
+        eventType: 'trip',
+        reminderEnabled: true
+      });
+    });
+
+    savedTrips.forEach(t => {
+      const d = new Date(t.date);
+      events.push({
+        id: t.id,
+        name: `Saved Trip`,
+        amount: t.budget,
+        dueDay: d.getDate(),
+        dueMonth: d.getMonth(),
+        dueYear: d.getFullYear(),
+        category: "Cartify",
+        isRecurring: false,
+        eventType: 'trip',
+        reminderEnabled: false
+      });
+    });
+
+    return events;
+  }, [bills, scheduledTrips, savedTrips]);
+
   // Bills due in the next 7 days (used for the header subtitle)
   const upcomingBills = useMemo(() => {
-    return bills
+    return allEvents
       .filter((b) => {
+        // Simple heuristic for upcoming next 7 days (assuming mostly same month or early next month)
         const daysUntil = b.dueDay >= currentDay ? b.dueDay - currentDay : daysInMonth - currentDay + b.dueDay;
-        return daysUntil <= 7;
+        return daysUntil <= 7 && daysUntil >= 0;
       })
       .sort((a, b) => {
         const da = a.dueDay >= currentDay ? a.dueDay - currentDay : daysInMonth - currentDay + a.dueDay;
         const db = b.dueDay >= currentDay ? b.dueDay - currentDay : daysInMonth - currentDay + b.dueDay;
         return da - db;
       });
-  }, [bills, currentDay, daysInMonth]);
-
-  // Days that have bills
-  const billDays = useMemo(() => {
-    return new Set(bills.map((b) => b.dueDay));
-  }, [bills]);
+  }, [allEvents, currentDay, daysInMonth]);
 
   // Mini calendar grid (2 weeks - current week and next week)
   const calendarDays = useMemo(() => {
@@ -59,17 +97,23 @@ export function BillsCalendarCard() {
     for (let i = 0; i < 14; i++) {
       const d = new Date(startOfWeek);
       d.setDate(startOfWeek.getDate() + i);
+      const eventsForDay = allEvents.filter(b => 
+        (b.isRecurring && b.dueDay === d.getDate()) || 
+        (!b.isRecurring && b.dueDay === d.getDate() && b.dueMonth === d.getMonth() && b.dueYear === d.getFullYear())
+      );
+      
       days.push({
         fullDate: d,
         date: d.getDate(),
         month: d.getMonth(),
         year: d.getFullYear(),
         isToday: d.getDate() === today.getDate() && d.getMonth() === today.getMonth(),
-        hasBill: billDays.has(d.getDate())
+        hasBill: eventsForDay.length > 0,
+        eventsForDay
       });
     }
     return days;
-  }, [billDays, today]);
+  }, [allEvents, today]);
 
   const dayLabels = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -80,8 +124,11 @@ export function BillsCalendarCard() {
   const selectedMonthName = selectedDate.toLocaleDateString("en-US", { month: 'short' }).toUpperCase();
   
   const selectedBills = useMemo(() => {
-    return bills.filter(b => b.dueDay === selectedDate.getDate());
-  }, [bills, selectedDate]);
+    return allEvents.filter(b => 
+        (b.isRecurring && b.dueDay === selectedDate.getDate()) ||
+        (!b.isRecurring && b.dueDay === selectedDate.getDate() && b.dueMonth === selectedDate.getMonth() && b.dueYear === selectedDate.getFullYear())
+    );
+  }, [allEvents, selectedDate]);
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
@@ -137,6 +184,20 @@ export function BillsCalendarCard() {
                   {/* Day Cells */}
                   {calendarDays.map((day, i) => {
                     const isSelected = day.date === selectedDate.getDate() && day.month === selectedDate.getMonth();
+                    const hasCartify = day.eventsForDay?.some(b => b.category === "Cartify");
+                    const hasRegular = day.eventsForDay?.some(b => b.category !== "Cartify");
+                    
+                    let bgClass = "bg-[#E5E5E5] text-black font-bold shadow-[0_0_30px_rgba(255,255,255,0.15)]";
+                    if (day.hasBill) {
+                      if (hasCartify && hasRegular) {
+                        bgClass = "bg-[#30D158] text-black font-bold shadow-[0_0_24px_rgba(48,209,88,0.25)] ring-2 ring-[#FF9F0A] ring-offset-2 ring-offset-[#111111]";
+                      } else if (hasCartify) {
+                        bgClass = "bg-[#30D158] text-black font-bold shadow-[0_0_24px_rgba(48,209,88,0.25)]";
+                      } else {
+                        bgClass = "bg-[#FF9F0A] text-black font-bold shadow-[0_0_24px_rgba(255,159,10,0.25)]";
+                      }
+                    }
+
                     return (
                       <div
                         key={i}
@@ -146,22 +207,30 @@ export function BillsCalendarCard() {
                         <div
                           className={`flex flex-col items-center justify-center rounded-full relative transition-all duration-300 ${
                             isSelected
-                              ? day.hasBill
-                                ? "w-[38px] h-[38px] bg-[#FF9F0A] text-black font-bold shadow-[0_0_24px_rgba(255,159,10,0.25)] z-10"
-                                : "w-[38px] h-[38px] bg-[#E5E5E5] text-black font-bold shadow-[0_0_30px_rgba(255,255,255,0.15)] z-10"
+                              ? `w-[38px] h-[38px] z-10 ${bgClass}`
                               : "w-[38px] h-[38px] text-[#A1A1A1] font-medium hover:text-white"
                           }`}
                         >
                           {/* Premium warning beam pulse for selected bills */}
                           {isSelected && day.hasBill && (
-                            <div className="absolute inset-0 rounded-full bg-[#FF9F0A] animate-[ping_2.5s_cubic-bezier(0,0,0.2,1)_infinite] opacity-40 pointer-events-none -z-10" />
+                            <div className={`absolute inset-0 rounded-full animate-[ping_2.5s_cubic-bezier(0,0,0.2,1)_infinite] opacity-40 pointer-events-none -z-10 ${hasCartify ? 'bg-[#30D158]' : 'bg-[#FF9F0A]'}`} />
                           )}
 
-                          <span className="text-[15px] relative z-10">{day.date}</span>
+                          {isSelected && hasCartify ? (
+                            <motion.div 
+                              animate={{ y: [0, -4, 0] }} 
+                              transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }} 
+                              className="relative z-10 flex items-center justify-center"
+                            >
+                              <ShoppingCart className="w-[18px] h-[18px] text-black" strokeWidth={2.5} />
+                            </motion.div>
+                          ) : (
+                            <span className="text-[15px] relative z-10">{day.date}</span>
+                          )}
                           
                           {/* Dot for bill */}
                           {day.hasBill && !isSelected && (
-                            <div className="w-1 h-1 rounded-full absolute bottom-[3px] bg-[#525252]" />
+                            <div className={`w-1 h-1 rounded-full absolute bottom-[3px] ${hasCartify ? 'bg-[#30D158]' : 'bg-[#525252]'}`} />
                           )}
                         </div>
                       </div>

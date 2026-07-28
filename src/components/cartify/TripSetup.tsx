@@ -1,18 +1,27 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useCartifyStore, CartifyMode } from "@/store/useCartifyStore";
+import { useState, useRef, useEffect, useEffect as useIsomorphicLayoutEffect } from "react";
+import { createPortal } from "react-dom";
+import { useCartifyStore, CartifyMode, SavedTrip } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
-import { Delete, ChevronRight, Check, ArrowUpDown, ShoppingCart, Zap, ListTodo } from "lucide-react";
+import { Delete, ChevronRight, Check, ArrowUpDown, ShoppingCart, Zap, ListTodo, Layers } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
+import { SavedTripsSheet } from "./SavedTripsSheet";
 
 export function TripSetup() {
-    const { startTrip, items, budget, mode, resumeTrip, endTrip } = useCartifyStore();
+    const { startTrip, items, budget, mode, resumeTrip, endTrip, savedTrips, resumeSpecificTrip, deleteSavedTrip } = useCartifyStore();
     const { primaryCurrency, exchangeRate, toggleCurrency } = useCurrencyStore();
     const [displayValue, setDisplayValue] = useState("0");
     const [selectedMode, setSelectedMode] = useState<CartifyMode>("simple");
+    const [isSavedTripsOpen, setIsSavedTripsOpen] = useState(false);
+    const [showStartPrompt, setShowStartPrompt] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const isPhpPrimary = primaryCurrency === 'PHP';
     const targetCurrency = isPhpPrimary ? 'ZAR' : 'PHP';
@@ -52,8 +61,17 @@ export function TripSetup() {
 
     const handleConfirm = () => {
         if (phpBudget > 0) {
-            startTrip(phpBudget, selectedMode);
+            if (savedTrips && savedTrips.length > 0) {
+                setShowStartPrompt(true);
+            } else {
+                startTrip(phpBudget, selectedMode);
+            }
         }
+    };
+
+    const proceedWithNewTrip = () => {
+        setShowStartPrompt(false);
+        startTrip(phpBudget, selectedMode);
     };
 
     const buttons = [
@@ -63,13 +81,14 @@ export function TripSetup() {
         { label: ".", type: "num" }, { label: "0", type: "num" }, { label: "⌫", type: "meta" },
     ];
 
-    const hasSavedTrip = items.length > 0 || budget > 0;
+    const hasSavedTrip = savedTrips && savedTrips.length > 0;
+    const isMultipleSaved = savedTrips && savedTrips.length > 1;
 
     return (
         <div className="flex flex-col w-full min-h-full relative z-20 flex-1 pb-32 pt-2">
             
             <AnimatePresence>
-                {hasSavedTrip && (
+                {hasSavedTrip && !isMultipleSaved && (
                     <motion.div 
                         initial={{ opacity: 0, y: -20, height: 0 }}
                         animate={{ opacity: 1, y: 0, height: 'auto' }}
@@ -86,20 +105,20 @@ export function TripSetup() {
                                     <div className="flex flex-col">
                                         <span className="text-white/90 text-[14px] font-medium tracking-tight">Saved Trip Available</span>
                                         <span className="text-white/50 text-[12px] font-medium tracking-wide">
-                                            ₱{budget.toLocaleString()} • {items.length} items
+                                            ₱{savedTrips[0].budget.toLocaleString()} • {savedTrips[0].items.length} items
                                         </span>
                                     </div>
                                 </div>
                                 
                                 <div className="flex items-center gap-2 relative z-10">
                                     <button 
-                                        onClick={resumeTrip}
+                                        onClick={() => resumeSpecificTrip(savedTrips[0].id)}
                                         className="px-4 py-2 bg-[#30D158]/10 text-[#30D158] text-[13px] font-bold tracking-wide rounded-full border border-[#30D158]/20 active:scale-95 transition-all hover:bg-[#30D158]/20"
                                     >
                                         Resume
                                     </button>
                                     <button 
-                                        onClick={endTrip}
+                                        onClick={() => deleteSavedTrip(savedTrips[0].id)}
                                         className="w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 text-white/40 rounded-full active:scale-95 hover:bg-white/10 hover:text-white transition-all"
                                         title="Discard Saved Trip"
                                     >
@@ -107,6 +126,43 @@ export function TripSetup() {
                                     </button>
                                 </div>
                             </div>
+                        </BorderBeam>
+                    </motion.div>
+                )}
+
+                {isMultipleSaved && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: -20, height: 0 }}
+                        animate={{ opacity: 1, y: 0, height: 'auto' }}
+                        exit={{ opacity: 0, y: -20, height: 0 }}
+                        className="px-4 mb-4 relative"
+                    >
+                        {/* Visual Stack Elements */}
+                        <div className="absolute top-0 left-6 right-6 h-full bg-[#1C1C1E]/50 border border-white/5 rounded-[24px] translate-y-2 scale-[0.96] shadow-lg pointer-events-none" />
+                        <div className="absolute top-0 left-8 right-8 h-full bg-[#1C1C1E]/30 border border-white/5 rounded-[24px] translate-y-4 scale-[0.92] shadow-sm pointer-events-none" />
+
+                        <BorderBeam size="pulse-outside" colorVariant="mono" strength={0.7} className="rounded-[24px]">
+                            <button 
+                                onClick={() => setIsSavedTripsOpen(true)}
+                                className="relative w-full bg-gradient-to-b from-[#1C1C1E] to-[#111112] border border-white/5 rounded-[24px] p-4 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)] text-left group active:scale-[0.98] transition-all"
+                            >
+                                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors rounded-[24px]" />
+                                <div className="flex items-center gap-3 relative z-10">
+                                    <div className="w-10 h-10 rounded-full bg-[#30D158]/10 flex items-center justify-center border border-[#30D158]/20 shadow-[0_0_15px_rgba(48,209,88,0.1)]">
+                                        <Layers className="w-5 h-5 text-[#30D158]" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-white/90 text-[14px] font-medium tracking-tight">{savedTrips.length} Saved Trips Available</span>
+                                        <span className="text-[#30D158] text-[12px] font-medium tracking-wide">
+                                            Tap to view and resume
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center relative z-10 group-hover:bg-white/10 transition-colors">
+                                    <ChevronRight className="w-4 h-4 text-white/50" />
+                                </div>
+                            </button>
                         </BorderBeam>
                     </motion.div>
                 )}
@@ -349,6 +405,66 @@ export function TripSetup() {
                 </motion.button>
             </div>
 
+            <SavedTripsSheet 
+                isOpen={isSavedTripsOpen}
+                onClose={() => setIsSavedTripsOpen(false)}
+            />
+
+            {/* Start New Trip Prompt Modal */}
+            {mounted && createPortal(
+                <AnimatePresence>
+                    {showStartPrompt && (
+                        <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-auto p-4">
+                            <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setShowStartPrompt(false)}
+                                className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+                            />
+                            
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                transition={{ type: "spring", damping: 25, stiffness: 400 }}
+                                className="relative w-full max-w-[340px] bg-[#1C1C1E] border border-white/10 rounded-[32px] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)] overflow-hidden"
+                            >
+                                {/* Glow */}
+                                <div className="absolute -top-12 -right-12 w-32 h-32 bg-[#30D158]/20 rounded-full blur-[40px] pointer-events-none" />
+
+                                <div className="w-12 h-12 rounded-full bg-[#30D158]/10 flex items-center justify-center border border-[#30D158]/20 mb-5 shadow-[0_0_15px_rgba(48,209,88,0.15)] relative z-10">
+                                    <Layers className="w-6 h-6 text-[#30D158]" />
+                                </div>
+                                
+                                <h3 className="text-xl font-bold text-white tracking-tight mb-2 relative z-10">Saved Trips Available</h3>
+                                <p className="text-white/60 text-[14px] leading-relaxed mb-8 relative z-10">
+                                    You still have trips saved for later. Would you like to start a new trip or visit your saved list?
+                                </p>
+                                
+                                <div className="flex flex-col gap-3 relative z-10">
+                                    <button 
+                                        onClick={() => {
+                                            setShowStartPrompt(false);
+                                            setIsSavedTripsOpen(true);
+                                        }}
+                                        className="w-full py-4 rounded-[18px] bg-white/5 border border-white/10 text-white font-semibold tracking-wide active:scale-[0.98] transition-all hover:bg-white/10"
+                                    >
+                                        View Saved Trips
+                                    </button>
+                                    <button 
+                                        onClick={proceedWithNewTrip}
+                                        className="w-full py-4 rounded-[18px] bg-[#30D158] text-black font-bold tracking-wide active:scale-[0.98] transition-all hover:bg-[#30D158]/90 shadow-[0_0_20px_rgba(48,209,88,0.2)]"
+                                    >
+                                        Start New Trip
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </div>
     );
 }

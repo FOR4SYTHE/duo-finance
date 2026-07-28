@@ -4,6 +4,14 @@ import { CartifyItem } from '@/types/finance';
 
 export type CartifyMode = 'simple' | 'planned';
 
+export interface SavedTrip {
+    id: string;
+    date: string; // ISO string
+    budget: number;
+    mode: CartifyMode;
+    items: CartifyItem[];
+}
+
 interface CartifyState {
     isActive: boolean;
     isBuildingList: boolean;
@@ -12,13 +20,16 @@ interface CartifyState {
     items: CartifyItem[];
     activeCategory: string | null;
     isReceiptView: boolean;
+    savedTrips: SavedTrip[];
     
     // Actions
     startTrip: (budget: number, mode: CartifyMode) => void;
     finishBuildingList: () => void;
     resumeBuildingList: () => void;
     saveForLater: () => void;
-    resumeTrip: () => void;
+    resumeTrip: () => void; // Resumes the single active trip (for backward compatibility if needed)
+    resumeSpecificTrip: (id: string) => void;
+    deleteSavedTrip: (id: string) => void;
     endTrip: () => void;
     showReceipt: () => void;
     hideReceipt: () => void;
@@ -52,6 +63,7 @@ export const useCartifyStore = create<CartifyState>()(
             items: [],
             activeCategory: null,
             isReceiptView: false,
+            savedTrips: [],
 
             startTrip: (budget, mode) => set({ 
                 isActive: true, 
@@ -65,8 +77,53 @@ export const useCartifyStore = create<CartifyState>()(
             finishBuildingList: () => set({ isBuildingList: false }),
             resumeBuildingList: () => set({ isBuildingList: true }),
             
-            saveForLater: () => set({ isActive: false }),
+            saveForLater: () => {
+                const state = get();
+                if (state.budget > 0 || state.items.length > 0) {
+                    const newSavedTrip: SavedTrip = {
+                        id: `cartify-${Date.now()}`,
+                        date: new Date().toISOString(),
+                        budget: state.budget,
+                        mode: state.mode,
+                        items: state.items
+                    };
+                    set({ 
+                        savedTrips: [newSavedTrip, ...state.savedTrips],
+                        isActive: false,
+                        isBuildingList: false,
+                        budget: 0,
+                        mode: 'simple',
+                        items: [],
+                        activeCategory: null,
+                        isReceiptView: false
+                    });
+                } else {
+                    set({ isActive: false });
+                }
+            },
+            
             resumeTrip: () => set({ isActive: true }),
+            
+            resumeSpecificTrip: (id) => {
+                const state = get();
+                const tripToResume = state.savedTrips.find(t => t.id === id);
+                if (tripToResume) {
+                    set({
+                        isActive: true,
+                        isBuildingList: false,
+                        budget: tripToResume.budget,
+                        mode: tripToResume.mode,
+                        items: tripToResume.items,
+                        savedTrips: state.savedTrips.filter(t => t.id !== id)
+                    });
+                }
+            },
+            
+            deleteSavedTrip: (id) => {
+                set((state) => ({
+                    savedTrips: state.savedTrips.filter(t => t.id !== id)
+                }));
+            },
 
             endTrip: () => set({ 
                 isActive: false, 

@@ -19,9 +19,12 @@ import {
   Car,
   HeartPulse,
   CreditCard,
+  ShoppingCart,
   LucideIcon
 } from "lucide-react";
 import { useBillsStore, Bill } from "@/store/useBillsStore";
+import { useHouseholdStore } from "@/store/useHouseholdStore";
+import { useCartifyStore } from "@/store/useCartifyStore";
 import { formatCurrency } from "@/lib/format";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -44,6 +47,7 @@ const getCategoryArt = (category: string): { icon: LucideIcon; color: string; gl
     case "Education": return { icon: BookOpen, color: "bg-[#BF5AF2]", glow: "bg-[#BF5AF2]" };
     case "Transportation": return { icon: Car, color: "bg-[#64D2FF]", glow: "bg-[#64D2FF]" };
     case "Health": return { icon: HeartPulse, color: "bg-[#FF375F]", glow: "bg-[#FF375F]" };
+    case "Cartify": return { icon: ShoppingCart, color: "bg-[#30D158]", glow: "bg-[#30D158]" };
     default: return { icon: CreditCard, color: "bg-white/90", glow: "bg-white/40" };
   }
 };
@@ -54,6 +58,8 @@ interface BillsCalendarProps {
 
 export function BillsCalendar({ onClose }: BillsCalendarProps) {
   const { bills, addBill, updateBill, removeBill, toggleReminder } = useBillsStore();
+  const { scheduledTrips, deleteScheduledTrip } = useHouseholdStore();
+  const { savedTrips, deleteSavedTrip } = useCartifyStore();
   const now = new Date();
   const [viewMonth, setViewMonth] = useState(now.getMonth());
   const [viewYear, setViewYear] = useState(now.getFullYear());
@@ -76,16 +82,56 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
     return days;
   }, [firstDayOfWeek, daysInMonth]);
 
-  const billsByDay = useMemo(() => {
-    const map: Record<number, Bill[]> = {};
-    bills.forEach((b) => {
+  const allEvents = useMemo(() => {
+    const events: any[] = [...bills.map(b => ({ ...b, eventType: 'bill' }))];
+
+    scheduledTrips.forEach(t => {
+      const d = new Date(t.date);
+      if (d.getMonth() === viewMonth && d.getFullYear() === viewYear) {
+        events.push({
+          id: t.id,
+          name: t.storeName ? `Trip to ${t.storeName}` : "Scheduled Trip",
+          amount: t.estimatedBudgetPHP || 0,
+          dueDay: d.getDate(),
+          category: "Cartify",
+          isRecurring: false,
+          eventType: 'trip',
+          tripType: 'scheduled',
+          reminderEnabled: true
+        });
+      }
+    });
+
+    savedTrips.forEach(t => {
+      const d = new Date(t.date);
+      if (d.getMonth() === viewMonth && d.getFullYear() === viewYear) {
+        events.push({
+          id: t.id,
+          name: `Saved Trip`,
+          amount: t.budget,
+          dueDay: d.getDate(),
+          category: "Cartify",
+          isRecurring: false,
+          eventType: 'trip',
+          tripType: 'saved',
+          reminderEnabled: false
+        });
+      }
+    });
+
+    return events;
+  }, [bills, scheduledTrips, savedTrips, viewMonth, viewYear]);
+
+  const eventsByDay = useMemo(() => {
+    const map: Record<number, any[]> = {};
+    allEvents.forEach((b) => {
       if (!map[b.dueDay]) map[b.dueDay] = [];
       map[b.dueDay].push(b);
     });
     return map;
-  }, [bills]);
+  }, [allEvents]);
 
-  const selectedDayBills = selectedDay ? billsByDay[selectedDay] || [] : [];
+  const selectedDayBills = selectedDay ? eventsByDay[selectedDay] || [] : [];
 
   const handlePrevMonth = () => {
     if (viewMonth === 0) {
@@ -189,14 +235,24 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
             {/* Day cells */}
             <div className="grid grid-cols-7 gap-1.5">
               {calendarDays.map((day, i) => {
-                const billsForDay = day ? billsByDay[day] : [];
+                const billsForDay = day ? eventsByDay[day] : [];
                 const hasBills = billsForDay && billsForDay.length > 0;
                 const isSelected = day === selectedDay;
                 const todayFlag = day && isToday(day);
 
                 let art = null;
+                let hasCartify = false;
+                let hasRegularBill = false;
+                
                 if (hasBills) {
-                  art = getCategoryArt(billsForDay[0].category);
+                  const cartifyBill = billsForDay.find(b => b.category === "Cartify");
+                  if (cartifyBill) {
+                     hasCartify = true;
+                     art = getCategoryArt("Cartify");
+                     hasRegularBill = billsForDay.some(b => b.category !== "Cartify");
+                  } else {
+                     art = getCategoryArt(billsForDay[0].category);
+                  }
                 }
 
                 return (
@@ -204,7 +260,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                     key={i}
                     onClick={() => day && setSelectedDay(day)}
                     disabled={!day}
-                    className={`aspect-square rounded-full flex flex-col items-center justify-center relative transition-transform duration-300 ${
+                    className={`w-10 h-10 mx-auto rounded-full flex flex-col items-center justify-center relative transition-transform duration-300 ${
                       isSelected ? "scale-110 shadow-[0_4px_16px_rgba(255,255,255,0.15)] z-10" : "active:scale-90"
                     } ${
                       !day
@@ -214,14 +270,25 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                         : todayFlag
                         ? "bg-white/15 text-white font-bold border border-white/30"
                         : "text-white/60 hover:bg-white/[0.06] font-medium"
-                    }`}
+                    } ${hasCartify && hasRegularBill ? "ring-2 ring-[#FF9F0A] ring-offset-2 ring-offset-[#050505]" : ""}`}
                   >
                     {day && hasBills && art ? (
                       <div className="relative w-full h-full flex items-center justify-center">
                         <span className="absolute top-1.5 text-center text-[9px] font-black opacity-60">
                           {day}
                         </span>
-                        <art.icon className="w-[18px] h-[18px] mt-2 opacity-90" strokeWidth={2.5} />
+                        
+                        {hasCartify ? (
+                          <motion.div
+                            animate={{ y: [0, -4, 0] }}
+                            transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }}
+                          >
+                            <art.icon className="w-[18px] h-[18px] mt-2 opacity-90" strokeWidth={2.5} />
+                          </motion.div>
+                        ) : (
+                          <art.icon className="w-[18px] h-[18px] mt-2 opacity-90" strokeWidth={2.5} />
+                        )}
+                        
                         {billsForDay.length > 1 && (
                           <div className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full text-white text-[9px] font-bold flex items-center justify-center border border-white/20 shadow-md">
                             {billsForDay.length}
@@ -295,7 +362,17 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                                 )}
                               </button>
                               <button
-                                onClick={() => removeBill(bill.id)}
+                                onClick={() => {
+                                  if (bill.eventType === 'trip') {
+                                    if (bill.tripType === 'scheduled') {
+                                      deleteScheduledTrip(bill.id);
+                                    } else {
+                                      deleteSavedTrip(bill.id);
+                                    }
+                                  } else {
+                                    removeBill(bill.id);
+                                  }
+                                }}
                                 className="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center hover:bg-[#FF453A]/20 transition-colors border border-white/5"
                               >
                                 <Trash2 className="w-3.5 h-3.5 text-white/30 hover:text-[#FF453A]" />
@@ -432,7 +509,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
               All Recurring Bills
             </h3>
             <div className="flex flex-col gap-3">
-              {bills.map((bill) => {
+              {allEvents.filter(e => e.isRecurring || e.eventType === 'trip').map((bill) => {
                 const art = getCategoryArt(bill.category);
                 return (
                   <div
@@ -461,7 +538,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                     <div className="flex items-end justify-between mt-5 relative z-10">
                       <span className="text-[26px] font-black text-white tracking-tighter leading-none">₱{formatCurrency(bill.amount)}</span>
                       <div className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest bg-white/10 text-white/90 border border-white/5`}>
-                        Scheduled
+                        {bill.eventType === 'trip' ? (bill.tripType === 'scheduled' ? 'Scheduled Trip' : 'Saved Trip') : 'Scheduled'}
                       </div>
                     </div>
                   </div>
