@@ -13,7 +13,7 @@ import { useCurrencyStore } from "@/store/useCurrencyStore";
 export default function ProfilePage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const { user, partner, householdId, toggleMockPartner, logout } = useAuthStore();
+  const { user, partner, householdId, toggleMockPartner, logout, joinHousehold } = useAuthStore();
   const { primaryCurrency, setPrimaryCurrency, exchangeRate } = useCurrencyStore();
   const [copied, setCopied] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -146,6 +146,44 @@ export default function ProfilePage() {
                 {!isEditingAvatar && <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />}
               </div>
               
+              {/* Partner Floating Bubble (Lava Lamp) */}
+              {partner && !isEditingAvatar && (
+                <motion.div 
+                  className="absolute -top-1 -right-2 z-20 pointer-events-none"
+                  initial={{ y: 0 }}
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <div className="relative">
+                    {/* Main Partner Avatar */}
+                    <div className="w-[42px] h-[42px] rounded-full border-[2.5px] border-[#0A0A0C] shadow-[0_8px_16px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden z-10 relative bg-[#D73A27]">
+                       <img src="https://i.pravatar.cc/150?u=sarah" className="w-full h-full object-cover" />
+                    </div>
+                    {/* Floating Premium Bubbles */}
+                    <motion.div 
+                      className="absolute -top-1.5 -left-1.5 w-3 h-3 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)] border-[1px] border-[#0A0A0C]"
+                      animate={{ y: [0, -3, 0], x: [0, -1, 0] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+                    />
+                    <motion.div 
+                      className="absolute top-1 -left-3 w-2 h-2 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] border-[1px] border-[#0A0A0C]"
+                      animate={{ y: [0, -2, 0], x: [0, -2, 0] }}
+                      transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                    />
+                    <motion.div 
+                      className="absolute -bottom-1 -right-1.5 w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] border-[1px] border-[#0A0A0C]"
+                      animate={{ y: [0, 2, 0], x: [0, 1, 0] }}
+                      transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
+                    />
+                    <motion.div 
+                      className="absolute bottom-2 -right-2.5 w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] border-[1px] border-[#0A0A0C]"
+                      animate={{ y: [0, 3, 0], x: [0, 2, 0] }}
+                      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.7 }}
+                    />
+                  </div>
+                </motion.div>
+              )}
+              
               {/* Camera Edit Icon */}
               {!isEditingAvatar && (
                 <div 
@@ -184,16 +222,7 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Partner Avatar (Overlapping) */}
-            {partner && (
-              <motion.div 
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                className="relative z-0 -ml-6 w-[84px] h-[84px] rounded-full bg-gradient-to-b from-[#1C1C1E] to-[#121214] border-[0.5px] border-white/10 flex items-center justify-center shadow-[0_12px_24px_rgba(0,0,0,0.6)] opacity-95"
-              >
-                <span className="text-white/80 text-[28px] font-medium tracking-tight">{partner.name[0].toUpperCase()}</span>
-              </motion.div>
-            )}
+            {/* Old Partner Avatar removed to use the floating bubble instead */}
           </div>
 
           <h2 className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1">
@@ -203,9 +232,24 @@ export default function ProfilePage() {
           
           {/* Status / Invite Pill inside the header */}
           {partner ? (
-            <div className="px-5 py-2.5 bg-black/40 border-[0.5px] border-[#30D158]/20 rounded-full flex items-center gap-2.5 shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md">
-              <div className="w-2 h-2 rounded-full bg-[#30D158] shadow-[0_0_8px_#30D158]" />
-              <span className="text-[#30D158] font-bold text-[11px] tracking-[0.1em] uppercase">Partnership Active</span>
+            <div className="flex flex-col items-center gap-4">
+              <div className="px-4 py-2 bg-[#0A0A0C] border border-[#30D158]/20 rounded-full flex items-center gap-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.5)] backdrop-blur-md">
+                <div className="relative flex items-center justify-center">
+                   <div className="absolute w-4 h-4 bg-[#30D158]/20 rounded-full blur-[3px]" />
+                   <div className="relative w-1.5 h-1.5 rounded-full bg-[#30D158]" />
+                </div>
+                <span className="text-[#30D158] font-bold text-[10px] tracking-[0.12em] uppercase pt-[1px]">Partnership Active</span>
+              </div>
+              
+              {/* Dev: Reset Trigger */}
+              <button 
+                onClick={() => {
+                  useAuthStore.getState().leaveHousehold();
+                }}
+                className="text-[10px] text-white/30 border border-white/10 px-3 py-1 rounded-full hover:text-white/70"
+              >
+                Dev: Reset Partnership
+              </button>
             </div>
           ) : (
             <div className="w-full max-w-[280px] flex flex-col gap-2 items-center">
@@ -317,7 +361,7 @@ export default function ProfilePage() {
           <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Primary Currency</h3>
           <div className="bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-full p-1.5 mb-3 flex relative shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
             <div className="absolute inset-y-1.5 w-[calc(50%-6px)] bg-[#2A2A2C] rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] border-[0.5px] border-white/5" 
-                style={{ left: primaryCurrency === 'PHP' ? '6px' : 'calc(50% + 6px)' }} 
+                style={{ left: primaryCurrency === 'PHP' ? '6px' : '50%' }} 
             />
             <button 
               onClick={() => setPrimaryCurrency('PHP')}
@@ -557,6 +601,7 @@ export default function ProfilePage() {
               <motion.button
                 initial={{ opacity: 0, scale: 0.9, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 1.5, type: "spring", bounce: 0.4 }}
                 onClick={() => {
+                  joinHousehold("8K9P2X");
                   setJoinStep('idle');
                 }}
                 className="w-full max-w-[320px] mx-auto py-3.5 bg-[#D1D1D3] text-[#111111] rounded-full font-semibold text-[15px] hover:bg-[#E5E5E5] active:scale-[0.97] transition-all flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),0_4px_20px_rgba(0,0,0,0.4)]"
