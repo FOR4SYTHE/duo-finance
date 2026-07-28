@@ -65,7 +65,7 @@ export default function ProfilePage() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-[100dvh] w-full bg-[#030303] text-white font-sans selection:bg-white/10 flex flex-col relative overflow-y-auto no-scrollbar pb-12">
+    <div className="w-full h-full bg-[#000000] text-white font-sans selection:bg-white/10 flex flex-col relative pb-4">
       
       {/* Background WebGL Shader (Subtle Animating Orbs) */}
       <div className="fixed inset-0 z-0 pointer-events-none opacity-60">
@@ -76,30 +76,36 @@ export default function ProfilePage() {
       <div className="fixed inset-0 z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.04] pointer-events-none mix-blend-overlay" />
 
       {/* Top Dynamic Island / Header Block */}
-      <div className="relative shrink-0 bg-[#0A0A0C] rounded-b-[44px] pb-10 pt-14 px-6 shadow-[0_24px_48px_rgba(0,0,0,0.8)] border-b border-white/5 z-20 overflow-hidden">
+      <motion.div 
+        layout
+        transition={{ type: "spring", bounce: 0, duration: 0.5 }}
+        className="relative shrink-0 bg-[#0A0A0C] rounded-b-[44px] pb-10 pt-14 px-6 shadow-[0_24px_48px_rgba(0,0,0,0.8)] border-b border-white/5 z-20 overflow-hidden"
+      >
         {/* Inner ambient light & noise */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none z-0" />
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay pointer-events-none z-0" />
         
         {/* Navigation */}
-        <div className="flex items-center justify-between mb-6 relative z-10">
-          <button 
+        <motion.div layout className="flex items-center justify-between mb-6 relative z-10">
+          <motion.button 
+            layout
             onClick={() => router.back()}
             className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors backdrop-blur-md shadow-sm border-[0.5px] border-white/5"
           >
             <ChevronLeft className="w-6 h-6 pr-0.5" />
-          </button>
-          <div 
+          </motion.button>
+          <motion.div 
+            layout
             onClick={() => document.getElementById('settings-section')?.scrollIntoView({ behavior: 'smooth' })}
             className="w-10 h-10 flex items-center justify-center text-white/50 hover:text-white transition-colors cursor-pointer bg-white/5 rounded-full backdrop-blur-sm border-[0.5px] border-white/5"
           >
              <Settings className="w-5 h-5" />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Interconnected Avatars & Info */}
-        <div className="flex flex-col items-center justify-center relative z-10">
-          <div className="flex items-center justify-center mb-6">
+        <motion.div layout className="flex flex-col items-center justify-center relative z-10">
+          <motion.div layout className="flex items-center justify-center mb-6">
             {/* Hidden File Input */}
             <input 
               type="file" 
@@ -109,8 +115,8 @@ export default function ProfilePage() {
               className="hidden" 
             />
             {/* User Avatar Container */}
-            <div className="relative z-10 flex flex-col items-center">
-              <div 
+            <motion.div layout className="relative z-10 flex flex-col items-center">
+              <motion.div layout
                 className="w-[92px] h-[92px] rounded-full bg-gradient-to-b from-[#2A2A2C] to-[#1A1A1C] border-[0.5px] border-white/20 flex items-center justify-center shadow-[0_12px_24px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.1)] overflow-hidden relative cursor-pointer group touch-none"
                 onClick={(e) => {
                   if (!isEditingAvatar) fileInputRef.current?.click();
@@ -144,7 +150,7 @@ export default function ProfilePage() {
                 )}
                 {/* Subtle dark overlay on hover */}
                 {!isEditingAvatar && <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />}
-              </div>
+              </motion.div>
               
               {/* Partner Floating Bubble (Lava Lamp) */}
               {partner && !isEditingAvatar && (
@@ -220,15 +226,15 @@ export default function ProfilePage() {
                   </button>
                 </div>
               )}
-            </div>
+            </motion.div>
 
             {/* Old Partner Avatar removed to use the floating bubble instead */}
-          </div>
+          </motion.div>
 
-          <h2 className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1">
+          <motion.h2 layout className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1">
             {user?.name || 'You'} {partner ? `& ${partner.name}` : ''}
-          </h2>
-          <p className="text-[14px] text-white/50 mb-7 font-medium">{user?.email || 'user@example.com'}</p>
+          </motion.h2>
+          <motion.p layout className="text-[14px] text-white/50 mb-7 font-medium">{user?.email || 'user@example.com'}</motion.p>
           
           {/* Status / Invite Pill inside the header */}
           {partner ? (
@@ -253,102 +259,137 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className="w-full max-w-[280px] flex flex-col gap-2 items-center">
-              {joinStep === 'input' || joinStep === 'verifying' ? (
-                <motion.div layoutId="join-box" className="w-full flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <BorderBeam size="line" colorVariant="colorful">
-                    <div className="w-full bg-[#121214] rounded-[20px] p-1.5 border-[0.5px] border-white/10 flex items-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md transition-colors relative overflow-hidden">
-                      <input 
-                        type="text" 
-                        placeholder="ENTER 6-DIGIT CODE" 
-                        className="bg-transparent flex-1 text-white font-mono text-[14px] px-3 outline-none placeholder:text-white/20 tracking-widest uppercase"
-                        maxLength={6}
-                        disabled={joinStep === 'verifying'}
-                      />
-                      <button 
-                        onClick={handleJoinClick}
-                        disabled={joinStep === 'verifying'}
-                        className="relative px-5 py-2 bg-[#232325] rounded-[12px] text-white/90 font-medium text-[13px] hover:bg-[#2C2C2F] active:scale-95 transition-all overflow-hidden flex items-center justify-center min-w-[64px] h-[34px]"
-                      >
-                        <AnimatePresence mode="wait">
-                          {joinStep === 'verifying' ? (
-                            <motion.div key="orb" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.2 }}>
-                               <ThinkingOrb state="working" size={20} />
-                            </motion.div>
-                          ) : (
-                            <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                              Join
-                            </motion.span>
-                          )}
-                        </AnimatePresence>
-                      </button>
-                    </div>
-                  </BorderBeam>
-                  <button 
-                    onClick={() => setJoinStep('idle')}
-                    className="text-white/40 text-[11px] font-medium tracking-wide hover:text-white/70 transition-colors py-1"
-                    disabled={joinStep === 'verifying'}
-                  >
-                    Cancel
-                  </button>
-                </motion.div>
-              ) : joinStep === 'matched' ? (
-                <motion.div layoutId="join-box" className="flex items-center justify-center w-full py-4">
+              <AnimatePresence mode="popLayout">
+                {joinStep === 'input' || joinStep === 'verifying' ? (
                   <motion.div 
-                    initial={{ width: 48, height: 48, borderRadius: 24, opacity: 0 }}
-                    animate={{ width: 200, height: 48, borderRadius: 24, opacity: 1 }}
-                    transition={{ type: "spring", bounce: 0.35, duration: 0.7 }}
-                    className="bg-black flex items-center justify-start overflow-hidden relative shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+                    key="input-state"
+                    layout
+                    initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="w-full flex flex-col gap-2"
                   >
-                     <div className="w-[50px] h-[48px] flex-shrink-0 flex items-center justify-center">
-                        <motion.svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#30D158" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          {/* Face ID Broken Square (Apple Style) */}
-                          <motion.path d="M8 3H5a2 2 0 0 0-2 2v3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
-                          <motion.path d="M16 3h3a2 2 0 0 1 2 2v3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
-                          <motion.path d="M8 21H5a2 2 0 0 1-2-2v-3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
-                          <motion.path d="M16 21h3a2 2 0 0 0 2-2v-3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
-                          {/* Face Center */}
-                          <motion.path d="M8.5 10h.01M15.5 10h.01" strokeWidth="3" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5, type: "spring", bounce: 0.6 }} />
-                          <motion.path d="M9 14c1 1.5 3 1.5 4 0" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.6, duration: 0.3 }} />
-                          <motion.path d="M12 10v1.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.55, duration: 0.2 }} />
-                        </motion.svg>
-                     </div>
-                     <motion.span 
-                       initial={{ opacity: 0, x: -5 }}
-                       animate={{ opacity: 1, x: 0 }}
-                       transition={{ delay: 0.45, duration: 0.4 }}
-                       className="text-[#30D158] text-[12px] font-bold tracking-[0.12em] whitespace-nowrap"
-                     >
-                       PARTNER FOUND
-                     </motion.span>
-                  </motion.div>
-                </motion.div>
-              ) : joinStep === 'welcome' ? null : (
-                <div className="w-full flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <BorderBeam size="line" colorVariant="colorful">
-                    <div className="w-full bg-[#121214] rounded-[20px] p-3 border-[0.5px] border-white/5 flex items-center justify-between shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md">
-                      <div className="flex flex-col pl-3">
-                          <span className="text-white/40 text-[9px] uppercase tracking-[0.1em] font-bold mb-0.5">Household Code</span>
-                          <span className="text-white font-mono text-[16px] tracking-[0.15em] font-medium opacity-90">{mockInviteCode}</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <button onClick={handleCopyCode} className="w-11 h-11 bg-[#1C1C1E] hover:bg-white/10 rounded-xl border-[0.5px] border-white/5 flex items-center justify-center transition-colors shadow-sm">
-                          {copied ? <CheckCircle2 className="w-5 h-5 text-[#30D158]" /> : <Copy className="w-5 h-5 text-white/60" />}
+                    <BorderBeam size="line" colorVariant="colorful">
+                      <div className="w-full bg-[#121214] rounded-[20px] p-1.5 border-[0.5px] border-white/10 flex items-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md transition-colors relative overflow-hidden">
+                        <input 
+                          type="text" 
+                          placeholder="ENTER 6-DIGIT CODE" 
+                          className="bg-transparent flex-1 text-white font-mono text-[14px] px-3 outline-none placeholder:text-white/20 tracking-widest uppercase"
+                          maxLength={6}
+                          disabled={joinStep === 'verifying'}
+                        />
+                        <button 
+                          onClick={handleJoinClick}
+                          disabled={joinStep === 'verifying'}
+                          className="relative px-5 py-2 bg-[#232325] rounded-[12px] text-white/90 font-medium text-[13px] hover:bg-[#2C2C2F] active:scale-95 transition-all overflow-hidden flex items-center justify-center min-w-[64px] h-[34px]"
+                        >
+                          <AnimatePresence mode="wait">
+                            {joinStep === 'verifying' ? (
+                              <motion.div key="orb" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.2 }}>
+                                 <ThinkingOrb state="working" size={20} />
+                              </motion.div>
+                            ) : (
+                              <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                                Join
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
                         </button>
                       </div>
-                    </div>
-                  </BorderBeam>
-                  <button 
-                    onClick={() => setJoinStep('input')}
-                    className="text-white/40 text-[11px] font-medium tracking-wide hover:text-white/70 transition-colors py-1"
+                    </BorderBeam>
+                    <button 
+                      onClick={() => setJoinStep('idle')}
+                      className="text-white/40 text-[11px] font-medium tracking-wide hover:text-white/70 transition-colors py-1"
+                      disabled={joinStep === 'verifying'}
+                    >
+                      Cancel
+                    </button>
+                  </motion.div>
+                ) : joinStep === 'matched' ? (
+                  <motion.div 
+                    key="matched-state"
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex items-center justify-center w-full py-4"
                   >
-                    Have an invite code? Join Partner
-                  </button>
-                </div>
-              )}
+                    <motion.div 
+                      initial={{ width: 48, height: 48, borderRadius: 24, opacity: 0 }}
+                      animate={{ width: 200, height: 48, borderRadius: 24, opacity: 1 }}
+                      transition={{ type: "spring", bounce: 0.35, duration: 0.7 }}
+                      className="bg-black flex items-center justify-start overflow-hidden relative shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+                    >
+                       <div className="w-[50px] h-[48px] flex-shrink-0 flex items-center justify-center">
+                          <motion.svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#30D158" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            {/* Face ID Broken Square (Apple Style) */}
+                            <motion.path d="M8 3H5a2 2 0 0 0-2 2v3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
+                            <motion.path d="M16 3h3a2 2 0 0 1 2 2v3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
+                            <motion.path d="M8 21H5a2 2 0 0 1-2-2v-3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
+                            <motion.path d="M16 21h3a2 2 0 0 0 2-2v-3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
+                            {/* Face Center */}
+                            <motion.path d="M8.5 10h.01M15.5 10h.01" strokeWidth="3" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5, type: "spring", bounce: 0.6 }} />
+                            <motion.path d="M9 14c1 1.5 3 1.5 4 0" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.6, duration: 0.3 }} />
+                            <motion.path d="M12 10v1.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.55, duration: 0.2 }} />
+                          </motion.svg>
+                       </div>
+                       <motion.span 
+                         initial={{ opacity: 0, x: -5 }}
+                         animate={{ opacity: 1, x: 0 }}
+                         transition={{ delay: 0.45, duration: 0.4 }}
+                         className="text-[#30D158] text-[12px] font-bold tracking-[0.12em] whitespace-nowrap"
+                       >
+                         PARTNER FOUND
+                       </motion.span>
+                    </motion.div>
+                  </motion.div>
+                ) : joinStep === 'welcome' ? null : (
+                  <motion.div 
+                    key="idle-state"
+                    layout
+                    initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="w-full flex flex-col gap-2"
+                  >
+                    <BorderBeam size="line" colorVariant="colorful">
+                      <div className="w-full bg-[#121214] rounded-[20px] p-3 border-[0.5px] border-white/5 flex items-center justify-between shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md">
+                        <div className="flex flex-col pl-3">
+                            <span className="text-white/40 text-[9px] uppercase tracking-[0.1em] font-bold mb-0.5">Household Code</span>
+                            <span className="text-white font-mono text-[16px] tracking-[0.15em] font-medium opacity-90">{mockInviteCode}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={handleCopyCode} className="w-11 h-11 bg-[#1C1C1E] hover:bg-white/10 rounded-xl border-[0.5px] border-white/5 flex items-center justify-center transition-colors shadow-sm">
+                            {copied ? <CheckCircle2 className="w-5 h-5 text-[#30D158]" /> : <Copy className="w-5 h-5 text-white/60" />}
+                          </button>
+                        </div>
+                      </div>
+                    </BorderBeam>
+                    <motion.button 
+                      onClick={() => setJoinStep('input')}
+                      whileHover={{ scale: 1.015 }}
+                      whileTap={{ scale: 0.96 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      className="group mt-2 flex items-center justify-center gap-1.5 py-2.5 px-5 bg-[#1C1C1E]/40 hover:bg-[#1C1C1E]/80 border-[0.5px] border-white/10 rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] transition-colors duration-300"
+                    >
+                      <span className="text-white/50 group-hover:text-white/70 text-[11px] font-medium tracking-wide transition-colors">
+                        Have an invite code?
+                      </span>
+                      <span className="text-white/90 group-hover:text-white text-[11px] font-bold tracking-wide transition-colors">
+                        Join Partner
+                      </span>
+                      <ChevronRight className="w-3.5 h-3.5 text-white/50 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-300" />
+                    </motion.button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       <div className="px-6 pt-10 pb-32 z-10 flex flex-col shrink-0">
 

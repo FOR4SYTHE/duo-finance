@@ -221,13 +221,21 @@ export default function Home() {
         className="flex flex-col w-full font-sans"
       >
         {/* Header */}
-        <motion.div variants={itemVariants} className="flex justify-between items-center mb-6 relative z-20">
-        <div className="flex flex-col">
-          <span className="text-white/40 text-[11px] font-medium tracking-[0.2em] uppercase mb-1">
-            Welcome back
-          </span>
-          <ConjoiningAvatar onTap={() => { window.location.href = '/profile'; }} />
-        </div>
+        <motion.div variants={itemVariants} className="flex justify-between items-center mb-8 relative z-20">
+          <div className="flex items-center gap-4">
+            <ConjoiningAvatar onTap={() => { window.location.href = '/profile'; }} />
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center gap-1.5 mb-1">
+                 <div className="w-1.5 h-1.5 rounded-full bg-[#30D158] shadow-[0_0_8px_rgba(48,209,88,0.8)]" />
+                 <span className="text-white/40 text-[9px] font-bold tracking-[0.25em] uppercase">
+                   Household Active
+                 </span>
+              </div>
+              <span className="text-white/90 text-[18px] font-semibold tracking-tight leading-none">
+                Good Evening
+              </span>
+            </div>
+          </div>
         <div className="flex items-center gap-3">
           <div className="flex gap-2">
             <button 
