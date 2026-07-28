@@ -10,9 +10,10 @@ import { X, Calendar as CalendarIcon, Store } from "lucide-react";
 interface ScheduleTripModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSaveComplete?: () => void;
 }
 
-export function ScheduleTripModal({ isOpen, onClose }: ScheduleTripModalProps) {
+export function ScheduleTripModal({ isOpen, onClose, onSaveComplete }: ScheduleTripModalProps) {
     const [mounted, setMounted] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [storeName, setStoreName] = useState("");
@@ -50,6 +51,7 @@ export function ScheduleTripModal({ isOpen, onClose }: ScheduleTripModalProps) {
         });
         
         onClose();
+        if (onSaveComplete) onSaveComplete();
     };
 
     if (!mounted) return null;

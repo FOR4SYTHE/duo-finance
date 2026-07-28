@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, ChevronRight, X } from "lucide-react";
 import { useBillsStore } from "@/store/useBillsStore";
+import { useCurrencyStore } from "@/store/useCurrencyStore";
 
 interface DueTodayBannerProps {
   onTap: () => void;
@@ -9,6 +10,7 @@ interface DueTodayBannerProps {
 
 export function DueTodayBanner({ onTap }: DueTodayBannerProps) {
   const { bills } = useBillsStore();
+  const { exchangeRate } = useCurrencyStore();
   const [isVisible, setIsVisible] = useState(true);
   const [dueBills, setDueBills] = useState<typeof bills>([]);
 
@@ -21,6 +23,7 @@ export function DueTodayBanner({ onTap }: DueTodayBannerProps) {
   if (!isVisible || dueBills.length === 0) return null;
 
   const totalDue = dueBills.reduce((sum, b) => sum + b.amount, 0);
+  const totalDueZAR = totalDue * exchangeRate;
 
   return (
     <AnimatePresence>
@@ -51,8 +54,8 @@ export function DueTodayBanner({ onTap }: DueTodayBannerProps) {
               <h3 className="text-white font-medium text-[15px] tracking-tight">
                 {dueBills.length} Bill{dueBills.length > 1 ? 's' : ''} Due Today
               </h3>
-              <p className="text-[#FF9F0A] font-bold text-[13px] mt-0.5 flex items-center gap-1.5 drop-shadow-[0_0_8px_rgba(255,159,10,0.3)]">
-                Total: ₱{totalDue.toLocaleString()}
+              <p className="text-[#FF9F0A] font-bold text-[13px] mt-0.5 flex items-baseline gap-1.5 drop-shadow-[0_0_8px_rgba(255,159,10,0.3)]">
+                Total: ₱{totalDue.toLocaleString()} <span className="text-[#FF9F0A]/50 font-semibold text-[10px] tracking-tight drop-shadow-none">≈ R{totalDueZAR.toFixed(2)}</span>
               </p>
             </div>
             

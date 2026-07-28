@@ -105,7 +105,7 @@ export default function CartifyPage() {
                 ) : !isActive ? (
                     <TripSetup />
                 ) : isBuildingList ? (
-                    <PlannedListBuilder />
+                    <PlannedListBuilder onRequestExit={() => setShowCancelPrompt(true)} />
                 ) : (
                     <LiveTripTracker />
                 )}

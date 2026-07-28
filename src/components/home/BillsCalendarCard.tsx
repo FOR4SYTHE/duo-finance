@@ -320,12 +320,19 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
                         <div className="flex items-end justify-between relative z-10 mt-auto">
                           <div className="flex flex-col">
                             <span className="text-[10px] text-[#737373] font-medium uppercase tracking-widest mb-0.5">Amount</span>
-                            <span className="text-[18px] font-bold text-[#E5E5E5] leading-none tracking-tight">
-                              <span className="text-[#A1A1A1] text-[14px] mr-0.5">₱</span>
-                              {selectedBills.length > 1 
-                                ? formatCurrency(selectedBills.reduce((acc, curr) => acc + curr.amount, 0)) 
-                                : formatCurrency(selectedBills[0].amount)}
-                            </span>
+                            <div className="flex flex-col items-start gap-0.5">
+                              <span className="text-[18px] font-bold text-[#E5E5E5] leading-none tracking-tight flex items-center">
+                                <span className="text-[#A1A1A1] text-[14px] mr-0.5">₱</span>
+                                {selectedBills.length > 1 
+                                  ? formatCurrency(selectedBills.reduce((acc, curr) => acc + curr.amount, 0)) 
+                                  : formatCurrency(selectedBills[0].amount)}
+                              </span>
+                              <span className="text-[11px] font-bold text-[#737373] tracking-tight">
+                                ≈ R{((selectedBills.length > 1 
+                                  ? selectedBills.reduce((acc, curr) => acc + curr.amount, 0) 
+                                  : selectedBills[0].amount) * exchangeRate).toFixed(2)}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>

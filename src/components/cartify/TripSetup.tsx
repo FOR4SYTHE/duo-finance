@@ -95,7 +95,7 @@ export function TripSetup() {
                         exit={{ opacity: 0, y: -20, height: 0 }}
                         className="px-4 mb-4"
                     >
-                        <BorderBeam size="pulse-outside" colorVariant="mono" strength={0.7} className="rounded-[24px]">
+                        <BorderBeam size="pulse-inner" colorVariant="mono" strength={0.7} className="rounded-[24px]">
                             <div className="relative w-full bg-gradient-to-b from-[#1C1C1E] to-[#111112] border border-white/5 rounded-[24px] p-4 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
                                 
                                 <div className="flex items-center gap-3 relative z-10">

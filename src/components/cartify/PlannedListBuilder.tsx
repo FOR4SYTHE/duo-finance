@@ -7,6 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TemplatePickerSheet } from "./TemplatePickerSheet";
 import { ScheduleTripModal } from "./ScheduleTripModal";
 
+interface PlannedListBuilderProps {
+    onRequestExit?: () => void;
+}
+
 const PremiumSparkle = () => (
     <div className="relative flex items-center justify-center w-4 h-4 mx-0.5">
         {/* Ambient glow */}
@@ -61,7 +65,7 @@ const QUICK_CATEGORIES = [
     }
 ];
 
-export function PlannedListBuilder() {
+export function PlannedListBuilder({ onRequestExit }: PlannedListBuilderProps = {}) {
     const { items, addPlannedItem, finishBuildingList, removeItem } = useCartifyStore();
     const [newItemName, setNewItemName] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -265,6 +269,7 @@ export function PlannedListBuilder() {
             <ScheduleTripModal
                 isOpen={showScheduleModal}
                 onClose={() => setShowScheduleModal(false)}
+                onSaveComplete={onRequestExit}
             />
         </div>
     );
