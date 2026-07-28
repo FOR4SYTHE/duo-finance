@@ -104,7 +104,7 @@ export function NotificationCenter({ isOpen, onClose, onActionClick }: Notificat
                         <div className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center border ${getBg(notif.type)}`}>
                           {getIcon(notif.type)}
                         </div>
-                        <div className="flex flex-col pr-4">
+                        <div className="flex flex-col flex-1 pr-4">
                           <span className={`font-semibold text-sm mb-1 tracking-tight ${notif.read ? 'text-white/80' : 'text-white'}`}>
                             {notif.title}
                           </span>
