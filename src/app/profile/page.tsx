@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { WelcomeShader } from "@/components/auth/WelcomeShader";
+import { BorderBeam } from "border-beam";
 import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
@@ -195,20 +196,22 @@ export default function ProfilePage() {
             <div className="w-full max-w-[280px] flex flex-col gap-2 items-center">
               {isJoining ? (
                 <div className="w-full flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="w-full bg-black/60 rounded-[20px] p-1.5 border-[0.5px] border-white/10 flex items-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md focus-within:border-[#30D158]/30 transition-colors">
-                    <input 
-                      type="text" 
-                      placeholder="Enter 6-digit code" 
-                      className="bg-transparent flex-1 text-white font-mono text-[14px] px-3 outline-none placeholder:text-white/20 tracking-widest uppercase"
-                      maxLength={6}
-                    />
-                    <button 
-                      onClick={() => setIsJoining(false)}
-                      className="px-4 py-2.5 bg-white/10 rounded-xl text-white font-medium text-[12px] hover:bg-white/20 transition-colors"
-                    >
-                      Join
-                    </button>
-                  </div>
+                  <BorderBeam size="line" colorVariant="colorful">
+                    <div className="w-full bg-[#121214] rounded-[20px] p-1.5 border-[0.5px] border-white/10 flex items-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md transition-colors relative overflow-hidden">
+                      <input 
+                        type="text" 
+                        placeholder="ENTER 6-DIGIT CODE" 
+                        className="bg-transparent flex-1 text-white font-mono text-[14px] px-3 outline-none placeholder:text-white/20 tracking-widest uppercase"
+                        maxLength={6}
+                      />
+                      <button 
+                        onClick={() => setIsJoining(false)}
+                        className="px-5 py-2.5 bg-[#1C1C1E] rounded-[14px] text-white font-medium text-[13px] hover:bg-white/10 border-[0.5px] border-white/5 hover:border-white/20 hover:shadow-[0_0_12px_rgba(255,255,255,0.1)] active:scale-95 transition-all"
+                      >
+                        Join
+                      </button>
+                    </div>
+                  </BorderBeam>
                   <button 
                     onClick={() => setIsJoining(false)}
                     className="text-white/40 text-[11px] font-medium tracking-wide hover:text-white/70 transition-colors py-1"
@@ -218,17 +221,19 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div className="w-full flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="w-full bg-black/40 rounded-[20px] p-3 border-[0.5px] border-white/5 flex items-center justify-between shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md">
-                    <div className="flex flex-col pl-3">
-                        <span className="text-white/40 text-[9px] uppercase tracking-[0.1em] font-bold mb-0.5">Household Code</span>
-                        <span className="text-white font-mono text-[16px] tracking-[0.15em] font-medium opacity-90">{mockInviteCode}</span>
+                  <BorderBeam size="line" colorVariant="colorful">
+                    <div className="w-full bg-[#121214] rounded-[20px] p-3 border-[0.5px] border-white/5 flex items-center justify-between shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md">
+                      <div className="flex flex-col pl-3">
+                          <span className="text-white/40 text-[9px] uppercase tracking-[0.1em] font-bold mb-0.5">Household Code</span>
+                          <span className="text-white font-mono text-[16px] tracking-[0.15em] font-medium opacity-90">{mockInviteCode}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={handleCopyCode} className="w-11 h-11 bg-[#1C1C1E] hover:bg-white/10 rounded-xl border-[0.5px] border-white/5 flex items-center justify-center transition-colors shadow-sm">
+                          {copied ? <CheckCircle2 className="w-5 h-5 text-[#30D158]" /> : <Copy className="w-5 h-5 text-white/60" />}
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button onClick={handleCopyCode} className="w-11 h-11 bg-white/5 hover:bg-white/10 rounded-xl border-[0.5px] border-white/5 flex items-center justify-center transition-colors shadow-sm">
-                        {copied ? <CheckCircle2 className="w-5 h-5 text-[#30D158]" /> : <Copy className="w-5 h-5 text-white/60" />}
-                      </button>
-                    </div>
-                  </div>
+                  </BorderBeam>
                   <button 
                     onClick={() => setIsJoining(true)}
                     className="text-white/40 text-[11px] font-medium tracking-wide hover:text-white/70 transition-colors py-1"
