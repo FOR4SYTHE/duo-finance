@@ -24,6 +24,7 @@ import { NotificationCenter } from "@/components/home/NotificationCenter";
 import { AnimatedPiggyBank } from "@/components/home/AnimatedPiggyBank";
 import { CashbackDealsRadar } from "@/components/home/CashbackDealsRadar";
 import { DueTodayBanner } from "@/components/home/DueTodayBanner";
+import { ConjoiningAvatar } from "@/components/home/ConjoiningAvatar";
 import { useNotificationEngine } from "@/hooks/useNotificationEngine";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
@@ -225,9 +226,7 @@ export default function Home() {
           <span className="text-white/40 text-[11px] font-medium tracking-[0.2em] uppercase mb-1">
             Welcome back
           </span>
-          <h1 className="text-2xl text-white font-light tracking-tight">
-            Sam & Jon
-          </h1>
+          <ConjoiningAvatar onTap={() => { window.location.href = '/profile'; }} />
         </div>
         <div className="flex items-center gap-3">
           <div className="flex gap-2">

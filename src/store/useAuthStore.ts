@@ -11,6 +11,7 @@ type AuthState = {
   isAuthenticated: boolean;
   user: AuthUser | null;
   householdId: string | null;
+  partner: AuthUser | null;
   
   // Actions
   login: (email: string) => void;
@@ -18,6 +19,7 @@ type AuthState = {
   joinHousehold: (inviteCode: string) => void;
   createHousehold: () => void;
   leaveHousehold: () => void;
+  toggleMockPartner: () => void;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -26,6 +28,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       user: null,
       householdId: null,
+      partner: { id: "partner-123", email: "jon@example.com", name: "Jon" },
 
       login: (email: string) => 
         set({ 
@@ -41,17 +44,22 @@ export const useAuthStore = create<AuthState>()(
         set({ 
           isAuthenticated: false, 
           user: null, 
-          householdId: null 
+          householdId: null,
+          partner: null
         }),
         
       joinHousehold: (inviteCode: string) => 
-        set({ householdId: `household-${inviteCode}` }),
+        set({ householdId: `household-${inviteCode}`, partner: { id: "partner-123", email: "jon@example.com", name: "Jon" } }),
         
       createHousehold: () => 
-        set({ householdId: `household-${crypto.randomUUID().slice(0, 8)}` }),
+        set({ householdId: `household-${crypto.randomUUID().slice(0, 8)}`, partner: null }),
         
       leaveHousehold: () => 
-        set({ householdId: null }),
+        set({ householdId: null, partner: null }),
+        
+      toggleMockPartner: () => set((state) => ({
+        partner: state.partner ? null : { id: "partner-123", email: "jon@example.com", name: "Jon" }
+      }))
     }),
     {
       name: "duo-auth-storage",

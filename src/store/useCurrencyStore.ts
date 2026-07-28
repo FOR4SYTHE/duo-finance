@@ -22,6 +22,7 @@ interface CurrencyState {
     executeCalculation: () => void;
     clearHistory: () => void;
     syncRates: () => Promise<void>;
+    setPrimaryCurrency: (currency: 'PHP' | 'ZAR') => void;
 }
 
 export const useCurrencyStore = create<CurrencyState>()(
@@ -39,6 +40,10 @@ export const useCurrencyStore = create<CurrencyState>()(
             toggleCurrency: async () => {
                 const nextCurrency = get().primaryCurrency === 'PHP' ? 'ZAR' : 'PHP';
                 set({ primaryCurrency: nextCurrency });
+            },
+
+            setPrimaryCurrency: (currency: 'PHP' | 'ZAR') => {
+                set({ primaryCurrency: currency });
             },
 
             syncRates: async () => {
