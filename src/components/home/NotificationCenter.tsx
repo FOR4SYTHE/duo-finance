@@ -45,7 +45,7 @@ export function NotificationCenter({ isOpen, onClose, onActionClick }: Notificat
             initial={{ opacity: 0, x: "100%" }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            transition={{ type: "tween", ease: [0.25, 1, 0.5, 1], duration: 0.4 }}
             className="fixed inset-y-0 right-0 w-full max-w-sm z-[110] bg-[#0A0A0C] border-l border-white/5 flex flex-col shadow-2xl"
           >
             <div className="flex items-center justify-between p-6 border-b border-white/5">

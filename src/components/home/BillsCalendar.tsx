@@ -210,7 +210,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
       initial={{ opacity: 0, y: "100%" }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: "100%" }}
-      transition={{ type: "spring", damping: 30, stiffness: 300 }}
+      transition={{ type: "tween", ease: [0.25, 1, 0.5, 1], duration: 0.4 }}
       className="fixed inset-0 z-[110] bg-[#050505] overflow-y-auto no-scrollbar"
       id="bills-calendar-scroll-area"
     >
