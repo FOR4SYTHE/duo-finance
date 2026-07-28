@@ -2,9 +2,10 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { WelcomeShader } from "@/components/auth/WelcomeShader";
 import { BorderBeam } from "border-beam";
+import { ThinkingOrb } from "thinking-orbs";
 import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
@@ -18,7 +19,7 @@ export default function ProfilePage() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [isJoining, setIsJoining] = useState(false);
+  const [joinStep, setJoinStep] = useState<'idle' | 'input' | 'verifying' | 'matched' | 'welcome'>('idle');
   const [isEditingAvatar, setIsEditingAvatar] = useState(false);
   const [imageZoom, setImageZoom] = useState(1);
   const [imagePan, setImagePan] = useState({ x: 0, y: 0 });
@@ -43,14 +44,25 @@ export default function ProfilePage() {
     setMounted(true);
   }, []);
 
+  const mockInviteCode = householdId ? householdId.split('-')[1]?.toUpperCase() || "8K9P2X" : "8K9P2X";
+
   const handleCopyCode = () => {
+    navigator.clipboard.writeText(mockInviteCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!mounted) return null;
+  const handleJoinClick = () => {
+    setJoinStep('verifying');
+    setTimeout(() => {
+      setJoinStep('matched');
+    }, 2500);
+    setTimeout(() => {
+      setJoinStep('welcome');
+    }, 5500);
+  };
 
-  const mockInviteCode = householdId ? householdId.split('-')[1]?.toUpperCase() || "8K9P2X" : "8K9P2X";
+  if (!mounted) return null;
 
   return (
     <div className="min-h-[100dvh] w-full bg-[#030303] text-white font-sans selection:bg-white/10 flex flex-col relative overflow-y-auto no-scrollbar pb-12">
@@ -77,7 +89,10 @@ export default function ProfilePage() {
           >
             <ChevronLeft className="w-6 h-6 pr-0.5" />
           </button>
-          <div className="w-10 h-10 flex items-center justify-center text-white/50 hover:text-white transition-colors cursor-pointer bg-white/5 rounded-full backdrop-blur-sm border-[0.5px] border-white/5">
+          <div 
+            onClick={() => document.getElementById('settings-section')?.scrollIntoView({ behavior: 'smooth' })}
+            className="w-10 h-10 flex items-center justify-center text-white/50 hover:text-white transition-colors cursor-pointer bg-white/5 rounded-full backdrop-blur-sm border-[0.5px] border-white/5"
+          >
              <Settings className="w-5 h-5" />
           </div>
         </div>
@@ -194,8 +209,8 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className="w-full max-w-[280px] flex flex-col gap-2 items-center">
-              {isJoining ? (
-                <div className="w-full flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              {joinStep === 'input' || joinStep === 'verifying' ? (
+                <motion.div layoutId="join-box" className="w-full flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <BorderBeam size="line" colorVariant="colorful">
                     <div className="w-full bg-[#121214] rounded-[20px] p-1.5 border-[0.5px] border-white/10 flex items-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md transition-colors relative overflow-hidden">
                       <input 
@@ -203,23 +218,67 @@ export default function ProfilePage() {
                         placeholder="ENTER 6-DIGIT CODE" 
                         className="bg-transparent flex-1 text-white font-mono text-[14px] px-3 outline-none placeholder:text-white/20 tracking-widest uppercase"
                         maxLength={6}
+                        disabled={joinStep === 'verifying'}
                       />
                       <button 
-                        onClick={() => setIsJoining(false)}
-                        className="px-5 py-2.5 bg-[#1C1C1E] rounded-[14px] text-white font-medium text-[13px] hover:bg-white/10 border-[0.5px] border-white/5 hover:border-white/20 hover:shadow-[0_0_12px_rgba(255,255,255,0.1)] active:scale-95 transition-all"
+                        onClick={handleJoinClick}
+                        disabled={joinStep === 'verifying'}
+                        className="relative px-5 py-2 bg-[#232325] rounded-[12px] text-white/90 font-medium text-[13px] hover:bg-[#2C2C2F] active:scale-95 transition-all overflow-hidden flex items-center justify-center min-w-[64px] h-[34px]"
                       >
-                        Join
+                        <AnimatePresence mode="wait">
+                          {joinStep === 'verifying' ? (
+                            <motion.div key="orb" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.2 }}>
+                               <ThinkingOrb state="working" size={20} />
+                            </motion.div>
+                          ) : (
+                            <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                              Join
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
                       </button>
                     </div>
                   </BorderBeam>
                   <button 
-                    onClick={() => setIsJoining(false)}
+                    onClick={() => setJoinStep('idle')}
                     className="text-white/40 text-[11px] font-medium tracking-wide hover:text-white/70 transition-colors py-1"
+                    disabled={joinStep === 'verifying'}
                   >
                     Cancel
                   </button>
-                </div>
-              ) : (
+                </motion.div>
+              ) : joinStep === 'matched' ? (
+                <motion.div layoutId="join-box" className="flex items-center justify-center w-full py-4">
+                  <motion.div 
+                    initial={{ width: 48, height: 48, borderRadius: 24, opacity: 0 }}
+                    animate={{ width: 200, height: 48, borderRadius: 24, opacity: 1 }}
+                    transition={{ type: "spring", bounce: 0.35, duration: 0.7 }}
+                    className="bg-black flex items-center justify-start overflow-hidden relative shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+                  >
+                     <div className="w-[50px] h-[48px] flex-shrink-0 flex items-center justify-center">
+                        <motion.svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#30D158" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          {/* Face ID Broken Square (Apple Style) */}
+                          <motion.path d="M8 3H5a2 2 0 0 0-2 2v3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
+                          <motion.path d="M16 3h3a2 2 0 0 1 2 2v3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
+                          <motion.path d="M8 21H5a2 2 0 0 1-2-2v-3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
+                          <motion.path d="M16 21h3a2 2 0 0 0 2-2v-3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
+                          {/* Face Center */}
+                          <motion.path d="M8.5 10h.01M15.5 10h.01" strokeWidth="3" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5, type: "spring", bounce: 0.6 }} />
+                          <motion.path d="M9 14c1 1.5 3 1.5 4 0" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.6, duration: 0.3 }} />
+                          <motion.path d="M12 10v1.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.55, duration: 0.2 }} />
+                        </motion.svg>
+                     </div>
+                     <motion.span 
+                       initial={{ opacity: 0, x: -5 }}
+                       animate={{ opacity: 1, x: 0 }}
+                       transition={{ delay: 0.45, duration: 0.4 }}
+                       className="text-[#30D158] text-[12px] font-bold tracking-[0.12em] whitespace-nowrap"
+                     >
+                       PARTNER FOUND
+                     </motion.span>
+                  </motion.div>
+                </motion.div>
+              ) : joinStep === 'welcome' ? null : (
                 <div className="w-full flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <BorderBeam size="line" colorVariant="colorful">
                     <div className="w-full bg-[#121214] rounded-[20px] p-3 border-[0.5px] border-white/5 flex items-center justify-between shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md">
@@ -235,7 +294,7 @@ export default function ProfilePage() {
                     </div>
                   </BorderBeam>
                   <button 
-                    onClick={() => setIsJoining(true)}
+                    onClick={() => setJoinStep('input')}
                     className="text-white/40 text-[11px] font-medium tracking-wide hover:text-white/70 transition-colors py-1"
                   >
                     Have an invite code? Join Partner
@@ -327,6 +386,7 @@ export default function ProfilePage() {
 
         {/* App Settings */}
         <motion.div 
+          id="settings-section"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
@@ -397,6 +457,116 @@ export default function ProfilePage() {
         </div>
 
       </div>
+      
+      {/* Full Screen Welcome Overlay */}
+      <AnimatePresence>
+        {joinStep === 'welcome' && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 backdrop-blur-3xl"
+          >
+            {/* SVG Filter for Metaballs */}
+            <svg width="0" height="0" className="absolute hidden">
+              <filter id="gooey-effect">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -10" result="goo" />
+              </filter>
+            </svg>
+
+            <div className="relative w-full max-w-md flex flex-col items-center justify-center p-8">
+              
+              {/* Gooey Avatars Container */}
+              <div className="relative w-full h-40 flex items-center justify-center mb-10">
+                 
+                 {/* Background Gooey Layer */}
+                 <div className="absolute inset-0 flex items-center justify-center" style={{ filter: 'url(#gooey-effect)' }}>
+                   <motion.div 
+                     className="absolute w-[96px] h-[96px] rounded-full bg-[#068562]"
+                     initial={{ x: -120, y: 0 }}
+                     animate={{ x: -60, y: [0, -8, 0] }}
+                     transition={{
+                       x: { duration: 1.2, type: "spring", bounce: 0.4 },
+                       y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
+                     }}
+                   />
+                   <motion.div 
+                     className="absolute w-[96px] h-[96px] rounded-full bg-[#068562]"
+                     initial={{ x: 120, y: 0 }}
+                     animate={{ x: 60, y: [0, 8, 0] }}
+                     transition={{
+                       x: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
+                       y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.3 }
+                     }}
+                   />
+                   <motion.div 
+                     className="absolute h-[50px] bg-[#013F4A]"
+                     initial={{ width: 0, opacity: 0, y: 0 }}
+                     animate={{ width: 120, opacity: 1, y: [0, -4, 4, 0] }}
+                     transition={{
+                       width: { duration: 1.0, delay: 0.2, type: "spring" },
+                       opacity: { duration: 1.0, delay: 0.2 },
+                       y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
+                     }}
+                   />
+                 </div>
+
+                 {/* Foreground Avatars (Sharp) */}
+                 <div className="absolute inset-0 flex items-center justify-center z-10">
+                   <motion.div 
+                     className="absolute w-[86px] h-[86px] rounded-full overflow-hidden border-2 border-[#111] shadow-[0_10px_30px_rgba(0,0,0,0.5)] bg-black"
+                     initial={{ x: -120, scale: 0.8, y: 0 }}
+                     animate={{ x: -60, scale: 1, y: [0, -8, 0] }}
+                     transition={{
+                       x: { duration: 1.2, type: "spring", bounce: 0.4 },
+                       scale: { duration: 1.2, type: "spring", bounce: 0.4 },
+                       y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
+                     }}
+                   >
+                     <img src={profileImage || "https://i.pravatar.cc/150?u=user"} className="w-full h-full object-cover" />
+                   </motion.div>
+                   <motion.div 
+                     className="absolute w-[86px] h-[86px] rounded-full overflow-hidden border-2 border-[#111] shadow-[0_10px_30px_rgba(0,0,0,0.5)] bg-black"
+                     initial={{ x: 120, scale: 0.8, y: 0 }}
+                     animate={{ x: 60, scale: 1, y: [0, 8, 0] }}
+                     transition={{
+                       x: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
+                       scale: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
+                       y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.3 }
+                     }}
+                   >
+                     <img src="https://i.pravatar.cc/150?u=sarah" className="w-full h-full object-cover" />
+                   </motion.div>
+                 </div>
+              </div>
+
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}
+                className="text-white text-3xl font-medium tracking-tight mb-3 text-center"
+              >
+                You're connected.
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}
+                className="text-white/50 text-[15px] text-center mb-12"
+              >
+                Your shared Duo Household is now active.
+              </motion.p>
+              
+              <motion.button
+                initial={{ opacity: 0, scale: 0.9, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 1.5, type: "spring", bounce: 0.4 }}
+                onClick={() => {
+                  setJoinStep('idle');
+                }}
+                className="w-full max-w-[320px] mx-auto py-3.5 bg-[#D1D1D3] text-[#111111] rounded-full font-semibold text-[15px] hover:bg-[#E5E5E5] active:scale-[0.97] transition-all flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),0_4px_20px_rgba(0,0,0,0.4)]"
+              >
+                Start Budgeting Together
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
