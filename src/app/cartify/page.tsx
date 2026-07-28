@@ -33,7 +33,7 @@ export default function CartifyPage() {
                         {isActive && !isReceiptView && (
                             <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full group-hover:bg-white/10 transition-colors mt-2">
                                 <span className="text-white/70 text-xs font-medium tracking-wide">
-                                    {mode === 'simple' ? 'Express' : mode === 'unplanned' ? 'Detailed' : 'Planned'}
+                                    {mode === 'simple' ? 'Quick Trip' : 'Planned Trip'}
                                 </span>
                                 <ChevronDown className={`w-3 h-3 text-white/50 transition-transform ${showModeSelector ? 'rotate-180' : ''}`} />
                             </div>
@@ -57,9 +57,8 @@ export default function CartifyPage() {
                                     className="absolute top-full left-0 mt-3 w-[200px] bg-[#111] border border-white/10 rounded-[24px] shadow-2xl overflow-hidden z-50 flex flex-col p-1.5"
                                 >
                                     {[
-                                        { id: 'simple', label: 'Express', desc: 'Prices only', icon: Zap },
-                                        { id: 'unplanned', label: 'Detailed', desc: 'Sort in store', icon: ShoppingCart },
-                                        { id: 'planned', label: 'Planned', desc: 'Pre-build list', icon: ListTodo }
+                                        { id: 'simple', label: 'Quick Trip', desc: 'Prices only', icon: Zap },
+                                        { id: 'planned', label: 'Planned Trip', desc: 'Pre-build list', icon: ListTodo }
                                     ].map(m => {
                                         const Icon = m.icon;
                                         const isSelected = mode === m.id;

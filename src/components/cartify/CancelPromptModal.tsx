@@ -31,8 +31,6 @@ export function CancelPromptModal({ isOpen, onClose, onConfirm, mode }: CancelPr
         switch (mode) {
             case 'simple':
                 return "/mascot/flat/difu-leaving-simple.webp";
-            case 'unplanned':
-                return "/mascot/flat/difu-leaving-unplanned.webp";
             case 'planned':
                 return "/mascot/flat/difu-leaving-planned.webp";
             default:
@@ -43,9 +41,7 @@ export function CancelPromptModal({ isOpen, onClose, onConfirm, mode }: CancelPr
     const getModeText = () => {
         switch (mode) {
             case 'simple':
-                return "You are ending a Simple Logging session.";
-            case 'unplanned':
-                return "You are ending an On-the-fly tracking session.";
+                return "You are ending a Quick Trip session.";
             case 'planned':
                 return "You are ending your Pre-planned trip.";
             default:
@@ -94,22 +90,23 @@ export function CancelPromptModal({ isOpen, onClose, onConfirm, mode }: CancelPr
                         {getModeText()}
                     </p>
                     <p className="text-white/40 text-xs mb-8 leading-relaxed relative z-10 max-w-[260px]">
-                        Are you sure you want to leave? Your current cart and budget progress will be lost.
+                        {mode === 'planned' 
+                            ? "Are you sure you want to leave? You can save your list for later or discard it entirely."
+                            : "Are you sure you want to leave? Your current cart and budget progress will be lost."}
                     </p>
                     
                     <div className="flex flex-col gap-3 w-full relative z-10">
-                        {mode === 'unplanned' && (
+                        {mode === 'planned' && (
+                            <>
                             <button 
                                 onClick={() => {
-                                    useCartifyStore.getState().setActiveCategory(null);
+                                    useCartifyStore.getState().saveForLater();
                                     onClose();
                                 }}
-                                className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-medium transition-colors border border-white/10 shadow-[0_4px_12px_rgba(255,255,255,0.05)] active:scale-[0.98]"
+                                className="w-full py-4 rounded-2xl bg-[#30D158]/10 hover:bg-[#30D158]/20 text-[#30D158] font-medium transition-colors border border-[#30D158]/20 shadow-[0_4px_12px_rgba(48,209,88,0.1)] active:scale-[0.98]"
                             >
-                                Change Category
+                                Save for Later
                             </button>
-                        )}
-                        {mode === 'planned' && (
                             <button 
                                 onClick={() => {
                                     useCartifyStore.getState().resumeBuildingList();
@@ -119,6 +116,7 @@ export function CancelPromptModal({ isOpen, onClose, onConfirm, mode }: CancelPr
                             >
                                 Edit Shopping List
                             </button>
+                            </>
                         )}
                         <button 
                             onClick={() => {

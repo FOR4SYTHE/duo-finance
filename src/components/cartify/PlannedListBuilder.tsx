@@ -2,8 +2,10 @@
 
 import { useState, useRef } from "react";
 import { useCartifyStore } from "@/store/useCartifyStore";
-import { Plus, ChevronRight, ListTodo, X, Check, ChevronDown } from "lucide-react";
+import { Plus, ChevronRight, ListTodo, X, Check, ChevronDown, History, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { TemplatePickerSheet } from "./TemplatePickerSheet";
+import { ScheduleTripModal } from "./ScheduleTripModal";
 
 const PremiumSparkle = () => (
     <div className="relative flex items-center justify-center w-4 h-4 mx-0.5">
@@ -63,6 +65,8 @@ export function PlannedListBuilder() {
     const { items, addPlannedItem, finishBuildingList, removeItem } = useCartifyStore();
     const [newItemName, setNewItemName] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+    const [showScheduleModal, setShowScheduleModal] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const handleAdd = (e: React.FormEvent) => {
@@ -95,6 +99,17 @@ export function PlannedListBuilder() {
                 </div>
             </div>
 
+            {/* Action Bar */}
+            <div className="flex px-2 mb-6">
+                <button 
+                    onClick={() => setShowTemplatePicker(true)}
+                    className="flex-1 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors active:scale-95"
+                >
+                    <History className="w-4 h-4 text-white/50" />
+                    <span className="text-white/70 text-sm font-medium">Use Template</span>
+                </button>
+            </div>
+
             {/* Input Form */}
             <form onSubmit={handleAdd} className="relative mb-6 px-2">
                 <div className="relative flex items-center">
@@ -123,7 +138,7 @@ export function PlannedListBuilder() {
             </form>
 
             {/* Content Area */}
-            <div className="flex-1 flex flex-col gap-8 px-2 overflow-x-hidden pb-4">
+            <div className="flex-1 flex flex-col gap-8 px-2 overflow-y-auto overflow-x-hidden no-scrollbar pb-4">
                 {/* Active Items */}
                 <div className="flex flex-col gap-2">
                     <AnimatePresence mode="popLayout">
@@ -221,16 +236,36 @@ export function PlannedListBuilder() {
                 </motion.div>
             </div>
 
-            <button
-                onClick={finishBuildingList}
-                disabled={items.length === 0}
-                className="w-full mt-auto h-[64px] rounded-full bg-white text-black font-semibold text-[17px] tracking-wide flex items-center justify-between px-6 hover:opacity-90 active:scale-[0.98] transition-all duration-300 group disabled:opacity-50 disabled:bg-white/10 disabled:text-white/40 disabled:scale-100 shadow-[0_0_40px_rgba(255,255,255,0.1)]"
-            >
-                <span className="pl-2">Start Shopping</span>
-                <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${items.length === 0 ? 'bg-white/10' : 'bg-black/10 group-hover:bg-black/20'}`}>
-                    <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
-                </div>
-            </button>
+            <div className="mt-auto pt-4 flex gap-3">
+                <button
+                    onClick={() => setShowScheduleModal(true)}
+                    disabled={items.length === 0}
+                    className="h-[64px] px-6 rounded-full bg-white/[0.04] border border-white/[0.08] text-white/80 font-medium text-[15px] flex items-center justify-center gap-2 hover:bg-white/[0.08] active:scale-[0.98] transition-all disabled:opacity-50"
+                >
+                    <Calendar className="w-4 h-4" />
+                    <span className="hidden sm:inline">Save for later</span>
+                </button>
+                
+                <button
+                    onClick={finishBuildingList}
+                    disabled={items.length === 0}
+                    className="flex-1 h-[64px] rounded-full bg-white text-black font-semibold text-[17px] tracking-wide flex items-center justify-between px-6 hover:opacity-90 active:scale-[0.98] transition-all duration-300 group disabled:opacity-50 disabled:bg-white/10 disabled:text-white/40 disabled:scale-100 shadow-[0_0_40px_rgba(255,255,255,0.1)]"
+                >
+                    <span className="pl-2">Start Shopping</span>
+                    <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${items.length === 0 ? 'bg-white/10' : 'bg-black/10 group-hover:bg-black/20'}`}>
+                        <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+                    </div>
+                </button>
+            </div>
+
+            <TemplatePickerSheet 
+                isOpen={showTemplatePicker} 
+                onClose={() => setShowTemplatePicker(false)} 
+            />
+            <ScheduleTripModal
+                isOpen={showScheduleModal}
+                onClose={() => setShowScheduleModal(false)}
+            />
         </div>
     );
 }

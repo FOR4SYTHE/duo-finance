@@ -7,7 +7,7 @@ import { Delete, ChevronRight, Check, ArrowUpDown, ShoppingCart, Zap, ListTodo }
 import { motion, AnimatePresence } from "framer-motion";
 
 export function TripSetup() {
-    const { startTrip } = useCartifyStore();
+    const { startTrip, items, budget, mode, resumeTrip, endTrip } = useCartifyStore();
     const { primaryCurrency, exchangeRate, toggleCurrency } = useCurrencyStore();
     const [displayValue, setDisplayValue] = useState("0");
     const [selectedMode, setSelectedMode] = useState<CartifyMode>("simple");
@@ -62,10 +62,45 @@ export function TripSetup() {
         { label: ".", type: "num" }, { label: "0", type: "num" }, { label: "⌫", type: "meta" },
     ];
 
+    const hasSavedTrip = items.length > 0 || budget > 0;
+
     return (
         <div className="flex flex-col w-full min-h-full relative z-20 flex-1 pb-24 pt-2">
             
-            {/* Premium Top Island */}
+            {hasSavedTrip ? (
+                <div className="flex-1 flex flex-col items-center justify-center px-4 relative z-30">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="w-full max-w-[360px] bg-gradient-to-b from-[#1C1C1E] to-[#151516] border border-white/10 rounded-[32px] p-6 shadow-2xl flex flex-col items-center text-center"
+                    >
+                        <div className="w-16 h-16 rounded-full bg-[#30D158]/10 flex items-center justify-center mb-4 border border-[#30D158]/20">
+                            <ShoppingCart className="w-8 h-8 text-[#30D158]" />
+                        </div>
+                        <h3 className="text-xl font-medium text-white mb-2">Saved Trip Found</h3>
+                        <p className="text-white/50 text-sm mb-6">
+                            You have a {mode === 'planned' ? 'Planned' : 'Quick'} trip in progress with a budget of ₱{budget.toLocaleString()}.
+                        </p>
+                        
+                        <div className="flex flex-col gap-3 w-full">
+                            <button
+                                onClick={resumeTrip}
+                                className="w-full h-14 rounded-full bg-[#30D158] text-black font-semibold text-[16px] tracking-wide flex items-center justify-center hover:bg-[#30D158]/90 active:scale-[0.98] transition-all"
+                            >
+                                Resume Trip
+                            </button>
+                            <button
+                                onClick={endTrip}
+                                className="w-full h-12 rounded-full bg-white/5 text-white/70 font-medium text-[15px] flex items-center justify-center hover:bg-white/10 active:scale-[0.98] transition-all"
+                            >
+                                Discard & Start New
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            ) : (
+                <>
+                    {/* Premium Top Island */}
             <div className="relative z-20 shrink-0 bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.08] rounded-[40px] p-6 mb-6 shadow-[0_16px_40px_rgba(0,0,0,0.3)] overflow-hidden">
                 {/* Elegant glow inside the card */}
                 <div className="absolute -top-24 -left-24 w-56 h-56 bg-[#30D158]/20 rounded-full blur-[60px] pointer-events-none" />
@@ -107,8 +142,8 @@ export function TripSetup() {
                             </div>
                         </div>
                         
-                        <div className="grid grid-cols-3 gap-3">
-                            {(['simple', 'unplanned', 'planned'] as CartifyMode[]).map(mode => (
+                        <div className="grid grid-cols-2 gap-3">
+                            {(['simple', 'planned'] as CartifyMode[]).map(mode => (
                                 <button 
                                     key={mode}
                                     onClick={() => setSelectedMode(mode)}
@@ -157,18 +192,7 @@ export function TripSetup() {
                                                 <Zap className="w-6 h-6" strokeWidth={1.5} />
                                             </motion.div>
                                         )}
-                                        {mode === 'unplanned' && (
-                                            <motion.div
-                                                animate={selectedMode === 'unplanned' ? { 
-                                                    y: [0, -8, 0],
-                                                    rotate: [0, -12, 0],
-                                                    scale: [1, 1.1, 1]
-                                                } : { y: 0, rotate: 0, scale: 1 }}
-                                                transition={{ duration: 0.4, times: [0, 0.4, 1], ease: "backOut" }}
-                                            >
-                                                <ShoppingCart className="w-6 h-6" strokeWidth={1.5} />
-                                            </motion.div>
-                                        )}
+
                                         {mode === 'planned' && (
                                             <motion.div
                                                 animate={selectedMode === 'planned' ? { 
@@ -184,11 +208,10 @@ export function TripSetup() {
 
                                     <div className="flex flex-col items-center text-center relative z-10 w-full mb-1">
                                         <span className={`text-[11px] font-bold uppercase tracking-wider transition-colors duration-200 mb-0.5 ${selectedMode === mode ? 'text-white' : 'text-white/60 group-hover:text-white/90'}`}>
-                                            {mode === 'unplanned' ? 'Detailed' : mode === 'planned' ? 'Planned' : 'Express'}
+                                            {mode === 'planned' ? 'Planned Trip' : 'Quick Trip'}
                                         </span>
                                         <span className={`text-[9px] leading-tight transition-colors duration-200 ${selectedMode === mode ? 'text-white/70' : 'text-white/30'}`}>
                                             {mode === 'simple' && "Prices only"}
-                                            {mode === 'unplanned' && "Sort in store"}
                                             {mode === 'planned' && "Pre-build list"}
                                         </span>
                                     </div>
@@ -305,7 +328,7 @@ export function TripSetup() {
                                 className="flex items-center justify-center w-full h-full absolute inset-0"
                             >
                                 <span className="text-white/40 font-medium text-[15px] tracking-wide relative z-10 flex items-center gap-2">
-                                    <ChevronRight className="w-4 h-4 text-white/20" strokeWidth={2.5} />
+                                    <ChevronRight className="w-5 h-5 text-black/40 group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
                                     Set Budget
                                 </span>
                             </motion.div>
@@ -313,6 +336,9 @@ export function TripSetup() {
                     </AnimatePresence>
                 </motion.button>
             </div>
+
+                </>
+            )}
         </div>
     );
 }

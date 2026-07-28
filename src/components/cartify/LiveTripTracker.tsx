@@ -101,7 +101,7 @@ export function LiveTripTracker() {
             updateItemPrice(activeEditId, price);
             setActiveEditId(null);
         } else if (isAddingNew && newItemName) {
-            addItem(newItemName, mode === 'unplanned' ? activeCategory || undefined : undefined, price, 1);
+            addItem(newItemName, undefined, price, 1);
             setIsAddingNew(false);
             setNewItemName("");
         }
@@ -116,58 +116,7 @@ export function LiveTripTracker() {
         { name: "Hardware", icon: Wrench, color: "#8A939A", image: "/categories/hardware.png" },
     ];
 
-    if (mode === 'unplanned' && (!activeCategory || isSwitchingCategory)) {
-        return (
-            <motion.div 
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-                className="flex flex-col w-full h-full relative z-20 pt-4"
-            >
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-white text-xl font-medium tracking-tight">Pick a Category</h2>
-                    {activeCategory && (
-                        <button onClick={() => setIsSwitchingCategory(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-                            <span className="text-white text-xs">✕</span>
-                        </button>
-                    )}
-                </div>
-                <div className="grid grid-cols-2 gap-3 sm:gap-4 pb-12">
-                    {categories.map(cat => {
-                        const Icon = cat.icon;
-                        return (
-                            <button
-                                key={cat.name}
-                                onClick={() => {
-                                    setActiveCategory(cat.name);
-                                    setIsSwitchingCategory(false);
-                                }}
-                                className="relative overflow-hidden group flex flex-col justify-end bg-[#0a0a0a] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_24px_rgba(0,0,0,0.4)] rounded-[32px] p-5 hover:border-white/20 active:scale-[0.97] transition-all aspect-[4/5]"
-                            >
-                                {/* Background Image with slow zoom */}
-                                <div className="absolute inset-0 z-0 bg-[#0a0a0a]">
-                                    <div 
-                                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 opacity-100 brightness-110"
-                                        style={{ backgroundImage: `url(${cat.image})` }}
-                                    />
-                                    {/* Tight, intense gradient strictly at the bottom behind the icon/text */}
-                                    <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black via-black/80 to-transparent" />
-                                </div>
-                                
-                                {/* Content (Icon and Label) placed cleanly at the bottom */}
-                                <div className="relative z-10 w-full flex flex-col items-center gap-3 mt-auto">
-                                    <div className="w-[44px] h-[44px] rounded-full flex items-center justify-center bg-[#1c1c1e] border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.8),inset_0_1px_2px_rgba(255,255,255,0.1)]">
-                                        <Icon className="w-[18px] h-[18px]" style={{ color: cat.color }} strokeWidth={2.5} />
-                                    </div>
-                                    <span className="text-white font-semibold tracking-wide text-sm drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{cat.name}</span>
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-            </motion.div>
-        );
-    }
+
 
     // Calculate volumetric states directly in the main render cycle
     let status = 'safe';

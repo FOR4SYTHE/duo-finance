@@ -5,11 +5,14 @@ import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { ChevronLeft, Receipt, CheckCircle2, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { SaveTemplatePrompt } from "./SaveTemplatePrompt";
 
 export function ReceiptView() {
-    const { items, budget, endTrip, hideReceipt } = useCartifyStore();
+    const { items, budget, mode, endTrip, hideReceipt } = useCartifyStore();
     const { exchangeRate } = useCurrencyStore();
+    
+    const [showSavePrompt, setShowSavePrompt] = useState(false);
 
     const totalSpent = items.reduce((acc, item) => acc + item.amount, 0);
     const vatableSubtotal = items.filter(i => i.isVatable).reduce((acc, i) => acc + i.amount, 0);
@@ -231,13 +234,29 @@ export function ReceiptView() {
                 {/* Finish Action */}
                 <div className="mt-8 mb-4">
                     <button
-                        onClick={endTrip}
+                        onClick={() => {
+                            if (mode === 'planned') {
+                                setShowSavePrompt(true);
+                            } else {
+                                endTrip();
+                            }
+                        }}
                         className="w-full h-[60px] rounded-full bg-white text-black font-semibold text-base tracking-wide flex items-center justify-center hover:bg-white/90 active:scale-[0.98] shadow-[0_8px_30px_rgba(255,255,255,0.1)] transition-all duration-300"
                     >
                         Finish & Clear Trip
                     </button>
                 </div>
             </div>
+
+            {/* Template Save Prompt */}
+            <SaveTemplatePrompt 
+                isOpen={showSavePrompt} 
+                onClose={() => setShowSavePrompt(false)}
+                onConfirmFinish={() => {
+                    setShowSavePrompt(false);
+                    endTrip();
+                }}
+            />
         </div>
     );
 }

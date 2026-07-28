@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartifyItem } from '@/types/finance';
 
-export type CartifyMode = 'simple' | 'unplanned' | 'planned';
+export type CartifyMode = 'simple' | 'planned';
 
 interface CartifyState {
     isActive: boolean;
@@ -17,6 +17,8 @@ interface CartifyState {
     startTrip: (budget: number, mode: CartifyMode) => void;
     finishBuildingList: () => void;
     resumeBuildingList: () => void;
+    saveForLater: () => void;
+    resumeTrip: () => void;
     endTrip: () => void;
     showReceipt: () => void;
     hideReceipt: () => void;
@@ -62,6 +64,9 @@ export const useCartifyStore = create<CartifyState>()(
 
             finishBuildingList: () => set({ isBuildingList: false }),
             resumeBuildingList: () => set({ isBuildingList: true }),
+            
+            saveForLater: () => set({ isActive: false }),
+            resumeTrip: () => set({ isActive: true }),
 
             endTrip: () => set({ 
                 isActive: false, 
