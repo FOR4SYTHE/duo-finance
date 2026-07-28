@@ -359,9 +359,9 @@ export function TripSetup() {
                         {parseFloat(displayValue) > 0 ? (
                             <motion.div 
                                 key="active-content"
-                                initial={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
-                                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                                exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 30, delay: 0.05 }}
                                 className="flex items-center justify-between w-full h-full"
                             >
@@ -424,9 +424,9 @@ export function TripSetup() {
                             />
                             
                             <motion.div 
-                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ type: "spring", damping: 25, stiffness: 400 }}
                                 className="relative w-full max-w-[340px] bg-[#1C1C1E] border border-white/10 rounded-[32px] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)] overflow-hidden"
                             >
