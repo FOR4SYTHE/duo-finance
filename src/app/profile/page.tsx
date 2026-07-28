@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { WelcomeShader } from "@/components/auth/WelcomeShader";
 import { BorderBeam } from "border-beam";
 import { ThinkingOrb } from "thinking-orbs";
 import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart } from "lucide-react";
@@ -23,8 +22,10 @@ export default function ProfilePage() {
   const [isEditingAvatar, setIsEditingAvatar] = useState(false);
   const [imageZoom, setImageZoom] = useState(1);
   const [imagePan, setImagePan] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
+  const panRef = useRef({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
   const dragStart = useRef({ x: 0, y: 0 });
+  const imgRef = useRef<HTMLImageElement>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -34,6 +35,7 @@ export default function ProfilePage() {
         setProfileImage(reader.result as string);
         setImageZoom(1);
         setImagePan({ x: 0, y: 0 });
+        panRef.current = { x: 0, y: 0 };
         setIsEditingAvatar(true);
       };
       reader.readAsDataURL(file);
@@ -67,13 +69,11 @@ export default function ProfilePage() {
   return (
     <div className="w-full h-full bg-[#000000] text-white font-sans selection:bg-white/10 flex flex-col relative pb-4">
       
-      {/* Background WebGL Shader (Subtle Animating Orbs) */}
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-60">
-        <WelcomeShader />
+      {/* Subtle ambient gradient — zero GPU cost replacement for WebGL shader */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_30%_40%,rgba(0,80,40,0.12),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_60%_at_70%_60%,rgba(0,60,30,0.08),transparent_70%)]" />
       </div>
-      
-      {/* Noise overlay */}
-      <div className="fixed inset-0 z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.04] pointer-events-none mix-blend-overlay" />
 
       {/* Top Dynamic Island / Header Block */}
       <motion.div 
@@ -81,31 +81,30 @@ export default function ProfilePage() {
         transition={{ type: "spring", bounce: 0, duration: 0.5 }}
         className="relative shrink-0 bg-[#0A0A0C] rounded-b-[44px] pb-10 pt-14 px-6 shadow-[0_24px_48px_rgba(0,0,0,0.8)] border-b border-white/5 z-20 overflow-hidden"
       >
-        {/* Inner ambient light & noise */}
+        {/* Inner ambient light */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none z-0" />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay pointer-events-none z-0" />
         
         {/* Navigation */}
-        <motion.div layout className="flex items-center justify-between mb-6 relative z-10">
+        <motion.div layout="position" className="flex items-center justify-between mb-6 relative z-10">
           <motion.button 
-            layout
+            layout="position"
             onClick={() => router.back()}
-            className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors backdrop-blur-md shadow-sm border-[0.5px] border-white/5"
+            className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors shadow-sm border-[0.5px] border-white/5"
           >
             <ChevronLeft className="w-6 h-6 pr-0.5" />
           </motion.button>
           <motion.div 
-            layout
+            layout="position"
             onClick={() => document.getElementById('settings-section')?.scrollIntoView({ behavior: 'smooth' })}
-            className="w-10 h-10 flex items-center justify-center text-white/50 hover:text-white transition-colors cursor-pointer bg-white/5 rounded-full backdrop-blur-sm border-[0.5px] border-white/5"
+            className="w-10 h-10 flex items-center justify-center text-white/50 hover:text-white transition-colors cursor-pointer bg-white/5 rounded-full border-[0.5px] border-white/5"
           >
              <Settings className="w-5 h-5" />
           </motion.div>
         </motion.div>
 
         {/* Interconnected Avatars & Info */}
-        <motion.div layout className="flex flex-col items-center justify-center relative z-10">
-          <motion.div layout className="flex items-center justify-center mb-6">
+        <motion.div layout="position" className="flex flex-col items-center justify-center relative z-10">
+          <div className="flex items-center justify-center mb-6">
             {/* Hidden File Input */}
             <input 
               type="file" 
@@ -115,34 +114,41 @@ export default function ProfilePage() {
               className="hidden" 
             />
             {/* User Avatar Container */}
-            <motion.div layout className="relative z-10 flex flex-col items-center">
-              <motion.div layout
+            <div className="relative z-10 flex flex-col items-center">
+              <div
                 className="w-[92px] h-[92px] rounded-full bg-gradient-to-b from-[#2A2A2C] to-[#1A1A1C] border-[0.5px] border-white/20 flex items-center justify-center shadow-[0_12px_24px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.1)] overflow-hidden relative cursor-pointer group touch-none"
                 onClick={(e) => {
                   if (!isEditingAvatar) fileInputRef.current?.click();
                 }}
                 onPointerDown={(e) => {
                    if (isEditingAvatar) {
-                     setIsDragging(true);
-                     dragStart.current = { x: e.clientX - imagePan.x, y: e.clientY - imagePan.y };
+                     isDraggingRef.current = true;
+                     dragStart.current = { x: e.clientX - panRef.current.x, y: e.clientY - panRef.current.y };
                      e.currentTarget.setPointerCapture(e.pointerId);
                    }
                 }}
                 onPointerMove={(e) => {
-                   if (isDragging && isEditingAvatar) {
-                     setImagePan({ x: e.clientX - dragStart.current.x, y: e.clientY - dragStart.current.y });
+                   if (isDraggingRef.current && isEditingAvatar) {
+                     const nx = e.clientX - dragStart.current.x;
+                     const ny = e.clientY - dragStart.current.y;
+                     panRef.current = { x: nx, y: ny };
+                     if (imgRef.current) {
+                       imgRef.current.style.transform = `scale(${imageZoom}) translate(${nx / imageZoom}px, ${ny / imageZoom}px)`;
+                     }
                    }
                 }}
                 onPointerUp={(e) => {
-                   setIsDragging(false);
+                   isDraggingRef.current = false;
+                   setImagePan({ ...panRef.current });
                    e.currentTarget.releasePointerCapture(e.pointerId);
                 }}
               >
                 {profileImage ? (
                   <img 
+                    ref={imgRef}
                     src={profileImage} 
                     alt="Profile" 
-                    className="w-full h-full object-cover pointer-events-none" 
+                    className="w-full h-full object-cover pointer-events-none will-change-transform" 
                     style={{ transform: `scale(${imageZoom}) translate(${imagePan.x / imageZoom}px, ${imagePan.y / imageZoom}px)` }}
                   />
                 ) : (
@@ -150,7 +156,7 @@ export default function ProfilePage() {
                 )}
                 {/* Subtle dark overlay on hover */}
                 {!isEditingAvatar && <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />}
-              </motion.div>
+              </div>
               
               {/* Partner Floating Bubble (Lava Lamp) */}
               {partner && !isEditingAvatar && (
@@ -202,7 +208,7 @@ export default function ProfilePage() {
 
               {/* Editing Controls */}
               {isEditingAvatar && (
-                <div className="absolute top-[100px] bg-[#1C1C1E]/95 backdrop-blur-xl border-[0.5px] border-white/10 rounded-2xl p-3 shadow-2xl flex flex-col gap-3 z-50 w-48 animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute top-[100px] bg-[#1C1C1E] border-[0.5px] border-white/10 rounded-2xl p-3 shadow-2xl flex flex-col gap-3 z-50 w-48 animate-in fade-in zoom-in-95 duration-200">
                   <div className="text-[9px] font-bold text-white/40 uppercase tracking-widest text-center">Adjust Photo</div>
                   <div className="flex items-center gap-2">
                      <span className="text-[12px] text-white/50">-</span>
@@ -226,20 +232,20 @@ export default function ProfilePage() {
                   </button>
                 </div>
               )}
-            </motion.div>
+            </div>
 
             {/* Old Partner Avatar removed to use the floating bubble instead */}
-          </motion.div>
+          </div>
 
-          <motion.h2 layout className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1">
+          <motion.h2 layout="position" className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1">
             {user?.name || 'You'} {partner ? `& ${partner.name}` : ''}
           </motion.h2>
-          <motion.p layout className="text-[14px] text-white/50 mb-7 font-medium">{user?.email || 'user@example.com'}</motion.p>
+          <motion.p layout="position" className="text-[14px] text-white/50 mb-7 font-medium">{user?.email || 'user@example.com'}</motion.p>
           
           {/* Status / Invite Pill inside the header */}
           {partner ? (
             <div className="flex flex-col items-center gap-4">
-              <div className="px-4 py-2 bg-[#0A0A0C] border border-[#30D158]/20 rounded-full flex items-center gap-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.5)] backdrop-blur-md">
+              <div className="px-4 py-2 bg-[#0A0A0C] border border-[#30D158]/20 rounded-full flex items-center gap-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.5)]">
                 <div className="relative flex items-center justify-center">
                    <div className="absolute w-4 h-4 bg-[#30D158]/20 rounded-full blur-[3px]" />
                    <div className="relative w-1.5 h-1.5 rounded-full bg-[#30D158]" />
@@ -264,14 +270,14 @@ export default function ProfilePage() {
                   <motion.div 
                     key="input-state"
                     layout
-                    initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
                     className="w-full flex flex-col gap-2"
                   >
                     <BorderBeam size="line" colorVariant="colorful">
-                      <div className="w-full bg-[#121214] rounded-[20px] p-1.5 border-[0.5px] border-white/10 flex items-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md transition-colors relative overflow-hidden">
+                      <div className="w-full bg-[#121214] rounded-[20px] p-1.5 border-[0.5px] border-white/10 flex items-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] relative overflow-hidden">
                         <input 
                           type="text" 
                           placeholder="ENTER 6-DIGIT CODE" 
@@ -349,14 +355,14 @@ export default function ProfilePage() {
                   <motion.div 
                     key="idle-state"
                     layout
-                    initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
                     className="w-full flex flex-col gap-2"
                   >
                     <BorderBeam size="line" colorVariant="colorful">
-                      <div className="w-full bg-[#121214] rounded-[20px] p-3 border-[0.5px] border-white/5 flex items-center justify-between shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] backdrop-blur-md">
+                      <div className="w-full bg-[#121214] rounded-[20px] p-3 border-[0.5px] border-white/5 flex items-center justify-between shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
                         <div className="flex flex-col pl-3">
                             <span className="text-white/40 text-[9px] uppercase tracking-[0.1em] font-bold mb-0.5">Household Code</span>
                             <span className="text-white font-mono text-[16px] tracking-[0.15em] font-medium opacity-90">{mockInviteCode}</span>

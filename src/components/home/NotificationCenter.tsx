@@ -38,15 +38,16 @@ export function NotificationCenter({ isOpen, onClose, onActionClick }: Notificat
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] bg-black/60"
           />
           <motion.div
             initial={{ opacity: 0, x: "100%" }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
-            transition={{ type: "tween", ease: [0.25, 1, 0.5, 1], duration: 0.4 }}
-            className="fixed inset-y-0 right-0 w-full max-w-sm z-[110] bg-[#0A0A0C] border-l border-white/5 flex flex-col shadow-2xl"
+            transition={{ type: "tween", ease: [0.25, 1, 0.5, 1], duration: 0.3 }}
+            className="fixed inset-y-0 right-0 w-full max-w-sm z-[110] bg-[#0A0A0C] border-l border-white/5 flex flex-col shadow-2xl will-change-transform"
           >
             <div className="flex items-center justify-between p-6 border-b border-white/5">
               <div className="flex items-center gap-3">
@@ -88,15 +89,15 @@ export function NotificationCenter({ isOpen, onClose, onActionClick }: Notificat
                     </button>
                   </div>
                   
-                  <AnimatePresence mode="popLayout">
+                  <AnimatePresence>
                     {notifications.map((notif) => (
                       <motion.div
                         key={notif.id}
-                        layout
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                        className={`flex gap-4 p-4 rounded-[20px] transition-colors relative group ${notif.read ? 'bg-white/5 border border-white/5' : 'bg-white/10 border border-white/15 shadow-[0_4px_16px_rgba(0,0,0,0.2)]'}`}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8, transition: { duration: 0.15 } }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className={`flex gap-4 p-4 rounded-[20px] relative group ${notif.read ? 'bg-white/5 border border-white/5' : 'bg-white/10 border border-white/15 shadow-[0_4px_16px_rgba(0,0,0,0.2)]'}`}
                       >
                         {!notif.read && (
                           <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-[#0A84FF] shadow-[0_0_8px_#0A84FF]" />
