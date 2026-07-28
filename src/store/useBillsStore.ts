@@ -11,6 +11,7 @@ export interface Bill {
   isRecurring: boolean;
   reminderEnabled: boolean;
   icon?: string;
+  color?: string;
 }
 
 interface BillsState {

@@ -56,6 +56,11 @@ export interface AppNotification {
     type: 'system' | 'report' | 'alert';
     action?: {
         label: string;
-        payload?: any;
+        payload?: {
+            actionType: 'view_report' | 'view_year_report' | 'view_calendar' | 'view_cartify' | 'view_budget';
+            monthKey?: string;
+            year?: number;
+            [key: string]: any;
+        };
     };
 }

@@ -23,6 +23,8 @@ import { YearlySummary } from "@/components/home/YearlySummary";
 import { NotificationCenter } from "@/components/home/NotificationCenter";
 import { AnimatedPiggyBank } from "@/components/home/AnimatedPiggyBank";
 import { CashbackDealsRadar } from "@/components/home/CashbackDealsRadar";
+import { DueTodayBanner } from "@/components/home/DueTodayBanner";
+import { useNotificationEngine } from "@/hooks/useNotificationEngine";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
@@ -32,6 +34,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { containerVariants, itemVariants } from "@/utils/animations";
 
 export default function Home() {
+  useNotificationEngine();
+
   const { config, setLastSeenMonth, _hasHydrated, notifications, addNotification } = useBudgetStore();
   const { entries, injectMockEntries } = useSpendStore();
   const { exchangeRate } = useCurrencyStore();
@@ -74,6 +78,7 @@ export default function Home() {
   const [showYearSummaryModal, setShowYearSummaryModal] = useState(false);
   const [showNotifCenter, setShowNotifCenter] = useState(false);
   const [showDealsRadar, setShowDealsRadar] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   
   const [lastSeen, setLastSeen] = useState("");
   const [currentMonth, setCurrentMonth] = useState("");
@@ -152,6 +157,15 @@ export default function Home() {
       setShowNotifCenter(false);
       setRecapYear(action.payload.year);
       setShowYearSummaryModal(true);
+    } else if (action?.payload?.actionType === 'view_calendar') {
+      setShowNotifCenter(false);
+      setShowCalendar(true); // Assuming this triggers a calendar modal or scrolls to it
+    } else if (action?.payload?.actionType === 'view_cartify') {
+      setShowNotifCenter(false);
+      window.location.href = '/cartify';
+    } else if (action?.payload?.actionType === 'view_budget') {
+      setShowNotifCenter(false);
+      window.location.href = '/budget';
     }
   };
 
@@ -216,25 +230,19 @@ export default function Home() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          {/* TEMP TRICK: Compact test dots */}
           <div className="flex gap-2">
-            {/* Auth Flow: Pink */}
             <button 
               title="Test Auth Flow"
               onClick={() => {
-                // Clear the state by directly mutating localStorage
                 localStorage.removeItem('duo-auth-storage');
                 const { useAuthStore } = require('@/store/useAuthStore');
                 if (useAuthStore.getState) {
                   useAuthStore.getState().logout();
                 }
-                
-                // Hard redirect
                 window.location.href = '/welcome';
               }}
               className="w-3 h-3 rounded-full bg-[#FF375F] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(255,55,95,0.5)]"
             />
-            {/* Yearly: Gold */}
             <button 
               title="Test Yearly Summary"
               onClick={() => {
@@ -245,28 +253,23 @@ export default function Home() {
               }}
               className="w-3 h-3 rounded-full bg-[#D4AF37] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(212,175,55,0.5)]"
             />
-            {/* Mock Busy Month: Green */}
             <button 
               title="Test Busy Month Data"
               onClick={() => {
-                // Generate 35 mock entries for June 2026
                 const mockEntries = Array.from({ length: 35 }).map((_, i) => ({
                   id: `mock-${crypto.randomUUID()}`,
-                  amount: Math.floor(Math.random() * 3000) + 100, // 100 to 3100
+                  amount: Math.floor(Math.random() * 3000) + 100,
                   currency: 'PHP' as const,
                   category: ['Groceries', 'Rent', 'Utilities', 'Child Care', 'Bills'][Math.floor(Math.random() * 5)],
                   note: `Mock Entry ${i + 1}`,
-                  timestamp: new Date(2026, 5, Math.floor(Math.random() * 28) + 1).getTime() // June 2026
+                  timestamp: new Date(2026, 5, Math.floor(Math.random() * 28) + 1).getTime()
                 }));
                 injectMockEntries(mockEntries);
-                
-                // Show the report for June 2026
                 setLastSeen("2026-06");
                 setShowSummaryModal(true);
               }}
               className="w-3 h-3 rounded-full bg-[#30D158] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(48,209,88,0.5)]"
             />
-            {/* Monthly: Blue */}
             <button 
               title="Test Monthly Summary"
               onClick={() => {
@@ -276,7 +279,6 @@ export default function Home() {
               }}
               className="w-3 h-3 rounded-full bg-[#0A84FF] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(10,132,255,0.5)]"
             />
-            {/* Notif: White */}
             <button 
               title="Test Notification"
               onClick={() => {
@@ -290,7 +292,6 @@ export default function Home() {
               }}
               className="w-3 h-3 rounded-full bg-white hover:scale-125 transition-transform shadow-[0_0_8px_rgba(255,255,255,0.5)]"
             />
-            {/* Animation: Purple */}
             <button 
               title="Test Entrance Animation"
               onClick={() => {
@@ -313,16 +314,23 @@ export default function Home() {
         </div>
       </motion.div>
 
+      {/* V1 Due Today Banner */}
+      <motion.div variants={itemVariants}>
+        <DueTodayBanner onTap={() => setShowCalendar(true)} />
+      </motion.div>
+
       {/* Monthly Report Hero Card (photo-backed, budget overlaid) */}
       <motion.div variants={itemVariants}>
         <MonthlyReportCard />
       </motion.div>
 
-      {/* Bills Calendar Card */}
-      <motion.div variants={itemVariants}>
-        <BillsCalendarCard />
+      {/* Bills & Calendar Overview */}
+      <motion.div variants={itemVariants} className="mb-8" id="calendar-section">
+        <BillsCalendarCard 
+          forceOpenFullCalendar={showCalendar}
+          onCalendarClose={() => setShowCalendar(false)}
+        />
       </motion.div>
-
 
       {/* Apple Watch Style Bento UI */}
       <motion.div variants={itemVariants} className="flex flex-col gap-4 relative z-20 flex-1">

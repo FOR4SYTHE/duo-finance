@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -33,10 +33,35 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
+const RAINBOW_COLORS = [
+  "#FF3B30", // Red
+  "#FF9F0A", // Orange
+  "#FFD60A", // Yellow
+  "#30D158", // Green
+  "#64D2FF", // Light Blue
+  "#0A84FF", // Blue
+  "#5E5CE6", // Indigo
+  "#BF5AF2", // Purple
+  "#FF375F", // Pink
+  "#FFFFFF", // Default/White
+];
+
 const BILL_CATEGORIES = [
   "Housing", "Utilities", "Insurance", "Subscriptions",
   "Education", "Transportation", "Health", "Other",
 ];
+
+const CATEGORY_HEX: Record<string, string> = {
+  Housing: "#FF9F0A",
+  Utilities: "#30D158",
+  Insurance: "#5E5CE6",
+  Subscriptions: "#FF453A",
+  Education: "#BF5AF2",
+  Transportation: "#64D2FF",
+  Health: "#FF375F",
+  Cartify: "#30D158",
+  Other: "#FFFFFF",
+};
 
 const getCategoryArt = (category: string): { icon: LucideIcon; color: string; glow: string } => {
   switch (category) {
@@ -67,10 +92,12 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
   const [showAddForm, setShowAddForm] = useState(false);
 
   // Add form state
+  const formRef = useRef<HTMLDivElement>(null);
   const [newName, setNewName] = useState("");
   const [newAmount, setNewAmount] = useState("");
   const [newCategory, setNewCategory] = useState("Other");
   const [newRecurring, setNewRecurring] = useState(true);
+  const [newColor, setNewColor] = useState<string>("");
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
@@ -157,17 +184,19 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
     if (!newName.trim() || !newAmount.trim() || !selectedDay) return;
     addBill({
       name: newName.trim(),
-      amount: parseFloat(newAmount),
+      amount: parseFloat(newAmount) || 0,
       currency: "PHP",
-      dueDay: selectedDay,
+      dueDay: selectedDay!,
       category: newCategory,
       isRecurring: newRecurring,
       reminderEnabled: true,
+      color: newColor || undefined
     });
     setNewName("");
     setNewAmount("");
     setNewCategory("Other");
     setNewRecurring(true);
+    setNewColor("");
     setShowAddForm(false);
   };
 
@@ -183,6 +212,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
       exit={{ opacity: 0, y: "100%" }}
       transition={{ type: "spring", damping: 30, stiffness: 300 }}
       className="fixed inset-0 z-[110] bg-[#050505] overflow-y-auto no-scrollbar"
+      id="bills-calendar-scroll-area"
     >
       <div className="w-full max-w-xl mx-auto min-h-full pb-12">
         {/* Header */}
@@ -255,6 +285,13 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                   }
                 }
 
+                // Derive the ring color: custom color on the bill, or fall back to category hex
+                const regularBill = hasBills ? billsForDay.find(b => b.category !== "Cartify") : undefined;
+                const ringHex = regularBill?.color || (regularBill ? CATEGORY_HEX[regularBill.category] || "#FF9F0A" : undefined);
+                const customBillColor = hasBills ? billsForDay[0]?.color : undefined;
+                
+                const tailwindBgClass = !hasCartify && !customBillColor ? art?.color : "";
+
                 return (
                   <button
                     key={i}
@@ -266,11 +303,18 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                       !day
                         ? ""
                         : hasBills
-                        ? `${art?.color} text-black border-none`
+                        ? hasCartify ? `bg-[#30D158] text-black border-none` : `${tailwindBgClass} text-black border-none`
                         : todayFlag
                         ? "bg-white/15 text-white font-bold border border-white/30"
                         : "text-white/60 hover:bg-white/[0.06] font-medium"
-                    } ${hasCartify && hasRegularBill ? "ring-2 ring-[#FF9F0A] ring-offset-2 ring-offset-[#050505]" : ""}`}
+                    }`}
+                    style={
+                      day && hasBills && hasCartify && hasRegularBill && ringHex
+                        ? { boxShadow: `0 0 0 2px #050505, 0 0 0 4px ${ringHex}` }
+                        : day && hasBills && !hasCartify && customBillColor
+                        ? { backgroundColor: customBillColor }
+                        : undefined
+                    }
                   >
                     {day && hasBills && art ? (
                       <div className="relative w-full h-full flex items-center justify-center">
@@ -290,7 +334,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                         )}
                         
                         {billsForDay.length > 1 && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full text-white text-[9px] font-bold flex items-center justify-center border border-white/20 shadow-md">
+                          <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-black rounded-full text-white text-[9px] font-bold flex items-center justify-center border border-white/20 shadow-md z-50">
                             {billsForDay.length}
                           </div>
                         )}
@@ -321,7 +365,14 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                     Schedule for {MONTH_NAMES[viewMonth].slice(0, 3)} {selectedDay}
                   </h3>
                   <button
-                    onClick={() => setShowAddForm(true)}
+                    onClick={() => {
+                      setShowAddForm(true);
+                      requestAnimationFrame(() => {
+                        setTimeout(() => {
+                          formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                      });
+                    }}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-white/20 transition-colors border border-white/10"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -342,11 +393,19 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                           
                           <div className="flex items-start justify-between relative z-10">
                             <div className="flex items-center gap-3.5">
-                              <div className={`w-11 h-11 rounded-full flex items-center justify-center ${art.color} text-black shadow-lg`}>
+                              <div 
+                                className={`w-11 h-11 rounded-full flex items-center justify-center text-black shadow-lg ${!bill.color ? art.color : ''}`}
+                                style={bill.color ? { backgroundColor: bill.color } : undefined}
+                              >
                                 <art.icon className="w-5 h-5" />
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-[16px] font-bold text-white tracking-wide">{bill.name}</span>
+                                <span 
+                                  className="text-[16px] font-bold tracking-wide"
+                                  style={{ color: bill.color || '#FFFFFF' }}
+                                >
+                                  {bill.name}
+                                </span>
                                 <span className="text-[10px] text-white/40 uppercase tracking-widest mt-0.5">{bill.category}</span>
                               </div>
                             </div>
@@ -416,7 +475,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden mb-8"
               >
-                <div className="bg-[#111111] rounded-[28px] border border-white/[0.08] p-6 shadow-2xl relative overflow-hidden">
+                <div ref={formRef} className="bg-[#111111] rounded-[28px] border border-white/[0.08] p-6 shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                   <h4 className="text-[15px] font-bold text-white mb-5 tracking-tight">
                     Add Bill for Day {selectedDay}
@@ -458,6 +517,23 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                           </button>
                         );
                       })}
+                    </div>
+
+                    {/* Color selector */}
+                    <div className="flex flex-col gap-2 mt-3 mb-1">
+                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest px-1">Optional Custom Color</span>
+                        <div className="flex flex-wrap gap-2.5 px-1">
+                            {RAINBOW_COLORS.map(color => (
+                                <button
+                                    key={color}
+                                    onClick={() => setNewColor(newColor === color ? "" : color)}
+                                    className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${newColor === color ? 'scale-125 shadow-[0_0_12px_rgba(255,255,255,0.3)] border-2 border-white' : 'hover:scale-110 opacity-70 hover:opacity-100 border border-white/10'}`}
+                                    style={{ backgroundColor: color }}
+                                >
+                                    {newColor === color && <Check className="w-[10px] h-[10px] text-black stroke-[4]" />}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Recurring toggle */}

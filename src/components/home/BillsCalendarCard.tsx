@@ -11,12 +11,17 @@ import { BillsCalendar } from "./BillsCalendar";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 
-export function BillsCalendarCard() {
+interface BillsCalendarCardProps {
+  forceOpenFullCalendar?: boolean;
+  onCalendarClose?: () => void;
+}
+
+export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: BillsCalendarCardProps = {}) {
   const { bills } = useBillsStore();
   const { scheduledTrips } = useHouseholdStore();
   const { savedTrips } = useCartifyStore();
   const { exchangeRate } = useCurrencyStore();
-  const [showCalendar, setShowCalendar] = useState(false);
+  const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [view, setView] = useState<'grid' | 'presentation'>('grid');
 
   const today = useMemo(() => new Date(), []);
@@ -33,6 +38,18 @@ export function BillsCalendarCard() {
     }, 15000);
     return () => clearTimeout(timer);
   }, [view, selectedDate]);
+
+  // Handle forced open from notifications
+  useEffect(() => {
+    if (forceOpenFullCalendar) {
+      setShowFullCalendar(true);
+    }
+  }, [forceOpenFullCalendar]);
+
+  const handleClose = () => {
+    setShowFullCalendar(false);
+    if (onCalendarClose) onCalendarClose();
+  };
 
   const allEvents = useMemo(() => {
     const events: any[] = [...bills.map(b => ({ ...b, eventType: 'bill' }))];
@@ -142,7 +159,7 @@ export function BillsCalendarCard() {
       >
         {/* Header - Clickable to open full calendar */}
         <div 
-          onClick={() => setShowCalendar(true)}
+          onClick={() => setShowFullCalendar(true)}
           className="flex items-center justify-between mb-8 cursor-pointer group active:opacity-70 transition-opacity"
         >
           <div className="flex items-center gap-4">
@@ -186,15 +203,26 @@ export function BillsCalendarCard() {
                     const isSelected = day.date === selectedDate.getDate() && day.month === selectedDate.getMonth();
                     const hasCartify = day.eventsForDay?.some(b => b.category === "Cartify");
                     const hasRegular = day.eventsForDay?.some(b => b.category !== "Cartify");
+                    const firstRegularBill = day.eventsForDay?.find(b => b.category !== "Cartify");
+                    const customColor = firstRegularBill?.color;
+                    // Derive ring color: custom color first, then category default
+                    const CATEGORY_HEX: Record<string, string> = {
+                      Housing: "#FF9F0A", Utilities: "#30D158", Insurance: "#5E5CE6",
+                      Subscriptions: "#FF453A", Education: "#BF5AF2", Transportation: "#64D2FF",
+                      Health: "#FF375F", Other: "#FFFFFF",
+                    };
+                    const ringHex = customColor || (firstRegularBill ? CATEGORY_HEX[firstRegularBill.category] || "#FF9F0A" : undefined);
                     
                     let bgClass = "bg-[#E5E5E5] text-black font-bold shadow-[0_0_30px_rgba(255,255,255,0.15)]";
                     if (day.hasBill) {
                       if (hasCartify && hasRegular) {
-                        bgClass = "bg-[#30D158] text-black font-bold shadow-[0_0_24px_rgba(48,209,88,0.25)] ring-2 ring-[#FF9F0A] ring-offset-2 ring-offset-[#111111]";
+                        bgClass = "bg-[#30D158] text-black font-bold shadow-[0_0_24px_rgba(48,209,88,0.25)]";
                       } else if (hasCartify) {
                         bgClass = "bg-[#30D158] text-black font-bold shadow-[0_0_24px_rgba(48,209,88,0.25)]";
                       } else {
-                        bgClass = "bg-[#FF9F0A] text-black font-bold shadow-[0_0_24px_rgba(255,159,10,0.25)]";
+                        bgClass = customColor 
+                          ? "text-black font-bold shadow-[0_0_24px_rgba(255,255,255,0.15)]"
+                          : "bg-[#FF9F0A] text-black font-bold shadow-[0_0_24px_rgba(255,159,10,0.25)]";
                       }
                     }
 
@@ -210,10 +238,20 @@ export function BillsCalendarCard() {
                               ? `w-[38px] h-[38px] z-10 ${bgClass}`
                               : "w-[38px] h-[38px] text-[#A1A1A1] font-medium hover:text-white"
                           }`}
+                          style={
+                            isSelected && hasCartify && hasRegular && ringHex
+                              ? { boxShadow: `0 0 0 2px #111111, 0 0 0 4px ${ringHex}` }
+                              : isSelected && !hasCartify && customColor
+                              ? { backgroundColor: customColor }
+                              : undefined
+                          }
                         >
                           {/* Premium warning beam pulse for selected bills */}
                           {isSelected && day.hasBill && (
-                            <div className={`absolute inset-0 rounded-full animate-[ping_2.5s_cubic-bezier(0,0,0.2,1)_infinite] opacity-40 pointer-events-none -z-10 ${hasCartify ? 'bg-[#30D158]' : 'bg-[#FF9F0A]'}`} />
+                            <div 
+                              className={`absolute inset-0 rounded-full animate-[ping_2.5s_cubic-bezier(0,0,0.2,1)_infinite] opacity-40 pointer-events-none -z-10`} 
+                              style={{ backgroundColor: hasCartify ? '#30D158' : (ringHex || '#FF9F0A') }}
+                            />
                           )}
 
                           {isSelected && hasCartify ? (
@@ -230,7 +268,10 @@ export function BillsCalendarCard() {
                           
                           {/* Dot for bill */}
                           {day.hasBill && !isSelected && (
-                            <div className={`w-1 h-1 rounded-full absolute bottom-[3px] ${hasCartify ? 'bg-[#30D158]' : 'bg-[#525252]'}`} />
+                            <div 
+                              className="w-1 h-1 rounded-full absolute bottom-[3px]"
+                              style={{ backgroundColor: hasCartify ? '#30D158' : (ringHex || '#525252') }}
+                            />
                           )}
                         </div>
                       </div>
@@ -269,7 +310,10 @@ export function BillsCalendarCard() {
                     {selectedBills.length > 0 ? (
                       <div className="w-full h-full flex flex-col justify-between">
                         <div className="flex items-start justify-between relative z-10">
-                          <span className="text-[15px] font-bold text-[#E5E5E5] leading-tight">
+                          <span 
+                            className="text-[15px] font-bold leading-tight"
+                            style={{ color: selectedBills.length === 1 && selectedBills[0].color ? selectedBills[0].color : '#E5E5E5' }}
+                          >
                             {selectedBills.length > 1 ? `${selectedBills.length} Bills Due` : selectedBills[0].name}
                           </span>
                         </div>
@@ -323,8 +367,8 @@ export function BillsCalendarCard() {
       {/* Full Calendar Overlay */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
-          {showCalendar && (
-            <BillsCalendar onClose={() => setShowCalendar(false)} />
+          {showFullCalendar && (
+            <BillsCalendar onClose={handleClose} />
           )}
         </AnimatePresence>,
         document.body
