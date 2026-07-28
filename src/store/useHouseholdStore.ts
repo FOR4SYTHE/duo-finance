@@ -22,6 +22,7 @@ export interface ScheduledTrip {
     date: string; // ISO date string
     templateId?: string;
     estimatedBudgetPHP?: number;
+    storeName?: string;
 }
 
 interface HouseholdState {
