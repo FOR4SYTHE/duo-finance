@@ -352,10 +352,8 @@ export default function Home() {
               <img 
                 src="/InsuranceCard-Art.webp" 
                 alt="Insurance Art" 
-                className="w-full h-full object-cover object-left" 
+                className="w-full h-full object-contain object-right" 
               />
-              {/* Fade gradient to blend smoothly into the dark card */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A] via-transparent to-transparent w-full" />
             </div>
           </Link>
 
@@ -372,10 +370,8 @@ export default function Home() {
               <img 
                 src="/ChildCare-CardArt.webp" 
                 alt="Child Care Art" 
-                className="w-full h-full object-cover object-left" 
+                className="w-full h-full object-contain object-right" 
               />
-              {/* Fade gradient to blend smoothly into the dark card */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A] via-transparent to-transparent w-full" />
             </div>
           </Link>
 
@@ -397,12 +393,12 @@ export default function Home() {
             <AnimatedPiggyBank />
             
             <div className="flex flex-row items-center justify-between w-full h-full relative z-20 px-5 pointer-events-none">
-              {/* ATM Hero Image (Left side) with edge fading mask */}
-              <div className="w-[45%] h-full flex items-center justify-center relative [mask-image:linear-gradient(to_right,black_60%,transparent_100%)]">
+              {/* ATM Hero Image (Left side) */}
+              <div className="w-[45%] h-full flex items-center justify-center relative">
                 <img 
                   src="/images/spend-machine.webp" 
                   alt="Spend Machine" 
-                  className="w-[160%] max-w-none h-auto object-contain drop-shadow-[0_12px_32px_rgba(0,0,0,0.9)] translate-y-1 -translate-x-3 group-hover:scale-[1.08] group-active:scale-[0.92] transition-transform duration-300 ease-out" 
+                  className="w-[120%] h-auto object-contain drop-shadow-[0_12px_32px_rgba(0,0,0,0.9)] translate-y-1 -translate-x-3 group-hover:scale-[1.08] group-active:scale-[0.92] transition-transform duration-300 ease-out" 
                 />
               </div>
               
@@ -420,20 +416,34 @@ export default function Home() {
           </div>
 
           {/* Daily Insight Card */}
-          <div className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-3.5 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
-            <div className="flex justify-between items-start relative z-10 w-full">
-              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-md backdrop-blur-md">
-                <Sparkles className="w-4 h-4 text-amber-400" strokeWidth={2.5} />
-              </div>
-            </div>
-            <div className="relative z-10 mt-auto">
-              <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-1 block">Daily Insight</span>
-              <p className="text-white/90 text-[11px] font-medium leading-tight">
-                Prioritize your emergency fund first this month.
+          <div className="aspect-[5/3] rounded-[32px] p-1.5 relative bg-gradient-to-b from-white/10 to-white/5 shadow-[0_12px_32px_rgba(0,0,0,0.5)] flex">
+            <div className="flex-1 bg-gradient-to-b from-[#1C1C1E] to-[#151516] rounded-[26px] p-5 relative flex flex-col items-center justify-center border border-black/50 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)]">
+              {/* Top Center Mini Icon */}
+              <motion.div 
+                animate={{ y: [-2, 2, -2], x: [-0.5, 0.5, -0.5] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                className="mb-2 relative z-10"
+              >
+                <div className="w-7 h-7 rounded-full bg-gradient-to-b from-[#2A2A2C] to-[#1A1A1C] flex items-center justify-center border border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
+                  <Shield className="w-3.5 h-3.5 text-[#30D158]" />
+                </div>
+              </motion.div>
+
+              <p className="text-[#E5E5E5] text-[15px] font-medium leading-[1.3] text-center tracking-tight relative z-10 px-1">
+                <span className="text-white/40">Prioritize your</span><br/>emergency fund first this month.
               </p>
+
+              {/* Floating Right Mini Squircle */}
+              <motion.div 
+                animate={{ y: [-3, 3, -3], rotate: [3, 9, 3] }}
+                transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="absolute right-4 bottom-5 w-7 h-7 rounded-[8px] bg-gradient-to-br from-white/30 to-white/5 p-[1px] shadow-[0_8px_16px_rgba(0,0,0,0.4)] z-20"
+              >
+                <div className="w-full h-full bg-[#1A1A1C] rounded-[7px] flex items-center justify-center">
+                   <PiggyBank className="w-4 h-4 text-[#FF9F0A]" strokeWidth={2.5} />
+                </div>
+              </motion.div>
             </div>
-            {/* Subtle glow */}
-            <div className="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/20 blur-2xl rounded-full pointer-events-none" />
           </div>
 
           {/* Cashback & Deals (Modeled after "It's 3° now" typography card) */}
