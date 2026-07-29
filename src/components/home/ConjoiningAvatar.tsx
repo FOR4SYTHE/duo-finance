@@ -56,7 +56,13 @@ export function ConjoiningAvatar({ onTap }: ConjoiningAvatarProps) {
               transition={transitionL}
               className="absolute left-0 w-[40px] h-[40px] rounded-full border-[2px] border-[#0A0A0C] overflow-hidden bg-[#111] shadow-[0_4px_12px_rgba(0,0,0,0.5)] flex items-center justify-center"
             >
-              <img src={"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop"} className="w-full h-full object-cover" />
+              {user?.avatar ? (
+                <img src={user.avatar} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-b from-[#2A2A2C] to-[#141416] flex items-center justify-center text-white text-[15px] font-bold select-none">
+                  {user?.name?.[0]?.toUpperCase() || "U"}
+                </div>
+              )}
             </motion.div>
 
             {/* Right Avatar (Partner) */}
@@ -65,7 +71,13 @@ export function ConjoiningAvatar({ onTap }: ConjoiningAvatarProps) {
               transition={transitionR}
               className="absolute right-0 w-[40px] h-[40px] rounded-full border-[2px] border-[#0A0A0C] overflow-hidden bg-[#111] shadow-[0_4px_12px_rgba(0,0,0,0.5)] flex items-center justify-center"
             >
-              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop" className="w-full h-full object-cover" />
+              {partner?.avatar ? (
+                <img src={partner.avatar} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-b from-[#1C2C24] to-[#0A1A12] flex items-center justify-center text-emerald-400 text-[15px] font-bold select-none">
+                  {partner?.name?.[0]?.toUpperCase() || "P"}
+                </div>
+              )}
             </motion.div>
           </div>
         </div>

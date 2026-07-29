@@ -6,6 +6,7 @@ import { Users, ArrowRight, CheckCircle2, Loader2, Link2 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { WelcomeShader } from "@/components/auth/WelcomeShader";
+import { BorderBeam } from "border-beam";
 
 export default function SetupPage() {
   const router = useRouter();
@@ -16,6 +17,9 @@ export default function SetupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   
+  // Join Animation states: 'input' | 'verifying' | 'matched' | 'welcome'
+  const [joinStep, setJoinStep] = useState<"input" | "verifying" | "matched" | "welcome">("input");
+
   useEffect(() => {
     if (householdId) {
       router.push("/");
@@ -40,13 +44,23 @@ export default function SetupPage() {
     e.preventDefault();
     if (!inviteCode || inviteCode.length < 6) return;
     
-    setIsLoading(true);
-    await new Promise(r => setTimeout(r, 1500));
-    joinHousehold(inviteCode);
-    setSuccess(true);
+    // Step 1: Thinking Orb state
+    setJoinStep("verifying");
+    
+    // Step 2: Matched "Partner Found" state
     setTimeout(() => {
-      router.push("/");
-    }, 1000);
+      setJoinStep("matched");
+    }, 1200);
+
+    // Step 3: Fullscreen "You're connected" state
+    setTimeout(() => {
+      setJoinStep("welcome");
+    }, 2600);
+  };
+
+  const handleFinishJoin = () => {
+    joinHousehold(inviteCode);
+    router.push("/");
   };
 
   return (
@@ -167,45 +181,109 @@ export default function SetupPage() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 15 }}
                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-full bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[28px] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)]"
+                    className="w-full bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[28px] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center min-h-[220px]"
                   >
-                    <form onSubmit={handleJoin} className="space-y-6">
-                      <div className="space-y-3">
-                        <label className="text-[13px] font-bold text-white/40 tracking-[0.1em] uppercase ml-1">
-                          Invite Code
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. A3K9P2"
-                          value={inviteCode}
-                          onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                          maxLength={6}
-                          className="w-full bg-white/[0.04] border border-white/10 rounded-[16px] py-4 px-5 text-[#e4e2e4] placeholder-white/30 text-center tracking-[0.2em] font-mono text-[20px] outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all uppercase"
-                        />
-                      </div>
-                      
-                      <div className="flex flex-col gap-3">
-                        <button
-                          type="submit"
-                          disabled={isLoading || inviteCode.length < 6}
-                          className="w-full h-[56px] bg-[#111111] border border-white/10 text-white rounded-[16px] font-semibold text-[16px] flex items-center justify-center gap-2 hover:bg-[#1a1a1a] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]"
+                    <AnimatePresence mode="popLayout">
+                      {joinStep === "matched" ? (
+                        <motion.div 
+                          key="matched-state"
+                          layout
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          transition={{ duration: 0.3 }}
+                          className="flex items-center justify-center w-full py-8"
                         >
-                          {isLoading ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                          ) : (
-                            "JOIN HOUSEHOLD"
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setStep("choose")}
-                          disabled={isLoading}
-                          className="w-full h-[56px] bg-transparent text-white/50 rounded-[16px] font-medium text-[15px] flex items-center justify-center hover:text-white hover:bg-white/[0.03] transition-all active:scale-[0.98]"
+                          <motion.div 
+                            initial={{ width: 48, height: 48, borderRadius: 24, opacity: 0 }}
+                            animate={{ width: 220, height: 52, borderRadius: 26, opacity: 1 }}
+                            transition={{ type: "spring", bounce: 0.35, duration: 0.7 }}
+                            className="bg-black border border-emerald-500/30 flex items-center justify-start overflow-hidden relative shadow-[0_10px_40px_rgba(0,0,0,0.8)]"
+                          >
+                             <div className="w-[52px] h-[52px] flex-shrink-0 flex items-center justify-center pl-1">
+                                <motion.svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#30D158" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  {/* Face ID Broken Square (Apple Style) */}
+                                  <motion.path d="M8 3H5a2 2 0 0 0-2 2v3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
+                                  <motion.path d="M16 3h3a2 2 0 0 1 2 2v3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
+                                  <motion.path d="M8 21H5a2 2 0 0 1-2-2v-3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
+                                  <motion.path d="M16 21h3a2 2 0 0 0 2-2v-3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.2, duration: 0.4 }} />
+                                  {/* Face Center */}
+                                  <motion.path d="M8.5 10h.01M15.5 10h.01" strokeWidth="3" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5, type: "spring", bounce: 0.6 }} />
+                                  <motion.path d="M9 14c1 1.5 3 1.5 4 0" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.6, duration: 0.3 }} />
+                                  <motion.path d="M12 10v1.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.55, duration: 0.2 }} />
+                                </motion.svg>
+                             </div>
+                             <motion.span 
+                               initial={{ opacity: 0, x: -5 }}
+                               animate={{ opacity: 1, x: 0 }}
+                               transition={{ delay: 0.45, duration: 0.4 }}
+                               className="text-[#30D158] text-[13px] font-bold tracking-[0.14em] whitespace-nowrap"
+                             >
+                               PARTNER FOUND
+                             </motion.span>
+                          </motion.div>
+                        </motion.div>
+                      ) : (
+                        <motion.form 
+                          key="input-form"
+                          onSubmit={handleJoin} 
+                          className="w-full space-y-6"
                         >
-                          Back
-                        </button>
-                      </div>
-                    </form>
+                          <div className="space-y-3">
+                            <label className="text-[13px] font-bold text-white/40 tracking-[0.1em] uppercase ml-1">
+                              Invite Code
+                            </label>
+                            
+                            <BorderBeam size={joinStep === "verifying" ? "line" : "pulse-inner"} colorVariant={joinStep === "verifying" ? "colorful" : "mono"}>
+                              <div className="relative w-full">
+                                <input
+                                  type="text"
+                                  placeholder="E.G. A3K9P2"
+                                  value={inviteCode}
+                                  onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                                  maxLength={6}
+                                  disabled={joinStep === "verifying"}
+                                  className="w-full bg-white/[0.04] border border-white/10 rounded-[16px] py-4 px-5 text-[#e4e2e4] placeholder-white/20 text-center tracking-[0.25em] font-mono text-[20px] outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all uppercase"
+                                />
+                                {joinStep === "verifying" && (
+                                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                                    <span className="relative flex h-3 w-3">
+                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                      <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </BorderBeam>
+                          </div>
+                          
+                          <div className="flex flex-col gap-3">
+                            <button
+                              type="submit"
+                              disabled={joinStep === "verifying" || inviteCode.length < 6}
+                              className="w-full h-[56px] bg-[#111111] border border-white/10 text-white rounded-[16px] font-semibold text-[16px] flex items-center justify-center gap-2 hover:bg-[#1a1a1a] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]"
+                            >
+                              {joinStep === "verifying" ? (
+                                <div className="flex items-center gap-2">
+                                  <Loader2 className="w-5 h-5 animate-spin text-[#30D158]" />
+                                  <span className="text-[#30D158] font-bold tracking-wider">VERIFYING CODE...</span>
+                                </div>
+                              ) : (
+                                "JOIN HOUSEHOLD"
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setStep("choose")}
+                              disabled={joinStep === "verifying"}
+                              className="w-full h-[56px] bg-transparent text-white/50 rounded-[16px] font-medium text-[15px] flex items-center justify-center hover:text-white hover:bg-white/[0.03] transition-all active:scale-[0.98]"
+                            >
+                              Back
+                            </button>
+                          </div>
+                        </motion.form>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 )}
               </motion.div>
@@ -238,6 +316,122 @@ export default function SetupPage() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Full Screen Connected Welcome Overlay */}
+      <AnimatePresence>
+        {joinStep === "welcome" && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 backdrop-blur-3xl"
+          >
+            {/* SVG Filter for Metaballs */}
+            <svg width="0" height="0" className="absolute hidden">
+              <filter id="gooey-effect-setup">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -10" result="goo" />
+              </filter>
+            </svg>
+
+            <div className="relative w-full max-w-md flex flex-col items-center justify-center p-8">
+              
+              {/* Gooey Avatars Container */}
+              <div className="relative w-full h-40 flex items-center justify-center mb-10">
+                 
+                 {/* Background Gooey Layer */}
+                 <div className="absolute inset-0 flex items-center justify-center" style={{ filter: 'url(#gooey-effect-setup)' }}>
+                   <motion.div 
+                     className="absolute w-[96px] h-[96px] rounded-full bg-[#068562]"
+                     initial={{ x: -120, y: 0 }}
+                     animate={{ x: -60, y: [0, -8, 0] }}
+                     transition={{
+                       x: { duration: 1.2, type: "spring", bounce: 0.4 },
+                       y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
+                     }}
+                   />
+                   <motion.div 
+                     className="absolute w-[96px] h-[96px] rounded-full bg-[#068562]"
+                     initial={{ x: 120, y: 0 }}
+                     animate={{ x: 60, y: [0, 8, 0] }}
+                     transition={{
+                       x: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
+                       y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.3 }
+                     }}
+                   />
+                   <motion.div 
+                     className="absolute h-[50px] bg-[#013F4A]"
+                     initial={{ width: 0, opacity: 0, y: 0 }}
+                     animate={{ width: 120, opacity: 1, y: [0, -4, 4, 0] }}
+                     transition={{
+                       width: { duration: 1.0, delay: 0.2, type: "spring" },
+                       opacity: { duration: 1.0, delay: 0.2 },
+                       y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
+                     }}
+                   />
+                 </div>
+
+                 {/* Foreground Avatars (Sharp) */}
+                 <div className="absolute inset-0 flex items-center justify-center z-10">
+                   <motion.div 
+                     className="absolute w-[86px] h-[86px] rounded-full overflow-hidden border-2 border-[#111] shadow-[0_10px_30px_rgba(0,0,0,0.5)] bg-[#1c1c1e] flex items-center justify-center"
+                     initial={{ x: -120, scale: 0.8, y: 0 }}
+                     animate={{ x: -60, scale: 1, y: [0, -8, 0] }}
+                     transition={{
+                       x: { duration: 1.2, type: "spring", bounce: 0.4 },
+                       scale: { duration: 1.2, type: "spring", bounce: 0.4 },
+                       y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
+                     }}
+                   >
+                     {user?.avatar ? (
+                       <img src={user.avatar} className="w-full h-full object-cover" />
+                     ) : (
+                       <span className="text-white text-3xl font-bold select-none">{user?.name?.[0]?.toUpperCase() || 'U'}</span>
+                     )}
+                   </motion.div>
+                   <motion.div 
+                     className="absolute w-[86px] h-[86px] rounded-full overflow-hidden border-2 border-[#111] shadow-[0_10px_30px_rgba(0,0,0,0.5)] bg-[#1c2c24] flex items-center justify-center"
+                     initial={{ x: 120, scale: 0.8, y: 0 }}
+                     animate={{ x: 60, scale: 1, y: [0, 8, 0] }}
+                     transition={{
+                       x: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
+                       scale: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
+                       y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.3 }
+                     }}
+                   >
+                     {user?.partnerAvatar ? (
+                       <img src={user.partnerAvatar} className="w-full h-full object-cover" />
+                     ) : (
+                       <span className="text-emerald-400 text-3xl font-bold select-none">P</span>
+                     )}
+                   </motion.div>
+                 </div>
+              </div>
+
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}
+                className="text-[#ffffff] text-3xl font-medium tracking-tight mb-3 text-center"
+              >
+                You're connected.
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}
+                className="text-white/50 text-[15px] text-center mb-12"
+              >
+                Your shared Duo Household is now active.
+              </motion.p>
+              
+              <motion.button
+                initial={{ opacity: 0, scale: 0.9, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 1.5, type: "spring", bounce: 0.4 }}
+                onClick={handleFinishJoin}
+                className="w-full max-w-[320px] mx-auto py-3.5 bg-[#D1D1D3] text-[#111111] rounded-full font-semibold text-[15px] hover:bg-[#E5E5E5] active:scale-[0.97] transition-all flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),0_4px_20px_rgba(0,0,0,0.4)]"
+              >
+                Start Budgeting Together
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
