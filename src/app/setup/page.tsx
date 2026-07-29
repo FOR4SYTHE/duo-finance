@@ -7,10 +7,11 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { WelcomeShader } from "@/components/auth/WelcomeShader";
 import { BorderBeam } from "border-beam";
+import { ThinkingOrb } from "thinking-orbs";
 
 export default function SetupPage() {
   const router = useRouter();
-  const { user, createHousehold, joinHousehold, householdId } = useAuthStore();
+  const { user, partner, createHousehold, joinHousehold, householdId } = useAuthStore();
   
   const [step, setStep] = useState<"choose" | "join">("choose");
   const [inviteCode, setInviteCode] = useState("");
@@ -245,14 +246,6 @@ export default function SetupPage() {
                                   disabled={joinStep === "verifying"}
                                   className="w-full bg-white/[0.04] border border-white/10 rounded-[16px] py-4 px-5 text-[#e4e2e4] placeholder-white/20 text-center tracking-[0.25em] font-mono text-[20px] outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all uppercase"
                                 />
-                                {joinStep === "verifying" && (
-                                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
-                                    <span className="relative flex h-3 w-3">
-                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                      <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                                    </span>
-                                  </div>
-                                )}
                               </div>
                             </BorderBeam>
                           </div>
@@ -264,8 +257,8 @@ export default function SetupPage() {
                               className="w-full h-[56px] bg-[#111111] border border-white/10 text-white rounded-[16px] font-semibold text-[16px] flex items-center justify-center gap-2 hover:bg-[#1a1a1a] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]"
                             >
                               {joinStep === "verifying" ? (
-                                <div className="flex items-center gap-2">
-                                  <Loader2 className="w-5 h-5 animate-spin text-[#30D158]" />
+                                <div className="flex items-center gap-3">
+                                  <ThinkingOrb state="working" size={24} />
                                   <span className="text-[#30D158] font-bold tracking-wider">VERIFYING CODE...</span>
                                 </div>
                               ) : (
@@ -399,10 +392,10 @@ export default function SetupPage() {
                        y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.3 }
                      }}
                    >
-                     {user?.partnerAvatar ? (
-                       <img src={user.partnerAvatar} className="w-full h-full object-cover" />
+                     {partner?.avatar ? (
+                       <img src={partner.avatar} className="w-full h-full object-cover" />
                      ) : (
-                       <span className="text-emerald-400 text-3xl font-bold select-none">P</span>
+                       <span className="text-emerald-400 text-3xl font-bold select-none">{partner?.name?.[0]?.toUpperCase() || 'P'}</span>
                      )}
                    </motion.div>
                  </div>
