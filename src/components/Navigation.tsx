@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRef } from "react";
 import { Home, Calculator, Wallet, PiggyBank, ShoppingBag, Brain } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartifyStore } from "@/store/useCartifyStore";
+import { MetalFx } from "metal-fx";
 
 export function Navigation() {
   const pathname = usePathname();
   const { isActive } = useCartifyStore();
+  const navRef = useRef<HTMLDivElement>(null);
 
   const isCartifyTripActive = pathname === '/cartify' && isActive;
   
@@ -40,7 +43,7 @@ export function Navigation() {
           className="absolute bottom-6 left-4 right-4 z-50 will-change-transform flex items-center justify-center gap-3"
         >
           {/* Main Navigation Capsule */}
-          <div className={`flex-1 max-w-[340px] p-2 flex items-center justify-between ${glassContainerStyles}`}>
+          <div ref={navRef} className={`flex-1 max-w-[340px] p-2 flex items-center justify-between ${glassContainerStyles}`}>
             {/* Specular Highlight Gloss */}
             <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.3] to-transparent" />
             <div className={glassHighlightStyles} />
@@ -79,21 +82,19 @@ export function Navigation() {
           </div>
 
           {/* AI Corner Pill (Separated) */}
-          <button
-            disabled
-            className={`w-[64px] h-[64px] flex-shrink-0 flex flex-col items-center justify-center group transition-all opacity-80 cursor-not-allowed hover:opacity-100 ${glassContainerStyles}`}
-          >
-            {/* Specular Highlight Gloss */}
-            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.3] to-transparent" />
-            <div className={glassHighlightStyles} />
-            
-            <div className="relative z-10 flex items-center justify-center">
-              <Brain
-                className="w-6 h-6 text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)] transition-transform group-hover:scale-105"
-                strokeWidth={2}
-              />
-            </div>
-          </button>
+          <MetalFx preset="chromatic" variant="circle" strength={0.85} reflectionTargets={[navRef]}>
+            <button
+              disabled
+              className="w-[64px] h-[64px] flex-shrink-0 flex flex-col items-center justify-center group transition-all opacity-80 cursor-not-allowed hover:opacity-100 relative overflow-hidden rounded-[32px] bg-[#0a0a0a]"
+            >
+              <div className="relative z-10 flex items-center justify-center">
+                <Brain
+                  className="w-6 h-6 text-amber-300 transition-transform group-hover:scale-105"
+                  strokeWidth={2}
+                />
+              </div>
+            </button>
+          </MetalFx>
         </motion.div>
       )}
     </AnimatePresence>
