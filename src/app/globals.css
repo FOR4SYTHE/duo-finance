@@ -17,6 +17,12 @@
   --color-status-good: #30D158;
   --color-status-warn: #FF9F0A;
   --color-status-danger: #FF453A;
+
+  --animate-hue-spin: hue-spin 4s linear infinite;
+  @keyframes hue-spin {
+    from { filter: hue-rotate(0deg); }
+    to { filter: hue-rotate(360deg); }
+  }
 }
 
 @layer base {

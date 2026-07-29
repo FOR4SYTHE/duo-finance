@@ -474,13 +474,11 @@ export default function Home() {
                </div>
                <span className="text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase ml-2 flex items-center">
                    CASHBACK
-                   <motion.span 
-                       animate={{ filter: ["hue-rotate(0deg)", "hue-rotate(360deg)"] }}
-                       transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                       className="ml-1.5 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-500 drop-shadow-[0_0_6px_rgba(129,140,248,0.5)]"
+                   <span 
+                       className="ml-1.5 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-500 drop-shadow-[0_0_6px_rgba(129,140,248,0.5)] animate-hue-spin"
                    >
                        AI
-                   </motion.span>
+                   </span>
                </span>
              </div>
           </button>

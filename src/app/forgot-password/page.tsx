@@ -33,17 +33,15 @@ export default function ForgotPasswordPage() {
         
         {/* Top Header - Chrome Logo with Shine Animation */}
         <motion.h1 
-          initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ 
             opacity: 1, 
             y: 0,
-            filter: "blur(0px)",
             backgroundPosition: ["0% 50%", "200% 50%"] 
           }}
           transition={{ 
             opacity: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
             y: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
-            filter: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
             backgroundPosition: { duration: 5, repeat: Infinity, ease: "linear" } 
           }}
           className="text-[32px] sm:text-[40px] font-extrabold uppercase tracking-[0.2em] relative mb-1"
@@ -67,8 +65,8 @@ export default function ForgotPasswordPage() {
         </motion.h1>
 
         <motion.p 
-          initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-[15px] sm:text-[17px] text-[#cfc4c5] font-medium mb-4 sm:mb-6"
         >
@@ -77,8 +75,8 @@ export default function ForgotPasswordPage() {
 
         {/* The Auth Card */}
         <motion.div 
-          initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="w-full max-w-[380px] bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[28px] p-5 sm:p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)]"
         >

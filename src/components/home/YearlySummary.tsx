@@ -311,7 +311,7 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
             </div>
 
             {/* Spending Breakdown — Donut */}
-            <div className="bg-[#111]/80 backdrop-blur-2xl rounded-[28px] border border-[#D4AF37]/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(212,175,55,0.05)] p-6">
+            <div className="bg-[#1A1A1A] rounded-[28px] border border-[#D4AF37]/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(212,175,55,0.05)] p-6">
               <h3 className="text-[11px] font-bold text-[#D4AF37] tracking-[0.2em] uppercase mb-6">
                 Yearly Breakdown
               </h3>
@@ -337,7 +337,7 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
             </div>
 
             {/* Budget vs Actual — Bar Charts */}
-            <div className="bg-[#111]/80 backdrop-blur-2xl rounded-[28px] border border-[#D4AF37]/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(212,175,55,0.05)] p-6">
+            <div className="bg-[#1A1A1A] rounded-[28px] border border-[#D4AF37]/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(212,175,55,0.05)] p-6">
               <h3 className="text-[11px] font-bold text-[#D4AF37] tracking-[0.2em] uppercase mb-6">
                 Target vs Actual (12 Months)
               </h3>
@@ -355,7 +355,7 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
             </div>
 
             {/* Spend Jar Activity */}
-            <div className="bg-[#111]/80 backdrop-blur-2xl rounded-[28px] border border-[#D4AF37]/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(212,175,55,0.05)] p-6">
+            <div className="bg-[#1A1A1A] rounded-[28px] border border-[#D4AF37]/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(212,175,55,0.05)] p-6">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/20 flex items-center justify-center shadow-[inset_0_1px_1px_rgba(212,175,55,0.1)]">
                   <PiggyBank className="w-6 h-6 text-[#D4AF37]" style={{ filter: 'drop-shadow(0 0 8px #D4AF37)' }} />
@@ -385,7 +385,7 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
 
             {/* Goals Progress */}
             {goals.length > 0 && (
-              <div className="bg-[#111]/80 backdrop-blur-2xl rounded-[28px] border border-[#D4AF37]/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(212,175,55,0.05)] p-6">
+              <div className="bg-[#1A1A1A] rounded-[28px] border border-[#D4AF37]/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(212,175,55,0.05)] p-6">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/20 flex items-center justify-center shadow-[inset_0_1px_1px_rgba(212,175,55,0.1)]">
                     <Target className="w-6 h-6 text-[#D4AF37]" style={{ filter: 'drop-shadow(0 0 8px #D4AF37)' }} />

@@ -322,7 +322,7 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
             </div>
 
             {/* Spending Breakdown — Donut */}
-            <div className="bg-white/5 backdrop-blur-2xl rounded-[28px] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] p-6">
+            <div className="bg-[#1C1C1E] rounded-[28px] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] p-6">
               <h3 className="text-[11px] font-bold text-white/40 tracking-[0.2em] uppercase mb-6">
                 Spending Breakdown
               </h3>
@@ -349,7 +349,7 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
             </div>
 
             {/* Budget vs Actual — Bar Charts */}
-            <div className="bg-white/5 backdrop-blur-2xl rounded-[28px] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] p-6">
+            <div className="bg-[#1C1C1E] rounded-[28px] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] p-6">
               <h3 className="text-[11px] font-bold text-white/40 tracking-[0.2em] uppercase mb-6">
                 Budget vs Actual
               </h3>
@@ -367,7 +367,7 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
             </div>
 
             {/* Spend Jar Activity */}
-            <div className="bg-white/5 backdrop-blur-2xl rounded-[28px] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] p-6">
+            <div className="bg-[#1C1C1E] rounded-[28px] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] p-6">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 rounded-full bg-[#30D158]/15 border border-[#30D158]/20 flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
                   <PiggyBank className="w-6 h-6 text-[#30D158]" style={{ filter: 'drop-shadow(0 0 8px #30D158)' }} />
@@ -397,7 +397,7 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
 
             {/* Goals Progress */}
             {goals.length > 0 && (
-              <div className="bg-white/5 backdrop-blur-2xl rounded-[28px] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] p-6">
+              <div className="bg-[#1C1C1E] rounded-[28px] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] p-6">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 rounded-full bg-[#BF5AF2]/15 border border-[#BF5AF2]/20 flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
                     <Target className="w-6 h-6 text-[#BF5AF2]" style={{ filter: 'drop-shadow(0 0 8px #BF5AF2)' }} />
