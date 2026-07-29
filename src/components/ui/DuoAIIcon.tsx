@@ -1,11 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
 const pillPath = "M 0 -1.2 C 1.375 -1.2, 2.5 -0.66, 2.5 0 C 2.5 0.66, 1.375 1.2, 0 1.2 C -1.375 1.2, -2.5 0.66, -2.5 0 C -2.5 -0.66, -1.375 -1.2, 0 -1.2 Z";
 const starPath = "M 0 -2.5 C 0 -0.5, 0.5 0, 2.5 0 C 0.5 0, 0 0.5, 0 2.5 C 0 0.5, -0.5 0, -2.5 0 C -0.5 0, 0 -0.5, 0 -2.5 Z";
 
-const spinUpVariants = {
+const spinUpVariants: Variants = {
   idle: { 
     rotate: 0,
     transition: { type: "spring", stiffness: 150, damping: 15 }
@@ -21,7 +21,7 @@ const spinUpVariants = {
   }
 };
 
-const ambientVariants = {
+const ambientVariants: Variants = {
   idle: { 
     rotate: 0,
     transition: { type: "spring", stiffness: 100, damping: 20 }
@@ -48,7 +48,7 @@ const ambientVariants = {
   }
 };
 
-const pathVariants = {
+const pathVariants: Variants = {
   idle: { 
     d: pillPath,
     transition: { type: "spring", stiffness: 150, damping: 15 }
