@@ -63,6 +63,7 @@ If a UI change can't honestly clear all four, it goes back for another pass befo
 **STRICT EDIT SCOPE & ISOLATION RULE:** When performing UI modifications or bug fixes, NEVER touch, alter, or refactor anything outside of the specific target component/task requested by the user. Do not make collateral visual adjustments to adjacent cards, headers, or global styles. Unrequested modifications introduce small breaks and unnecessary regression loops.
 
 **Performance & Rendering Guardrails (Mobile/Tablet Optimization) — MANDATORY:**
+- **PERFORMANCE AUDIT RULE:** Everything built moving forward MUST undergo a performance audit before completion. The UI must remain buttery smooth, lite, and fast at all times. No heavy main-thread blocking, no unoptimized reflows.
 - **No Excessive CSS `backdrop-blur` on Mapped/Repeated Items:** `backdrop-blur` (e.g. `backdrop-blur-3xl`, `backdrop-blur-xl`) applied to dynamic list rows or repeated cards causes severe GPU thrashing and frame drops on tablets and mobile devices. Use solid, semi-opaque backgrounds (e.g., `#1c1c1e`, `#0a0a0a`) with subtle borders and inset highlights for depth instead. Reserve heavy blurs *strictly* for single-instance, static headers (like the Dynamic Island hero card).
 - **No Framer Motion `layout` Thrashing on Swipable Lists:** Do not add `layout` props directly to mapped draggable or swappable items in dynamic lists. Avoid `filter: blur(...)` during Framer Motion `initial`/`animate`/`exit` entrance transitions. Use snappy `tween` easeOut transitions (0.1s–0.2s) for gestures rather than heavy, squishy spring physics.
 - **Viewport-Fixed Modals (`fixed` vs `absolute`):** All modal sheets, inline calculators, numpads, and dropdown overlays MUST use `fixed` positioning with viewport-relative constraints (`dvh`, `-translate-y-1/2`) rather than `absolute` positioning inside fluid/scrollable containers. Absolute positioning breaks when list heights shrink or stretch.
@@ -88,6 +89,8 @@ If a UI change can't honestly clear all four, it goes back for another pass befo
 ## 4. Feature Specs
 
 ### 4.0 App Shell — Home & Navigation (build this scaffold first, across all sections)
+
+**Optional: One-Time Welcome Tour.** Build a one-time "take-a-tour" onboarding flow for the whole app. This should be an optional, highly polished walkthrough highlighting the core features (Everything in Sync, Cartify Together, Shared Privacy). Do not clutter the persistent settings page with this guide; instead, surface it once upon household connection or via an explicit "Take a Tour" button in the app preferences.
 
 Right now only the Calculator exists in isolation, with no context for what pressing "Confirm Amount" leads to. Before going deeper on any single feature, build the navigational shell that makes the whole app legible as one product — every section reachable, even before it's functional.
 

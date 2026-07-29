@@ -5,15 +5,16 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { ThinkingOrb } from "thinking-orbs";
-import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart } from "lucide-react";
+import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, Sparkles, AlertTriangle } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const { user, partner, householdId, toggleMockPartner, logout, joinHousehold } = useAuthStore();
+  const { user, partner, householdId, logout, toggleMockPartner, joinHousehold } = useAuthStore();
   const { primaryCurrency, setPrimaryCurrency, exchangeRate } = useCurrencyStore();
+  const [showSignOutPrompt, setShowSignOutPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,7 +106,6 @@ export default function ProfilePage() {
         {/* Interconnected Avatars & Info */}
         <motion.div layout="position" className="flex flex-col items-center justify-center relative z-10">
           <div className="flex items-center justify-center mb-6">
-            {/* Hidden File Input */}
             <input 
               type="file" 
               ref={fileInputRef} 
@@ -113,7 +113,6 @@ export default function ProfilePage() {
               accept="image/*" 
               className="hidden" 
             />
-            {/* User Avatar Container */}
             <div className="relative z-10 flex flex-col items-center">
               <div
                 className="w-[92px] h-[92px] rounded-full bg-gradient-to-b from-[#2A2A2C] to-[#1A1A1C] border-[0.5px] border-white/20 flex items-center justify-center shadow-[0_12px_24px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.1)] overflow-hidden relative cursor-pointer group touch-none"
@@ -154,11 +153,9 @@ export default function ProfilePage() {
                 ) : (
                   <span className="text-white text-[34px] font-medium tracking-tight drop-shadow-md group-hover:scale-110 transition-transform">{user?.name?.[0]?.toUpperCase() || 'U'}</span>
                 )}
-                {/* Subtle dark overlay on hover */}
                 {!isEditingAvatar && <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />}
               </div>
               
-              {/* Partner Floating Bubble (Lava Lamp) */}
               {partner && !isEditingAvatar && (
                 <motion.div 
                   className="absolute -top-1 -right-2 z-20 pointer-events-none"
@@ -167,7 +164,6 @@ export default function ProfilePage() {
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <div className="relative">
-                    {/* Main Partner Avatar */}
                     <div className="w-[42px] h-[42px] rounded-full border-[2.5px] border-[#0A0A0C] shadow-[0_8px_16px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden z-10 relative bg-gradient-to-b from-[#1C2C24] to-[#0A1A12]">
                        {partner?.avatar ? (
                          <img src={partner.avatar} className="w-full h-full object-cover" />
@@ -175,7 +171,6 @@ export default function ProfilePage() {
                          <span className="text-emerald-400 font-bold text-[16px] select-none">{partner?.name?.[0]?.toUpperCase() || 'P'}</span>
                        )}
                     </div>
-                    {/* Floating Premium Bubbles */}
                     <motion.div 
                       className="absolute -top-1.5 -left-1.5 w-3 h-3 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)] border-[1px] border-[#0A0A0C]"
                       animate={{ y: [0, -3, 0], x: [0, -1, 0] }}
@@ -200,7 +195,6 @@ export default function ProfilePage() {
                 </motion.div>
               )}
               
-              {/* Camera Edit Icon */}
               {!isEditingAvatar && (
                 <div 
                   onClick={() => fileInputRef.current?.click()}
@@ -210,7 +204,6 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              {/* Editing Controls */}
               {isEditingAvatar && (
                 <div className="absolute top-[100px] bg-[#1C1C1E] border-[0.5px] border-white/10 rounded-2xl p-3 shadow-2xl flex flex-col gap-3 z-50 w-48 animate-in fade-in zoom-in-95 duration-200">
                   <div className="text-[9px] font-bold text-white/40 uppercase tracking-widest text-center">Adjust Photo</div>
@@ -237,8 +230,6 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
-
-            {/* Old Partner Avatar removed to use the floating bubble instead */}
           </div>
 
           <motion.h2 layout="position" className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1">
@@ -246,7 +237,6 @@ export default function ProfilePage() {
           </motion.h2>
           <motion.p layout="position" className="text-[14px] text-white/50 mb-7 font-medium">{user?.email || 'user@example.com'}</motion.p>
           
-          {/* Status / Invite Pill inside the header */}
           {partner ? (
             <div className="flex flex-col items-center gap-4">
               <div className="px-4 py-2 bg-[#0A0A0C] border border-[#30D158]/20 rounded-full flex items-center gap-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.5)]">
@@ -256,16 +246,6 @@ export default function ProfilePage() {
                 </div>
                 <span className="text-[#30D158] font-bold text-[10px] tracking-[0.12em] uppercase pt-[1px]">Partnership Active</span>
               </div>
-              
-              {/* Dev: Reset Trigger */}
-              <button 
-                onClick={() => {
-                  useAuthStore.getState().leaveHousehold();
-                }}
-                className="text-[10px] text-white/30 border border-white/10 px-3 py-1 rounded-full hover:text-white/70"
-              >
-                Dev: Reset Partnership
-              </button>
             </div>
           ) : (
             <div className="w-full max-w-[280px] flex flex-col gap-2 items-center">
@@ -488,7 +468,9 @@ export default function ProfilePage() {
         >
           <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Settings & Security</h3>
           <div className="bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[32px] overflow-hidden mb-12 shadow-[0_16px_32px_rgba(0,0,0,0.4)]">
-            <button className="w-full p-5 flex items-center justify-between border-b border-white/5 hover:bg-white/[0.03] transition-colors active:bg-white/[0.05]">
+            <button 
+              onClick={() => router.push('/profile/biometrics')}
+              className="w-full p-5 flex items-center justify-between border-b border-white/5 hover:bg-white/[0.03] transition-all duration-200 active:bg-white/[0.05] active:scale-[0.98]">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border-[0.5px] border-white/5">
                   <ShieldCheck className="w-4 h-4 text-white/70" />
@@ -497,7 +479,9 @@ export default function ProfilePage() {
               </div>
               <ChevronRight className="w-5 h-5 text-white/10" />
             </button>
-            <button className="w-full p-5 flex items-center justify-between border-b border-white/5 hover:bg-white/[0.03] transition-colors active:bg-white/[0.05]">
+            <button 
+              onClick={() => router.push('/profile/notifications')}
+              className="w-full p-5 flex items-center justify-between border-b border-white/5 hover:bg-white/[0.03] transition-all duration-200 active:bg-white/[0.05] active:scale-[0.98]">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border-[0.5px] border-white/5">
                   <Bell className="w-4 h-4 text-white/70" />
@@ -506,7 +490,9 @@ export default function ProfilePage() {
               </div>
               <ChevronRight className="w-5 h-5 text-white/10" />
             </button>
-            <button className="w-full p-5 flex items-center justify-between border-b border-white/5 hover:bg-white/[0.03] transition-colors active:bg-white/[0.05]">
+            <button 
+              onClick={() => router.push('/profile/subscriptions')}
+              className="w-full p-5 flex items-center justify-between border-b border-white/5 hover:bg-white/[0.03] transition-all duration-200 active:bg-white/[0.05] active:scale-[0.98]">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border-[0.5px] border-white/5">
                   <CreditCard className="w-4 h-4 text-white/70" />
@@ -515,7 +501,9 @@ export default function ProfilePage() {
               </div>
               <ChevronRight className="w-5 h-5 text-white/10" />
             </button>
-            <button className="w-full p-5 flex items-center justify-between border-b border-white/5 hover:bg-white/[0.03] transition-colors active:bg-white/[0.05]">
+            <button 
+              onClick={() => router.push('/profile/preferences')}
+              className="w-full p-5 flex items-center justify-between hover:bg-white/[0.03] transition-all duration-200 active:bg-white/[0.05] active:scale-[0.98]">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border-[0.5px] border-white/5">
                   <Settings className="w-4 h-4 text-white/70" />
@@ -524,12 +512,28 @@ export default function ProfilePage() {
               </div>
               <ChevronRight className="w-5 h-5 text-white/10" />
             </button>
-            
+          </div>
+
+          <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Onboarding</h3>
+          <div className="bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[32px] overflow-hidden mb-12 shadow-[0_16px_32px_rgba(0,0,0,0.4)]">
             <button 
-            onClick={() => {
-                logout();
-                router.push('/welcome');
-            }}
+              onClick={() => alert("Tour coming soon!")}
+              className="w-full p-5 flex items-center justify-between hover:bg-white/[0.03] transition-all duration-200 active:bg-white/[0.05] active:scale-[0.98]">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center border-[0.5px] border-emerald-500/20">
+                  <Sparkles className="w-4 h-4 text-emerald-400" />
+                </div>
+                <span className="text-white/90 font-medium text-[16px] tracking-tight">Take a Tour</span>
+              </div>
+              <div className="px-3 py-1 bg-white/10 rounded-full text-[11px] font-bold text-white/70">
+                 Start
+              </div>
+            </button>
+          </div>
+            
+          <div className="bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[32px] overflow-hidden mb-32 shadow-[0_16px_32px_rgba(0,0,0,0.4)]">
+            <button 
+            onClick={() => setShowSignOutPrompt(true)}
             className="w-full p-5 flex items-center justify-between hover:bg-[#FF453A]/5 transition-colors group active:bg-[#FF453A]/10">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-white/5 group-hover:bg-[#FF453A]/10 flex items-center justify-center transition-colors border-[0.5px] border-white/5 group-hover:border-[#FF453A]/20">
@@ -669,6 +673,61 @@ export default function ProfilePage() {
               </motion.button>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <style jsx global>{`
+        ::-webkit-scrollbar {
+          width: 0px;
+          background: transparent;
+        }
+      `}</style>
+
+      {/* Custom Sign Out Modal */}
+      <AnimatePresence>
+        {showSignOutPrompt && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSignOutPrompt(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
+              className="relative w-full max-w-sm bg-[#1C1C1E] rounded-[32px] p-6 shadow-2xl border border-white/10 flex flex-col items-center text-center"
+            >
+              <div className="w-14 h-14 rounded-full bg-[#FF453A]/10 flex items-center justify-center mb-4">
+                <AlertTriangle className="w-6 h-6 text-[#FF453A]" />
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2 tracking-tight">Sign Out</h2>
+              <p className="text-white/60 text-[15px] leading-relaxed mb-8">
+                Are you sure you want to sign out of Duo? You will need to log back in to view your household.
+              </p>
+              
+              <div className="w-full flex gap-3">
+                <button 
+                  onClick={() => setShowSignOutPrompt(false)}
+                  className="flex-1 py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-white font-semibold transition-colors active:scale-[0.98]"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    logout();
+                    router.push('/welcome');
+                  }}
+                  className="flex-1 py-4 bg-[#FF453A] hover:bg-[#FF453A]/90 rounded-2xl text-white font-semibold shadow-[0_4px_12px_rgba(255,69,58,0.3)] transition-colors active:scale-[0.98]"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
