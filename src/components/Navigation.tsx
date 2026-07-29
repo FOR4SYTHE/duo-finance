@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
-import { Home, Calculator, Wallet, PiggyBank, ShoppingBag, Brain } from "lucide-react";
+import { Home, Calculator, Wallet, PiggyBank, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartifyStore } from "@/store/useCartifyStore";
 import { MetalFx } from "metal-fx";
+import { DuoAIIcon } from "@/components/ui/DuoAIIcon";
 
 export function Navigation() {
   const pathname = usePathname();
@@ -88,9 +89,8 @@ export function Navigation() {
               className="w-[64px] h-[64px] flex-shrink-0 flex flex-col items-center justify-center group transition-all opacity-80 cursor-not-allowed hover:opacity-100 relative overflow-hidden rounded-[32px] bg-[#0a0a0a]"
             >
               <div className="relative z-10 flex items-center justify-center">
-                <Brain
+                <DuoAIIcon
                   className="w-6 h-6 text-amber-300 transition-transform group-hover:scale-105"
-                  strokeWidth={2}
                 />
               </div>
             </button>
