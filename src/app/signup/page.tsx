@@ -18,6 +18,37 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [authMode, setAuthMode] = useState<"password" | "magic_link" | "magic_link_sent">("password");
+  const [otpCode, setOtpCode] = useState("");
+
+  const handleInitiateMagicLink = () => {
+    if (email) {
+      handleSendMagicLink();
+    } else {
+      setAuthMode("magic_link");
+    }
+  };
+
+  const handleSendMagicLink = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!email) return;
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setAuthMode("magic_link_sent");
+    }, 600);
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otpCode.length < 6) return;
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    login(email);
+    setIsLoading(false);
+    router.push("/setup");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password || password !== confirmPassword) return;
@@ -77,7 +108,11 @@ export default function SignupPage() {
           transition={{ duration: 1.2, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-[15px] sm:text-[17px] text-[#cfc4c5] font-medium mb-3 sm:mb-6"
         >
-          Create your shared space
+          {authMode === "magic_link_sent" 
+            ? "Check your inbox" 
+            : authMode === "magic_link" 
+              ? "Sign up without a password"
+              : "Create your shared space"}
         </motion.p>
 
         {/* The Auth Card */}
@@ -87,116 +122,206 @@ export default function SignupPage() {
           transition={{ duration: 1.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="w-full max-w-[380px] bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[28px] p-5 sm:p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)]"
         >
-          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-            
-            {/* Name Input */}
-            <div>
-              <input
-                type="text"
-                placeholder="First name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 px-5 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
-              />
-            </div>
+          {authMode === "magic_link_sent" ? (
+            <form onSubmit={handleVerifyOtp} className="space-y-4 text-center">
+              <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center mx-auto mb-2 text-white">
+                ✉️
+              </div>
+              <div>
+                <p className="text-[14px] text-white/70">
+                  We sent a 6-digit code & link to:
+                </p>
+                <p className="text-[15px] text-white font-semibold mt-0.5">
+                  {email || "your email"}
+                </p>
+              </div>
 
-            {/* Email Input */}
-            <div>
-              <input
-                type="email"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 px-5 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
-              />
-            </div>
+              <div>
+                <input
+                  type="text"
+                  maxLength={6}
+                  placeholder="Enter 6-digit code"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                  className="w-full tracking-[0.3em] text-center bg-white/[0.04] border border-white/10 rounded-[16px] py-4 text-white text-[20px] font-mono placeholder-white/20 outline-none focus:border-white/40 focus:ring-4 focus:ring-white/[0.02] transition-all"
+                  autoFocus
+                />
+              </div>
 
-            {/* Password Input */}
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 pl-5 pr-12 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
-              />
+              <button
+                type="submit"
+                disabled={isLoading || otpCode.length < 6}
+                className="w-full h-[48px] sm:h-[52px] bg-[#111111] border border-white/10 text-white rounded-[16px] font-semibold text-[15px] sm:text-[16px] flex items-center justify-center gap-2 hover:bg-[#1a1a1a] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]"
+              >
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "VERIFY & SIGN UP"}
+              </button>
+
+              <div className="pt-2 flex items-center justify-between text-[13px]">
+                <button
+                  type="button"
+                  onClick={() => setAuthMode("password")}
+                  className="text-white/40 hover:text-white transition-colors"
+                >
+                  ← Back to form
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSendMagicLink}
+                  className="text-[#5E5CE6] hover:text-[#7A78FF] transition-colors"
+                >
+                  Resend code
+                </button>
+              </div>
+            </form>
+          ) : authMode === "magic_link" ? (
+            <form onSubmit={handleSendMagicLink} className="space-y-4 text-center">
+              <div>
+                <p className="text-[14px] text-white/70 mb-4 text-left">
+                  Enter your email address and we'll send you a magic link to sign up instantly.
+                </p>
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 sm:py-4 px-5 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
+                  autoFocus
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading || !email}
+                className="w-full h-[48px] sm:h-[52px] bg-[#111111] border border-white/10 text-white rounded-[16px] font-semibold text-[15px] sm:text-[16px] flex items-center justify-center gap-2 hover:bg-[#1a1a1a] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]"
+              >
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "SEND MAGIC LINK"}
+              </button>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setAuthMode("password")}
+                  className="text-[13px] text-white/40 hover:text-white transition-colors"
+                >
+                  ← Back to password signup
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+              
+              {/* Name Input */}
+              <div>
+                <input
+                  type="text"
+                  placeholder="First name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 px-5 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
+                />
+              </div>
+
+              {/* Email Input */}
+              <div>
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 px-5 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
+                />
+              </div>
+
+              {/* Password Input */}
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 pl-5 pr-12 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+
+              {/* Confirm Password Input */}
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Confirm password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 pl-5 pr-12 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
+                />
+              </div>
+
+              <div className="pt-1" />
+
+              {/* Sign Up Button */}
+              <button
+                type="submit"
+                disabled={isLoading || !email || !password || password !== confirmPassword}
+                className="w-full h-[48px] sm:h-[52px] bg-[#111111] border border-white/10 text-white rounded-[14px] sm:rounded-[16px] font-semibold text-[15px] sm:text-[16px] flex items-center justify-center gap-2 hover:bg-[#1a1a1a] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]"
+              >
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "SIGN UP"}
+              </button>
+              
+              {/* Divider */}
+              <div className="flex items-center gap-3 py-2">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-white/10" />
+                <span className="text-[13px] text-white/30 font-medium">OR</span>
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-white/10" />
+              </div>
+
+              {/* Google Button */}
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                onClick={() => { login(email || "google@mock.com"); router.push("/setup"); }}
+                className="w-full h-[48px] sm:h-[52px] bg-white/[0.03] border border-white/10 text-[#e4e2e4] rounded-[14px] sm:rounded-[16px] font-medium text-[15px] sm:text-[16px] flex items-center justify-center gap-3 hover:bg-white/[0.06] transition-all active:scale-[0.98]"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Sign up with Google
               </button>
-            </div>
 
-            {/* Confirm Password Input */}
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Confirm password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="w-full bg-white/[0.04] border border-white/10 rounded-[14px] sm:rounded-[16px] py-3.5 pl-5 pr-12 text-[#e4e2e4] placeholder-white/30 outline-none focus:bg-white/[0.06] focus:border-white/30 focus:ring-4 focus:ring-white/[0.02] transition-all font-medium text-[15px] sm:text-[16px]"
-              />
-            </div>
-
-            <div className="pt-1" />
-
-            {/* Sign Up Button */}
-            <button
-              type="submit"
-              disabled={isLoading || !email || !password || password !== confirmPassword}
-              className="w-full h-[48px] sm:h-[52px] bg-[#111111] border border-white/10 text-white rounded-[14px] sm:rounded-[16px] font-semibold text-[15px] sm:text-[16px] flex items-center justify-center gap-2 hover:bg-[#1a1a1a] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]"
-            >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "SIGN UP"}
-            </button>
-            
-            {/* Divider */}
-            <div className="flex items-center gap-3 py-2">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent to-white/10" />
-              <span className="text-[13px] text-white/30 font-medium">OR</span>
-              <div className="flex-1 h-px bg-gradient-to-l from-transparent to-white/10" />
-            </div>
-
-            {/* Google Button */}
-            <button
-              type="button"
-              className="w-full h-[48px] sm:h-[52px] bg-white/[0.03] border border-white/10 text-[#e4e2e4] rounded-[14px] sm:rounded-[16px] font-medium text-[15px] sm:text-[16px] flex items-center justify-center gap-3 hover:bg-white/[0.06] transition-all active:scale-[0.98]"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
-              Sign up with Google
-            </button>
-
-            {/* Magic Link Button */}
-            <button
-              type="button"
-              className="w-full h-[48px] sm:h-[52px] bg-transparent border border-white/5 text-[#cfc4c5] rounded-[14px] sm:rounded-[16px] font-medium text-[15px] sm:text-[16px] flex items-center justify-center gap-3 hover:bg-white/[0.03] transition-all active:scale-[0.98]"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <defs>
-                  <linearGradient id="chromeGradientSignup" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#b3b3b3" />
-                    <stop offset="30%" stopColor="#ffffff" />
-                    <stop offset="50%" stopColor="#8a8a8a" />
-                    <stop offset="70%" stopColor="#ffffff" />
-                    <stop offset="100%" stopColor="#b3b3b3" />
-                  </linearGradient>
-                </defs>
-                <path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" stroke="url(#chromeGradientSignup)" />
-                <circle cx="16.5" cy="7.5" r=".5" fill="url(#chromeGradientSignup)" stroke="none" />
-              </svg>
-              Continue with Magic Link
-            </button>
-          </form>
+              {/* Magic Link Button */}
+              <button
+                type="button"
+                onClick={handleInitiateMagicLink}
+                className="w-full h-[48px] sm:h-[52px] bg-transparent border border-white/5 text-[#cfc4c5] rounded-[14px] sm:rounded-[16px] font-medium text-[15px] sm:text-[16px] flex items-center justify-center gap-3 hover:bg-white/[0.03] transition-all active:scale-[0.98]"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <defs>
+                    <linearGradient id="chromeGradientSignup" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#b3b3b3" />
+                      <stop offset="30%" stopColor="#ffffff" />
+                      <stop offset="50%" stopColor="#8a8a8a" />
+                      <stop offset="70%" stopColor="#ffffff" />
+                      <stop offset="100%" stopColor="#b3b3b3" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" stroke="url(#chromeGradientSignup)" />
+                  <circle cx="16.5" cy="7.5" r=".5" fill="url(#chromeGradientSignup)" stroke="none" />
+                </svg>
+                Continue with Magic Link
+              </button>
+            </form>
+          )}
         </motion.div>
 
         {/* Footer */}
