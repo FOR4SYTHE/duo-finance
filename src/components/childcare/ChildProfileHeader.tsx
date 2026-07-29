@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useChildCareStore } from "@/store/useChildCareStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Calculator } from "lucide-react";
 
@@ -11,6 +12,7 @@ export function ChildProfileHeader() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const { primarySymbol, secondarySymbol, getSecondaryValue } = useDualCurrency();
 
   const itemWidth = 60;
   const dashboardAges = Array.from({ length: 18 }, (_, i) => i + 1);
@@ -43,7 +45,7 @@ export function ChildProfileHeader() {
   }, 0);
 
   const totalCostPHP = baseEssentials + tuitionCost + healthcareCost + activitiesCost;
-  const totalCostZAR = totalCostPHP * 0.27; // Dummy exchange rate for mock
+  const totalCostZAR = getSecondaryValue(totalCostPHP);
 
   const handleEditProfile = () => {
     // Restart the onboarding flow to edit data
@@ -129,20 +131,20 @@ export function ChildProfileHeader() {
         <div className="flex flex-col gap-1 mb-8 ml-1">
           <div className="flex items-baseline gap-2">
             <span className="text-[42px] leading-none font-black tracking-tighter text-white">
-              ₱{totalCostPHP.toLocaleString()}
+              {primarySymbol}{totalCostPHP.toLocaleString()}
             </span>
             <div className="bg-[#FF7B54]/10 px-2 py-1 rounded-lg ml-1">
               <span className="text-sm font-bold text-[#FF7B54]">
-                R{Math.round(totalCostZAR).toLocaleString()}
+                {secondarySymbol}{Math.round(totalCostZAR).toLocaleString()}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-1.5 mt-1 opacity-70">
             <span className="text-[13px] font-bold text-white tracking-wide">
-              Est. Yearly: ₱{(totalCostPHP * 12).toLocaleString()}
+              Est. Yearly: {primarySymbol}{(totalCostPHP * 12).toLocaleString()}
             </span>
             <span className="text-[12px] font-bold text-white/50">
-              / R{Math.round(totalCostZAR * 12).toLocaleString()}
+              / {secondarySymbol}{Math.round(totalCostZAR * 12).toLocaleString()}
             </span>
           </div>
         </div>
@@ -203,7 +205,7 @@ export function ChildProfileHeader() {
                       <span className="text-[14px] font-bold text-white">Base Essentials</span>
                       <span className="text-[11px] text-white/50">Food, Diapers, Hygiene</span>
                     </div>
-                    <span className="text-[15px] font-bold text-white">₱{baseEssentials.toLocaleString()}</span>
+                    <span className="text-[15px] font-bold text-white">{primarySymbol}{baseEssentials.toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between items-center pb-4 border-b border-white/5">
@@ -213,7 +215,7 @@ export function ChildProfileHeader() {
                         {configuredSchool ? 'Configured' : 'Estimated'}
                       </span>
                     </div>
-                    <span className="text-[15px] font-bold text-white">₱{tuitionCost.toLocaleString()}</span>
+                    <span className="text-[15px] font-bold text-white">{primarySymbol}{tuitionCost.toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between items-center pb-4 border-b border-white/5">
@@ -223,7 +225,7 @@ export function ChildProfileHeader() {
                         {hasHealthcare ? 'Configured' : 'Estimated'}
                       </span>
                     </div>
-                    <span className="text-[15px] font-bold text-white">₱{healthcareCost.toLocaleString()}</span>
+                    <span className="text-[15px] font-bold text-white">{primarySymbol}{healthcareCost.toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between items-center pb-4 border-b border-white/5">
@@ -233,14 +235,14 @@ export function ChildProfileHeader() {
                         {activitiesCost > 0 ? 'Configured' : 'Estimated'}
                       </span>
                     </div>
-                    <span className="text-[15px] font-bold text-white">₱{activitiesCost.toLocaleString()}</span>
+                    <span className="text-[15px] font-bold text-white">{primarySymbol}{activitiesCost.toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between items-center pt-2">
                     <span className="text-[16px] font-black text-white">Total Monthly</span>
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-[20px] font-black text-[#FF7B54]">₱{Math.round(totalCostPHP).toLocaleString()}</span>
-                      <span className="text-[12px] font-bold text-white/50">/ R{Math.round(totalCostZAR).toLocaleString()}</span>
+                      <span className="text-[20px] font-black text-[#FF7B54]">{primarySymbol}{Math.round(totalCostPHP).toLocaleString()}</span>
+                      <span className="text-[12px] font-bold text-white/50">/ {secondarySymbol}{Math.round(totalCostZAR).toLocaleString()}</span>
                     </div>
                   </div>
                 </div>

@@ -6,6 +6,7 @@ import { MoreHorizontal, ImagePlus, Trash2, ArrowUpDown, Check } from "lucide-re
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { formatCurrency } from "@/lib/format";
 import { MonthPicker } from "./MonthPicker";
 import { MonthlySummary } from "./MonthlySummary";
@@ -40,7 +41,7 @@ export function MonthlyReportCard() {
 
   const { config, categories, setCustomPhoto, removeCustomPhoto, setCustomPhotoPosition } = useBudgetStore();
   const { entries } = useSpendStore();
-  const { exchangeRate } = useCurrencyStore();
+  const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
   const now = new Date();
   const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -63,7 +64,6 @@ export function MonthlyReportCard() {
   
   const effectiveSpent = displayAllocated + totalSpent;
   const remaining = displayUnallocated;
-  const remainingZAR = remaining * exchangeRate;
   
   const spendRatio = displayTarget > 0 ? effectiveSpent / displayTarget : 0;
   const progressPct = Math.min(Math.max(spendRatio * 100, 0), 100);
@@ -241,12 +241,12 @@ export function MonthlyReportCard() {
               </div>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-2xl font-semibold text-white tracking-tight drop-shadow-sm">
-                  ₱{formatCurrency(Math.max(remaining, 0))}
+                  {primarySymbol}{formatCurrency(Math.max(getPrimaryValue(remaining), 0))}
                 </span>
                 <span className="text-[11px] text-white/60 font-medium">left</span>
               </div>
               <span className="text-xs text-white/40 font-medium">
-                ≈ R{formatCurrency(Math.max(remainingZAR, 0))}
+                ≈ {secondarySymbol}{formatCurrency(Math.max(getSecondaryValue(remaining), 0))}
               </span>
               {/* Ultra sleek progress bar */}
               <div className="w-full h-1 bg-white/10 rounded-full mt-1.5 overflow-hidden">

@@ -8,13 +8,13 @@ import { premiumPageVariants } from "@/utils/animations";
 import { useEffect, useRef } from "react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
-import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { QuickLogModal } from "@/components/jar/QuickLogModal";
 import { JarLockedModal } from "@/components/jar/JarLockedModal";
 import { JarSettingsModal } from "@/components/jar/JarSettingsModal";
 import { LogAnimationOverlay } from "@/components/jar/LogAnimationOverlay";
 import { AnimatePresence } from "framer-motion";
-import { filterEntriesByMonth } from "@/utils/budgetMath";
+import { filterEntriesByMonth } from "@/utils/budgetFilters";
 
 export default function SpendJarPage() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function SpendJarPage() {
 
   const { config, categories } = useBudgetStore();
   const { entries, addExpense, clearEntries } = useSpendStore();
-  const { exchangeRate } = useCurrencyStore();
+  const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
   
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isLockedModalOpen, setIsLockedModalOpen] = useState(false);
@@ -256,9 +256,9 @@ export default function SpendJarPage() {
             </div>
             
             {/* Arc Labels */}
-            <div className="absolute bottom-[-10px] left-3 text-[10px] text-white/30 font-bold tracking-widest">₱0</div>
+            <div className="absolute bottom-[-10px] left-3 text-[10px] text-white/30 font-bold tracking-widest">{primarySymbol}0</div>
             <div className="absolute bottom-[-10px] right-3 text-[10px] text-white/30 font-bold tracking-widest">
-              ₱{Math.round(allowedSpend/1000)}k
+              {primarySymbol}{Math.round(getPrimaryValue(allowedSpend)/1000)}k
             </div>
           </div>
         </div>
@@ -269,13 +269,13 @@ export default function SpendJarPage() {
             Spent {config.period === 'monthly' ? 'this month' : 'this week'}
           </span>
           <div className="flex items-start justify-center">
-            <span className="text-3xl text-white/40 font-light mt-2 mr-1">₱</span>
+            <span className="text-3xl text-white/40 font-light mt-2 mr-1">{primarySymbol}</span>
             <span className="text-[5.5rem] leading-none font-light tracking-tighter text-white drop-shadow-2xl">
-              {totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+              {getPrimaryValue(totalSpent).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
             </span>
           </div>
           <span className="text-white/30 font-medium tracking-widest text-xs mt-3">
-            ≈ R{(totalSpent * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+            ≈ {secondarySymbol}{getSecondaryValue(totalSpent).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
           </span>
           
           {/* Subtle Status Pill */}
@@ -322,7 +322,7 @@ export default function SpendJarPage() {
                 <span className="text-white/60 text-sm leading-relaxed">
                   {isLocked 
                     ? `You have maxed out your allowed extra spend for the ${config.period}.` 
-                    : `You only have ₱${remainingAllowed.toLocaleString()} left in your allowed extra spend.`
+                    : `You only have ${primarySymbol}${getPrimaryValue(remainingAllowed).toLocaleString()} left in your allowed extra spend.`
                   }
                 </span>
               </div>
@@ -379,8 +379,8 @@ export default function SpendJarPage() {
                 </div>
               </div>
               <div className="flex flex-col items-end">
-                <span className={`font-semibold tracking-wider ${entry.colorClass}`}>₱{entry.amount.toLocaleString()}</span>
-                <span className="text-white/30 text-[10px] uppercase tracking-wider font-mono mt-0.5">R{(entry.amount * exchangeRate).toFixed(0)}</span>
+                <span className={`font-semibold tracking-wider ${entry.colorClass}`}>{primarySymbol}{getPrimaryValue(entry.amount).toLocaleString()}</span>
+                <span className="text-white/30 text-[10px] uppercase tracking-wider font-mono mt-0.5">{secondarySymbol}{getSecondaryValue(entry.amount).toFixed(0)}</span>
               </div>
             </div>
           ))}

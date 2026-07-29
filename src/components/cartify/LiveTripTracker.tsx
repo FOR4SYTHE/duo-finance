@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useCartifyStore } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { PriceEntryModal } from "./PriceEntryModal";
 import { Activity, Plus, ShoppingCart, Trash2, ArrowUpDown, ReceiptText, Delete, ShoppingBag, Shirt, Armchair, Laptop, Pill, Wrench, Milk, Egg, Croissant, Cookie, Drumstick, Fish, Carrot, Apple, CupSoda, Coffee, Beer, Wine, Pizza, Cake, Banana, Cherry, Grape, Package, Droplets, X } from "lucide-react";
 import { motion, useAnimation, PanInfo, AnimatePresence } from "framer-motion";
@@ -19,6 +20,7 @@ const categorySuggestions: Record<string, string[]> = {
 export function LiveTripTracker() {
     const { items, budget, mode, activeCategory, setActiveCategory, updateItemPrice, incrementQuantity, decrementQuantity, removeItem, addItem, showReceipt } = useCartifyStore();
     const { exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     
     const [sortMode, setSortMode] = useState<'default' | 'asc' | 'desc'>('default');
     const [activeEditId, setActiveEditId] = useState<string | null>(null);
@@ -237,14 +239,14 @@ export function LiveTripTracker() {
                             transition={{ type: "spring", stiffness: 300, damping: 20 }}
                             className="text-white text-[32px] leading-none font-medium tracking-tight"
                         >
-                            ₱{Math.abs(remaining).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                            {primarySymbol}{getPrimaryValue(Math.abs(remaining)).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                         </motion.span>
                         <div className="flex items-center justify-center gap-2 mt-1 text-white/50 text-[10px] font-normal tracking-wide">
-                            <span>≈ R{(Math.abs(remaining) * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            <span>≈ {secondarySymbol}{getSecondaryValue(Math.abs(remaining)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             {vatAmount > 0 && (
                                 <>
                                     <span className="w-[1px] h-2.5 bg-white/20" />
-                                    <span>Est. VAT ₱{vatAmount.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                                    <span>Est. VAT {primarySymbol}{getPrimaryValue(vatAmount).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
                                 </>
                             )}
                         </div>
@@ -303,10 +305,10 @@ export function LiveTripTracker() {
                         className="w-full pt-1 flex justify-center items-center gap-10 relative z-20 bg-black"
                     >
                         <span className="text-[#888] text-[13px] font-light tracking-[0.03em] flex items-center gap-2">
-                            SPENT <span className="text-[#aaa] tracking-normal">₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                            SPENT <span className="text-[#aaa] tracking-normal">{primarySymbol}{getPrimaryValue(totalSpent).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
                         </span>
                         <span className="text-[#888] text-[13px] font-light tracking-[0.03em] flex items-center gap-2">
-                            TOTAL <span className="text-[#aaa] tracking-normal">₱{budget.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                            TOTAL <span className="text-[#aaa] tracking-normal">{primarySymbol}{getPrimaryValue(budget).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
                         </span>
                     </motion.div>
                 </motion.div>
@@ -380,17 +382,17 @@ export function LiveTripTracker() {
                     <span className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4">Remaining Budget</span>
                     
                     <div className="flex items-start">
-                        <span className="text-white/40 text-3xl font-light mt-3 mr-1">₱</span>
+                        <span className="text-white/40 text-3xl font-light mt-3 mr-1">{primarySymbol}</span>
                         <motion.span 
                             layout
                             className={`text-[96px] leading-none tracking-tighter font-medium ${isOverBudget ? 'text-red-500' : 'text-white'}`}
                         >
-                            {Math.abs(remaining).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                            {getPrimaryValue(Math.abs(remaining)).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                         </motion.span>
                     </div>
                     
                     <span className="text-white/40 text-sm font-medium tracking-wide mt-2">
-                        ≈ R{(Math.abs(remaining) * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        ≈ {secondarySymbol}{getSecondaryValue(Math.abs(remaining)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                     </span>
                 </div>
 
@@ -409,7 +411,7 @@ export function LiveTripTracker() {
                             ) : (
                                 <>
                                     <span className="text-white/40 text-[9px] font-bold tracking-[0.2em] uppercase mb-1">Spent</span>
-                                    <span className="text-white text-3xl font-medium tracking-tight">₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                                    <span className="text-white text-3xl font-medium tracking-tight">{primarySymbol}{getPrimaryValue(totalSpent).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
                                 </>
                             )}
                         </div>
@@ -446,7 +448,7 @@ export function LiveTripTracker() {
                             className="fixed z-[200] pointer-events-none flex items-center justify-center"
                         >
                             <span className="text-white text-[80px] font-light tracking-tight drop-shadow-2xl">
-                                ₱{flyingValue}
+                                {primarySymbol}{flyingValue}
                             </span>
                         </motion.div>
                     )}
@@ -474,11 +476,11 @@ export function LiveTripTracker() {
                                 
                                 <div className="flex flex-col items-center justify-center gap-1 mb-8">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-4xl text-white/40">₱</span>
+                                        <span className="text-4xl text-white/40">{primarySymbol}</span>
                                         <span className="text-[64px] text-white font-light tracking-tight">{simpleDisplayValue}</span>
                                     </div>
                                     <span className="text-white/40 text-sm font-medium tracking-wide">
-                                        ≈ R{(Number(simpleDisplayValue || 0) * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                        ≈ {secondarySymbol}{getSecondaryValue(Number(simpleDisplayValue || 0)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                                     </span>
                                 </div>
 
@@ -549,9 +551,9 @@ export function LiveTripTracker() {
                                             <span className="text-white font-medium pl-2">{item.name}</span>
                                             <div className="flex items-center gap-4">
                                                 <div className="flex flex-col items-end">
-                                                    <span className="text-white font-medium text-lg tracking-tight">₱{item.amount.toLocaleString()}</span>
+                                                    <span className="text-white font-medium text-lg tracking-tight">{primarySymbol}{getPrimaryValue(item.amount).toLocaleString()}</span>
                                                     <span className="text-white/40 text-[10px] uppercase tracking-wider">
-                                                        ≈ R{(item.amount * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                                        ≈ {secondarySymbol}{getSecondaryValue(item.amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                                                     </span>
                                                 </div>
                                                 <button onClick={() => removeItem(item.id)} className="w-10 h-10 rounded-full bg-red-500/10 text-red-500/80 hover:text-red-500 hover:bg-red-500/20 flex items-center justify-center transition-colors">
@@ -828,6 +830,7 @@ function SwipeableCartItem({
     onDelete 
 }: any) {
     const { toggleItemVatable } = useCartifyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     const isStillNeed = item.status === 'still-need';
     const isSwiped = activeSwipeId === item.id;
 
@@ -915,7 +918,7 @@ function SwipeableCartItem({
                         <div className="flex flex-col flex-1 pl-1" onClick={!isStillNeed ? onEdit : undefined}>
                             <span className={`font-semibold text-[16px] leading-tight tracking-tight mb-1 ${isStillNeed ? 'text-white/60' : 'text-white'}`}>{item.name}</span>
                             <span className="text-white/40 text-[11px] font-medium tracking-wide">
-                                {isStillNeed ? 'Tap to set price' : `₱${item.unitPrice.toLocaleString()} each`}
+                                {isStillNeed ? 'Tap to set price' : `${primarySymbol}${getPrimaryValue(item.unitPrice).toLocaleString()} each`}
                             </span>
                             
                             {/* Premium glowing VAT Badge */}
@@ -936,11 +939,11 @@ function SwipeableCartItem({
                     
                     <div className="flex flex-col items-end justify-center" onClick={onEdit}>
                         <span className={`font-medium text-[19px] tracking-tight ${isStillNeed ? 'text-white/30' : 'text-white'}`}>
-                            {isStillNeed ? '--' : `₱${item.amount.toLocaleString()}`}
+                            {isStillNeed ? '--' : `${primarySymbol}${getPrimaryValue(item.amount).toLocaleString()}`}
                         </span>
                         {!isStillNeed && (
                             <span className="text-white/30 text-[10px] uppercase font-bold tracking-wider mt-1">
-                                ≈ R{(item.amount * exchangeRate).toFixed(0)}
+                                ≈ {secondarySymbol}{getSecondaryValue(item.amount).toFixed(0)}
                             </span>
                         )}
                     </div>

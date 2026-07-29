@@ -9,6 +9,7 @@ import * as Icons from "lucide-react";
 import confetti from "canvas-confetti";
 import { AddGoalSheet, EditGoalSheet, GoalMenuSheet } from "./GoalSheets";
 import { AmountInputModal } from "./AmountInputModal";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 // ==========================================
 // STATIC CONSTANTS
@@ -56,6 +57,7 @@ function EmergencyRunwayContent() {
     const [isLogging, setIsLogging] = useState(false);
     const { categories, goals, config, setRunwayMultiplier, updateGoal } = useBudgetStore();
     const { exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     
     const multiplier = config.runwayMultiplier || 3;
 
@@ -78,7 +80,7 @@ function EmergencyRunwayContent() {
                 <div className="flex flex-col">
                     <span className="text-white/70 text-sm font-medium">Runway Duration</span>
                     <span className="text-white/40 text-[10px]">
-                        {monthlyBaseline > 0 ? `Monthly baseline: ₱${formatCurrency(monthlyBaseline)}` : 'Category targets not set'}
+                        {monthlyBaseline > 0 ? `Monthly baseline: ${primarySymbol}${formatCurrency(getPrimaryValue(monthlyBaseline))}` : 'Category targets not set'}
                     </span>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
@@ -101,12 +103,12 @@ function EmergencyRunwayContent() {
             <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-center text-xs">
                     <span className="text-white/50 uppercase tracking-wider font-semibold">Saved So Far</span>
-                    <span className="text-white/40">≈ ZAR {formatCurrency(savedSoFar * exchangeRate)}</span>
+                    <span className="text-white/40">≈ {secondarySymbol} {formatCurrency(getSecondaryValue(savedSoFar))}</span>
                 </div>
                 <div className="flex items-center gap-3 bg-black/40 rounded-2xl p-4 border border-white/5 w-full justify-between">
                     <div className="flex items-center gap-1">
-                        <span className="text-white/40 text-sm font-medium">₱</span>
-                        <span className="text-white font-semibold text-lg">{formatCurrency(savedSoFar)}</span>
+                        <span className="text-white/40 text-sm font-medium">{primarySymbol}</span>
+                        <span className="text-white font-semibold text-lg">{formatCurrency(getPrimaryValue(savedSoFar))}</span>
                     </div>
                     <button 
                         onClick={() => setIsLogging(true)}
@@ -123,8 +125,8 @@ function EmergencyRunwayContent() {
                     <div className="text-right flex flex-col items-end justify-center">
                         {targetRunway > 0 ? (
                             <>
-                                <span className="text-white font-semibold">₱{formatCurrency(targetRunway)}</span>
-                                <span className="text-white/40 text-xs block">≈ R{formatCurrency(targetRunway * exchangeRate)}</span>
+                                <span className="text-white font-semibold">{primarySymbol}{formatCurrency(getPrimaryValue(targetRunway))}</span>
+                                <span className="text-white/40 text-xs block">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(targetRunway))}</span>
                             </>
                         ) : (
                             <span className="text-white/40 text-[11px] font-medium">Set category budgets to calculate</span>
@@ -143,7 +145,7 @@ function EmergencyRunwayContent() {
                         <div className="flex justify-between text-[11px] text-white/50">
                             <span>{progressPct.toFixed(0)}% Saved</span>
                             {remainingAmount > 0 ? (
-                                <span>₱{formatCurrency(remainingAmount)} remaining</span>
+                                <span>{primarySymbol}{formatCurrency(getPrimaryValue(remainingAmount))} remaining</span>
                             ) : (
                                 <span className="text-[#30D158] font-medium">Runway Fully Funded! 🎉</span>
                             )}
@@ -182,6 +184,7 @@ function EmergencyRunwayContent() {
 function GoalsContent() {
     const { goals, addMoneyToGoal } = useBudgetStore();
     const { exchangeRate, primaryCurrency } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     
     const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
     const [menuGoalId, setMenuGoalId] = useState<string | null>(null);
@@ -230,13 +233,13 @@ function GoalsContent() {
                             
                             <div className="flex justify-between items-end">
                                 <div>
-                                    <div className="text-white font-semibold">₱{formatCurrency(goal.savedAmount)}</div>
-                                    <div className="text-white/40 text-xs">≈ R{formatCurrency(goal.savedAmount * exchangeRate)}</div>
+                                    <div className="text-white font-semibold">{primarySymbol}{formatCurrency(getPrimaryValue(goal.savedAmount))}</div>
+                                    <div className="text-white/40 text-xs">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(goal.savedAmount))}</div>
                                 </div>
                                 <div className="text-right">
                                     {goal.targetAmount > 0 ? (
                                         <>
-                                            <div className="text-white/50 text-xs mb-1">Target: ₱{formatCurrency(goal.targetAmount)}</div>
+                                            <div className="text-white/50 text-xs mb-1">Target: {primarySymbol}{formatCurrency(getPrimaryValue(goal.targetAmount))}</div>
                                             <div className="text-[#30D158] text-sm font-medium">{progress.toFixed(0)}%</div>
                                         </>
                                     ) : (
@@ -314,7 +317,7 @@ function GoalsContent() {
                             />
                             <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">Goal Reached! 🎉</h2>
                             <p className="text-white/70 text-base mb-6 max-w-[240px] leading-relaxed">
-                                You just fully funded <strong className="text-white">"{celebrationGoal.name}"</strong> (₱{formatCurrency(celebrationGoal.target)}). Incredible work!
+                                You just fully funded <strong className="text-white">"{celebrationGoal.name}"</strong> ({primarySymbol}{formatCurrency(getPrimaryValue(celebrationGoal.target))}). Incredible work!
                             </p>
                             <button 
                                 onClick={() => setCelebrationGoal(null)}
@@ -362,6 +365,7 @@ function GoalsContent() {
 function InflationGuardContent() {
     const { categories } = useBudgetStore();
     const { exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
     const utilsCategory = categories.find(c => c.name.toLowerCase() === 'utilities');
     const groceriesCategory = categories.find(c => c.name.toLowerCase() === 'groceries');
@@ -383,24 +387,24 @@ function InflationGuardContent() {
                 <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2.5">
                     <div className="flex flex-col">
                         <span className="text-white/70 font-medium">Utilities (Meralco peak)</span>
-                        <span className="text-white/40 text-[10px]">Current: ₱{formatCurrency(utilsTarget)}</span>
+                        <span className="text-white/40 text-[10px]">Current: {primarySymbol}{formatCurrency(getPrimaryValue(utilsTarget))}</span>
                     </div>
-                    <span className="text-[#E8A33D] font-semibold">+₱{formatCurrency(suggestedUtilsBuffer)} (25%)</span>
+                    <span className="text-[#E8A33D] font-semibold">+{primarySymbol}{formatCurrency(getPrimaryValue(suggestedUtilsBuffer))} (25%)</span>
                 </div>
 
                 <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2.5">
                     <div className="flex flex-col">
                         <span className="text-white/70 font-medium">Groceries (Supply volatility)</span>
-                        <span className="text-white/40 text-[10px]">Current: ₱{formatCurrency(groceriesTarget)}</span>
+                        <span className="text-white/40 text-[10px]">Current: {primarySymbol}{formatCurrency(getPrimaryValue(groceriesTarget))}</span>
                     </div>
-                    <span className="text-[#E8A33D] font-semibold">+₱{formatCurrency(suggestedGroceriesBuffer)} (8%)</span>
+                    <span className="text-[#E8A33D] font-semibold">+{primarySymbol}{formatCurrency(getPrimaryValue(suggestedGroceriesBuffer))} (8%)</span>
                 </div>
 
                 <div className="flex justify-between items-baseline pt-1">
                     <span className="text-white/80 font-medium text-xs uppercase tracking-wider">Suggested Buffer</span>
                     <div className="text-right">
-                        <span className="text-[#E8A33D] font-semibold text-lg">₱{formatCurrency(totalSuggestedBuffer)}</span>
-                        <span className="text-white/40 text-xs block">≈ R{formatCurrency(totalSuggestedBuffer * exchangeRate)}</span>
+                        <span className="text-[#E8A33D] font-semibold text-lg">{primarySymbol}{formatCurrency(getPrimaryValue(totalSuggestedBuffer))}</span>
+                        <span className="text-white/40 text-xs block">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(totalSuggestedBuffer))}</span>
                     </div>
                 </div>
 
@@ -419,6 +423,7 @@ function InflationGuardContent() {
 function SalaryAllocationContent() {
     const { categories, goals } = useBudgetStore();
     const { exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     
     const [income, setIncome] = useState<number>(0);
     const [needsPct, setNeedsPct] = useState<number>(50);
@@ -534,7 +539,7 @@ function SalaryAllocationContent() {
                 <div className="flex flex-col gap-2">
                     <span className="text-white/50 text-xs uppercase tracking-wider font-semibold">Monthly Combined Income</span>
                     <div className="flex items-center gap-3 bg-black/40 rounded-2xl p-4 border border-white/5 focus-within:border-white/20 transition-colors w-full">
-                        <span className="text-white/40 text-sm font-medium">₱</span>
+                        <span className="text-white/40 text-sm font-medium">{primarySymbol}</span>
                         <input 
                             type="number" 
                             value={income || ''} 
@@ -630,7 +635,7 @@ function SalaryAllocationContent() {
                                     <button onClick={() => setExpandedInfo(expandedInfo === 'rent' ? null : 'rent')} className="text-white/60 flex items-center gap-1.5 hover:text-white transition-colors outline-none text-left">
                                         Rent (60% of Needs) <Icons.Info className="w-3 h-3 opacity-60 shrink-0" />
                                     </button>
-                                    <span className="text-white font-medium">₱{formatCurrency(rentAllocation)}</span>
+                                    <span className="text-white font-medium">{primarySymbol}{formatCurrency(getPrimaryValue(rentAllocation))}</span>
                                 </div>
                                 <AnimatePresence>
                                     {expandedInfo === 'rent' && (
@@ -648,7 +653,7 @@ function SalaryAllocationContent() {
                                     <button onClick={() => setExpandedInfo(expandedInfo === 'groceries' ? null : 'groceries')} className="text-white/60 flex items-center gap-1.5 hover:text-white transition-colors outline-none text-left">
                                         Groceries (25% of Needs) <Icons.Info className="w-3 h-3 opacity-60 shrink-0" />
                                     </button>
-                                    <span className="text-white font-medium">₱{formatCurrency(groceriesAllocation)}</span>
+                                    <span className="text-white font-medium">{primarySymbol}{formatCurrency(getPrimaryValue(groceriesAllocation))}</span>
                                 </div>
                                 <AnimatePresence>
                                     {expandedInfo === 'groceries' && (
@@ -666,7 +671,7 @@ function SalaryAllocationContent() {
                                     <button onClick={() => setExpandedInfo(expandedInfo === 'utilities' ? null : 'utilities')} className="text-white/60 flex items-center gap-1.5 hover:text-white transition-colors outline-none text-left">
                                         Utilities (15% of Needs) <Icons.Info className="w-3 h-3 opacity-60 shrink-0" />
                                     </button>
-                                    <span className="text-white font-medium">₱{formatCurrency(utilitiesAllocation)}</span>
+                                    <span className="text-white font-medium">{primarySymbol}{formatCurrency(getPrimaryValue(utilitiesAllocation))}</span>
                                 </div>
                                 <AnimatePresence>
                                     {expandedInfo === 'utilities' && (
@@ -684,7 +689,7 @@ function SalaryAllocationContent() {
                                     <button onClick={() => setExpandedInfo(expandedInfo === 'wants' ? null : 'wants')} className="text-white/60 flex items-center gap-1.5 hover:text-white transition-colors outline-none text-left">
                                         Unallocated - Discretionary (Wants) <Icons.Info className="w-3 h-3 opacity-60 shrink-0" />
                                     </button>
-                                    <span className="text-[#0A84FF] font-semibold">₱{formatCurrency(wantsAmount)}</span>
+                                    <span className="text-[#0A84FF] font-semibold">{primarySymbol}{formatCurrency(getPrimaryValue(wantsAmount))}</span>
                                 </div>
                                 <AnimatePresence>
                                     {expandedInfo === 'wants' && (
@@ -702,7 +707,7 @@ function SalaryAllocationContent() {
                                     <button onClick={() => setExpandedInfo(expandedInfo === 'savings' ? null : 'savings')} className="text-white/60 flex items-center gap-1.5 hover:text-white transition-colors outline-none text-left">
                                         Emergency Savings target <Icons.Info className="w-3 h-3 opacity-60 shrink-0" />
                                     </button>
-                                    <span className="text-[#BF5AF2] font-semibold">₱{formatCurrency(savingsAmount)}</span>
+                                    <span className="text-[#BF5AF2] font-semibold">{primarySymbol}{formatCurrency(getPrimaryValue(savingsAmount))}</span>
                                 </div>
                                 <AnimatePresence>
                                     {expandedInfo === 'savings' && (

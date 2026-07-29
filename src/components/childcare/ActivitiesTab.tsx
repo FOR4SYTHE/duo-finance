@@ -4,9 +4,12 @@ import { useState } from "react";
 import { useChildCareStore } from "@/store/useChildCareStore";
 import { Plus, Palette, CheckCircle2, Info } from "lucide-react";
 import { motion } from "framer-motion";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
+import { formatCurrency } from "@/lib/format";
 
 export function ActivitiesTab() {
   const { cachedData, configuration, toggleActivity } = useChildCareStore();
+  const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
   const [activeActivityCategory, setActiveActivityCategory] = useState<string>("All");
 
   const categories = ["All", "Sports", "Arts", "Learning", "Lifestyle"];
@@ -54,7 +57,7 @@ export function ActivitiesTab() {
             .filter(a => activeActivityCategory === "All" || a.category === activeActivityCategory)
             .map((activity, idx) => {
             const isSelected = configuration.selectedActivities.includes(activity.id);
-            const zarCost = Math.round((activity.cost || 5000) * 0.27);
+            const baseCost = activity.cost || 5000;
             return (
               <motion.div 
                 key={`${activity.id}-${idx}`} 
@@ -85,8 +88,8 @@ export function ActivitiesTab() {
                 
                 <div className="relative z-10 p-4 flex flex-col gap-1 w-full">
                   <span className="text-[10px] font-bold text-[#FF7B54] uppercase tracking-widest mb-1 flex items-baseline gap-1">
-                    ₱{activity.cost?.toLocaleString() || "5,000"} 
-                    <span className="text-white/50 text-[8px]">/ R{zarCost.toLocaleString()}</span>
+                    {primarySymbol}{formatCurrency(getPrimaryValue(baseCost))} 
+                    <span className="text-white/50 text-[8px]">/ {secondarySymbol}{formatCurrency(getSecondaryValue(baseCost))}</span>
                   </span>
                   <span className="text-[14px] font-bold text-white leading-tight">
                     {activity.title}

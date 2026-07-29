@@ -6,6 +6,7 @@ import { X, Trash2, Edit3, Target, Calendar, HelpCircle } from "lucide-react";
 import * as Icons from "lucide-react";
 import confetti from "canvas-confetti";
 import { useBudgetStore, Goal } from "@/store/useBudgetStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { AmountInputModal } from "./AmountInputModal";
 
 interface AddGoalSheetProps {
@@ -140,6 +141,7 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
     const [date, setDate] = useState("");
     const [savedAmount, setSavedAmount] = useState(0);
     const [isAmountModalOpen, setIsAmountModalOpen] = useState(false);
+    const { primarySymbol } = useDualCurrency();
 
     // Sync state when goal changes
     useEffect(() => {
@@ -260,7 +262,7 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
                                 <div className="flex flex-col gap-2">
                                     <label className="text-white/50 text-xs font-semibold uppercase tracking-wider">Saved So Far</label>
                                     <div className="flex items-center gap-3 bg-black/40 border border-white/5 rounded-2xl px-4 py-3 focus-within:border-white/20 transition-colors">
-                                        <span className="text-white/50 font-medium">₱</span>
+                                        <span className="text-white/50 font-medium">{primarySymbol}</span>
                                         <input 
                                             type="number"
                                             value={savedAmount || ''}

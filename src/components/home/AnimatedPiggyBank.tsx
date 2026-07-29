@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
-import { filterEntriesByMonth } from "@/utils/budgetMath";
+import { filterEntriesByMonth } from "@/utils/budgetFilters";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 export function AnimatedPiggyBank() {
+  const { primarySymbol, secondarySymbol } = useDualCurrency();
   const [coins, setCoins] = useState<{ id: number; peakX: number; peakY: number; endX: number; endY: number; delay: number; duration: number; startX: number; startY: number; state: string; currency: string }[]>([]);
 
   // Get Spend Jar state
@@ -46,7 +48,6 @@ export function AnimatedPiggyBank() {
       const numCoins = 15;
       
       const newCoins = Array.from({ length: numCoins }).map((_, i) => {
-        const isPHP = Math.random() > 0.5;
         
         // Match the reference video physics:
         // Explode mostly upward and slightly outward
@@ -74,7 +75,7 @@ export function AnimatedPiggyBank() {
           delay: Math.random() * 0.1, 
           duration: 1.5 + Math.random() * 0.5, // slightly longer for the floaty fall
           state: state,
-          currency: isPHP ? '₱' : 'R'
+          currency: Math.random() > 0.5 ? primarySymbol : secondarySymbol
         };
       });
       

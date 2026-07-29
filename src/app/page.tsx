@@ -29,11 +29,12 @@ import { useNotificationEngine } from "@/hooks/useNotificationEngine";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { containerVariants, itemVariants } from "@/utils/animations";
-import { filterEntriesByMonth } from "@/utils/budgetMath";
+import { filterEntriesByMonth } from "@/utils/budgetFilters";
 
 export default function Home() {
   useNotificationEngine();
@@ -41,10 +42,11 @@ export default function Home() {
   const { config, setLastSeenMonth, _hasHydrated, notifications, addNotification } = useBudgetStore();
   const { entries, injectMockEntries } = useSpendStore();
   const { exchangeRate } = useCurrencyStore();
+  const { primarySymbol, secondarySymbol, getSecondaryValue } = useDualCurrency();
   
   const currentMonthEntries = useMemo(() => filterEntriesByMonth(entries, config.activeMonth || new Date().toISOString().slice(0, 7)), [entries, config.activeMonth]);
   const totalSpent = useMemo(() => currentMonthEntries.reduce((sum, entry) => sum + entry.amount, 0), [currentMonthEntries]);
-  const zarTotalSpent = useMemo(() => Math.round(totalSpent * exchangeRate), [totalSpent, exchangeRate]);
+  const zarTotalSpent = useMemo(() => getSecondaryValue(totalSpent), [totalSpent, getSecondaryValue]);
 
   const allowedSpend = config.targetAmount * ((config.jarAllowedPercentage || 20) / 100);
   const percentage = allowedSpend > 0 ? (totalSpent / allowedSpend) * 100 : 0;
@@ -415,10 +417,10 @@ export default function Home() {
               <div className="flex flex-col items-end text-right w-[55%] pt-1">
                 <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-1">Spend Jar</span>
                 <span className={`${phpColor} text-[22px] font-black tracking-tighter leading-none mb-0.5 transition-colors duration-300`}>
-                  ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                  {primarySymbol}{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                 </span>
                 <span className={`${zarColor} text-[10px] font-semibold tracking-wide transition-colors duration-300`}>
-                  ≈ R{zarTotalSpent.toLocaleString()}
+                  ≈ {secondarySymbol}{zarTotalSpent.toLocaleString(undefined, {maximumFractionDigits: 0})}
                 </span>
               </div>
             </div>

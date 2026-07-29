@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Delete, X } from "lucide-react";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 interface AmountInputModalProps {
     isOpen: boolean;
@@ -15,10 +16,10 @@ interface AmountInputModalProps {
 
 export function AmountInputModal({ isOpen, onClose, onConfirm, title, initialAmount = 0 }: AmountInputModalProps) {
     const { primaryCurrency, exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getSecondaryValue } = useDualCurrency();
     const [displayValue, setDisplayValue] = useState("0");
 
     const isPhpPrimary = primaryCurrency === 'PHP';
-    const targetCurrency = isPhpPrimary ? 'ZAR' : 'PHP';
     
     // When modal opens, initialize with the current amount converted to primary currency
     useEffect(() => {
@@ -29,9 +30,7 @@ export function AmountInputModal({ isOpen, onClose, onConfirm, title, initialAmo
     }, [isOpen, initialAmount, isPhpPrimary, exchangeRate]);
 
     const numericValue = Number(displayValue || 0);
-    const convertedAmount = isPhpPrimary 
-        ? numericValue * exchangeRate 
-        : numericValue / exchangeRate;
+    const convertedAmount = getSecondaryValue(numericValue);
         
     const phpAmount = isPhpPrimary ? numericValue : convertedAmount;
 
@@ -97,11 +96,11 @@ export function AmountInputModal({ isOpen, onClose, onConfirm, title, initialAmo
 
                         <div className="flex flex-col items-center justify-center mb-4 shrink-0">
                             <div className="text-[2.75rem] leading-none text-white flex items-baseline justify-center gap-1 font-light tracking-tight">
-                                <span className="text-xl text-white/40">{isPhpPrimary ? '₱' : 'R'}</span>
+                                <span className="text-xl text-white/40">{primarySymbol}</span>
                                 <span>{displayValue || "0"}</span>
                             </div>
                             <span className="text-white/40 font-medium tracking-wide mt-1 text-xs">
-                                ≈ {targetCurrency === 'PHP' ? '₱' : 'R'}{convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                ≈ {secondarySymbol}{convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                             </span>
                         </div>
 
@@ -129,7 +128,7 @@ export function AmountInputModal({ isOpen, onClose, onConfirm, title, initialAmo
                             disabled={phpAmount < 0}
                             className="w-full h-[54px] rounded-full bg-white text-black font-semibold text-sm tracking-wide flex items-center justify-center gap-2 hover:bg-gray-100 disabled:opacity-50 disabled:bg-white/10 disabled:text-white/40 transition-all duration-300 active:scale-[0.98] shrink-0"
                         >
-                            Save {isPhpPrimary ? '₱' : 'R'}{numericValue.toLocaleString()}
+                            Save {primarySymbol}{numericValue.toLocaleString()}
                         </button>
                     </motion.div>
                 </div>

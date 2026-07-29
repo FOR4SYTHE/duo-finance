@@ -25,7 +25,7 @@ import {
 import { useBillsStore, Bill } from "@/store/useBillsStore";
 import { useHouseholdStore } from "@/store/useHouseholdStore";
 import { useCartifyStore } from "@/store/useCartifyStore";
-import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { formatCurrency } from "@/lib/format";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -86,7 +86,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
   const { bills, addBill, updateBill, removeBill, toggleReminder } = useBillsStore();
   const { scheduledTrips, deleteScheduledTrip } = useHouseholdStore();
   const { savedTrips, deleteSavedTrip } = useCartifyStore();
-  const { exchangeRate } = useCurrencyStore();
+  const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
   const now = new Date();
   const [viewMonth, setViewMonth] = useState(now.getMonth());
   const [viewYear, setViewYear] = useState(now.getFullYear());
@@ -443,8 +443,8 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
 
                           <div className="flex items-end justify-between mt-5 relative z-10">
                             <div className="flex flex-col items-start gap-0.5">
-                              <span className="text-3xl font-black text-white tracking-tighter leading-none">₱{formatCurrency(bill.amount)}</span>
-                              <span className="text-[13px] text-white/50 font-bold tracking-tight">≈ R{(bill.amount * exchangeRate).toFixed(2)}</span>
+                              <span className="text-3xl font-black text-white tracking-tighter leading-none">{primarySymbol}{formatCurrency(getPrimaryValue(bill.amount))}</span>
+                              <span className="text-[13px] text-white/50 font-bold tracking-tight">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(bill.amount))}</span>
                             </div>
                             {bill.isRecurring && (
                               <div className="px-3 py-1 rounded-full bg-white/5 text-white/50 text-[9px] font-bold uppercase tracking-widest border border-white/10">
@@ -618,8 +618,8 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
 
                     <div className="flex items-end justify-between mt-5 relative z-10">
                       <div className="flex flex-col items-start gap-0.5">
-                        <span className="text-[26px] font-black text-white tracking-tighter leading-none">₱{formatCurrency(bill.amount)}</span>
-                        <span className="text-[12px] font-bold text-white/40 tracking-tight">≈ R{(bill.amount * exchangeRate).toFixed(2)}</span>
+                        <span className="text-[26px] font-black text-white tracking-tighter leading-none">{primarySymbol}{formatCurrency(getPrimaryValue(bill.amount))}</span>
+                        <span className="text-[12px] font-bold text-white/40 tracking-tight">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(bill.amount))}</span>
                       </div>
                       <div className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest bg-white/10 text-white/90 border border-white/5`}>
                         {bill.eventType === 'trip' ? (bill.tripType === 'scheduled' ? 'Scheduled Trip' : 'Saved Trip') : 'Scheduled'}

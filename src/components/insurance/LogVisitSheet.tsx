@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, Info } from "lucide-react";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { formatCurrency } from "@/lib/format";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 interface LogVisitSheetProps {
     isOpen: boolean;
@@ -25,6 +26,7 @@ export function LogVisitSheet({ isOpen, onClose, onSave }: LogVisitSheetProps) {
     }, []);
 
     const { exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     const [visitType, setVisitType] = useState('Checkup');
     const [policy, setPolicy] = useState('Silver Care HMO');
     const [status, setStatus] = useState('Covered');
@@ -208,11 +210,10 @@ export function LogVisitSheet({ isOpen, onClose, onSave }: LogVisitSheetProps) {
                                 </div>
                             </div>
 
-                            {/* Total Bill */}
                             <div className="flex flex-col gap-2">
                                 <label className="text-[13px] font-bold text-white/80 ml-1">Total Hospital Bill</label>
                                 <div className="relative">
-                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/50 font-bold text-[17px]">₱</span>
+                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/50 font-bold text-[17px]">{primarySymbol}</span>
                                     <input
                                         type="text"
                                         inputMode="decimal"
@@ -224,16 +225,15 @@ export function LogVisitSheet({ isOpen, onClose, onSave }: LogVisitSheetProps) {
                                 </div>
                                 {billStr && (
                                     <span className="text-[#30D158] text-[11px] font-bold ml-2">
-                                        ≈ R{formatCurrency(parseFloat(billStr.replace(/,/g, '')) * exchangeRate)}
+                                        ≈ {secondarySymbol}{formatCurrency(getSecondaryValue(parseFloat(billStr.replace(/,/g, ''))))}
                                     </span>
                                 )}
                             </div>
 
-                            {/* Out of Pocket */}
                             <div className="flex flex-col gap-2 mb-4">
                                 <label className="text-[13px] font-bold text-white/80 ml-1">Out of Pocket (You Paid)</label>
                                 <div className="relative">
-                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/50 font-bold text-[17px]">₱</span>
+                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/50 font-bold text-[17px]">{primarySymbol}</span>
                                     <input
                                         type="text"
                                         inputMode="decimal"
@@ -245,7 +245,7 @@ export function LogVisitSheet({ isOpen, onClose, onSave }: LogVisitSheetProps) {
                                 </div>
                                 {outOfPocketStr && (
                                     <span className="text-[#FF453A] text-[11px] font-bold ml-2">
-                                        ≈ R{formatCurrency(parseFloat(outOfPocketStr.replace(/,/g, '')) * exchangeRate)}
+                                        ≈ {secondarySymbol}{formatCurrency(getSecondaryValue(parseFloat(outOfPocketStr.replace(/,/g, ''))))}
                                     </span>
                                 )}
                             </div>

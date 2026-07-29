@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronDown, Check, ChevronRight, Phone, Calendar } from "lucide-react";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { formatCurrency } from "@/lib/format";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 interface ManualInputSheetProps {
     isOpen: boolean;
@@ -91,6 +92,7 @@ const SelectDropdown = ({ label, value, options, onChange }: any) => {
 export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetProps) {
     const [mounted, setMounted] = useState(false);
     const { exchangeRate } = useCurrencyStore();
+    const { primarySymbol } = useDualCurrency();
     
     useEffect(() => { setMounted(true); }, []);
 
@@ -227,11 +229,11 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
                                 <div className="flex justify-between items-end">
                                     <div className="flex flex-col gap-1">
                                         <span className="text-white/50 text-[11px] font-medium">Coverage Limit</span>
-                                        <span className="text-white font-bold text-[18px]">₱{coverageStr || '0'}</span>
+                                        <span className="text-white font-bold text-[18px]">{primarySymbol}{coverageStr || '0'}</span>
                                     </div>
                                     <div className="flex flex-col gap-1 text-right">
                                         <span className="text-white/50 text-[11px] font-medium">{paymentFreq} Premium</span>
-                                        <span className="text-white font-bold text-[18px]">₱{premiumStr || '0'}</span>
+                                        <span className="text-white font-bold text-[18px]">{primarySymbol}{premiumStr || '0'}</span>
                                     </div>
                                 </div>
                                 
@@ -280,17 +282,17 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
                             <div className="flex flex-col gap-4 mb-8">
                                 <h4 className="text-white/40 text-[13px] font-bold uppercase tracking-wider mb-2">Coverage & Premium</h4>
                                 
-                                <FloatingInput label={coverageLabel} value={coverageStr} onChange={(e: any) => setCoverageStr(formatNumberInput(e.target.value))} prefix="₱" inputMode="decimal" />
+                                <FloatingInput label={coverageLabel} value={coverageStr} onChange={(e: any) => setCoverageStr(formatNumberInput(e.target.value))} prefix={primarySymbol} inputMode="decimal" />
                                 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <FloatingInput label="Premium Amount" value={premiumStr} onChange={(e: any) => setPremiumStr(formatNumberInput(e.target.value))} prefix="₱" inputMode="decimal" />
+                                    <FloatingInput label="Premium Amount" value={premiumStr} onChange={(e: any) => setPremiumStr(formatNumberInput(e.target.value))} prefix={primarySymbol} inputMode="decimal" />
                                     <SelectDropdown label="Frequency" value={paymentFreq} options={PAYMENT_FREQUENCIES} onChange={setPaymentFreq} />
                                 </div>
 
                                 {/* Smart Calculation Hint */}
                                 {premiumStr && paymentFreq !== 'Monthly' && (
                                     <div className="px-5 text-white/40 text-[12px] font-medium -mt-2">
-                                        ≈ ₱{formatNumberInput((parseFloat(premiumStr.replace(/,/g, '')) / (paymentFreq === 'Annual' ? 12 : paymentFreq === 'Semi-Annual' ? 6 : 3)).toFixed(0))} / month
+                                        ≈ {primarySymbol}{formatNumberInput((parseFloat(premiumStr.replace(/,/g, '')) / (paymentFreq === 'Annual' ? 12 : paymentFreq === 'Semi-Annual' ? 6 : 3)).toFixed(0))} / month
                                     </div>
                                 )}
 
@@ -322,10 +324,10 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
                                             {policyType === 'HMO' && (
                                                 <>
                                                     <SelectDropdown label="Room Category" value={roomCategory} options={ROOM_CATEGORIES} onChange={setRoomCategory} />
-                                                    <FloatingInput label="Outpatient Limit" value={outpatientLimit} onChange={(e: any) => setOutpatientLimit(formatNumberInput(e.target.value))} prefix="₱" />
+                                                    <FloatingInput label="Outpatient Limit" value={outpatientLimit} onChange={(e: any) => setOutpatientLimit(formatNumberInput(e.target.value))} prefix={primarySymbol} />
                                                 </>
                                             )}
-                                            <FloatingInput label="Deductible / Co-pay" value={deductible} onChange={(e: any) => setDeductible(formatNumberInput(e.target.value))} prefix="₱" />
+                                            <FloatingInput label="Deductible / Co-pay" value={deductible} onChange={(e: any) => setDeductible(formatNumberInput(e.target.value))} prefix={primarySymbol} />
                                             
                                             <div className="w-full h-px bg-white/5 my-2" />
                                             

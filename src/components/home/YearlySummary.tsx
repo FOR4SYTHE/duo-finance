@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
-import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { formatCurrency } from "@/lib/format";
 import { ActivityRingsChart } from "./ActivityRingsChart";
 import { Sparkline } from "./Sparkline";
@@ -40,6 +40,7 @@ function HorizontalBar({
   budget: number;
   color: string;
 }) {
+  const { primarySymbol, getPrimaryValue } = useDualCurrency();
   const pct = budget > 0 ? Math.min((spent / budget) * 100, 120) : 0;
   const isOver = spent > budget;
 
@@ -49,9 +50,9 @@ function HorizontalBar({
         <span className="text-sm text-white/90 font-medium">{label}</span>
         <div className="flex items-center gap-1.5">
           <span className={`text-sm font-semibold tracking-tight ${isOver ? "text-[#FF453A]" : "text-[#D4AF37]"}`}>
-            ₱{formatCurrency(spent)}
+            {primarySymbol}{formatCurrency(getPrimaryValue(spent))}
           </span>
-          <span className="text-xs text-white/30 font-medium">/ ₱{formatCurrency(budget)}</span>
+          <span className="text-xs text-white/30 font-medium">/ {primarySymbol}{formatCurrency(getPrimaryValue(budget))}</span>
         </div>
       </div>
       <div className="w-full h-1.5 bg-black/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] rounded-full overflow-hidden">
@@ -82,6 +83,7 @@ function GoalBar({
   target: number;
   color?: string;
 }) {
+  const { primarySymbol, getPrimaryValue } = useDualCurrency();
   const pct = target > 0 ? Math.min((saved / target) * 100, 100) : 0;
   
   const isGold = color === "#D4AF37";
@@ -109,10 +111,10 @@ function GoalBar({
           </span>
           <div className="flex items-baseline gap-2">
             <span className="text-[28px] font-bold text-white tracking-tight tabular-nums leading-none">
-              <AnimatedCounter value={saved} prefix="₱" />
+              <AnimatedCounter value={getPrimaryValue(saved)} prefix={primarySymbol} />
             </span>
             <span className="text-sm font-medium text-white/30">
-              / ₱{formatCurrency(target)}
+              / {primarySymbol}{formatCurrency(getPrimaryValue(target))}
             </span>
           </div>
         </div>
@@ -154,7 +156,7 @@ function GoalBar({
 export function YearlySummary({ year, onClose }: YearlySummaryProps) {
   const { config, categories, goals } = useBudgetStore();
   const { entries: spendEntries } = useSpendStore();
-  const { exchangeRate } = useCurrencyStore();
+  const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
   // Filter entries for this entire year
   const yearEntries = useMemo(
@@ -299,9 +301,9 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
                 </div>
                 <p className="text-[11px] font-medium text-white/60 mt-0.5 tracking-tight truncate pr-2">
                   {remaining >= 0
-                    ? `₱${formatCurrency(remaining)} remaining`
-                    : `₱${formatCurrency(Math.abs(remaining))} over`}
-                  <span className="opacity-50 ml-1">(≈ R${formatCurrency(Math.abs(remaining) * exchangeRate)})</span>
+                    ? `${primarySymbol}${formatCurrency(getPrimaryValue(remaining))} remaining`
+                    : `${primarySymbol}${formatCurrency(getPrimaryValue(Math.abs(remaining)))} over`}
+                  <span className="opacity-50 ml-1">(≈ {secondarySymbol}{formatCurrency(getSecondaryValue(Math.abs(remaining)))})</span>
                 </p>
               </div>
               {/* Right Chart */}
@@ -329,7 +331,7 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
                       {seg.label}
                     </span>
                     <span className="text-xs font-semibold text-white/40 ml-auto tracking-tight">
-                      ₱{formatCurrency(seg.value)}
+                      {primarySymbol}{formatCurrency(getPrimaryValue(seg.value))}
                     </span>
                   </div>
                 ))}
@@ -367,10 +369,10 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
               <div className="grid grid-cols-2 gap-4 bg-black/40 rounded-[20px] p-5 border border-[#D4AF37]/10">
                 <div>
                   <p className="text-2xl font-bold text-[#D4AF37] tracking-tight drop-shadow-sm tabular-nums">
-                    <AnimatedCounter value={totalSpent} prefix="₱" />
+                    <AnimatedCounter value={getPrimaryValue(totalSpent)} prefix={primarySymbol} />
                   </p>
                   <p className="text-xs font-medium text-[#D4AF37]/60 mt-1 tabular-nums">
-                    ≈ <AnimatedCounter value={totalSpent * exchangeRate} prefix="R" />
+                    ≈ <AnimatedCounter value={getSecondaryValue(totalSpent)} prefix={secondarySymbol} />
                   </p>
                   <p className="text-xs font-semibold text-[#D4AF37]/40 mt-2 uppercase tracking-wider">Total logged</p>
                 </div>

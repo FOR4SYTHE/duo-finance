@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { ChevronDown, MapPin, Users } from "lucide-react";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { motion, AnimatePresence } from "framer-motion";
 
 const COST_DATA = {
@@ -21,6 +22,7 @@ export function RelocationEstimator({ onUseEstimate }: RelocationEstimatorProps)
     const [adults, setAdults] = useState(2);
     const [area, setArea] = useState<Area>('Makati / BGC');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const { primarySymbol, getPrimaryValue } = useDualCurrency();
     
     const [estimate, setEstimate] = useState<{ rent: number, utilities: number } | null>(null);
 
@@ -136,11 +138,11 @@ export function RelocationEstimator({ onUseEstimate }: RelocationEstimatorProps)
                         >
                             <div className="flex justify-between items-center">
                                 <span className="text-white/50 text-xs uppercase tracking-wider font-bold">Suggested Base Rent</span>
-                                <span className="text-white font-medium">₱{estimate.rent.toLocaleString()} / mo</span>
+                                <span className="text-white font-medium">{primarySymbol}{getPrimaryValue(estimate.rent).toLocaleString(undefined, {maximumFractionDigits: 0})} / mo</span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-white/50 text-xs uppercase tracking-wider font-bold">Est. Utilities</span>
-                                <span className="text-white font-medium">₱{estimate.utilities.toLocaleString()} / mo</span>
+                                <span className="text-white font-medium">{primarySymbol}{getPrimaryValue(estimate.utilities).toLocaleString(undefined, {maximumFractionDigits: 0})} / mo</span>
                             </div>
                             
                             <button 

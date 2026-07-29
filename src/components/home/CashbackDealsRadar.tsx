@@ -6,6 +6,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { X, Copy, Check, Radar, Clock, Flame, Navigation, Database } from "lucide-react";
 import { ThinkingOrb } from "thinking-orbs";
 import { BorderBeam } from 'border-beam';
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 interface Deal {
   id: string;
@@ -148,6 +149,7 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
   const [location, setLocation] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { primarySymbol } = useDualCurrency();
 
   // Reference for the scroll container to enable Framer Motion scroll effects if needed,
   // though we will achieve the core stacking effect using high-performance CSS sticky.
@@ -160,16 +162,16 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
     setScanStatus("scanning");
     setTimeout(() => {
       setDeals([
-        { id: "1", brand: "Foodpanda", title: "₱100 off on minimum spend ₱499", code: "PANDA100", expires: "2026-08-01T00:00:00Z", category: "Food", hot: true, url: "#" },
-        { id: "2", brand: "Grab", title: "20% off GrabCar (max ₱80)", code: "GRAB20", expires: "2026-07-26T00:00:00Z", category: "Transport", hot: false, url: "#" },
+        { id: "1", brand: "Foodpanda", title: `${primarySymbol}100 off on minimum spend ${primarySymbol}499`, code: "PANDA100", expires: "2026-08-01T00:00:00Z", category: "Food", hot: true, url: "#" },
+        { id: "2", brand: "Grab", title: `20% off GrabCar (max ${primarySymbol}80)`, code: "GRAB20", expires: "2026-07-26T00:00:00Z", category: "Transport", hot: false, url: "#" },
         { id: "3", brand: "Shopee", title: "Free Shipping Vouchers", code: "FREESHIP", expires: "2026-08-01T00:00:00Z", category: "Shopping", hot: true, url: "#" },
-        { id: "4", brand: "Lazada", title: "₱250 off Tech Accessories", code: "LAZTECH", expires: "2026-07-30T00:00:00Z", category: "Shopping", hot: false, url: "#" },
+        { id: "4", brand: "Lazada", title: `${primarySymbol}250 off Tech Accessories`, code: "LAZTECH", expires: "2026-07-30T00:00:00Z", category: "Shopping", hot: false, url: "#" },
         { id: "5", brand: "Klook", title: "15% off Weekend Getaways", code: "WKND15", expires: "2026-08-15T00:00:00Z", category: "Travel", hot: true, url: "#" },
-        { id: "6", brand: "Agoda", title: "₱500 off Hotel Bookings", code: "AGODA500", expires: "2026-08-10T00:00:00Z", category: "Travel", hot: false, url: "#" },
+        { id: "6", brand: "Agoda", title: `${primarySymbol}500 off Hotel Bookings`, code: "AGODA500", expires: "2026-08-10T00:00:00Z", category: "Travel", hot: false, url: "#" },
         { id: "7", brand: "Foodpanda", title: "Free Delivery on Pick-Up", code: "PICKUPFREE", expires: "2026-07-31T00:00:00Z", category: "Food", hot: false, url: "#" },
-        { id: "8", brand: "Grab", title: "₱50 off GrabFood orders", code: "FOOD50", expires: "2026-08-05T00:00:00Z", category: "Food", hot: false, url: "#" },
+        { id: "8", brand: "Grab", title: `${primarySymbol}50 off GrabFood orders`, code: "FOOD50", expires: "2026-08-05T00:00:00Z", category: "Food", hot: false, url: "#" },
         { id: "9", brand: "Shopee", title: "10% Cashback on Gadgets", code: "GADGET10", expires: "2026-08-02T00:00:00Z", category: "Shopping", hot: true, url: "#" },
-        { id: "10", brand: "Cheapflights", title: "₱1000 off International Flights", code: "FLY1000", expires: "2026-09-01T00:00:00Z", category: "Travel", hot: true, url: "#" },
+        { id: "10", brand: "Cheapflights", title: `${primarySymbol}1000 off International Flights`, code: "FLY1000", expires: "2026-09-01T00:00:00Z", category: "Travel", hot: true, url: "#" },
       ]);
       setScanStatus("results");
     }, 1500);

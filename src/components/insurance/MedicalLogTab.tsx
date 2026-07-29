@@ -3,6 +3,7 @@
 import { Plus, Stethoscope, Hospital, Building2 } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 interface MedicalLogTabProps {
     onLogVisit?: () => void;
@@ -10,6 +11,7 @@ interface MedicalLogTabProps {
 
 export function MedicalLogTab({ onLogVisit }: MedicalLogTabProps) {
     const { exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
     return (
         <div className="flex flex-col gap-6">
@@ -26,10 +28,10 @@ export function MedicalLogTab({ onLogVisit }: MedicalLogTabProps) {
                     <div className="relative z-10 flex flex-col gap-1">
                         <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Total Out-of-Pocket · 2024</span>
                         <div className="flex items-baseline gap-1 mt-1">
-                            <span className="text-white font-black text-[36px] tracking-tight leading-none">₱1,800.00</span>
+                            <span className="text-white font-black text-[36px] tracking-tight leading-none">{primarySymbol}{formatCurrency(getPrimaryValue(1800))}</span>
                         </div>
                         <span className="text-[#FF453A] text-[13px] font-bold mt-1">
-                            ≈ R{formatCurrency(1800 * exchangeRate)}
+                            ≈ {secondarySymbol}{formatCurrency(getSecondaryValue(1800))}
                         </span>
                     </div>
                 </div>
@@ -67,9 +69,9 @@ export function MedicalLogTab({ onLogVisit }: MedicalLogTabProps) {
                             
                             <div className="flex flex-col items-end w-full border-t border-white/5 pt-3">
                                 <div className="flex items-baseline gap-1 mt-0.5">
-                                    <span className="text-white font-black text-[22px] tracking-tight">₱2,500.00</span>
+                                    <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(2500))}</span>
                                 </div>
-                                <span className="text-white/50 text-[11px] font-bold mt-0.5">≈ R{formatCurrency(2500 * exchangeRate)}</span>
+                                <span className="text-white/50 text-[11px] font-bold mt-0.5">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(2500))}</span>
                                 <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest mt-1">Maxicare HMO</span>
                             </div>
                         </div>
@@ -99,9 +101,9 @@ export function MedicalLogTab({ onLogVisit }: MedicalLogTabProps) {
                             
                             <div className="flex flex-col items-end w-full border-t border-white/5 pt-3">
                                 <div className="flex items-baseline gap-1 mt-0.5">
-                                    <span className="text-white font-black text-[22px] tracking-tight">₱1,800.00</span>
+                                    <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(1800))}</span>
                                 </div>
-                                <span className="text-white/50 text-[11px] font-bold mt-0.5">≈ R{formatCurrency(1800 * exchangeRate)}</span>
+                                <span className="text-white/50 text-[11px] font-bold mt-0.5">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(1800))}</span>
                                 <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest mt-1">Personal Fund</span>
                             </div>
                         </div>
@@ -132,9 +134,9 @@ export function MedicalLogTab({ onLogVisit }: MedicalLogTabProps) {
                             
                             <div className="flex flex-col items-end w-full border-t border-white/5 pt-3">
                                 <div className="flex items-baseline gap-1 mt-0.5">
-                                    <span className="text-white font-black text-[22px] tracking-tight">₱4,000.00</span>
+                                    <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(4000))}</span>
                                 </div>
-                                <span className="text-white/50 text-[11px] font-bold mt-0.5">≈ R{formatCurrency(4000 * exchangeRate)}</span>
+                                <span className="text-white/50 text-[11px] font-bold mt-0.5">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(4000))}</span>
                                 <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest mt-1">Pacific Cross</span>
                             </div>
                         </div>

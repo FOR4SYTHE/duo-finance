@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { simplePageVariants } from "@/utils/animations";
 import { ArrowUpDown, Delete, ChevronRight, History } from "lucide-react";
 
@@ -21,6 +22,7 @@ export function Calculator() {
         history,
         clearHistory
     } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getSecondaryValue } = useDualCurrency();
     const [mounted, setMounted] = React.useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
     useEffect(() => {
@@ -42,9 +44,7 @@ export function Calculator() {
     const targetCurrency = isPhpPrimary ? 'ZAR' : 'PHP';
     
     const numericValue = Number(displayValue || 0);
-    const convertedAmount = isPhpPrimary 
-        ? numericValue * exchangeRate 
-        : numericValue / exchangeRate;
+    const convertedAmount = getSecondaryValue(numericValue);
     const statusColor = isLoadingRate ? "text-status-warn animate-pulse" : "text-status-good";
 
     const handleAction = (label: string) => {
@@ -98,7 +98,7 @@ export function Calculator() {
                     </div>
                     <div className="flex items-baseline gap-2 justify-center">
                         <span className="text-3xl text-white/30 font-light">
-                            {isPhpPrimary ? '₱' : 'R'}
+                            {primarySymbol}
                         </span>
                         <div className="text-[clamp(3.5rem,10vh,5.5rem)] leading-none text-white font-light tracking-tight drop-shadow-2xl flex items-center">
                             {Array.from(displayValue || "0").map((char, index) => (
@@ -135,7 +135,7 @@ export function Calculator() {
                 <div className="flex flex-col items-center opacity-80 mt-1">
                     <div className="flex items-baseline gap-2 justify-center">
                         <span className="text-xl text-white/30 font-light">
-                            {isPhpPrimary ? 'R' : '₱'}
+                            {secondarySymbol}
                         </span>
                         <span className="text-[clamp(2.25rem,6vh,3rem)] leading-none text-white font-light tracking-tight flex items-center min-h-[40px] sm:min-h-[56px]">
                             {Number.isNaN(convertedAmount) ? (

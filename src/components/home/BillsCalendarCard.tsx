@@ -5,7 +5,7 @@ import { CalendarDays, ChevronRight, CheckCircle2, ShoppingCart } from "lucide-r
 import { useBillsStore } from "@/store/useBillsStore";
 import { useHouseholdStore } from "@/store/useHouseholdStore";
 import { useCartifyStore } from "@/store/useCartifyStore";
-import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { formatCurrency } from "@/lib/format";
 import { BillsCalendar } from "./BillsCalendar";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,7 +20,7 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
   const { bills } = useBillsStore();
   const { scheduledTrips } = useHouseholdStore();
   const { savedTrips } = useCartifyStore();
-  const { exchangeRate } = useCurrencyStore();
+  const { primarySymbol, getPrimaryValue, getSecondaryValue, secondarySymbol } = useDualCurrency();
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [view, setView] = useState<'grid' | 'presentation'>('grid');
   const [mounted, setMounted] = useState(false);
@@ -103,7 +103,7 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
         return daysUntil <= 7 && daysUntil >= 0;
       })
       .sort((a, b) => {
-        const da = a.dueDay >= currentDay ? a.dueDay - currentDay : daysInMonth - currentDay + a.dueDay;
+        const da = a.dueDay >= currentDay ? b.dueDay - currentDay : daysInMonth - currentDay + a.dueDay;
         const db = b.dueDay >= currentDay ? b.dueDay - currentDay : daysInMonth - currentDay + b.dueDay;
         return da - db;
       });
@@ -156,6 +156,8 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
     setSelectedDate(date);
     setView('presentation');
   };
+
+  const totalSelectedAmount = selectedBills.reduce((acc, curr) => acc + curr.amount, 0);
 
   return (
     <>
@@ -328,15 +330,11 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
                             <span className="text-[10px] text-[#737373] font-medium uppercase tracking-widest mb-0.5">Amount</span>
                             <div className="flex flex-col items-start gap-0.5">
                               <span className="text-[18px] font-bold text-[#E5E5E5] leading-none tracking-tight flex items-center">
-                                <span className="text-[#A1A1A1] text-[14px] mr-0.5">₱</span>
-                                {selectedBills.length > 1 
-                                  ? formatCurrency(selectedBills.reduce((acc, curr) => acc + curr.amount, 0)) 
-                                  : formatCurrency(selectedBills[0].amount)}
+                                <span className="text-[#A1A1A1] text-[14px] mr-0.5">{primarySymbol}</span>
+                                {formatCurrency(getPrimaryValue(totalSelectedAmount))}
                               </span>
                               <span className="text-[11px] font-bold text-[#737373] tracking-tight">
-                                ≈ R{((selectedBills.length > 1 
-                                  ? selectedBills.reduce((acc, curr) => acc + curr.amount, 0) 
-                                  : selectedBills[0].amount) * exchangeRate).toFixed(2)}
+                                ≈ {secondarySymbol}{formatCurrency(getSecondaryValue(totalSelectedAmount))}
                               </span>
                             </div>
                           </div>

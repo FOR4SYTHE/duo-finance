@@ -1,5 +1,6 @@
 "use client";
 
+// Cache buster for Turbopack HMR
 import { useState, useEffect } from "react";
 import { ChevronDown, Plus, Edit2 } from "lucide-react";
 import * as Icons from "lucide-react";
@@ -8,6 +9,7 @@ import { premiumPageVariants } from "@/utils/animations";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { useBillsStore } from "@/store/useBillsStore";
 import { useSubscriptionsStore } from "@/store/useSubscriptionsStore";
 import { BudgetPeriod, BudgetCategory } from "@/types/finance";
@@ -17,7 +19,8 @@ import { AddCategorySheet } from "@/components/budget/AddCategorySheet";
 import { CategoryDetailsSheet } from "@/components/budget/CategoryDetailsSheet";
 import { CategoryMenuSheet } from "@/components/budget/CategoryMenuSheet";
 import { CardSettingsSheet } from "@/components/budget/CardSettingsSheet";
-import { getDisplayValue, getCanonicalValue, calculateAllocations, filterEntriesByMonth, sumByCategory } from "@/utils/budgetMath";
+import * as budgetMath from "@/utils/budgetMath";
+import * as budgetFilters from "@/utils/budgetFilters";
 import { format, addMonths, subMonths, parseISO } from "date-fns";
 
 const PERIODS: { value: BudgetPeriod; label: string }[] = [
@@ -33,7 +36,8 @@ export default function BudgetPage() {
 
   const { config, categories, setBudget, updateCategory, _hasHydrated, setActiveMonth } = useBudgetStore();
   const { entries } = useSpendStore();
-  const { exchangeRate } = useCurrencyStore();
+  const { exchangeRate, primaryCurrency } = useCurrencyStore();
+  const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
   const { bills } = useBillsStore();
   const { subscriptions } = useSubscriptionsStore();
   
@@ -49,19 +53,19 @@ export default function BudgetPage() {
   const displayMonth = config.activeMonth || currentMonth;
 
   // Computed Values
-  const monthEntries = filterEntriesByMonth(entries, displayMonth);
+  const monthEntries = budgetFilters.filterEntriesByMonth(entries, displayMonth);
   const totalSpent = monthEntries.reduce((sum, entry) => sum + entry.amount, 0);
-  const { displayTarget, displayAllocated, displayUnallocated } = calculateAllocations(config, categories, totalSpent, displayMonth);
+  const { displayTarget, displayAllocated, displayUnallocated } = budgetMath.calculateAllocations(config, categories, totalSpent, displayMonth);
 
   const handleHeroSave = (amount: number) => {
-      const canonical = getCanonicalValue(amount, config.period);
+      const canonical = budgetMath.getCanonicalValue(amount, config.period);
       setBudget(canonical, config.period);
       setIsHeroModalOpen(false);
   };
 
   const handleCategorySave = (amount: number) => {
       if (editingCategory) {
-          const canonical = getCanonicalValue(amount, config.period);
+          const canonical = budgetMath.getCanonicalValue(amount, config.period);
           updateCategory(editingCategory.id, { targetAmount: canonical });
       }
       setEditingCategory(null);
@@ -277,8 +281,8 @@ export default function BudgetPage() {
             <div className={`text-[2.75rem] leading-none ${skin.textColor} flex items-baseline gap-1 font-medium tracking-tight mb-2 drop-shadow-md`}>
                 {displayTarget > 0 ? (
                     <>
-                        <span className={`text-2xl ${skin.textSecondary} font-normal`}>₱</span>
-                        <span>{displayTarget.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                        <span className={`text-2xl ${skin.textSecondary} font-normal`}>{primarySymbol}</span>
+                        <span>{getPrimaryValue(displayTarget).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
                     </>
                 ) : (
                     <span className={`text-[1.75rem] ${skin.textSecondary} font-medium tracking-tight`}>Set target budget</span>
@@ -289,7 +293,7 @@ export default function BudgetPage() {
                 <div className="flex flex-col gap-3">
                     {displayTarget > 0 && (
                         <span className={`${skin.textSecondary} font-medium tracking-wide text-sm`}>
-                            ≈ R{(displayTarget * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                            ≈ {secondarySymbol}{getSecondaryValue(displayTarget).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                         </span>
                     )}
 
@@ -302,7 +306,9 @@ export default function BudgetPage() {
                                     <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Allocated</span>
                                 </div>
                                 <div className="flex items-baseline gap-1">
-                                    <span className={`font-semibold ${displayAllocated > displayTarget ? 'text-[#FF453A]' : skin.textColor} text-[15px]`}>₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                    <span className={`font-semibold ${displayAllocated > displayTarget ? 'text-[#FF453A]' : skin.textColor} text-[15px]`}>
+                                        {primarySymbol}{getPrimaryValue(displayAllocated).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                    </span>
                                 </div>
                             </div>
 
@@ -316,7 +322,7 @@ export default function BudgetPage() {
                                     <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Spent</span>
                                 </div>
                                 <span className={`font-semibold text-[15px] ${totalSpent > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
-                                    ₱{totalSpent.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                    {primarySymbol}{getPrimaryValue(totalSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}
                                 </span>
                             </div>
 
@@ -330,7 +336,7 @@ export default function BudgetPage() {
                                     <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Left</span>
                                 </div>
                                 <span className={`font-semibold text-[15px] ${totalSpent > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
-                                    ₱{Math.max(0, displayTarget - totalSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                    {primarySymbol}{getPrimaryValue(Math.max(0, displayTarget - totalSpent)).toLocaleString(undefined, {maximumFractionDigits: 0})}
                                 </span>
                             </div>
                         </div>
@@ -362,7 +368,7 @@ export default function BudgetPage() {
                         >
                             <span className={`${skin.textSecondary} text-[10px] uppercase tracking-wider font-semibold`}>Spend Jar:</span>
                             <span className={`${skin.textColor} font-medium text-xs`}>
-                                {config.jarAllowedPercentage}% · ₱{(displayUnallocated * (config.jarAllowedPercentage / 100)).toLocaleString(undefined, {maximumFractionDigits: 0})} allowed
+                                {config.jarAllowedPercentage}% · {primarySymbol}{getPrimaryValue(displayUnallocated * (config.jarAllowedPercentage / 100)).toLocaleString(undefined, {maximumFractionDigits: 0})} allowed
                             </span>
                         </div>
                     )}
@@ -393,9 +399,9 @@ export default function BudgetPage() {
             {categories.map((cat) => {
                 const Icon = (Icons as any)[cat.icon] || Icons.HelpCircle;
                 const historicalTarget = (displayMonth && cat.targetHistory?.[displayMonth]) !== undefined ? cat.targetHistory![displayMonth] : cat.targetAmount;
-                const catTarget = getDisplayValue(historicalTarget, config.period);
+                const catTarget = budgetMath.getDisplayValue(historicalTarget, config.period);
                 
-                const catSpent = sumByCategory(monthEntries, cat.name);
+                const catSpent = budgetFilters.sumByCategory(monthEntries, cat.name);
                 
                 // Calculate committed bills for this category
                 const catBills = bills.filter(b => b.category === cat.name);
@@ -452,25 +458,28 @@ export default function BudgetPage() {
                             <span className="text-white/80 font-medium text-[15px] mb-1.5 tracking-wide">{cat.name}</span>
                             {catTarget > 0 ? (
                                 <div className="flex flex-col">
-                                    <span className="text-white font-semibold text-xl tracking-tight mb-0.5">₱{catTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                    <div className="flex items-baseline gap-1 mb-0.5">
+                                        <span className="text-white font-semibold text-xl tracking-tight">{primarySymbol}{getPrimaryValue(catTarget).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                        <span className="text-white/40 text-[10px] font-medium tracking-wider ml-1">≈ {secondarySymbol}{getSecondaryValue(catTarget).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                    </div>
                                     
                                     <div className="flex flex-col gap-1 mt-2">
                                         <div className="flex justify-between items-center text-[10px]">
                                             <span className="text-white/50 tracking-wide uppercase">Spent</span>
-                                            <span className="text-white font-medium">₱{catSpent.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                            <span className="text-white font-medium">{primarySymbol}{getPrimaryValue(catSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
                                         </div>
                                         
                                         {committed > 0 && (
                                             <div className="flex justify-between items-center text-[10px]">
                                                 <span className="text-white/40 tracking-wide uppercase">Bills</span>
-                                                <span className="text-white/70 font-medium">₱{committed.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                                <span className="text-white/70 font-medium">{primarySymbol}{getPrimaryValue(committed).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
                                             </div>
                                         )}
                                         
                                         <div className="flex justify-between items-center text-[10px]">
                                             <span className="text-white/50 tracking-wide uppercase">Left</span>
                                             <span className={`font-medium ${catSpent > catTarget ? 'text-[#FF453A]' : 'text-white'}`}>
-                                                ₱{Math.max(0, catTarget - catSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                                {primarySymbol}{getPrimaryValue(Math.max(0, catTarget - catSpent)).toLocaleString(undefined, {maximumFractionDigits: 0})}
                                             </span>
                                         </div>
                                     </div>
@@ -522,11 +531,11 @@ export default function BudgetPage() {
 
       {editingCategory && (
           <AmountInputModal 
-            isOpen={!!editingCategory}
+            isOpen={true}
             onClose={() => setEditingCategory(null)}
             onConfirm={handleCategorySave}
-            title={editingCategory.name}
-            initialAmount={getDisplayValue(editingCategory.targetAmount, config.period)}
+            initialAmount={budgetMath.getDisplayValue(editingCategory.targetAmount, config.period)}
+            title={`${editingCategory.name} Target`}
           />
       )}
 

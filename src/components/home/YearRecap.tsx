@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { formatCurrency } from "@/lib/format";
 import confetti from "canvas-confetti";
 
@@ -100,6 +101,7 @@ function SlideCover({ year }: { year: number }) {
 
 // Slide 2: The Grand Total
 function SlideTotals({ totalEntries, totalSpent, config }: any) {
+  const { primarySymbol, getPrimaryValue } = useDualCurrency();
   return (
     <div className="w-full h-full bg-[#1a1a1a] flex flex-col px-6 pt-16 pb-12 relative overflow-hidden">
       <div className="absolute -right-32 -top-32 opacity-10 blur-sm">
@@ -147,7 +149,7 @@ function SlideTotals({ totalEntries, totalSpent, config }: any) {
             Total Spend
           </span>
           <h2 className="text-4xl font-bold tracking-tighter mb-4">
-            ₱{formatCurrency(totalSpent)}
+            {primarySymbol}{formatCurrency(getPrimaryValue(totalSpent))}
           </h2>
           <p className="text-sm font-medium opacity-80 leading-snug">
             That's a whole year of managing your household budget together.
@@ -161,6 +163,7 @@ function SlideTotals({ totalEntries, totalSpent, config }: any) {
 
 // Slide 3: Biggest Hit
 function SlideHit({ topCategory, topAmount }: any) {
+  const { primarySymbol, getPrimaryValue } = useDualCurrency();
   return (
     <div className="w-full h-full bg-black flex flex-col justify-center px-8 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-[#1a1a1a] via-black to-black" />
@@ -194,10 +197,10 @@ function SlideHit({ topCategory, topAmount }: any) {
         
         <div className="inline-flex items-center gap-4 bg-white/5 backdrop-blur-md rounded-full pl-2 pr-6 py-2 border border-white/10">
           <div className="w-10 h-10 rounded-full bg-[#D4AF37] flex items-center justify-center text-black text-lg font-bold">
-            ₱
+            {primarySymbol}
           </div>
           <span className="text-2xl font-bold tracking-tight text-white">
-            {formatCurrency(topAmount)}
+            {formatCurrency(getPrimaryValue(topAmount))}
           </span>
         </div>
       </motion.div>
@@ -244,8 +247,7 @@ import { useCurrencyStore } from "@/store/useCurrencyStore";
 // Slide 5: Outro (Budget Renewal)
 function SlideOutro({ onClose, nextYear, config }: any) {
   const router = useRouter();
-  const { exchangeRate } = useCurrencyStore();
-  const zarBudget = Math.round((config?.targetAmount || 0) * 12 * exchangeRate);
+  const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
   const handleClose = () => {
     // Fire confetti just before closing
@@ -281,7 +283,7 @@ function SlideOutro({ onClose, nextYear, config }: any) {
         </h2>
         
         <p className="text-white/50 text-sm font-medium mb-10 leading-relaxed">
-          Your target budget was <span className="text-white">₱{formatCurrency((config?.targetAmount || 0) * 12)}</span> (≈ R{formatCurrency(zarBudget)}) last year.
+          Your target budget was <span className="text-white">{primarySymbol}{formatCurrency(getPrimaryValue((config?.targetAmount || 0) * 12))}</span> (≈ {secondarySymbol}{formatCurrency(getSecondaryValue((config?.targetAmount || 0) * 12))}) last year.
         </p>
         
         <div className="flex flex-col gap-4">

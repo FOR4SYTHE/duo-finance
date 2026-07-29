@@ -6,6 +6,7 @@ import { ArrowRight, Trophy, TrendingUp, TrendingDown, Minus, Receipt, ShoppingC
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { formatCurrency } from "@/lib/format";
 
 const MONTH_NAMES = [
@@ -71,6 +72,7 @@ function SlideCover({ monthName, photoUrl }: { monthName: string, photoUrl: stri
 
 // Slide 2: The Score
 function SlideScore({ config, monthEntries, remaining, isOver }: any) {
+  const { primarySymbol, getPrimaryValue } = useDualCurrency();
   const scorePercent = config.targetAmount > 0 
     ? Math.max(0, 100 - (remaining < 0 ? (Math.abs(remaining)/config.targetAmount)*100 : 0))
     : 100;
@@ -139,7 +141,7 @@ function SlideScore({ config, monthEntries, remaining, isOver }: any) {
           </span>
           <div className="flex items-end justify-between">
             <h2 className="text-3xl font-medium tracking-tight leading-none max-w-[150px]">
-              ₱{formatCurrency(Math.abs(remaining))} {isOver ? '💸' : '😇'}
+              {primarySymbol}{formatCurrency(getPrimaryValue(Math.abs(remaining)))} {isOver ? '💸' : '😇'}
             </h2>
             <span className="text-5xl font-light tracking-tighter">
               {scorePercent.toFixed(0)}%
@@ -156,7 +158,7 @@ function SlideScore({ config, monthEntries, remaining, isOver }: any) {
           className="bg-[#64D2FF] text-black rounded-full px-6 py-5 shadow-sm flex items-center justify-between"
         >
           <span className="font-semibold text-sm tracking-tight">
-            Target was ₱{formatCurrency(config.targetAmount)}
+            Target was {primarySymbol}{formatCurrency(getPrimaryValue(config.targetAmount))}
           </span>
           <div className="w-8 h-8 bg-black/10 rounded-full flex items-center justify-center">
             <Receipt className="w-4 h-4" />
@@ -170,6 +172,7 @@ function SlideScore({ config, monthEntries, remaining, isOver }: any) {
 
 // Slide 3: Biggest Hit
 function SlideHit({ topCategory, topAmount }: any) {
+  const { primarySymbol, getPrimaryValue } = useDualCurrency();
   return (
     <div className="w-full h-full bg-[#1C1C1E] flex flex-col justify-center px-8 relative overflow-hidden">
       {/* Background Graphic */}
@@ -204,10 +207,10 @@ function SlideHit({ topCategory, topAmount }: any) {
         
         <div className="inline-flex items-center gap-4 bg-white/10 backdrop-blur-md rounded-full pl-2 pr-6 py-2 border border-white/10">
           <div className="w-10 h-10 rounded-full bg-[#0A84FF] flex items-center justify-center text-white text-lg font-bold">
-            ₱
+            {primarySymbol}
           </div>
           <span className="text-2xl font-bold tracking-tight text-white">
-            {formatCurrency(topAmount)}
+            {formatCurrency(getPrimaryValue(topAmount))}
           </span>
         </div>
       </motion.div>
@@ -220,8 +223,7 @@ import { useRouter } from "next/navigation";
 // Slide 4: Outro (Budget Renewal)
 function SlideOutro({ onClose, currentMonthName, config }: any) {
   const router = useRouter();
-  const { exchangeRate } = useCurrencyStore();
-  const zarBudget = Math.round(config.targetAmount * exchangeRate);
+  const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
   return (
     <div className="w-full h-full bg-[#0A0A0C] flex flex-col items-center justify-center px-8 relative">
@@ -245,7 +247,7 @@ function SlideOutro({ onClose, currentMonthName, config }: any) {
         </h2>
         
         <p className="text-white/50 text-sm font-medium mb-10 leading-relaxed">
-          Your target budget was <span className="text-white">₱{formatCurrency(config.targetAmount)}</span> (≈ R{formatCurrency(zarBudget)}) last month.
+          Your target budget was <span className="text-white">{primarySymbol}{formatCurrency(getPrimaryValue(config.targetAmount))}</span> (≈ {secondarySymbol}{formatCurrency(getSecondaryValue(config.targetAmount))}) last month.
         </p>
         
         <div className="flex flex-col gap-4">

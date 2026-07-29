@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Settings2, Sparkles } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 interface JarSettingsModalProps {
     isOpen: boolean;
@@ -12,6 +13,7 @@ interface JarSettingsModalProps {
 
 export function JarSettingsModal({ isOpen, onClose }: JarSettingsModalProps) {
     const { config, categories, setJarPercentage } = useBudgetStore();
+    const { primarySymbol, getPrimaryValue } = useDualCurrency();
     const [percentage, setPercentage] = useState<string>("");
 
     useEffect(() => {
@@ -100,7 +102,7 @@ export function JarSettingsModal({ isOpen, onClose }: JarSettingsModalProps) {
                                         Set to <span className="font-bold text-white">{suggestedPercentage}%</span> of your unallocated {config.period} budget.
                                     </span>
                                     <span className="text-white/40 text-xs mt-1">
-                                        (₱{suggestedAmount.toLocaleString()} allowed)
+                                        ({primarySymbol}{getPrimaryValue(suggestedAmount).toLocaleString(undefined, {maximumFractionDigits: 0})} allowed)
                                     </span>
                                 </button>
 

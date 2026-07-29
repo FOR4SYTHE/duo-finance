@@ -4,9 +4,12 @@ import { useState, useMemo, useEffect } from "react";
 import { useChildCareStore } from "@/store/useChildCareStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, TrendingUp, AlertCircle, BookOpen, HeartPulse, Palette } from "lucide-react";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
+import { formatCurrency } from "@/lib/format";
 
 export function GrowthCostForecast() {
   const { profile, cachedData, configuration } = useChildCareStore();
+  const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
   
   // Baseline age
   const baseAge = profile.age || 6;
@@ -165,7 +168,7 @@ export function GrowthCostForecast() {
           </div>
           <div className="flex flex-col items-end">
             <span className="text-[11px] font-bold text-[#FF7B54]/80 tracking-widest uppercase mb-1">Projected To Age 18</span>
-            <span className="text-lg font-black text-[#FF7B54]">₱{(lifetimeEstimate / 1000000).toFixed(1)}M</span>
+            <span className="text-lg font-black text-[#FF7B54]">{primarySymbol}{formatCurrency(getPrimaryValue(lifetimeEstimate))}</span>
           </div>
         </div>
 
@@ -178,12 +181,12 @@ export function GrowthCostForecast() {
               animate={{ opacity: 1, y: 0 }}
               className="text-[38px] leading-none font-black tracking-tighter text-white"
             >
-              ₱{activeCost.toLocaleString()}
+              {primarySymbol}{formatCurrency(getPrimaryValue(activeCost))}
             </motion.span>
           </div>
           <div className="flex items-baseline gap-2 pl-[60px]">
             <span className="text-sm font-bold text-white/40">Yearly</span>
-            <span className="text-[18px] font-bold text-white/70">₱{activeYearly.toLocaleString()}</span>
+            <span className="text-[18px] font-bold text-white/70">{primarySymbol}{formatCurrency(getPrimaryValue(activeYearly))}</span>
           </div>
         </div>
       </div>
@@ -278,7 +281,7 @@ export function GrowthCostForecast() {
                     className="absolute bg-white text-black px-2 py-1 rounded-md text-[10px] font-bold shadow-lg transform -translate-x-1/2 -translate-y-full whitespace-nowrap"
                     style={{ left: `${(p.x / 300) * 100}%`, top: `calc(${(p.y / 100) * 100}% - 12px)` }}
                   >
-                    ₱{(p.cost / 1000).toFixed(1)}k
+                    {primarySymbol}{formatCurrency(getPrimaryValue(p.cost))}
                   </motion.div>
                 );
               }
@@ -302,11 +305,11 @@ export function GrowthCostForecast() {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[14px] font-bold text-white">{item.label}</span>
-                    <span className="text-[11px] font-medium text-white/50">₱{(item.amount * 12).toLocaleString()}/yr</span>
+                    <span className="text-[11px] font-medium text-white/50">{primarySymbol}{formatCurrency(getPrimaryValue(item.amount * 12))}/yr</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-[15px] font-black text-white">₱{item.amount.toLocaleString()}</span>
+                  <span className="text-[15px] font-black text-white">{primarySymbol}{formatCurrency(getPrimaryValue(item.amount))}</span>
                   <span className="text-[10px] font-bold text-[#FF7B54] bg-[#FF7B54]/10 px-2 py-0.5 rounded-full mt-1">
                     {percent}%
                   </span>

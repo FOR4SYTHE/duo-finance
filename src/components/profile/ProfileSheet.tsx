@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 interface ProfileSheetProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export function ProfileSheet({ isOpen, onClose }: ProfileSheetProps) {
   const [mounted, setMounted] = useState(false);
   const { user, partner, householdId, toggleMockPartner, logout } = useAuthStore();
   const { primaryCurrency, setPrimaryCurrency, exchangeRate } = useCurrencyStore();
+  const { primarySymbol, secondarySymbol } = useDualCurrency();
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -176,7 +178,7 @@ export function ProfileSheet({ isOpen, onClose }: ProfileSheetProps) {
                </div>
                
                <div className="flex justify-center mb-8">
-                 <p className="text-white/30 text-xs">Live Rate: ₱1.00 = R{exchangeRate.toFixed(3)} (Auto-updated)</p>
+                 <p className="text-white/30 text-xs">Live Rate: {primarySymbol}1.00 = {secondarySymbol}{exchangeRate.toFixed(3)} (Auto-updated)</p>
                </div>
 
                {/* Household Sharing Guide */}

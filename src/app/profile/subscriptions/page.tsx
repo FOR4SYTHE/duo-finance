@@ -7,12 +7,14 @@ import { ChevronLeft, Plus, Play, Trash2 } from "lucide-react";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useSubscriptionsStore } from "@/store/useSubscriptionsStore";
 import { formatCurrency } from "@/lib/format";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { triggerHaptic } from "@/lib/haptics";
 import { AddSubscriptionSheet } from "@/components/profile/AddSubscriptionSheet";
 
 export default function SubscriptionsPage() {
   const router = useRouter();
   const { primaryCurrency, exchangeRate } = useCurrencyStore();
+  const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
   const { subscriptions, removeSubscription } = useSubscriptionsStore();
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
 
@@ -54,10 +56,10 @@ export default function SubscriptionsPage() {
           <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none" />
           <span className="text-white/40 text-[11px] font-bold tracking-[0.2em] uppercase mb-2">Total Monthly</span>
           <span className="text-white text-[32px] font-medium tracking-tight">
-             {primaryCurrency === "PHP" ? "₱" : "R"} {formatCurrency(primaryCurrency === "PHP" ? totalPHP : totalPHP * exchangeRate)}
+             {primarySymbol} {formatCurrency(getPrimaryValue(totalPHP))}
           </span>
           <span className="text-white/40 text-[14px] mt-1">
-             ≈ {primaryCurrency === "PHP" ? "R" : "₱"} {formatCurrency(primaryCurrency === "PHP" ? totalPHP * exchangeRate : totalPHP)}
+             ≈ {secondarySymbol} {formatCurrency(getSecondaryValue(totalPHP))}
           </span>
         </motion.div>
 
@@ -87,7 +89,7 @@ export default function SubscriptionsPage() {
                   
                   <div className="flex items-center gap-4">
                       <span className="font-medium text-white">
-                        {primaryCurrency === "PHP" ? "₱" : "R"} {formatCurrency(primaryCurrency === "PHP" ? sub.amount : sub.amount * exchangeRate)}
+                        {primarySymbol} {formatCurrency(getPrimaryValue(sub.amount))}
                       </span>
                     <button 
                       onClick={() => {

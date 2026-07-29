@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertOctagon, X } from "lucide-react";
-import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 interface JarLockedModalProps {
     isOpen: boolean;
@@ -13,7 +13,7 @@ interface JarLockedModalProps {
 }
 
 export function JarLockedModal({ isOpen, onClose, totalSpent, targetAmount, period }: JarLockedModalProps) {
-    const { exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
     return (
         <AnimatePresence>
@@ -60,15 +60,15 @@ export function JarLockedModal({ isOpen, onClose, totalSpent, targetAmount, peri
                             
                             <span className="text-[#FF453A] font-semibold text-xs tracking-widest uppercase mb-1">Total Quick Logged</span>
                             <span className="text-4xl text-white font-light tracking-tight mb-1">
-                                ₱{totalSpent.toLocaleString()}
+                                {primarySymbol}{getPrimaryValue(totalSpent).toLocaleString()}
                             </span>
                             <span className="text-white/50 font-medium tracking-wide text-sm">
-                                ≈ R{(totalSpent * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                                ≈ {secondarySymbol}{getSecondaryValue(totalSpent).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                             </span>
                             <div className="w-full h-[1px] bg-[#FF453A]/20 my-4" />
                             <div className="flex justify-between w-full text-sm">
                                 <span className="text-white/50">Base Target</span>
-                                <span className="text-white">₱{targetAmount.toLocaleString()}</span>
+                                <span className="text-white">{primarySymbol}{getPrimaryValue(targetAmount).toLocaleString()}</span>
                             </div>
                         </div>
 

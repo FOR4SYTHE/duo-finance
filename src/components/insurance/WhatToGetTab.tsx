@@ -1,8 +1,10 @@
 "use client";
 
 import { Shield, TrendingUp, ArrowRight, Info } from "lucide-react";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 export function WhatToGetTab() {
+    const { primarySymbol } = useDualCurrency();
     return (
         <div className="flex flex-col gap-6">
             <div>
@@ -26,7 +28,7 @@ export function WhatToGetTab() {
                     
                     <h3 className="text-white font-bold text-[17px] tracking-tight mb-2">Life Insurance Gap</h3>
                     <p className="text-white/50 text-[13px] font-medium leading-relaxed mb-6">
-                        A basic term plan starting at just ₱500/month can offer great peace of mind and protect your family's future.
+                        A basic term plan starting at just {primarySymbol}500/month can offer great peace of mind and protect your family's future.
                     </p>
                     
                     <button className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)] flex items-center justify-center gap-2">
@@ -48,7 +50,7 @@ export function WhatToGetTab() {
                     
                     <h3 className="text-white font-bold text-[17px] tracking-tight mb-2">Income Protection</h3>
                     <p className="text-white/50 text-[13px] font-medium leading-relaxed mb-6">
-                        Consider Disability Insurance (coverage up to ₱50,000/mo) to safeguard your income during unexpected events.
+                        Consider Disability Insurance (coverage up to {primarySymbol}50,000/mo) to safeguard your income during unexpected events.
                     </p>
                     
                     <button className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)] flex items-center justify-center gap-2">

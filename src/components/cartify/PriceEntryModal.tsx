@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Delete, X } from "lucide-react";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 interface PriceEntryModalProps {
     isOpen: boolean;
@@ -15,9 +16,9 @@ interface PriceEntryModalProps {
 export function PriceEntryModal({ isOpen, onClose, onConfirm, title }: PriceEntryModalProps) {
     const [displayValue, setDisplayValue] = useState("0");
     const { exchangeRate, primaryCurrency } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol } = useDualCurrency();
     
     const isPhpPrimary = primaryCurrency === 'PHP';
-    const targetCurrency = isPhpPrimary ? 'ZAR' : 'PHP';
 
     const numericValue = parseFloat(displayValue || "0") || 0;
     const convertedAmount = isPhpPrimary ? numericValue * exchangeRate : numericValue / exchangeRate;
@@ -83,12 +84,12 @@ export function PriceEntryModal({ isOpen, onClose, onConfirm, title }: PriceEntr
                         
                         <div className="flex flex-col items-center justify-center mb-8">
                             <div className="text-[4rem] leading-none text-white flex items-center justify-center gap-2 font-light tracking-tight">
-                                <span className="text-3xl text-white/40 mr-1">{isPhpPrimary ? '₱' : 'R'}</span>
+                                <span className="text-3xl text-white/40 mr-1">{primarySymbol}</span>
                                 <span>{displayValue || "0"}</span>
                             </div>
                             <div className="text-white/40 text-[13px] font-medium mt-2 flex items-center gap-1 tracking-wider">
                                 <span>≈</span>
-                                <span>{isPhpPrimary ? 'R' : '₱'}</span>
+                                <span>{secondarySymbol}</span>
                                 <span>{convertedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </div>
                         </div>

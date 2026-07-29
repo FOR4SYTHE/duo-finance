@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { formatCurrency } from "@/lib/format";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { BriefcaseMedical, TrendingUp, Sun } from "lucide-react";
 
 interface ExploreTabProps {
@@ -11,6 +12,7 @@ interface ExploreTabProps {
 
 export function ExploreTab({ onLogPlan }: ExploreTabProps) {
     const { exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     const [filter, setFilter] = useState('All Plans');
 
     const FILTERS = ['All Plans', 'Life', 'HMO', 'Gen'];
@@ -62,16 +64,16 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                         <div className="flex flex-col gap-1">
                             <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Coverage</span>
                             <div className="flex items-baseline gap-1 mt-0.5">
-                                <span className="text-white font-black text-[22px] tracking-tight">₱1M</span>
+                                <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(1000000))}</span>
                             </div>
-                            <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(1000000 * exchangeRate)}</span>
+                            <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(1000000))}</span>
                         </div>
                         <div className="flex flex-col gap-1">
                             <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Deductible</span>
                             <div className="flex items-baseline gap-1 mt-0.5">
-                                <span className="text-white font-black text-[22px] tracking-tight">₱0</span>
+                                <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}0</span>
                             </div>
-                            <span className="text-white/50 text-[11px] font-bold">≈R0</span>
+                            <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}0</span>
                         </div>
                     </div>
                     
@@ -103,16 +105,16 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                         <div className="flex flex-col gap-1">
                             <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Coverage</span>
                             <div className="flex items-baseline gap-1 mt-0.5">
-                                <span className="text-white font-black text-[22px] tracking-tight">₱500k</span>
+                                <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(500000))}</span>
                             </div>
-                            <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(500000 * exchangeRate)}</span>
+                            <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(500000))}</span>
                         </div>
                         <div className="flex flex-col gap-1">
                             <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Copay</span>
                             <div className="flex items-baseline gap-1 mt-0.5">
-                                <span className="text-white font-black text-[22px] tracking-tight">₱20</span>
+                                <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(20))}</span>
                             </div>
-                            <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(20 * exchangeRate)}</span>
+                            <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(20))}</span>
                         </div>
                     </div>
                     
@@ -144,9 +146,9 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                         <div className="flex flex-col gap-1">
                             <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Coverage</span>
                             <div className="flex items-baseline gap-1 mt-0.5">
-                                <span className="text-white font-black text-[22px] tracking-tight">₱750k</span>
+                                <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(750000))}</span>
                             </div>
-                            <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(750000 * exchangeRate)}</span>
+                            <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(750000))}</span>
                         </div>
                         <div className="flex flex-col gap-1">
                             <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Est. Return</span>

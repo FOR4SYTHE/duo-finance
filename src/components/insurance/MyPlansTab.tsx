@@ -7,6 +7,7 @@ import { Shield, Plus, ChevronLeft, Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/format";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 interface MyPlansTabProps {
     hasPolicies?: boolean;
@@ -16,6 +17,7 @@ interface MyPlansTabProps {
 
 export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlansTabProps) {
     const { exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
 
@@ -203,24 +205,24 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                     <div className="flex flex-col gap-1">
                         <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Premium</span>
                         <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">₱1,200</span>
+                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(1200))}</span>
                             <span className="text-white/50 text-[13px] font-medium">/yr</span>
                         </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(1200 * exchangeRate)}/yr</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(1200))}/yr</span>
                     </div>
                     <div className="flex flex-col gap-1">
                         <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">MBL</span>
                         <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">₱50,000</span>
+                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(50000))}</span>
                         </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(50000 * exchangeRate)}</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(50000))}</span>
                     </div>
                     <div className="flex flex-col gap-1 mt-3">
                         <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">OPD Limit</span>
                         <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">₱500</span>
+                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(500))}</span>
                         </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(500 * exchangeRate)}</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(500))}</span>
                     </div>
                 </div>
             </div>
@@ -247,24 +249,24 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                     <div className="flex flex-col gap-1">
                         <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Premium</span>
                         <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">₱2,500</span>
+                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(2500))}</span>
                             <span className="text-white/50 text-[13px] font-medium">/yr</span>
                         </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(2500 * exchangeRate)}/yr</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(2500))}/yr</span>
                     </div>
                     <div className="flex flex-col gap-1">
                         <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Fund Value</span>
                         <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-[#D4AF37] font-black text-[22px] tracking-tight">₱12,450</span>
+                            <span className="text-[#D4AF37] font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(12450))}</span>
                         </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(12450 * exchangeRate)}</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(12450))}</span>
                     </div>
                     <div className="flex flex-col gap-1 mt-3">
                         <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Life Cover</span>
                         <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">₱500,000</span>
+                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(500000))}</span>
                         </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(500000 * exchangeRate)}</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(500000))}</span>
                     </div>
                 </div>
             </div>
@@ -291,10 +293,10 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                     <div className="flex flex-col gap-1">
                         <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Premium</span>
                         <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">₱300</span>
+                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(300))}</span>
                             <span className="text-white/50 text-[13px] font-medium">/yr</span>
                         </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈R{formatCurrency(300 * exchangeRate)}/yr</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(300))}/yr</span>
                     </div>
                     <div className="flex flex-col gap-1">
                         <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Coverage</span>
@@ -305,9 +307,9 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                     <div className="flex flex-col gap-1 mt-3">
                         <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Deductible</span>
                         <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">₱0</span>
+                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}0</span>
                         </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈R0</span>
+                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}0</span>
                     </div>
                 </div>
             </div>

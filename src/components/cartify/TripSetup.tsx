@@ -8,10 +8,12 @@ import { Delete, ChevronRight, Check, ArrowUpDown, ShoppingCart, Zap, ListTodo, 
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { SavedTripsSheet } from "./SavedTripsSheet";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 export function TripSetup() {
     const { startTrip, items, budget, mode, resumeTrip, endTrip, savedTrips, resumeSpecificTrip, deleteSavedTrip } = useCartifyStore();
     const { primaryCurrency, exchangeRate, toggleCurrency } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     const [displayValue, setDisplayValue] = useState("0");
     const [selectedMode, setSelectedMode] = useState<CartifyMode>("simple");
     const [isSavedTripsOpen, setIsSavedTripsOpen] = useState(false);
@@ -105,7 +107,7 @@ export function TripSetup() {
                                     <div className="flex flex-col">
                                         <span className="text-white/90 text-[14px] font-medium tracking-tight">Saved Trip Available</span>
                                         <span className="text-white/50 text-[12px] font-medium tracking-wide">
-                                            ₱{savedTrips[0].budget.toLocaleString()} • {savedTrips[0].items.length} items
+                                            {primarySymbol}{getPrimaryValue(savedTrips[0].budget).toLocaleString()} • {savedTrips[0].items.length} items
                                         </span>
                                     </div>
                                 </div>
@@ -191,12 +193,12 @@ export function TripSetup() {
                     <div className="flex flex-col items-center justify-center mb-10">
                         <div className="flex flex-col items-center">
                             <div className="text-[4rem] leading-none text-white flex items-baseline justify-center gap-1.5 font-light tracking-tight drop-shadow-lg">
-                                <span className="text-3xl text-white/40 font-medium">{isPhpPrimary ? '₱' : 'R'}</span>
+                                <span className="text-3xl text-white/40 font-medium">{primarySymbol}</span>
                                 <span>{displayValue || "0"}</span>
                             </div>
                             <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full bg-black/20 border border-white/5">
                                 <span className="text-white/50 font-medium tracking-wide text-sm">
-                                    ≈ {targetCurrency === 'PHP' ? '₱' : 'R'}{convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                    ≈ {secondarySymbol}{convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                                 </span>
                             </div>
                         </div>

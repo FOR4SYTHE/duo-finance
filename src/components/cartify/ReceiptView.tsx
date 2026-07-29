@@ -2,6 +2,7 @@
 
 import { useCartifyStore } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { ChevronLeft, Receipt, CheckCircle2, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -11,6 +12,7 @@ import { SaveTemplatePrompt } from "./SaveTemplatePrompt";
 export function ReceiptView() {
     const { items, budget, mode, endTrip, hideReceipt } = useCartifyStore();
     const { exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     
     const [showSavePrompt, setShowSavePrompt] = useState(false);
 
@@ -56,13 +58,13 @@ export function ReceiptView() {
             }
         }
         if (biggestCat) {
-            suggestions.push(`"${biggestCat}" was your highest category at ₱${biggestAmt.toLocaleString()}.`);
+            suggestions.push(`"${biggestCat}" was your highest category at ${primarySymbol}${getPrimaryValue(biggestAmt).toLocaleString()}.`);
         }
         
         // Find most expensive individual item
         if (items.length > 0) {
             const mostExp = [...items].sort((a, b) => b.amount - a.amount)[0];
-            suggestions.push(`Your most expensive item was "${mostExp.name}" (₱${mostExp.amount.toLocaleString()}).`);
+            suggestions.push(`Your most expensive item was "${mostExp.name}" (${primarySymbol}${getPrimaryValue(mostExp.amount).toLocaleString()}).`);
         }
     }
 
@@ -101,10 +103,10 @@ export function ReceiptView() {
                                 <div className="mb-4 text-4xl">🎉</div>
                             )}
                             <h2 className="text-black text-[2.5rem] font-medium tracking-tight mb-2 mt-4">
-                                ₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                {primarySymbol}{getPrimaryValue(totalSpent).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                             </h2>
                             <span className="text-black/40 font-medium tracking-wide">
-                                ≈ R{(totalSpent * exchangeRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                ≈ {secondarySymbol}{getSecondaryValue(totalSpent).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                             </span>
                             
                             {isOverBudget ? (
@@ -131,17 +133,17 @@ export function ReceiptView() {
                         <div className="px-6 py-6 flex flex-col gap-4 border-b-2 border-dashed border-black/10">
                             <div className="flex justify-between items-center text-sm font-medium text-black/50">
                                 <span>Target Budget</span>
-                                <span className="text-black/70 font-mono">₱{budget.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                                <span className="text-black/70 font-mono">{primarySymbol}{getPrimaryValue(budget).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                             </div>
                             {isOverBudget ? (
                                 <div className="flex justify-between items-center text-sm font-bold text-red-500">
                                     <span>Amount over budget</span>
-                                    <span className="font-mono">₱{overage.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                                    <span className="font-mono">{primarySymbol}{getPrimaryValue(overage).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                                 </div>
                             ) : (
                                 <div className="flex justify-between items-center text-sm font-bold text-[#28a745]">
                                     <span>Amount saved</span>
-                                    <span className="font-mono">₱{(budget - totalSpent).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                                    <span className="font-mono">{primarySymbol}{getPrimaryValue(budget - totalSpent).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                                 </div>
                             )}
                         </div>
@@ -169,7 +171,7 @@ export function ReceiptView() {
                                         <span className="text-black/90 text-sm font-medium">{item.name} {item.quantity > 1 ? `(x${item.quantity})` : ''}</span>
                                         {item.category && <span className="text-black/40 text-xs">{item.category} {!item.isVatable && '• Exempt'}</span>}
                                     </div>
-                                    <span className="text-black/80 font-medium font-mono text-sm">₱{item.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                                    <span className="text-black/80 font-medium font-mono text-sm">{primarySymbol}{getPrimaryValue(item.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                                 </div>
                             ))}
                             {items.length === 0 && (
@@ -183,22 +185,22 @@ export function ReceiptView() {
                             
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-black/50">VAT-Exempt Sales</span>
-                                <span className="text-black/70 font-mono">₱{vatExemptSubtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                                <span className="text-black/70 font-mono">{primarySymbol}{getPrimaryValue(vatExemptSubtotal).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-black/50">VATable Sales (Net)</span>
-                                <span className="text-black/70 font-mono">₱{vatableNet.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                                <span className="text-black/70 font-mono">{primarySymbol}{getPrimaryValue(vatableNet).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-black/50">VAT Amount (12%)</span>
-                                <span className="text-black/70 font-mono">₱{vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                                <span className="text-black/70 font-mono">{primarySymbol}{getPrimaryValue(vatAmount).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                             </div>
                             
                             <div className="w-full h-px bg-black/10 my-2" />
                             
                             <div className="flex justify-between items-center mb-6">
                                 <span className="text-black/80 font-medium">Grand Total</span>
-                                <span className="text-black font-mono font-medium text-lg">₱{totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                                <span className="text-black font-mono font-medium text-lg">{primarySymbol}{getPrimaryValue(totalSpent).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                             </div>
 
                             {/* Barcode & Date */}

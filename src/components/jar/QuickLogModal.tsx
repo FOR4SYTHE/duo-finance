@@ -6,6 +6,7 @@ import { Delete, X } from "lucide-react";
 import * as Icons from "lucide-react";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useBudgetStore } from "@/store/useBudgetStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 interface QuickLogModalProps {
     isOpen: boolean;
@@ -16,12 +17,12 @@ interface QuickLogModalProps {
 export function QuickLogModal({ isOpen, onClose, onConfirm }: QuickLogModalProps) {
     const { primaryCurrency, exchangeRate } = useCurrencyStore();
     const { categories } = useBudgetStore();
+    const { primarySymbol, secondarySymbol } = useDualCurrency();
     const [displayValue, setDisplayValue] = useState("0");
     const [note, setNote] = useState("");
     const [selectedCategory, setSelectedCategory] = useState<string>("Other");
 
     const isPhpPrimary = primaryCurrency === 'PHP';
-    const targetCurrency = isPhpPrimary ? 'ZAR' : 'PHP';
     
     const numericValue = Number(displayValue || 0);
     const convertedAmount = isPhpPrimary 
@@ -92,11 +93,11 @@ export function QuickLogModal({ isOpen, onClose, onConfirm }: QuickLogModalProps
 
                         <div className="flex flex-col items-center justify-center mb-6">
                             <div className="text-[3.5rem] leading-none text-white flex items-baseline justify-center gap-1 font-light tracking-tight">
-                                <span className="text-2xl text-white/40">{isPhpPrimary ? '₱' : 'R'}</span>
+                                <span className="text-2xl text-white/40">{primarySymbol}</span>
                                 <span>{displayValue || "0"}</span>
                             </div>
                             <span className="text-white/40 font-medium tracking-wide mt-1 text-sm">
-                                ≈ {targetCurrency === 'PHP' ? '₱' : 'R'}{convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                ≈ {secondarySymbol}{convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                             </span>
                         </div>
 
@@ -161,7 +162,7 @@ export function QuickLogModal({ isOpen, onClose, onConfirm }: QuickLogModalProps
                             disabled={phpAmount <= 0}
                             className="w-full h-[64px] rounded-full bg-white text-black font-semibold text-base tracking-wide flex items-center justify-center gap-2 hover:bg-gray-100 disabled:opacity-50 disabled:bg-white/10 disabled:text-white/40 transition-all duration-300 active:scale-[0.98]"
                         >
-                            Log ₱{phpAmount.toLocaleString()}
+                            Log {primarySymbol}{numericValue.toLocaleString()}
                         </button>
                     </motion.div>
                 </div>

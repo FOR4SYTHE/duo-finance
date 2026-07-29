@@ -8,12 +8,14 @@ import { ThinkingOrb } from "thinking-orbs";
 import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, Sparkles, AlertTriangle } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const { user, partner, householdId, logout, toggleMockPartner, joinHousehold } = useAuthStore();
   const { primaryCurrency, setPrimaryCurrency, exchangeRate } = useCurrencyStore();
+  const { primarySymbol, secondarySymbol } = useDualCurrency();
   const [showSignOutPrompt, setShowSignOutPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -409,7 +411,7 @@ export default function ProfilePage() {
           </div>
           
           <div className="flex justify-center mb-10">
-            <p className="text-white/20 text-[11px] font-medium tracking-wide">Live Rate: ₱1.00 = R{exchangeRate.toFixed(3)} (Auto-updated)</p>
+            <p className="text-white/20 text-[11px] font-medium tracking-wide">Live Rate: {primarySymbol}1.00 = {secondarySymbol}{exchangeRate.toFixed(3)} (Auto-updated)</p>
           </div>
         </motion.div>
 

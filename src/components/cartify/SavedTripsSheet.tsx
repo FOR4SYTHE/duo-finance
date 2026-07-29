@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Layers, ShoppingCart, Trash2, Calendar as CalendarIcon } from "lucide-react";
 import { useCartifyStore, SavedTrip } from "@/store/useCartifyStore";
-import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 interface SavedTripsSheetProps {
     isOpen: boolean;
@@ -15,7 +15,7 @@ interface SavedTripsSheetProps {
 export function SavedTripsSheet({ isOpen, onClose }: SavedTripsSheetProps) {
     const [mounted, setMounted] = useState(false);
     const { savedTrips, resumeSpecificTrip, deleteSavedTrip } = useCartifyStore();
-    const { primaryCurrency, exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
     useEffect(() => {
         setMounted(true);
@@ -74,13 +74,8 @@ export function SavedTripsSheet({ isOpen, onClose }: SavedTripsSheetProps) {
                             ) : (
                                 savedTrips.map((trip: SavedTrip) => {
                                     const date = new Date(trip.date);
-                                    const isPhpPrimary = primaryCurrency === 'PHP';
-                                    const displayBudget = isPhpPrimary 
-                                        ? `₱${trip.budget.toLocaleString()}` 
-                                        : `R${(trip.budget / exchangeRate).toFixed(2)}`;
-                                    const secondaryBudget = isPhpPrimary 
-                                        ? `R${(trip.budget / exchangeRate).toFixed(2)}` 
-                                        : `₱${trip.budget.toLocaleString()}`;
+                                    const displayBudget = `${primarySymbol}${getPrimaryValue(trip.budget).toLocaleString()}`;
+                                    const secondaryBudget = `${secondarySymbol}${getSecondaryValue(trip.budget).toFixed(2)}`;
 
                                     return (
                                         <div key={trip.id} className="relative group bg-white/5 border border-white/5 rounded-[20px] p-4 flex flex-col gap-4 overflow-hidden">

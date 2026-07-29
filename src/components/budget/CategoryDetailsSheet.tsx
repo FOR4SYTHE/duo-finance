@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { AmountInputModal } from "./AmountInputModal";
 
 interface CategoryDetailsSheetProps {
@@ -16,6 +17,7 @@ interface CategoryDetailsSheetProps {
 export function CategoryDetailsSheet({ isOpen, onClose, categoryId }: CategoryDetailsSheetProps) {
     const { categories, updateSubCategory, addSubCategory } = useBudgetStore();
     const { primaryCurrency, exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     
     const [selectedSubId, setSelectedSubId] = useState<string | null>(null);
     const [isAmountModalOpen, setIsAmountModalOpen] = useState(false);
@@ -29,9 +31,6 @@ export function CategoryDetailsSheet({ isOpen, onClose, categoryId }: CategoryDe
     if (!category || !isOpen) return null;
     
     const subCategories = category.subCategories || [];
-    
-    const isPhpPrimary = primaryCurrency === 'PHP';
-    const targetCurrency = isPhpPrimary ? 'ZAR' : 'PHP';
 
     const handleConfirmAmount = (amountPHP: number) => {
         if (selectedSubId && categoryId) {
@@ -73,7 +72,7 @@ export function CategoryDetailsSheet({ isOpen, onClose, categoryId }: CategoryDe
                             <div className="flex justify-between items-center mb-6">
                                 <div className="flex flex-col">
                                     <h3 className="text-white font-medium text-lg">{category.name} Details</h3>
-                                    <span className="text-white/50 text-xs">Total: ₱{category.targetAmount.toLocaleString()}</span>
+                                    <span className="text-white/50 text-xs">Total: {primarySymbol}{getPrimaryValue(category.targetAmount).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
                                 </div>
                                 <button 
                                     onClick={onClose}
@@ -85,7 +84,7 @@ export function CategoryDetailsSheet({ isOpen, onClose, categoryId }: CategoryDe
 
                             <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-3 pb-6">
                                 {subCategories.map((sub) => {
-                                    const converted = isPhpPrimary ? sub.amount * exchangeRate : sub.amount / exchangeRate;
+                                    const converted = getSecondaryValue(sub.amount);
                                     return (
                                         <button
                                             key={sub.id}
@@ -98,10 +97,10 @@ export function CategoryDetailsSheet({ isOpen, onClose, categoryId }: CategoryDe
                                             <span className="text-white font-medium text-sm">{sub.name}</span>
                                             <div className="flex flex-col items-end">
                                                 <span className="text-white font-semibold">
-                                                    {isPhpPrimary ? '₱' : 'R'}{sub.amount.toLocaleString()}
+                                                    {primarySymbol}{getPrimaryValue(sub.amount).toLocaleString(undefined, {maximumFractionDigits: 0})}
                                                 </span>
                                                 <span className="text-white/40 text-xs">
-                                                    ≈ {targetCurrency === 'PHP' ? '₱' : 'R'}{converted.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2})}
+                                                    ≈ {secondarySymbol}{converted.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2})}
                                                 </span>
                                             </div>
                                         </button>

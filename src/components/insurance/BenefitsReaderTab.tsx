@@ -2,10 +2,12 @@
 
 import { formatCurrency } from "@/lib/format";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { Info } from "lucide-react";
 
 export function BenefitsReaderTab() {
     const { exchangeRate } = useCurrencyStore();
+    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
     return (
         <div className="flex flex-col gap-6">
@@ -33,10 +35,10 @@ export function BenefitsReaderTab() {
                         </div>
                         <div className="flex flex-col items-end text-right">
                             <div className="flex items-baseline gap-1.5 mb-1 mt-0.5">
-                                <span className="text-white font-black text-[22px] tracking-tight">₱50,000</span>
+                                <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(50000))}</span>
                                 <span className="text-white/40 text-[13px] font-medium">/illness</span>
                             </div>
-                            <span className="text-white/50 text-[11px] font-bold">≈ R{formatCurrency(50000 * exchangeRate)}/illness</span>
+                            <span className="text-white/50 text-[11px] font-bold">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(50000))}/illness</span>
                             <div className="px-2.5 py-1 mt-1 rounded-full bg-[#30D158]/10 border border-[#30D158]/20 flex items-center gap-1.5">
                                 <div className="w-1.5 h-1.5 rounded-full bg-[#30D158]" />
                                 <span className="text-[#30D158] text-[10px] font-bold uppercase tracking-widest">Covered</span>
@@ -52,10 +54,10 @@ export function BenefitsReaderTab() {
                         </div>
                         <div className="flex flex-col items-end text-right">
                             <div className="flex items-baseline gap-1.5 mb-1 mt-0.5">
-                                <span className="text-white font-black text-[22px] tracking-tight">₱500</span>
+                                <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(500))}</span>
                                 <span className="text-white/40 text-[13px] font-medium">/visit</span>
                             </div>
-                            <span className="text-white/50 text-[11px] font-bold">≈ R{formatCurrency(500 * exchangeRate)}/visit</span>
+                            <span className="text-white/50 text-[11px] font-bold">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(500))}/visit</span>
                             <div className="px-2.5 py-1 mt-1 rounded-full bg-[#30D158]/10 border border-[#30D158]/20 flex items-center gap-1.5">
                                 <div className="w-1.5 h-1.5 rounded-full bg-[#30D158]" />
                                 <span className="text-[#30D158] text-[10px] font-bold uppercase tracking-widest">Covered</span>

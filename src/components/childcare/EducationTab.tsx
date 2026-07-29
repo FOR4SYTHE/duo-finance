@@ -5,9 +5,12 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChildCareStore } from "@/store/useChildCareStore";
 import { Calendar, GraduationCap, MapPin, CheckCircle2, Info, Plus, X } from "lucide-react";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
+import { formatCurrency } from "@/lib/format";
 
 export function EducationTab() {
   const { cachedData, configuration, selectSchool, addCustomSchool } = useChildCareStore();
+  const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -139,10 +142,10 @@ export function EducationTab() {
                     <div>
                       <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Est. Yearly Tuition</div>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-black text-[#FF7B54]">₱{(school.monthlyTuition * 12).toLocaleString()}</span>
-                        <span className="text-[12px] font-medium text-white/50">/ R{(zarTuition * 12).toLocaleString()}</span>
+                        <span className="text-lg font-black text-[#FF7B54]">{primarySymbol}{formatCurrency(getPrimaryValue(school.monthlyTuition * 12))}</span>
+                        <span className="text-[12px] font-medium text-white/50">/ {secondarySymbol}{formatCurrency(getSecondaryValue(school.monthlyTuition * 12))}</span>
                       </div>
-                      <div className="text-[10px] text-white/30 mt-0.5">₱{school.monthlyTuition.toLocaleString()} / mo</div>
+                      <div className="text-[10px] text-white/30 mt-0.5">{primarySymbol}{formatCurrency(getPrimaryValue(school.monthlyTuition))} / mo</div>
                     </div>
                     <div className="flex items-center gap-2">
                       <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/60 text-[11px] font-bold border border-white/5 transition-colors">
@@ -230,7 +233,7 @@ export function EducationTab() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-bold text-white/80 ml-1">Monthly Tuition (₱)</label>
+                    <label className="text-[13px] font-bold text-white/80 ml-1">Monthly Tuition ({primarySymbol})</label>
                     <input 
                       type="number"
                       placeholder="e.g. 5000"
@@ -241,7 +244,7 @@ export function EducationTab() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-bold text-white/80 ml-1">Annual Enrollment Fee (Optional, ₱)</label>
+                    <label className="text-[13px] font-bold text-white/80 ml-1">Annual Enrollment Fee (Optional, {primarySymbol})</label>
                     <input 
                       type="number"
                       placeholder="e.g. 15000"
@@ -256,7 +259,7 @@ export function EducationTab() {
                       <label className="text-[12px] font-bold text-white/80 ml-1">Books/Supplies</label>
                       <input 
                         type="number"
-                        placeholder="₱"
+                        placeholder={primarySymbol}
                         value={customSchool.books}
                         onChange={(e) => setCustomSchool({...customSchool, books: e.target.value})}
                         className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-[14px] font-semibold text-white placeholder-white/20 focus:outline-none focus:border-[#FF7B54]/50 transition-all"
@@ -266,7 +269,7 @@ export function EducationTab() {
                       <label className="text-[12px] font-bold text-white/80 ml-1">Uniforms</label>
                       <input 
                         type="number"
-                        placeholder="₱"
+                        placeholder={primarySymbol}
                         value={customSchool.uniform}
                         onChange={(e) => setCustomSchool({...customSchool, uniform: e.target.value})}
                         className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-[14px] font-semibold text-white placeholder-white/20 focus:outline-none focus:border-[#FF7B54]/50 transition-all"

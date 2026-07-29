@@ -6,6 +6,7 @@ import { ArrowRight, BarChart3 } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { formatCurrency } from "@/lib/format";
+import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { MonthlySummary } from "./MonthlySummary";
 
 const MONTH_NAMES = [
@@ -25,6 +26,7 @@ export function MonthRolloverModal({ lastSeenMonthKey, currentMonthKey, onClose 
 
   const { config } = useBudgetStore();
   const { entries } = useSpendStore();
+  const { primarySymbol, getPrimaryValue } = useDualCurrency();
 
   const [lastYear, lastMonth] = lastSeenMonthKey.split("-").map(Number);
   const lastMonthName = MONTH_NAMES[lastMonth - 1] || "Last Month";
@@ -101,8 +103,8 @@ export function MonthRolloverModal({ lastSeenMonthKey, currentMonthKey, onClose 
                 You logged {monthEntries.length} entries in {lastMonthName}.
                 {hasData ? (
                    isOver 
-                    ? ` You went over budget by ₱${formatCurrency(Math.abs(remaining))}.`
-                    : ` You stayed under budget by ₱${formatCurrency(remaining)}.`
+                    ? ` You went over budget by ${primarySymbol}${formatCurrency(getPrimaryValue(Math.abs(remaining)))}.`
+                    : ` You stayed under budget by ${primarySymbol}${formatCurrency(getPrimaryValue(remaining))}.`
                 ) : (
                   " You didn't spend anything from your budget."
                 )}
