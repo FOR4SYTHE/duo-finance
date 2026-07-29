@@ -8,8 +8,8 @@ export async function processAndCompressImage(file: File): Promise<string> {
             img.src = event.target?.result as string;
             
             img.onload = () => {
-                const MAX_WIDTH = 1000;
-                const MAX_HEIGHT = 1000;
+                const MAX_WIDTH = 1200;
+                const MAX_HEIGHT = 1200;
                 let width = img.width;
                 let height = img.height;
                 
@@ -37,8 +37,8 @@ export async function processAndCompressImage(file: File): Promise<string> {
                 
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                // Compress to JPEG with 0.7 quality to keep size small (~50-100KB)
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                // Compress to WebP with 0.85 quality for higher visual fidelity while maintaining small payload size
+                const dataUrl = canvas.toDataURL('image/webp', 0.85);
                 resolve(dataUrl);
             };
             

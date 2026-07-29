@@ -24,6 +24,7 @@ interface BudgetState {
     setCardSkin: (skin: string) => void;
     setCardName: (name: string) => void;
     setCustomPhoto: (key: string, dataUrl: string) => void;
+    setCustomPhotoPosition: (key: string, position: { x: number; y: number }) => void;
     removeCustomPhoto: (key: string) => void;
     setActiveMonth: (month: string) => void;
     setLastSeenMonth: (month: string) => void;
@@ -104,6 +105,7 @@ export const useBudgetStore = create<BudgetState>()(
                 cardSkin: 'default-dark',
                 cardName: 'BL',
                 customPhotos: {},
+                customPhotoPositions: {},
                 activeMonth: new Date().toISOString().slice(0, 7), // "YYYY-MM" format
                 lastSeenMonth: new Date().toISOString().slice(0, 7)
             },
@@ -130,14 +132,24 @@ export const useBudgetStore = create<BudgetState>()(
                 set((state) => ({ 
                     config: { 
                         ...state.config, 
-                        customPhotos: { ...state.config.customPhotos, [key]: dataUrl } 
+                        customPhotos: { ...state.config.customPhotos, [key]: dataUrl },
+                        customPhotoPositions: { ...state.config.customPhotoPositions, [key]: { x: 50, y: 50 } }
                     } 
+                })),
+            setCustomPhotoPosition: (key: string, position: { x: number; y: number }) =>
+                set((state) => ({
+                    config: {
+                        ...state.config,
+                        customPhotoPositions: { ...state.config.customPhotoPositions, [key]: position }
+                    }
                 })),
             removeCustomPhoto: (key: string) =>
                 set((state) => {
                     const newPhotos = { ...state.config.customPhotos };
+                    const newPositions = { ...state.config.customPhotoPositions };
                     delete newPhotos[key];
-                    return { config: { ...state.config, customPhotos: newPhotos } };
+                    delete newPositions[key];
+                    return { config: { ...state.config, customPhotos: newPhotos, customPhotoPositions: newPositions } };
                 }),
             setActiveMonth: (month: string) =>
                 set((state) => ({ config: { ...state.config, activeMonth: month } })),
@@ -280,13 +292,15 @@ export const useBudgetStore = create<BudgetState>()(
                 // Ensure config has all required fields, including activeMonth
                 if (!merged.config) {
                     merged.config = currentState.config;
-                } else if (!merged.config.activeMonth) {
+                }
+                if (!merged.config.activeMonth) {
                     merged.config.activeMonth = new Date().toISOString().slice(0, 7);
                 }
                 if (!merged.config.lastSeenMonth) {
                     merged.config.lastSeenMonth = merged.config.activeMonth || new Date().toISOString().slice(0, 7);
                 }
                 if (!merged.config.customPhotos) merged.config.customPhotos = {};
+                if (!merged.config.customPhotoPositions) merged.config.customPhotoPositions = {};
                 if (!merged.config.cardSkin) merged.config.cardSkin = 'default-dark';
                 if (!merged.config.cardName) merged.config.cardName = 'BL';
                 if (!persistedState.goals) {
