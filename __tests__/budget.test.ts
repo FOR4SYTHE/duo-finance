@@ -35,7 +35,7 @@ describe('Budget Store & Math', () => {
         const { displayAllocated, displayUnallocated } = calculateAllocations(config, [
             { id: '1', name: 'Rent', icon: 'Home', color: '#000', targetAmount: 10000 },
             { id: '2', name: 'Food', icon: 'Food', color: '#000', targetAmount: 5000 }
-        ]);
+        ], 0);
 
         expect(displayAllocated).toBe(15000);
         expect(displayUnallocated).toBe(5000); // 20000 - 15000
@@ -46,7 +46,7 @@ describe('Budget Store & Math', () => {
         
         const { displayAllocated, displayUnallocated } = calculateAllocations(config, [
             { id: '1', name: 'Rent', icon: 'Home', color: '#000', targetAmount: 12000 }
-        ]);
+        ], 0);
 
         expect(displayAllocated).toBe(12000);
         expect(displayUnallocated).toBe(0); // Cannot be negative

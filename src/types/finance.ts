@@ -32,11 +32,13 @@ export interface BudgetCategory {
     icon: string; // Component or identifier name
     color: string; // e.g., '#30D158'
     targetAmount: number; // Stored natively in canonical Monthly PHP
+    targetHistory?: Record<string, number>; // Month key (YYYY-MM) -> target amount
     subCategories?: BudgetSubCategory[];
 }
 
 export interface BudgetConfig {
     targetAmount: number; // Global target amount in canonical Monthly PHP
+    targetHistory?: Record<string, number>; // Month key (YYYY-MM) -> target amount
     period: BudgetPeriod; // Current selected display period
     jarAllowedPercentage: number; // Percentage of targetAmount allowed for extra spend
     runwayMultiplier?: number; // For Emergency Runway calculator

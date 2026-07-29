@@ -113,7 +113,20 @@ export const useBudgetStore = create<BudgetState>()(
             goals: DEFAULT_GOALS,
             notifications: [],
             setBudget: (targetAmount: number, period: BudgetPeriod) => 
-                set((state) => ({ config: { ...state.config, targetAmount, period } })),
+                set((state) => {
+                    const activeMonth = state.config.activeMonth || new Date().toISOString().slice(0, 7);
+                    return {
+                        config: {
+                            ...state.config,
+                            targetAmount,
+                            period,
+                            targetHistory: {
+                                ...(state.config.targetHistory || {}),
+                                [activeMonth]: targetAmount
+                            }
+                        }
+                    };
+                }),
             setJarPercentage: (percentage: number) => 
                 set((state) => ({ config: { ...state.config, jarAllowedPercentage: percentage } })),
             setRunwayMultiplier: (multiplier: number) =>
@@ -165,7 +178,18 @@ export const useBudgetStore = create<BudgetState>()(
                 }),
             updateCategory: (id, updates) => 
                 set((state) => {
-                    const newCats = state.categories.map(c => c.id === id ? { ...c, ...updates } : c);
+                    const activeMonth = state.config.activeMonth || new Date().toISOString().slice(0, 7);
+                    const newCats = state.categories.map(c => {
+                        if (c.id !== id) return c;
+                        const newCat = { ...c, ...updates };
+                        if (updates.targetAmount !== undefined) {
+                            newCat.targetHistory = {
+                                ...(c.targetHistory || {}),
+                                [activeMonth]: updates.targetAmount
+                            };
+                        }
+                        return newCat;
+                    });
                     const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
                     const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
                     const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
@@ -173,9 +197,20 @@ export const useBudgetStore = create<BudgetState>()(
                 }),
             updateCategoriesTarget: (updates) =>
                 set((state) => {
+                    const activeMonth = state.config.activeMonth || new Date().toISOString().slice(0, 7);
                     const newCats = state.categories.map(c => {
                         const match = updates.find(u => u.id === c.id);
-                        return match ? { ...c, targetAmount: match.targetAmount } : c;
+                        if (match) {
+                            return { 
+                                ...c, 
+                                targetAmount: match.targetAmount,
+                                targetHistory: {
+                                    ...(c.targetHistory || {}),
+                                    [activeMonth]: match.targetAmount
+                                }
+                            };
+                        }
+                        return c;
                     });
                     const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
                     const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
+import { filterEntriesByMonth } from "@/utils/budgetMath";
 
 export function AnimatedPiggyBank() {
   const [coins, setCoins] = useState<{ id: number; peakX: number; peakY: number; endX: number; endY: number; delay: number; duration: number; startX: number; startY: number; state: string; currency: string }[]>([]);
@@ -16,7 +17,8 @@ export function AnimatedPiggyBank() {
   const totalSpentRef = useRef(0);
 
   useEffect(() => {
-    const totalSpent = entries.reduce((sum, entry) => sum + entry.amount, 0);
+    const currentMonthEntries = filterEntriesByMonth(entries, config.activeMonth || new Date().toISOString().slice(0, 7));
+    const totalSpent = currentMonthEntries.reduce((sum, entry) => sum + entry.amount, 0);
     const allowedSpend = config.targetAmount * ((config.jarAllowedPercentage || 20) / 100);
     const percentage = allowedSpend > 0 ? Math.min((totalSpent / allowedSpend) * 100, 100) : 0;
     percentageRef.current = percentage;

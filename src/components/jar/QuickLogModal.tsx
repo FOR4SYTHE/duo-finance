@@ -3,18 +3,22 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Delete, X } from "lucide-react";
+import * as Icons from "lucide-react";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useBudgetStore } from "@/store/useBudgetStore";
 
 interface QuickLogModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (amountPHP: number, note: string) => void;
+    onConfirm: (amountPHP: number, note: string, category?: string) => void;
 }
 
 export function QuickLogModal({ isOpen, onClose, onConfirm }: QuickLogModalProps) {
     const { primaryCurrency, exchangeRate } = useCurrencyStore();
+    const { categories } = useBudgetStore();
     const [displayValue, setDisplayValue] = useState("0");
     const [note, setNote] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState<string>("Other");
 
     const isPhpPrimary = primaryCurrency === 'PHP';
     const targetCurrency = isPhpPrimary ? 'ZAR' : 'PHP';
@@ -44,9 +48,10 @@ export function QuickLogModal({ isOpen, onClose, onConfirm }: QuickLogModalProps
 
     const handleConfirm = () => {
         if (phpAmount > 0) {
-            onConfirm(phpAmount, note);
+            onConfirm(phpAmount, note, selectedCategory === "Other" ? undefined : selectedCategory);
             setDisplayValue("0");
             setNote("");
+            setSelectedCategory("Other");
         }
     };
 
@@ -100,8 +105,40 @@ export function QuickLogModal({ isOpen, onClose, onConfirm }: QuickLogModalProps
                             placeholder="Note (Optional)"
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
-                            className="w-full h-12 bg-white/[0.05] border border-white/10 rounded-[16px] px-4 text-white outline-none focus:border-white/20 mb-6 placeholder:text-white/30 text-sm"
+                            className="w-full h-12 bg-white/[0.05] border border-white/10 rounded-[16px] px-4 text-white outline-none focus:border-white/20 mb-4 placeholder:text-white/30 text-sm"
                         />
+
+                        {/* Category Picker */}
+                        <div className="w-full overflow-x-auto no-scrollbar mb-6 flex gap-2 pb-2">
+                            <button
+                                onClick={() => setSelectedCategory("Other")}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs whitespace-nowrap transition-colors shrink-0 ${
+                                    selectedCategory === "Other" 
+                                        ? "bg-white/10 border-white/20 text-white" 
+                                        : "bg-white/[0.02] border-white/5 text-white/50 hover:bg-white/[0.05]"
+                                }`}
+                            >
+                                Other
+                            </button>
+                            {categories.map(cat => {
+                                const Icon = (Icons as any)[cat.icon] || Icons.HelpCircle;
+                                const isSelected = selectedCategory === cat.name;
+                                return (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setSelectedCategory(cat.name)}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs whitespace-nowrap transition-colors shrink-0 ${
+                                            isSelected 
+                                                ? "bg-white/10 border-white/20 text-white" 
+                                                : "bg-white/[0.02] border-white/5 text-white/50 hover:bg-white/[0.05]"
+                                        }`}
+                                    >
+                                        <Icon className="w-3.5 h-3.5" style={{ color: isSelected ? cat.color : undefined }} />
+                                        {cat.name}
+                                    </button>
+                                );
+                            })}
+                        </div>
 
                         {/* Numpad */}
                         <div className="flex-1 grid grid-cols-3 gap-3 mb-6 min-h-[250px]">

@@ -33,6 +33,7 @@ import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { containerVariants, itemVariants } from "@/utils/animations";
+import { filterEntriesByMonth } from "@/utils/budgetMath";
 
 export default function Home() {
   useNotificationEngine();
@@ -41,7 +42,8 @@ export default function Home() {
   const { entries, injectMockEntries } = useSpendStore();
   const { exchangeRate } = useCurrencyStore();
   
-  const totalSpent = useMemo(() => entries.reduce((sum, entry) => sum + entry.amount, 0), [entries]);
+  const currentMonthEntries = useMemo(() => filterEntriesByMonth(entries, config.activeMonth || new Date().toISOString().slice(0, 7)), [entries, config.activeMonth]);
+  const totalSpent = useMemo(() => currentMonthEntries.reduce((sum, entry) => sum + entry.amount, 0), [currentMonthEntries]);
   const zarTotalSpent = useMemo(() => Math.round(totalSpent * exchangeRate), [totalSpent, exchangeRate]);
 
   const allowedSpend = config.targetAmount * ((config.jarAllowedPercentage || 20) / 100);

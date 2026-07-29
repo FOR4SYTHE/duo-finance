@@ -14,6 +14,7 @@ import { JarLockedModal } from "@/components/jar/JarLockedModal";
 import { JarSettingsModal } from "@/components/jar/JarSettingsModal";
 import { LogAnimationOverlay } from "@/components/jar/LogAnimationOverlay";
 import { AnimatePresence } from "framer-motion";
+import { filterEntriesByMonth } from "@/utils/budgetMath";
 
 export default function SpendJarPage() {
   const router = useRouter();
@@ -55,7 +56,8 @@ export default function SpendJarPage() {
   // Calculate totals based on allowed percentage of UNALLOCATED budget
   const totalAllocated = categories.reduce((sum, cat) => sum + (cat.targetAmount || 0), 0);
   const unallocatedAmount = Math.max(0, config.targetAmount - totalAllocated);
-  const totalSpent = entries.reduce((sum, entry) => sum + entry.amount, 0);
+  const currentMonthEntries = filterEntriesByMonth(entries, config.activeMonth || new Date().toISOString().slice(0, 7));
+  const totalSpent = currentMonthEntries.reduce((sum, entry) => sum + entry.amount, 0);
   const allowedSpend = unallocatedAmount * ((config.jarAllowedPercentage || 20) / 100);
   const isBudgetSet = config.targetAmount > 0;
   
@@ -78,7 +80,7 @@ export default function SpendJarPage() {
 
   // SVG parameters (Removed since we use nitro glow ring now)
   
-  const handleLogSpend = (amount: number, note: string) => {
+  const handleLogSpend = (amount: number, note: string, category?: string) => {
       // Calculate new percentage to trigger corresponding animation
       const newTotal = totalSpent + amount;
       const newPercentage = (newTotal / allowedSpend) * 100;
@@ -88,7 +90,7 @@ export default function SpendJarPage() {
       else if (newPercentage >= 50) type = 'worried';
       
       setAnimationType(type);
-      addExpense(amount, 'PHP', undefined, note);
+      addExpense(amount, 'PHP', category, note);
       setIsLogModalOpen(false);
   };
 
@@ -107,7 +109,7 @@ export default function SpendJarPage() {
   // Compute cumulative color for logs
   // Entries are newest first, so we reverse to process oldest to newest, then reverse back
   let runningTotal = 0;
-  const logsWithColor = [...entries].reverse().map(entry => {
+  const logsWithColor = [...currentMonthEntries].reverse().map(entry => {
       runningTotal += entry.amount;
       const perc = (runningTotal / allowedSpend) * 100;
       let colorClass = "text-[#30D158]"; // Green
@@ -354,7 +356,7 @@ export default function SpendJarPage() {
         {/* Premium Solid Recent Entries Feed */}
         <div className="w-[85%] mx-auto mt-12 flex flex-col gap-3 relative z-20">
           <div className="flex justify-between items-center mb-3 px-1">
-            <h2 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase">Recent Drops ({entries.length})</h2>
+            <h2 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase">Recent Drops ({currentMonthEntries.length})</h2>
             <button 
                 onClick={() => clearEntries()} 
                 className="text-white/20 text-[9px] uppercase font-bold tracking-[0.15em] hover:text-white/60 transition-colors"
@@ -383,7 +385,7 @@ export default function SpendJarPage() {
             </div>
           ))}
 
-          {entries.length === 0 && (
+          {currentMonthEntries.length === 0 && (
             <div className="text-center py-16 opacity-30 flex flex-col items-center">
               <div className="w-16 h-16 rounded-full border border-dashed border-white/20 mb-4 flex items-center justify-center">
                 <PiggyBank className="w-6 h-6 text-white/50" />

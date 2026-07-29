@@ -1,31 +1,34 @@
 # MASTER HANDOFF DOCUMENT — DUO FINANCE
 
-> **Date:** July 28, 2026  
+> **Date:** July 29, 2026  
 > **Target:** AI Agent Handoff & Continuum State  
-> **Status:** Home Screen UI refinement, Cartify workflows, Vercel build safety, and Daily Insight redesign complete. Ready for Insurance Hub & Notification Engine integration.
+> **Status:** Global Settings, App Security Lock, Subscriptions Manager, and Haptic feedback have been fully built, wired to Zustand stores, and polished. The application is now ready for core backend feature work (Spend Jar, Cartify, Monthly Budget).
 
 ---
 
 ## 1. Executive Summary & Core Milestones Achieved
 
-### A. Home Page UI & Polish (`/src/app/page.tsx`)
-- **Daily Insight Card Redesign:**
-  - Replaced generic card with a premium Apple-style "nested bezel" aesthetic (translucent outer gradient border wrapping a deep `#1C1C1E` inner card).
-  - Removed "DAILY INSIGHT" header title and interactive scaling/click handlers to serve as a pure daily typography widget.
-  - Added zero-gravity floating mini-icons: a top-centered `Shield` icon (emergency fund indicator) and a bottom-right rotated `PiggyBank` squircle icon.
-  - Animated both mini-icons with subtle, lightweight, asynchronous `framer-motion` floating keyframes (`y: [-2, 2, -2]`, sway & tilt) for a weightless, premium feel.
-- **Card Art & Image Mask Cleanup:**
-  - Removed `[mask-image:linear-gradient(...)]` from the Spend Machine container, eliminating the vertical cutoff line and restoring full drop-shadow rendering.
-  - Stripped legacy `bg-gradient-to-r` fading overlays from `Insurance` and `Child Care` card images, allowing transparent `.webp` assets to sit seamlessly without background shade mismatches.
+### A. Global State & Persistence (`src/store/`)
+- **`useSettingsStore.ts`**: Built a global Zustand store with `persist` middleware to track all App Preferences, Notifications, and Security settings (FaceID, PIN, Lock Timeouts, Start Week on Monday, etc.).
+- **`useSubscriptionsStore.ts`**: Built a persistent Zustand store to replace the mock `MOCK_SUBS` array. Manages adding/removing subscriptions and calculating dynamic monthly totals.
 
-### B. Bills & Due Today Banner (`DueTodayBanner.tsx`, `BillsCalendar.tsx`)
-- **Dynamic Island Style Banner:** Upgraded `DueTodayBanner` to an Apple/Vision Pro style floating island with a subtle bell ringing animation and smooth height transitions.
-- **Subtle Dual Currency:** Formatted secondary Rand conversions across banners to sit cleanly on the baseline in `text-[10px]` with 50% opacity to keep PHP hero amounts prominent.
-- **TypeScript & Vercel Fix:** Fixed Vercel build error (`Property 'storeName' does not exist on type 'ScheduledTrip'`) by adding `storeName?: string` to `ScheduledTrip` interface in `useHouseholdStore.ts`.
+### B. Security & App Lock (`src/components/security/AppLockScreen.tsx`)
+- **Global Inactivity Lock**: Built a top-level overlay (`fixed inset-0 z-[9999]`) injected directly into `src/app/layout.tsx`.
+- **Visibility Listener**: It actively listens to `visibilitychange`. When the user leaves the app/browser and returns, it calculates the time away against their chosen `lockTimeout` (Immediately, 1 min, 5 min).
+- **Security UI**: A premium dark screen featuring a 4-digit PIN pad and a "Use FaceID" button (UI prepped for native WebAuthn). Mock unlock triggers upon successful 4-digit entry.
 
-### C. Cartify Module Upgrades (`TripSetup.tsx`, `PlannedListBuilder.tsx`, `ScheduleTripModal.tsx`)
-- **Inner Border Beam:** Swapped the "Saved Trip Available" pill glow animation in `TripSetup.tsx` to `pulse-inner` using pre-installed `BorderBeam` props.
-- **Automated Exit Flow:** Updated "Save for Later" action in `ScheduleTripModal` / `PlannedListBuilder` to automatically invoke the `onRequestExit` callback, immediately bringing up the "End Trip?" confirmation modal for a friction-free return to Home.
+### C. Subscriptions Manager (`src/components/profile/AddSubscriptionSheet.tsx`)
+- **Add Subscription Portal**: Built a beautiful Framer Motion bottom-sheet modal using `createPortal` (portalled to `document.body` to avoid nested transform clipping).
+- **Flow**: Users can select a curated preset (Netflix, Gym) or enter a "Custom" name, use the custom Numpad to assign the monthly cost in PHP, and save it to the global store.
+- **Dynamic Updates**: The `SubscriptionsPage` map was refactored to read from the store, and the total monthly cost card now instantly updates (with dual-currency ZAR conversions).
+
+### D. Settings Pages Polish & Fixes (`src/app/profile/*`)
+- **Toggle Fixes**: Completely rebuilt the CSS for toggle switches so the inner circle never overlaps/clips the pill border when active (green).
+- **Removed Glows**: Stripped the ambient screen-wide colored glows from all settings sub-pages for a cleaner, darker aesthetic.
+- **Haptics Utility (`src/lib/haptics.ts`)**: Built a `triggerHaptic('light' | 'medium' | 'heavy')` utility. It reads the global `haptics` state before firing `navigator.vibrate()`. Wired this into every toggle switch and Numpad tap.
+- **Custom Sign Out Modal**: Removed native browser `confirm()` dialogue. Built a sleek, custom red-tinted Framer Motion Sign Out modal at the bottom of the Profile page.
+- **Dark Mode Strategy**: Affirmed that a true Light Mode is deferred to v2 due to the app's reliance on Apple-style spatial dark UI. Tapping the Dark Mode toggle now triggers a haptic bump, snaps back instantly, and displays a toast: *"Duo is optimized for Dark Mode (Light Mode coming soon)"*.
+- **Bug Fix**: Resolved `toggleMockPartner is not defined` ReferenceError in `ProfilePage`.
 
 ---
 
@@ -33,32 +36,37 @@
 
 | File Path | Description | Key Changes / State |
 | :--- | :--- | :--- |
-| `src/app/page.tsx` | Home Page Shell | Redesigned Daily Insight card with zero-g icons, removed image cut-off masks/gradients on Spend Jar, Insurance, & Child Care cards. |
-| `src/store/useHouseholdStore.ts` | Household Store | Added `storeName?: string` to `ScheduledTrip` interface to resolve TypeScript build errors. |
-| `src/components/home/DueTodayBanner.tsx` | Due Today Banner | Apple/Dynamic Island aesthetic, subtle Rand conversion typography (`text-[10px]`, 50% opacity). |
-| `src/components/cartify/TripSetup.tsx` | Cartify Setup | Applied `pulse-inner` to `BorderBeam` on the saved trip banner. |
-| `src/components/cartify/PlannedListBuilder.tsx` | Cartify List Builder | Passed `onRequestExit` prop down to `ScheduleTripModal`. |
-| `src/components/cartify/ScheduleTripModal.tsx` | Schedule Trip Modal | Triggers `onSaveComplete` / `onRequestExit` on saving for later to auto-prompt exit flow. |
+| `src/store/useSettingsStore.ts` | Global Settings | Persistent store for FaceID, PIN, timeouts, notifications, and preferences. |
+| `src/store/useSubscriptionsStore.ts` | Subscriptions | Persistent store tracking user's active recurring subscriptions. |
+| `src/components/security/AppLockScreen.tsx` | Global Lock Overlay | Injected in `layout.tsx`. Listens to `visibilitychange` to trigger PIN/FaceID. |
+| `src/components/profile/AddSubscriptionSheet.tsx` | Add Sub Modal | Portalled Framer Motion sheet with presets and a custom Numpad. |
+| `src/lib/haptics.ts` | Haptics Utility | Checks `useSettingsStore` before firing `navigator.vibrate()`. |
+| `src/app/profile/biometrics/page.tsx` | Biometrics Settings | Wired to `useSettingsStore`. Toggles fixed, glows removed. |
+| `src/app/profile/notifications/page.tsx` | Notifications Settings | Wired to `useSettingsStore`. Toggles fixed, glows removed. |
+| `src/app/profile/preferences/page.tsx` | App Preferences | Handles Dark Mode rejection toast, haptics toggle. |
+| `src/app/profile/subscriptions/page.tsx` | Subscriptions List | Refactored to map global store data. Triggers Add Sub Sheet. |
+| `src/app/profile/page.tsx` | Profile Root | Added custom Sign Out confirmation modal. Fixed `toggleMockPartner` bug. |
 
 ---
 
 ## 3. Strict Guidelines for Next Agent
 
-1. **Daily Insight Widget:** Keep the Daily Insight card non-interactive (no scaling on hover, no click modals unless explicitly requested). The floating mini-icons must maintain lightweight framer-motion keyframe animations.
-2. **Transparent `.webp` Assets:** Do NOT add `mask-image` linear gradients or solid `bg-gradient-to-r` fading overlays on top of transparent card artwork; they create visible background seams.
-3. **Dual Currency Rule:** Every price display (PHP) must have a secondary ZAR conversion formatted subtly (e.g. `text-[10px]`, 50% opacity, baseline aligned).
-4. **Vercel Build Shield:** Always check `ScheduledTrip` properties when referencing trip attributes in calendar components.
+1. **Native UI Ban:** NEVER use native browser `alert()`, `confirm()`, or `prompt()`. All alerts and confirmations must be custom built components that match the dark, premium Apple spatial aesthetic.
+2. **Portals for Overlays:** Any full-screen modal or sheet (like `AddSubscriptionSheet`) MUST use `createPortal(..., document.body)` to ensure it breaks out of `framer-motion` layout transforms.
+3. **Performance Audit Rule:** Everything built moving forward MUST undergo a performance audit before completion. The UI must remain buttery smooth, lite, and fast at all times. Avoid excessive `backdrop-blur` on repeated list items.
+4. **Dark Mode Only:** The app is strictly optimized for Dark Mode. Do not attempt to implement Light Mode (white backgrounds) without a massive redesign phase.
+5. **Dual Currency Everywhere:** Every instance of a currency display must show the secondary currency implicitly.
 
 ---
 
 ## 4. Immediate Next Task (Start of Next Chat)
 
-1. **Connect Insurance Hub & Notification Engine:**
-   - Connect `useInsuranceStore` renewal dates to `useNotificationEngine.ts`.
-   - Ensure upcoming policy renewals auto-trigger notifications in `NotificationCenter` and link to the Insurance Hub.
+1. **Begin Core Workflow Modules:**
+   - With the foundational settings, navigation, and security complete, the next major focus should be the **Spend Jar** (everyday tracking) or the **Budget Module** (monthly allocations).
+   - Prioritize connecting these to global Zustand stores before worrying about Supabase backend.
 
 ---
 
 🚀 **MISSION STATUS:** Handoff updated & saved to `HANDOFF.md`. Ready to switch chat sessions!  
-⚡️ **NEXT STEP:** [Architect] - Connect `useInsuranceStore` to Notification Engine in new chat session.  
+⚡️ **NEXT STEP:** [Architect / Builder] - Begin building the Spend Jar or Budget Manager in a new chat session.  
 🔥 **MANTRA:** BEYOND PLUS ULTRA!

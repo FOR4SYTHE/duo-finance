@@ -86,9 +86,9 @@ export default function SubscriptionsPage() {
                   </div>
                   
                   <div className="flex items-center gap-4">
-                    <span className="text-white font-medium tracking-tight">
-                      {primaryCurrency === "PHP" ? "₱" : "R"} {formatCurrency(primaryCurrency === "PHP" ? sub.amount : sub.amount * exchangeRate, "", "", 2)}
-                    </span>
+                      <span className="font-medium text-white">
+                        {primaryCurrency === "PHP" ? "₱" : "R"} {formatCurrency(primaryCurrency === "PHP" ? sub.amount : sub.amount * exchangeRate)}
+                      </span>
                     <button 
                       onClick={() => {
                         triggerHaptic('medium');

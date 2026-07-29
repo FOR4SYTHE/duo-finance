@@ -146,7 +146,7 @@ export function AddSubscriptionSheet({ isOpen, onClose }: { isOpen: boolean, onC
                   <div className="flex flex-col items-center justify-center bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[32px] w-full py-6 mb-8 shadow-inner">
                     <span className="text-white/40 text-[12px] font-bold tracking-[0.2em] uppercase mb-2">Monthly Cost</span>
                     <span className="text-[42px] font-medium text-white tracking-tight">
-                      {primaryCurrency === "PHP" ? "₱" : "R"} {formatCurrency(parseFloat(amountStr), "", "", 2)}
+                      {primaryCurrency === "PHP" ? "₱" : "R"} {formatCurrency(parseFloat(amountStr))}
                     </span>
                   </div>
 

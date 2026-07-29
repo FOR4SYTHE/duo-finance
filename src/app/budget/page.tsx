@@ -8,6 +8,8 @@ import { premiumPageVariants } from "@/utils/animations";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { useBillsStore } from "@/store/useBillsStore";
+import { useSubscriptionsStore } from "@/store/useSubscriptionsStore";
 import { BudgetPeriod, BudgetCategory } from "@/types/finance";
 import { SmartTools } from "@/components/budget/SmartTools";
 import { AmountInputModal } from "@/components/budget/AmountInputModal";
@@ -15,7 +17,7 @@ import { AddCategorySheet } from "@/components/budget/AddCategorySheet";
 import { CategoryDetailsSheet } from "@/components/budget/CategoryDetailsSheet";
 import { CategoryMenuSheet } from "@/components/budget/CategoryMenuSheet";
 import { CardSettingsSheet } from "@/components/budget/CardSettingsSheet";
-import { getDisplayValue, getCanonicalValue, calculateAllocations } from "@/utils/budgetMath";
+import { getDisplayValue, getCanonicalValue, calculateAllocations, filterEntriesByMonth, sumByCategory } from "@/utils/budgetMath";
 import { format, addMonths, subMonths, parseISO } from "date-fns";
 
 const PERIODS: { value: BudgetPeriod; label: string }[] = [
@@ -32,6 +34,8 @@ export default function BudgetPage() {
   const { config, categories, setBudget, updateCategory, _hasHydrated, setActiveMonth } = useBudgetStore();
   const { entries } = useSpendStore();
   const { exchangeRate } = useCurrencyStore();
+  const { bills } = useBillsStore();
+  const { subscriptions } = useSubscriptionsStore();
   
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [isHeroModalOpen, setIsHeroModalOpen] = useState(false);
@@ -41,9 +45,13 @@ export default function BudgetPage() {
   const [menuCategory, setMenuCategory] = useState<BudgetCategory | null>(null);
   const [isCardSettingsOpen, setIsCardSettingsOpen] = useState(false);
 
+  const currentMonth = format(new Date(), 'yyyy-MM');
+  const displayMonth = config.activeMonth || currentMonth;
+
   // Computed Values
-  const totalSpent = entries.reduce((sum, entry) => sum + entry.amount, 0);
-  const { displayTarget, displayAllocated, displayUnallocated } = calculateAllocations(config, categories, totalSpent);
+  const monthEntries = filterEntriesByMonth(entries, displayMonth);
+  const totalSpent = monthEntries.reduce((sum, entry) => sum + entry.amount, 0);
+  const { displayTarget, displayAllocated, displayUnallocated } = calculateAllocations(config, categories, totalSpent, displayMonth);
 
   const handleHeroSave = (amount: number) => {
       const canonical = getCanonicalValue(amount, config.period);
@@ -70,9 +78,6 @@ export default function BudgetPage() {
           setBudget(config.targetAmount, 'monthly');
       }
   };
-
-  const currentMonth = format(new Date(), 'yyyy-MM');
-  const displayMonth = config.activeMonth || currentMonth;
 
   const handlePrevMonth = () => {
       const prev = subMonths(parseISO(`${displayMonth}-01`), 1);
@@ -293,42 +298,58 @@ export default function BudgetPage() {
                             {/* Allocated Column */}
                             <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-1.5">
-                                    <div className={`w-2 h-2 rounded-full ${displayAllocated > displayTarget ? 'bg-[#FF453A] shadow-[0_0_8px_rgba(255,69,58,0.5)]' : 'bg-[#30D158] shadow-[0_0_8px_rgba(48,209,88,0.5)]'} shrink-0`} />
+                                    <div className={`w-2 h-2 rounded-full ${displayAllocated > displayTarget ? 'bg-[#FF453A]' : 'bg-white/40'} shrink-0`} />
                                     <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Allocated</span>
                                 </div>
                                 <div className="flex items-baseline gap-1">
-                                    <span className={`font-semibold ${skin.textColor} text-[15px]`}>₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                                    <span className={`${skin.textTertiary} text-[10px] font-medium tracking-wide`}>/ ₱{displayTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                    <span className={`font-semibold ${displayAllocated > displayTarget ? 'text-[#FF453A]' : skin.textColor} text-[15px]`}>₱{displayAllocated.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
                                 </div>
                             </div>
 
                             {/* Divider */}
                             <div className={`w-[1px] h-7 border-l ${skin.border}`} />
 
-                            {/* Unallocated / Over Budget Column */}
+                            {/* Spent Column */}
                             <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-1.5">
-                                    {displayAllocated > displayTarget ? (
-                                        <>
-                                            <div className="w-2 h-2 rounded-full bg-[#FF453A] shadow-[0_0_8px_rgba(255,69,58,0.5)] shrink-0" />
-                                            <span className={`text-[#FF453A] text-[10px] uppercase tracking-widest font-bold`}>Over Budget</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="w-2 h-2 rounded-full border border-current opacity-40 shrink-0" style={{ color: skin.textSecondary.split('-')[1] || '#fff' }} />
-                                            <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Unallocated</span>
-                                        </>
-                                    )}
+                                    <div className={`w-2 h-2 rounded-full ${totalSpent > displayTarget ? 'bg-[#FF453A]' : 'bg-[#30D158]'} shrink-0 shadow-[0_0_8px_rgba(48,209,88,0.5)]`} />
+                                    <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Spent</span>
                                 </div>
-                                <span className={`font-semibold text-[15px] ${displayAllocated > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
-                                    ₱{displayAllocated > displayTarget 
-                                        ? (displayAllocated - displayTarget).toLocaleString(undefined, {maximumFractionDigits: 0}) 
-                                        : displayUnallocated.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                <span className={`font-semibold text-[15px] ${totalSpent > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
+                                    ₱{totalSpent.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                </span>
+                            </div>
+
+                            {/* Divider */}
+                            <div className={`w-[1px] h-7 border-l ${skin.border}`} />
+
+                            {/* Left Column */}
+                            <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-1.5">
+                                    <div className="w-2 h-2 rounded-full border border-current opacity-40 shrink-0" style={{ color: skin.textSecondary.split('-')[1] || '#fff' }} />
+                                    <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Left</span>
+                                </div>
+                                <span className={`font-semibold text-[15px] ${totalSpent > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
+                                    ₱{Math.max(0, displayTarget - totalSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}
                                 </span>
                             </div>
                         </div>
                     )}
-                    {/* Discretionary Spend Jar Allocation */}
+                    
+                    {/* Overall Progress Bar */}
+                    {(displayTarget > 0) && (
+                        <div className="w-full mt-2">
+                            <div className={`w-full h-1.5 rounded-full ${skin.progressBg} overflow-hidden flex`}>
+                                <div 
+                                    className={`h-full transition-all duration-1000 ease-out ${totalSpent > displayTarget ? 'bg-[#FF453A]' : 'bg-[#30D158]'}`}
+                                    style={{ width: `${Math.min((totalSpent / displayTarget) * 100, 100)}%` }}
+                                />
+                            </div>
+                            <div className="flex justify-between items-center mt-1.5 px-0.5">
+                                <span className={`${skin.textTertiary} text-[9px] font-medium tracking-wider uppercase`}>{((totalSpent / displayTarget) * 100).toFixed(0)}% Spent</span>
+                            </div>
+                        </div>
+                    )}
                     {displayUnallocated > 0 && config.jarAllowedPercentage !== undefined && (
                         <div 
                             onClick={(e) => {
@@ -339,8 +360,10 @@ export default function BudgetPage() {
                             }}
                             className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md ${skin.jarBg} transition-colors cursor-pointer mt-1 self-start`}
                         >
-                            <span className={`${skin.textSecondary} text-[10px] uppercase tracking-wider font-semibold`}>Spend Jar Allowance:</span>
-                            <span className={`${skin.textColor} font-medium text-xs`}>{config.jarAllowedPercentage}%</span>
+                            <span className={`${skin.textSecondary} text-[10px] uppercase tracking-wider font-semibold`}>Spend Jar:</span>
+                            <span className={`${skin.textColor} font-medium text-xs`}>
+                                {config.jarAllowedPercentage}% · ₱{(displayUnallocated * (config.jarAllowedPercentage / 100)).toLocaleString(undefined, {maximumFractionDigits: 0})} allowed
+                            </span>
                         </div>
                     )}
                 </div>
@@ -369,7 +392,19 @@ export default function BudgetPage() {
         <div className="grid grid-cols-2 gap-4 pb-6">
             {categories.map((cat) => {
                 const Icon = (Icons as any)[cat.icon] || Icons.HelpCircle;
-                const catTarget = getDisplayValue(cat.targetAmount, config.period);
+                const historicalTarget = (displayMonth && cat.targetHistory?.[displayMonth]) !== undefined ? cat.targetHistory![displayMonth] : cat.targetAmount;
+                const catTarget = getDisplayValue(historicalTarget, config.period);
+                
+                const catSpent = sumByCategory(monthEntries, cat.name);
+                
+                // Calculate committed bills for this category
+                const catBills = bills.filter(b => b.category === cat.name);
+                const catSubs = subscriptions.filter(s => s.category === cat.name);
+                const committed = catBills.reduce((sum, b) => sum + b.amount, 0) + 
+                                  catSubs.reduce((sum, s) => sum + s.amount, 0);
+
+                const catPercent = catTarget > 0 ? (catSpent / catTarget) * 100 : 0;
+                const catHealth = catPercent >= 90 ? '#FF453A' : catPercent >= 60 ? '#E8A33D' : '#30D158';
                 
                 return (
                     <div 
@@ -413,15 +448,44 @@ export default function BudgetPage() {
                                 <Icons.MoreHorizontal className="w-4 h-4" />
                             </button>
                         </div>
-                        <div className="relative z-10 flex flex-col">
+                        <div className="relative z-10 flex flex-col mt-auto">
                             <span className="text-white/80 font-medium text-[15px] mb-1.5 tracking-wide">{cat.name}</span>
                             {catTarget > 0 ? (
-                                <>
+                                <div className="flex flex-col">
                                     <span className="text-white font-semibold text-xl tracking-tight mb-0.5">₱{catTarget.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                                    <span className="text-white/40 text-[11px] font-medium tracking-wider">
-                                        ≈ R{(catTarget * exchangeRate).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                    </span>
-                                </>
+                                    
+                                    <div className="flex flex-col gap-1 mt-2">
+                                        <div className="flex justify-between items-center text-[10px]">
+                                            <span className="text-white/50 tracking-wide uppercase">Spent</span>
+                                            <span className="text-white font-medium">₱{catSpent.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                        </div>
+                                        
+                                        {committed > 0 && (
+                                            <div className="flex justify-between items-center text-[10px]">
+                                                <span className="text-white/40 tracking-wide uppercase">Bills</span>
+                                                <span className="text-white/70 font-medium">₱{committed.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                            </div>
+                                        )}
+                                        
+                                        <div className="flex justify-between items-center text-[10px]">
+                                            <span className="text-white/50 tracking-wide uppercase">Left</span>
+                                            <span className={`font-medium ${catSpent > catTarget ? 'text-[#FF453A]' : 'text-white'}`}>
+                                                ₱{Math.max(0, catTarget - catSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Progress Bar */}
+                                    <div className="w-full h-1 bg-white/[0.05] rounded-full mt-3 overflow-hidden">
+                                        <div 
+                                            className={`h-full rounded-full transition-all duration-1000`}
+                                            style={{ 
+                                                width: `${Math.min(catPercent, 100)}%`,
+                                                backgroundColor: catHealth
+                                            }}
+                                        />
+                                    </div>
+                                </div>
                             ) : (
                                 <span className="text-white/30 text-sm font-medium mt-0.5 tracking-wide">Set amount</span>
                             )}

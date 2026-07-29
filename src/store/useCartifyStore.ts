@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartifyItem } from '@/types/finance';
+import { useSpendStore } from '@/store/useSpendStore';
 
 export type CartifyMode = 'simple' | 'planned';
 
@@ -125,15 +126,28 @@ export const useCartifyStore = create<CartifyState>()(
                 }));
             },
 
-            endTrip: () => set({ 
-                isActive: false, 
-                isBuildingList: false,
-                budget: 0, 
-                mode: 'simple', 
-                items: [], 
-                activeCategory: null,
-                isReceiptView: false
-            }),
+            endTrip: () => {
+                const state = get();
+                // Filter only items that were actually put in the cart
+                const purchasedItems = state.items.filter(i => i.status === 'in-cart');
+                const totalAmount = purchasedItems.reduce((sum, item) => sum + item.amount, 0);
+
+                if (totalAmount > 0) {
+                    const spendStore = useSpendStore.getState();
+                    const tripId = `trip-${Date.now()}`;
+                    spendStore.addExpense(totalAmount, 'PHP', 'Groceries', 'Cartify trip', tripId);
+                }
+
+                set({ 
+                    isActive: false, 
+                    isBuildingList: false,
+                    budget: 0, 
+                    mode: 'simple', 
+                    items: [], 
+                    activeCategory: null,
+                    isReceiptView: false
+                });
+            },
 
             showReceipt: () => set({ isReceiptView: true }),
             hideReceipt: () => set({ isReceiptView: false }),
