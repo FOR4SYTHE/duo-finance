@@ -47,7 +47,7 @@ export function ChildCareOnboarding() {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-start min-h-[100dvh] w-full px-6 pt-12 pb-24 overflow-y-auto no-scrollbar bg-[#0A0A0A]">
+    <div className="relative flex flex-col items-center justify-start h-[100dvh] overflow-hidden w-full px-6 pt-12 pb-24 no-scrollbar bg-[#0A0A0A]">
       {/* Fixed Background Layer to prevent black overscroll revealing the body background */}
       <div className="fixed inset-0 bg-[#0A0A0A] -z-10 pointer-events-none" />
       
