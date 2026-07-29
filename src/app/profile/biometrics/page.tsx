@@ -1,18 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ChevronLeft, ShieldCheck, Fingerprint } from "lucide-react";
+import { useSettingsStore } from "@/store/useSettingsStore";
+import { triggerHaptic } from "@/lib/haptics";
 
 export default function BiometricsPage() {
   const router = useRouter();
-  const [requireFaceId, setRequireFaceId] = useState(true);
-  const [requirePin, setRequirePin] = useState(false);
-  const [lockTimeout, setLockTimeout] = useState("Immediately");
+  const { requireFaceId, setRequireFaceId, requirePin, setRequirePin, lockTimeout, setLockTimeout } = useSettingsStore();
 
   return (
-    <div className="w-full h-full min-h-screen bg-[#000000] text-white font-sans selection:bg-white/10 flex flex-col relative pb-4">
+    <div className="w-full h-[100dvh] overflow-hidden bg-[#000000] text-white font-sans selection:bg-white/10 flex flex-col relative pb-4">
       
       {/* Header */}
       <div className="sticky top-0 z-50 bg-black/60 backdrop-blur-xl border-b border-white/5 px-6 pt-14 pb-4 flex items-center gap-4">
@@ -46,7 +45,10 @@ export default function BiometricsPage() {
                 </div>
               </div>
               <button 
-                onClick={() => setRequireFaceId(!requireFaceId)}
+                onClick={() => {
+                  setRequireFaceId(!requireFaceId);
+                  triggerHaptic('light');
+                }}
                 className={`relative w-[50px] h-[30px] rounded-full transition-colors duration-300 ease-in-out ${requireFaceId ? 'bg-[#30D158]' : 'bg-white/10'}`}
               >
                 <div className={`absolute top-[2px] left-0 w-[26px] h-[26px] bg-white rounded-full shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${requireFaceId ? 'translate-x-[22px]' : 'translate-x-[2px]'}`} />
@@ -65,7 +67,10 @@ export default function BiometricsPage() {
                 </div>
               </div>
               <button 
-                onClick={() => setRequirePin(!requirePin)}
+                onClick={() => {
+                  setRequirePin(!requirePin);
+                  triggerHaptic('light');
+                }}
                 className={`relative w-[50px] h-[30px] rounded-full transition-colors duration-300 ease-in-out ${requirePin ? 'bg-[#30D158]' : 'bg-white/10'}`}
               >
                 <div className={`absolute top-[2px] left-0 w-[26px] h-[26px] bg-white rounded-full shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${requirePin ? 'translate-x-[22px]' : 'translate-x-[2px]'}`} />
@@ -84,7 +89,10 @@ export default function BiometricsPage() {
             {["Immediately", "After 1 minute", "After 5 minutes"].map((opt, idx, arr) => (
               <button 
                 key={opt}
-                onClick={() => setLockTimeout(opt)}
+                onClick={() => {
+                  setLockTimeout(opt as any);
+                  triggerHaptic('light');
+                }}
                 className={`w-full p-5 flex items-center justify-between hover:bg-white/[0.03] transition-colors active:bg-white/[0.05] ${idx !== arr.length - 1 ? 'border-b border-white/5' : ''}`}
               >
                 <span className="text-white/90 font-medium text-[16px] tracking-tight">{opt}</span>

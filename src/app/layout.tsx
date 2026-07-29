@@ -22,6 +22,8 @@ export const metadata: Metadata = {
   description: "Personal finance app for couple relocation",
 };
 
+import { AppLockScreen } from "@/components/security/AppLockScreen";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,6 +35,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${hankenGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-hanken">
+        <AppLockScreen />
         <main className="min-h-[100dvh] w-full bg-[#050505] flex flex-col font-hanken relative">
           
           {/* 

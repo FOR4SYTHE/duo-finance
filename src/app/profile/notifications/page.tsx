@@ -1,18 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { ChevronLeft, Bell, Wallet, UserSquare2, CalendarClock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ChevronLeft, Bell, Wallet, UserSquare2, CalendarClock } from "lucide-react";
+import { useSettingsStore } from "@/store/useSettingsStore";
+import { triggerHaptic } from "@/lib/haptics";
 
 export default function NotificationsPage() {
   const router = useRouter();
-  const [budgetAlerts, setBudgetAlerts] = useState(true);
-  const [partnerActivity, setPartnerActivity] = useState(true);
-  const [reminders, setReminders] = useState(true);
+  const { budgetAlerts, setBudgetAlerts, partnerActivity, setPartnerActivity, reminders, setReminders } = useSettingsStore();
 
   return (
-    <div className="w-full h-full min-h-screen bg-[#000000] text-white font-sans selection:bg-white/10 flex flex-col relative pb-4">
+    <div className="w-full h-[100dvh] overflow-hidden bg-[#000000] text-white font-sans selection:bg-white/10 flex flex-col relative pb-4">
       
       {/* Header */}
       <div className="sticky top-0 z-50 bg-black/60 backdrop-blur-xl border-b border-white/5 px-6 pt-14 pb-4 flex items-center gap-4">
@@ -46,7 +45,10 @@ export default function NotificationsPage() {
                 </div>
               </div>
               <button 
-                onClick={() => setBudgetAlerts(!budgetAlerts)}
+                onClick={() => {
+                  setBudgetAlerts(!budgetAlerts);
+                  triggerHaptic('light');
+                }}
                 className={`relative w-[50px] h-[30px] rounded-full transition-colors duration-300 ease-in-out ${budgetAlerts ? 'bg-[#30D158]' : 'bg-white/10'}`}
               >
                 <div className={`absolute top-[2px] left-0 w-[26px] h-[26px] bg-white rounded-full shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${budgetAlerts ? 'translate-x-[22px]' : 'translate-x-[2px]'}`} />
@@ -65,7 +67,10 @@ export default function NotificationsPage() {
                 </div>
               </div>
               <button 
-                onClick={() => setPartnerActivity(!partnerActivity)}
+                onClick={() => {
+                  setPartnerActivity(!partnerActivity);
+                  triggerHaptic('light');
+                }}
                 className={`relative w-[50px] h-[30px] rounded-full transition-colors duration-300 ease-in-out ${partnerActivity ? 'bg-[#30D158]' : 'bg-white/10'}`}
               >
                 <div className={`absolute top-[2px] left-0 w-[26px] h-[26px] bg-white rounded-full shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${partnerActivity ? 'translate-x-[22px]' : 'translate-x-[2px]'}`} />
@@ -84,7 +89,10 @@ export default function NotificationsPage() {
                 </div>
               </div>
               <button 
-                onClick={() => setReminders(!reminders)}
+                onClick={() => {
+                  setReminders(!reminders);
+                  triggerHaptic('light');
+                }}
                 className={`relative w-[50px] h-[30px] rounded-full transition-colors duration-300 ease-in-out ${reminders ? 'bg-[#30D158]' : 'bg-white/10'}`}
               >
                 <div className={`absolute top-[2px] left-0 w-[26px] h-[26px] bg-white rounded-full shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${reminders ? 'translate-x-[22px]' : 'translate-x-[2px]'}`} />
