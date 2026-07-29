@@ -11,10 +11,10 @@ export function ConjoiningAvatar({ onTap }: ConjoiningAvatarProps) {
   const { user, partner } = useAuthStore();
   const isShared = !!partner;
 
-  // Animation values for subtle floating
-  const duration = 4;
-  const bounceLeft = { x: [-1.5, 1.5, -1.5], y: [0, 0.5, 0] };
-  const bounceRight = { x: [1.5, -1.5, 1.5], y: [0, -0.5, 0] };
+  // Animation values for extremely subtle breathing/floating
+  const duration = 10;
+  const bounceLeft = { x: [-0.3, 0.3, -0.3], y: [0, 0.2, 0] };
+  const bounceRight = { x: [0.3, -0.3, 0.3], y: [0, -0.2, 0] };
   const transitionL: any = { duration, repeat: Infinity, ease: "easeInOut" };
   const transitionR: any = { duration, repeat: Infinity, ease: "easeInOut", delay: 0.1 };
 
