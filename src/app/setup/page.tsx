@@ -258,7 +258,7 @@ export default function SetupPage() {
                             >
                               {joinStep === "verifying" ? (
                                 <div className="flex items-center gap-3">
-                                  <ThinkingOrb state="working" size={24} />
+                                  <ThinkingOrb state="working" size={20} />
                                   <span className="text-[#30D158] font-bold tracking-wider">VERIFYING CODE...</span>
                                 </div>
                               ) : (
