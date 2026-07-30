@@ -42,9 +42,9 @@ export function ConjoiningAvatar({ onTap }: ConjoiningAvatarProps) {
               {user?.avatar ? (
                 <img src={user.avatar} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-[#1c1c1e] flex items-center justify-center text-white text-[16px] font-bold select-none">
+                <span className="text-white/60 font-medium text-lg">
                   {user?.name?.[0]?.toUpperCase() || "U"}
-                </div>
+                </span>
               )}
             </div>
 
@@ -55,9 +55,9 @@ export function ConjoiningAvatar({ onTap }: ConjoiningAvatarProps) {
               {partner?.avatar ? (
                 <img src={partner.avatar} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-[#1c2c24] flex items-center justify-center text-emerald-400 text-[11px] font-bold select-none">
+                <span className="text-[#30D158] font-bold text-xs">
                   {partner?.name?.[0]?.toUpperCase() || "P"}
-                </div>
+                </span>
               )}
             </div>
           </div>

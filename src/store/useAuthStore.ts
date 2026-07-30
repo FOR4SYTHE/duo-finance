@@ -21,6 +21,7 @@ type AuthState = {
   createHousehold: () => void;
   leaveHousehold: () => void;
   toggleMockPartner: () => void;
+  updateUser: (data: Partial<AuthUser>) => void;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -60,6 +61,10 @@ export const useAuthStore = create<AuthState>()(
         
       toggleMockPartner: () => set((state) => ({
         partner: state.partner ? null : { id: "partner-123", email: "jon@example.com", name: "Jon" }
+      })),
+      
+      updateUser: (data) => set((state) => ({
+        user: state.user ? { ...state.user, ...data } : null
       }))
     }),
     {

@@ -13,7 +13,7 @@ import { useDualCurrency } from "@/hooks/useDualCurrency";
 export default function ProfilePage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const { user, partner, householdId, logout, toggleMockPartner, joinHousehold } = useAuthStore();
+  const { user, partner, householdId, logout, toggleMockPartner, joinHousehold, updateUser } = useAuthStore();
   const { primaryCurrency, setPrimaryCurrency, exchangeRate } = useCurrencyStore();
   const { primarySymbol, secondarySymbol } = useDualCurrency();
   const [showSignOutPrompt, setShowSignOutPrompt] = useState(false);
@@ -47,7 +47,10 @@ export default function ProfilePage() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (user?.avatar) {
+      setProfileImage(user.avatar);
+    }
+  }, [user?.avatar]);
 
   const mockInviteCode = householdId ? householdId.split('-')[1]?.toUpperCase() || "8K9P2X" : "8K9P2X";
 
@@ -207,7 +210,10 @@ export default function ProfilePage() {
                   </div>
                   <div className="text-[9px] text-white/30 text-center -mt-1 mb-1">Drag image to reposition</div>
                   <button 
-                    onClick={() => setIsEditingAvatar(false)} 
+                    onClick={() => {
+                      setIsEditingAvatar(false);
+                      if (profileImage) updateUser({ avatar: profileImage });
+                    }} 
                     className="w-full py-2 bg-white text-black rounded-xl text-[13px] font-bold hover:bg-white/90 active:scale-95 transition-all"
                   >
                     Done
