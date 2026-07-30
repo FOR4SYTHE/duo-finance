@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageSquare, ScanLine, Settings, Plus, ArrowLeft } from 'lucide-react';
+import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { useRouter } from 'next/navigation';
 
@@ -11,8 +12,14 @@ interface SidebarDrawerProps {
 }
 
 export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
-    const { setActiveTab, clearChat } = useAIChatStore();
+    const { setActiveTab, clearChat, userName } = useAIChatStore();
     const router = useRouter();
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+    const toggleDropdown = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setOpenDropdownId(openDropdownId === id ? null : id);
+    };
 
     return (
         <AnimatePresence>
@@ -74,28 +81,97 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                         </div>
 
                         {/* Recents */}
-                        <div className="flex-1 overflow-y-auto px-4 py-2">
+                        <div className="flex-1 overflow-y-auto px-4 py-2" onClick={() => setOpenDropdownId(null)}>
                             <h3 className="text-[11px] font-bold text-white/40 uppercase tracking-widest mb-3 pl-2 mt-4">Recent Chats</h3>
                             <div className="flex flex-col gap-1">
-                                <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/[0.05] transition-colors text-left group">
-                                    <MessageSquare className="w-4 h-4 text-white/40 group-hover:text-white/70" />
-                                    <span className="text-[13px] font-medium text-white/70 group-hover:text-white/90 truncate">PHP vs ZAR Trends</span>
-                                </button>
-                                <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/[0.05] transition-colors text-left group">
-                                    <MessageSquare className="w-4 h-4 text-white/40 group-hover:text-white/70" />
-                                    <span className="text-[13px] font-medium text-white/70 group-hover:text-white/90 truncate">Budget Check-in</span>
-                                </button>
+                                {/* Active Highlighted Chat */}
+                                <div className="relative group flex items-center w-full px-4 py-2.5 rounded-xl bg-white/[0.08] text-left">
+                                    <MessageSquare className="w-4 h-4 text-white shrink-0 mr-3" />
+                                    <span className="text-[13px] font-semibold text-white truncate flex-1">PHP vs ZAR Trends</span>
+                                    <button 
+                                        onClick={(e) => toggleDropdown('chat1', e)}
+                                        className="w-6 h-6 rounded flex items-center justify-center hover:bg-white/10 shrink-0 opacity-100 transition-opacity"
+                                    >
+                                        <MoreVertical className="w-4 h-4 text-white/60" />
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {openDropdownId === 'chat1' && (
+                                            <motion.div 
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.95 }}
+                                                className="absolute right-0 top-10 w-48 bg-[#2C2C2E] border border-white/10 rounded-xl shadow-2xl py-1 z-[120] overflow-hidden"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <button className="w-full px-3 py-2 text-left text-[13px] text-white hover:bg-white/[0.08] flex items-center gap-2">
+                                                    <Share className="w-4 h-4 text-white/60" /> Share
+                                                </button>
+                                                <button className="w-full px-3 py-2 text-left text-[13px] text-white hover:bg-white/[0.08] flex items-center gap-2">
+                                                    <Pin className="w-4 h-4 text-white/60" /> Pin
+                                                </button>
+                                                <button className="w-full px-3 py-2 text-left text-[13px] text-white hover:bg-white/[0.08] flex items-center gap-2">
+                                                    <Edit2 className="w-4 h-4 text-white/60" /> Rename
+                                                </button>
+                                                <div className="h-[1px] bg-white/5 my-1" />
+                                                <button className="w-full px-3 py-2 text-left text-[13px] text-red-400 hover:bg-red-500/10 flex items-center gap-2">
+                                                    <Trash2 className="w-4 h-4 text-red-400" /> Delete
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                {/* Inactive Chat */}
+                                <div className="relative group flex items-center w-full px-4 py-2.5 rounded-xl hover:bg-white/[0.05] transition-colors text-left cursor-pointer">
+                                    <MessageSquare className="w-4 h-4 text-white/40 group-hover:text-white/70 shrink-0 mr-3" />
+                                    <span className="text-[13px] font-medium text-white/70 group-hover:text-white/90 truncate flex-1">Budget Check-in</span>
+                                    <button 
+                                        onClick={(e) => toggleDropdown('chat2', e)}
+                                        className="w-6 h-6 rounded flex items-center justify-center hover:bg-white/10 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <MoreVertical className="w-4 h-4 text-white/60" />
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {openDropdownId === 'chat2' && (
+                                            <motion.div 
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.95 }}
+                                                className="absolute right-0 top-10 w-48 bg-[#2C2C2E] border border-white/10 rounded-xl shadow-2xl py-1 z-[120] overflow-hidden"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <button className="w-full px-3 py-2 text-left text-[13px] text-white hover:bg-white/[0.08] flex items-center gap-2">
+                                                    <Share className="w-4 h-4 text-white/60" /> Share
+                                                </button>
+                                                <button className="w-full px-3 py-2 text-left text-[13px] text-white hover:bg-white/[0.08] flex items-center gap-2">
+                                                    <Pin className="w-4 h-4 text-white/60" /> Pin
+                                                </button>
+                                                <button className="w-full px-3 py-2 text-left text-[13px] text-white hover:bg-white/[0.08] flex items-center gap-2">
+                                                    <Edit2 className="w-4 h-4 text-white/60" /> Rename
+                                                </button>
+                                                <div className="h-[1px] bg-white/5 my-1" />
+                                                <button className="w-full px-3 py-2 text-left text-[13px] text-red-400 hover:bg-red-500/10 flex items-center gap-2">
+                                                    <Trash2 className="w-4 h-4 text-red-400" /> Delete
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Footer (Exit App) */}
-                        <div className="p-4 border-t border-white/5 shrink-0">
-                            <button 
-                                onClick={() => router.back()}
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 transition-colors text-left group"
-                            >
-                                <ArrowLeft className="w-5 h-5 text-red-400 group-hover:text-red-300" />
-                                <span className="text-[14px] font-medium text-red-400 group-hover:text-red-300">Exit AI Corner</span>
+                        {/* Footer (User Account) */}
+                        <div className="p-4 border-t border-white/5 shrink-0 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-emerald-400 flex items-center justify-center">
+                                    <span className="text-[12px] font-bold text-white">{userName.charAt(0)}</span>
+                                </div>
+                                <span className="text-[14px] font-medium text-white/90">{userName}</span>
+                            </div>
+                            <button className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors">
+                                <Settings className="w-4 h-4 text-white/60" />
                             </button>
                         </div>
                     </motion.div>

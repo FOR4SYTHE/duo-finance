@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Menu, MoreVertical, Plus, ScanLine, Share, Pin, Edit2, Trash2, Download } from 'lucide-react';
+import { Menu, MoreVertical, Plus, ScanLine, Share, Pin, Edit2, Trash2, Download, ChevronDown } from 'lucide-react';
 import { AIChatView } from '@/components/ai/AIChatView';
 import { AIScannerView } from '@/components/ai/AIScannerView';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { PillTabRow } from '@/components/ui/PillTabRow';
 import { SidebarDrawer } from '@/components/ai/SidebarDrawer';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function AIAppPage() {
     const { activeTab, setActiveTab, clearChat, isScannerHasResults, isScannerExpanded } = useAIChatStore();
+    const router = useRouter();
     const [mounted, setMounted] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -52,9 +54,9 @@ export default function AIAppPage() {
             />
 
             {/* Header Strip - Gemini Style */}
-            <div className="flex items-center justify-between p-4 bg-transparent shrink-0 z-50 absolute top-0 left-0 right-0 pointer-events-none">
+            <div className="flex items-center justify-between px-4 py-3 bg-[#050505] shrink-0 z-50">
                 {/* Left Side: Hamburger & Title */}
-                <div className="flex items-center gap-2 pointer-events-auto">
+                <div className="flex items-center gap-2">
                     {/* Hide Hamburger if we are showing the toggle switch instead */}
                     <AnimatePresence mode="popLayout">
                         {!showScannerToggle && (
@@ -63,16 +65,29 @@ export default function AIAppPage() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.8 }}
                                 onClick={() => setIsSidebarOpen(true)}
-                                className="w-10 h-10 rounded-full bg-black/40 border border-white/5 hover:bg-black/60 flex items-center justify-center transition-colors"
+                                className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors"
                             >
                                 <Menu className="w-5 h-5 text-white/90" />
                             </motion.button>
                         )}
                     </AnimatePresence>
+                    
+                    <button 
+                        onClick={() => router.back()}
+                        className="flex items-center gap-2 group"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-white/[0.05] group-hover:bg-white/[0.1] flex items-center justify-center transition-colors">
+                            <ChevronDown className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex flex-col items-start">
+                            <h1 className="text-[14px] font-semibold text-white leading-tight">DUO AI</h1>
+                            <p className="text-[10px] text-white/50 leading-tight">Household Assistant</p>
+                        </div>
+                    </button>
                 </div>
                 
                 {/* Right Side: Actions */}
-                <div className="flex items-center gap-2 pointer-events-auto relative">
+                <div className="flex items-center gap-1 relative">
                     {/* New Chat / New Scan Button */}
                     <AnimatePresence mode="popLayout">
                         {!showScannerToggle && (
@@ -83,14 +98,12 @@ export default function AIAppPage() {
                                 onClick={() => {
                                     if (activeTab === 'chat') {
                                         clearChat();
-                                    } else {
-                                        // Reset scan action (already handled internally by scanner usually, but this is the global button)
                                     }
                                 }}
-                                className="w-10 h-10 rounded-full bg-black/40 border border-white/5 hover:bg-black/60 flex items-center justify-center transition-colors text-white"
+                                className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors text-white"
                                 title={activeTab === 'chat' ? "New Chat" : "New Scan"}
                             >
-                                {activeTab === 'chat' ? <Plus className="w-5 h-5" /> : <ScanLine className="w-4 h-4" />}
+                                {activeTab === 'chat' ? <Plus className="w-5 h-5" /> : <ScanLine className="w-5 h-5" />}
                             </motion.button>
                         )}
                     </AnimatePresence>
@@ -104,7 +117,7 @@ export default function AIAppPage() {
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.8 }}
                                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                    className="w-10 h-10 rounded-full bg-black/40 border border-white/5 hover:bg-black/60 flex items-center justify-center transition-colors"
+                                    className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors"
                                 >
                                     <MoreVertical className="w-5 h-5 text-white/90" />
                                 </motion.button>
@@ -112,7 +125,7 @@ export default function AIAppPage() {
                                 {isMenuOpen && (
                                     <>
                                         <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)} />
-                                        <div className="absolute right-0 top-12 w-56 bg-[#1C1C1E] border border-white/10 rounded-2xl shadow-2xl py-2 z-50 overflow-hidden">
+                                        <div className="absolute right-0 top-12 w-56 bg-[#2C2C2E] border border-white/10 rounded-2xl shadow-2xl py-2 z-50 overflow-hidden">
                                             <button className="w-full px-4 py-2.5 text-left text-[14px] text-white hover:bg-white/[0.08] flex items-center gap-3">
                                                 <Share className="w-4 h-4 text-white/60" /> Share conversation
                                             </button>

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowUp, Loader2, Copy, Share2, Check } from 'lucide-react';
+import { Send, ArrowUp, Loader2, Copy, Share2, Check, Plus } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { buildHouseholdContext } from '@/lib/buildHouseholdContext';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
@@ -140,66 +140,70 @@ export function AIChatView() {
             <div 
                 ref={scrollRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto p-4 space-y-6 pb-32 no-scrollbar"
+                className="flex-1 overflow-y-auto p-4 pb-32 no-scrollbar flex flex-col items-center"
             >
-                {messages.length > 0 && (
-                    <AnimatePresence initial={false}>
-                        {messages.map((msg) => (
-                            <motion.div
-                                key={msg.id}
-                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-                            >
-                                <div className={`flex items-end gap-2 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                                    {msg.role === 'assistant' && (
-                                        <div className="w-6 h-6 shrink-0 rounded-full bg-[#1C1C1E] flex items-center justify-center mb-1">
-                                            {msg.status === 'streaming' ? (
-                                                <DuoAIIcon className="w-3.5 h-3.5 text-amber-300" forceState="star-idle" />
-                                            ) : (
-                                                <DuoAIIcon className="w-3.5 h-3.5 text-white/60" forceState="star-idle" />
-                                            )}
-                                        </div>
-                                    )}
-                                    <div className="flex flex-col gap-1">
+                <div className="w-full max-w-3xl flex flex-col gap-6">
+                    {messages.length > 0 && (
+                        <AnimatePresence initial={false}>
+                            {messages.map((msg) => (
+                                <motion.div
+                                    key={msg.id}
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    className={`flex flex-col w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                                >
+                                    <div className={`flex flex-col gap-1 w-full`}>
                                         <div 
-                                            className={`px-4 py-3 rounded-[20px] text-[15px] leading-relaxed shadow-sm ${
+                                            className={`text-[15px] leading-[1.7] ${
                                                 msg.role === 'user' 
-                                                    ? 'bg-white text-black rounded-br-md whitespace-pre-wrap' 
-                                                    : 'bg-[#1C1C1E] text-white/90 rounded-bl-md border border-white/[0.05] prose prose-invert prose-p:leading-relaxed prose-pre:bg-black/50 max-w-none'
-                                            } ${msg.status === 'error' ? 'border-red-500/30 text-red-400' : ''}`}
+                                                    ? 'px-5 py-3.5 bg-[#2C2C2E] text-white rounded-[24px] rounded-br-[6px] self-end max-w-[85%] whitespace-pre-wrap' 
+                                                    : 'text-white/90 w-full self-start [&>p]:mb-5 [&>ul]:mb-5 [&>ul]:list-disc [&>ul]:pl-5 [&>li]:mb-2 [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-3 [&>h2]:text-lg [&>h2]:font-bold [&>h2]:mb-3 [&>h3]:text-base [&>h3]:font-bold [&>h3]:mb-2 [&>strong]:font-semibold [&>strong]:text-white last:[&>*]:mb-0'
+                                            } ${msg.status === 'error' ? 'text-red-400' : ''}`}
                                         >
                                             {msg.role === 'assistant' ? (
-                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                                    {msg.content}
-                                                </ReactMarkdown>
+                                                msg.status === 'streaming' && !msg.content ? (
+                                                    <div className="py-2">
+                                                        <DuoAIIcon className="w-6 h-6 animate-spin text-white/70" forceState="star-idle" />
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <ReactMarkdown 
+                                                            remarkPlugins={[remarkGfm]}
+                                                            components={{
+                                                                hr: () => <div className="h-6" />
+                                                            }}
+                                                        >
+                                                            {msg.content}
+                                                        </ReactMarkdown>
+                                                        {msg.status === 'streaming' && (
+                                                            <span className="inline-block w-1.5 h-4 ml-1 bg-white/40 animate-pulse align-middle" />
+                                                        )}
+                                                    </>
+                                                )
                                             ) : (
                                                 msg.content
-                                            )}
-                                            {msg.status === 'streaming' && (
-                                                <span className="inline-block w-1.5 h-4 ml-1 bg-white/40 animate-pulse align-middle" />
                                             )}
                                         </div>
 
                                         {msg.role === 'assistant' && msg.status !== 'streaming' && (
-                                            <div className="flex items-center gap-4 px-2 mt-1">
+                                            <div className="flex items-center gap-4 mt-1">
                                                 <button 
                                                     onClick={() => handleCopy(msg.id, msg.content)}
                                                     className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors"
                                                 >
-                                                    {copiedId === msg.id ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                                    {copiedId === msg.id ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                                                 </button>
                                                 <button className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors">
-                                                    <Share2 className="w-3.5 h-3.5" />
+                                                    <Share2 className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         )}
                                     </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                )}
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    )}
+                </div>
             </div>
 
             {/* Dynamic Premium Input Area */}
@@ -243,21 +247,7 @@ export function AIChatView() {
                 </AnimatePresence>
 
                 <AnimatePresence mode="wait">
-                    {isStreaming ? (
-                        <motion.div 
-                            key="loading"
-                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            transition={{ duration: 0.2 }}
-                            className="flex justify-center items-center py-4"
-                        >
-                            <div className="bg-[#1C1C1E] border border-white/[0.08] px-6 py-3 rounded-full flex items-center gap-3 shadow-[0_8px_30px_rgba(0,0,0,0.8)]">
-                                <DuoAIIcon className="w-5 h-5 animate-spin" forceState="star-idle" />
-                                <span className="text-[13px] font-medium text-white/90">Thinking...</span>
-                            </div>
-                        </motion.div>
-                    ) : (
+                    {!isStreaming && (
                         <motion.div 
                             key="input"
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -274,10 +264,7 @@ export function AIChatView() {
                                 className="w-12 h-12 flex items-center justify-center shrink-0 text-white/40 hover:text-white transition-colors relative z-10"
                                 onClick={() => {}}
                             >
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                </svg>
+                                <Plus className="w-6 h-6" />
                             </button>
                             
                             <input
