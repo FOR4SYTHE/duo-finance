@@ -9,9 +9,10 @@ import { PillTabRow } from '@/components/ui/PillTabRow';
 import { SidebarDrawer } from '@/components/ai/SidebarDrawer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
 
 export default function AIAppPage() {
-    const { activeTab, setActiveTab, clearChat, isScannerHasResults, isScannerExpanded } = useAIChatStore();
+    const { activeTab, setActiveTab, clearChat, isScannerHasResults, isScannerExpanded, messages } = useAIChatStore();
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -87,66 +88,76 @@ export default function AIAppPage() {
                 </div>
                 
                 {/* Right Side: Actions */}
-                <div className="flex items-center gap-1 relative">
-                    {/* New Chat / New Scan Button */}
+                <div className="flex items-center gap-1 relative h-10">
                     <AnimatePresence mode="popLayout">
                         {!showScannerToggle && (
-                            <motion.button 
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                onClick={() => {
-                                    if (activeTab === 'chat') {
-                                        clearChat();
-                                    }
-                                }}
-                                className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors text-white"
-                                title={activeTab === 'chat' ? "New Chat" : "New Scan"}
-                            >
-                                {activeTab === 'chat' ? <Plus className="w-5 h-5" /> : <ScanLine className="w-5 h-5" />}
-                            </motion.button>
-                        )}
-                    </AnimatePresence>
-
-                    {/* 3-Dots Menu */}
-                    <AnimatePresence mode="popLayout">
-                        {!showScannerToggle && (
-                            <div className="relative">
-                                <motion.button 
+                            messages.length === 0 ? (
+                                <motion.div
+                                    key="logo"
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.8 }}
-                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                    className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors"
+                                    className="w-10 h-10 flex items-center justify-center"
                                 >
-                                    <MoreVertical className="w-5 h-5 text-white/90" />
-                                </motion.button>
-                                
-                                {isMenuOpen && (
-                                    <>
-                                        <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)} />
-                                        <div className="absolute right-0 top-12 w-56 bg-[#2C2C2E] border border-white/10 rounded-2xl shadow-2xl py-2 z-50 overflow-hidden">
-                                            <button className="w-full px-4 py-2.5 text-left text-[14px] text-white hover:bg-white/[0.08] flex items-center gap-3">
-                                                <Share className="w-4 h-4 text-white/60" /> Share conversation
-                                            </button>
-                                            <button className="w-full px-4 py-2.5 text-left text-[14px] text-white hover:bg-white/[0.08] flex items-center gap-3">
-                                                <Pin className="w-4 h-4 text-white/60" /> Pin chat
-                                            </button>
-                                            <button className="w-full px-4 py-2.5 text-left text-[14px] text-white hover:bg-white/[0.08] flex items-center gap-3">
-                                                <Edit2 className="w-4 h-4 text-white/60" /> Rename chat
-                                            </button>
-                                            <div className="h-[1px] bg-white/5 my-1" />
-                                            <button className="w-full px-4 py-2.5 text-left text-[14px] text-white hover:bg-white/[0.08] flex items-center gap-3">
-                                                <Download className="w-4 h-4 text-white/60" /> Download as PDF
-                                            </button>
-                                            <div className="h-[1px] bg-white/5 my-1" />
-                                            <button className="w-full px-4 py-2.5 text-left text-[14px] text-red-400 hover:bg-red-500/10 flex items-center gap-3">
-                                                <Trash2 className="w-4 h-4 text-red-400" /> Delete chat
-                                            </button>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                                    <DuoAIIcon className="w-5 h-5 text-white/30" forceState="star-idle" />
+                                </motion.div>
+                            ) : (
+                                <motion.div 
+                                    key="actions"
+                                    className="flex items-center gap-1"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                >
+                                    {/* New Chat / New Scan Button */}
+                                    <button 
+                                        onClick={() => {
+                                            if (activeTab === 'chat') {
+                                                clearChat();
+                                            }
+                                        }}
+                                        className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors text-white"
+                                        title={activeTab === 'chat' ? "New Chat" : "New Scan"}
+                                    >
+                                        {activeTab === 'chat' ? <Plus className="w-5 h-5" /> : <ScanLine className="w-5 h-5" />}
+                                    </button>
+
+                                    {/* 3-Dots Menu */}
+                                    <div className="relative">
+                                        <button 
+                                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                            className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors"
+                                        >
+                                            <MoreVertical className="w-5 h-5 text-white/90" />
+                                        </button>
+                                        
+                                        {isMenuOpen && (
+                                            <>
+                                                <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)} />
+                                                <div className="absolute right-0 top-12 w-56 bg-[#2C2C2E] border border-white/10 rounded-2xl shadow-2xl py-2 z-50 overflow-hidden">
+                                                    <button className="w-full px-4 py-2.5 text-left text-[14px] text-white hover:bg-white/[0.08] flex items-center gap-3">
+                                                        <Share className="w-4 h-4 text-white/60" /> Share conversation
+                                                    </button>
+                                                    <button className="w-full px-4 py-2.5 text-left text-[14px] text-white hover:bg-white/[0.08] flex items-center gap-3">
+                                                        <Pin className="w-4 h-4 text-white/60" /> Pin chat
+                                                    </button>
+                                                    <button className="w-full px-4 py-2.5 text-left text-[14px] text-white hover:bg-white/[0.08] flex items-center gap-3">
+                                                        <Edit2 className="w-4 h-4 text-white/60" /> Rename chat
+                                                    </button>
+                                                    <div className="h-[1px] bg-white/5 my-1" />
+                                                    <button className="w-full px-4 py-2.5 text-left text-[14px] text-white hover:bg-white/[0.08] flex items-center gap-3">
+                                                        <Download className="w-4 h-4 text-white/60" /> Download as PDF
+                                                    </button>
+                                                    <div className="h-[1px] bg-white/5 my-1" />
+                                                    <button className="w-full px-4 py-2.5 text-left text-[14px] text-red-400 hover:bg-red-500/10 flex items-center gap-3">
+                                                        <Trash2 className="w-4 h-4 text-red-400" /> Delete chat
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )
                         )}
                     </AnimatePresence>
                 </div>

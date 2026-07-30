@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { useRouter } from 'next/navigation';
+import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
 
 interface SidebarDrawerProps {
     isOpen: boolean;
@@ -47,10 +48,11 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                         <div className="h-16 flex items-center px-4 border-b border-white/5 shrink-0">
                             <button 
                                 onClick={onClose}
-                                className="w-10 h-10 rounded-full hover:bg-white/[0.08] flex items-center justify-center transition-colors mr-2"
+                                className="w-10 h-10 rounded-full hover:bg-white/[0.08] flex items-center justify-center transition-colors mr-1"
                             >
                                 <X className="w-5 h-5 text-white/80" />
                             </button>
+                            <DuoAIIcon className="w-5 h-5 text-white mr-2" forceState="star-idle" />
                             <span className="text-[15px] font-semibold text-white tracking-wide">DUO AI</span>
                         </div>
 
