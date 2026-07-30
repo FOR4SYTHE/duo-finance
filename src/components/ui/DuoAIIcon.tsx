@@ -18,6 +18,10 @@ const spinUpVariants: Variants = {
     rotate: 180,
     scale: 0.9,
     transition: { type: "spring", stiffness: 200, damping: 20 }
+  },
+  "star-idle": {
+    rotate: 0,
+    transition: { type: "spring", stiffness: 150, damping: 15 }
   }
 };
 
@@ -45,6 +49,10 @@ const ambientVariants: Variants = {
         duration: 24
       }
     }
+  },
+  "star-idle": {
+    rotate: 0,
+    transition: { type: "spring", stiffness: 100, damping: 20 }
   }
 };
 
@@ -60,11 +68,22 @@ const pathVariants: Variants = {
   pressed: {
     d: starPath,
     transition: { type: "spring", stiffness: 150, damping: 15 }
+  },
+  "star-idle": {
+    d: starPath,
+    transition: { type: "spring", stiffness: 150, damping: 15 }
   }
 };
 
-export function DuoAIIcon({ className }: { className?: string }) {
+import { useId } from "react";
+
+// (Keep existing code above) ...
+
+export function DuoAIIcon({ className, forceState }: { className?: string, forceState?: "idle" | "hover" | "pressed" | "star-idle" }) {
   const angles = [0, 60, 120, 180, 240, 300];
+  const uniqueId = useId();
+  const gradientId = `chromatic-metal-${uniqueId}`;
+  const maskId = `metal-mask-${uniqueId}`;
 
   return (
     <motion.svg
@@ -73,12 +92,13 @@ export function DuoAIIcon({ className }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       initial="idle"
-      whileHover="hover"
-      whileTap="pressed"
+      animate={forceState || "idle"}
+      whileHover={!forceState ? "hover" : undefined}
+      whileTap={!forceState ? "pressed" : undefined}
       style={{ overflow: "visible" }}
     >
       <defs>
-        <linearGradient id="chromatic-metal" x1="-10" y1="-10" x2="34" y2="34" gradientUnits="userSpaceOnUse">
+        <linearGradient id={gradientId} x1="-10" y1="-10" x2="34" y2="34" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#FFFFFF" />
           <stop offset="15%" stopColor="#7DD3FC" />
           <stop offset="30%" stopColor="#F472B6" />
@@ -88,7 +108,7 @@ export function DuoAIIcon({ className }: { className?: string }) {
           <stop offset="100%" stopColor="#FFFFFF" />
         </linearGradient>
 
-        <mask id="metal-mask">
+        <mask id={maskId}>
           <g transform="translate(12, 12) scale(1.6)">
             <motion.g variants={spinUpVariants}>
               <motion.g variants={ambientVariants}>
@@ -112,8 +132,8 @@ export function DuoAIIcon({ className }: { className?: string }) {
         y="-12"
         width="48"
         height="48"
-        fill="url(#chromatic-metal)"
-        mask="url(#metal-mask)"
+        fill={`url(#${gradientId})`}
+        mask={`url(#${maskId})`}
       />
     </motion.svg>
   );

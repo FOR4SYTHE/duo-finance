@@ -132,7 +132,12 @@ export function AIChatView() {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex flex-col items-center justify-center h-full text-center max-w-[280px] mx-auto mt-20"
                     >
-                        <DuoAIIcon className="w-16 h-16 text-white/20 mb-6" />
+                        <div className="relative mb-6">
+                            <DuoAIIcon className="w-16 h-16 text-white/20" forceState="star-idle" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-[11px] font-bold tracking-[0.2em] text-white/50 pl-[0.3em] mt-[1px]">DUO</span>
+                            </div>
+                        </div>
                         <h3 className="text-xl font-semibold text-white mb-2">Hi! I'm Duo AI.</h3>
                         <p className="text-sm text-white/60 mb-8 leading-relaxed">
                             Your household finance assistant. I can help with budgeting, spending advice, and local cost-of-living insights.
