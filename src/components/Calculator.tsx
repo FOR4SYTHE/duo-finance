@@ -8,20 +8,18 @@ import { simplePageVariants } from "@/utils/animations";
 import { ArrowUpDown, Delete, ChevronRight, History } from "lucide-react";
 
 export function Calculator() {
-    const { 
-        displayValue, 
-        exchangeRate, 
-        appendInput, 
-        clearInput, 
-        deleteLast, 
-        executeCalculation,
-        primaryCurrency,
-        toggleCurrency,
-        isLoadingRate,
-        lastUpdated,
-        history,
-        clearHistory
-    } = useCurrencyStore();
+    const displayValue = useCurrencyStore((state) => state.displayValue);
+    const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
+    const appendInput = useCurrencyStore((state) => state.appendInput);
+    const clearInput = useCurrencyStore((state) => state.clearInput);
+    const deleteLast = useCurrencyStore((state) => state.deleteLast);
+    const executeCalculation = useCurrencyStore((state) => state.executeCalculation);
+    const primaryCurrency = useCurrencyStore((state) => state.primaryCurrency);
+    const toggleCurrency = useCurrencyStore((state) => state.toggleCurrency);
+    const isLoadingRate = useCurrencyStore((state) => state.isLoadingRate);
+    const history = useCurrencyStore((state) => state.history);
+    const clearHistory = useCurrencyStore((state) => state.clearHistory);
+    
     const { primarySymbol, secondarySymbol, getSecondaryValue } = useDualCurrency();
     const [mounted, setMounted] = React.useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
@@ -104,7 +102,7 @@ export function Calculator() {
                             {Array.from(displayValue || "0").map((char, index) => (
                                 <motion.span
                                     key={`${index}-${char}`}
-                                    initial={{ y: 15, opacity: 0, scale: 0.9 }}
+                                    initial={mounted ? { y: 15, opacity: 0, scale: 0.9 } : false}
                                     animate={{ y: 0, opacity: 1, scale: 1 }}
                                     transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.5 }}
                                     className="inline-block"
@@ -137,7 +135,7 @@ export function Calculator() {
                         <span className="text-xl text-white/30 font-light">
                             {secondarySymbol}
                         </span>
-                        <span className="text-[clamp(2.25rem,6vh,3rem)] leading-none text-white font-light tracking-tight flex items-center min-h-[40px] sm:min-h-[56px]">
+                        <span className="text-[clamp(2.25rem,6vh,3rem)] leading-none text-white font-light tracking-tight flex items-center min-h-[3rem] justify-center">
                             {Number.isNaN(convertedAmount) ? (
                                 <div className="relative w-8 h-8 opacity-60 ml-2">
                                     {Array.from({ length: 8 }).map((_, i) => (
@@ -163,7 +161,7 @@ export function Calculator() {
                                 Array.from(convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})).map((char, index) => (
                                     <motion.span
                                         key={`${index}-${char}`}
-                                        initial={{ y: 10, opacity: 0, scale: 0.95 }}
+                                        initial={mounted ? { y: 10, opacity: 0, scale: 0.95 } : false}
                                         animate={{ y: 0, opacity: 1, scale: 1 }}
                                         transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.5 }}
                                         className="inline-block"
