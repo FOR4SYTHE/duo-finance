@@ -154,8 +154,10 @@ function GoalBar({
 }
 
 export function YearlySummary({ year, onClose }: YearlySummaryProps) {
-  const { config, categories, goals } = useBudgetStore();
-  const { entries: spendEntries } = useSpendStore();
+  const config = useBudgetStore((state) => state.config);
+  const categories = useBudgetStore((state) => state.categories);
+  const goals = useBudgetStore((state) => state.goals);
+  const spendEntries = useSpendStore((state) => state.entries);
   const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
   // Filter entries for this entire year

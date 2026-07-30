@@ -39,8 +39,13 @@ export function MonthlyReportCard() {
   const dragStartPosY = useRef<number>(50);
   const [localPositionY, setLocalPositionY] = useState<number | null>(null);
 
-  const { config, categories, setCustomPhoto, removeCustomPhoto, setCustomPhotoPosition } = useBudgetStore();
-  const { entries } = useSpendStore();
+  const config = useBudgetStore((state) => state.config);
+  const categories = useBudgetStore((state) => state.categories);
+  const setCustomPhoto = useBudgetStore((state) => state.setCustomPhoto);
+  const removeCustomPhoto = useBudgetStore((state) => state.removeCustomPhoto);
+  const setCustomPhotoPosition = useBudgetStore((state) => state.setCustomPhotoPosition);
+  
+  const entries = useSpendStore((state) => state.entries);
   const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
   const now = new Date();

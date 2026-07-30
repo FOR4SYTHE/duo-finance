@@ -77,12 +77,9 @@ export default function SetupPage() {
           animate={{ 
             opacity: 1, 
             y: 0,
-            backgroundPosition: ["0% 50%", "200% 50%"] 
           }}
           transition={{ 
-            opacity: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
-            y: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
-            backgroundPosition: { duration: 5, repeat: Infinity, ease: "linear" } 
+            opacity: { duration: 0.8 },
           }}
           className="text-[40px] font-extrabold uppercase tracking-[0.2em] relative mb-2"
           style={{
@@ -143,7 +140,7 @@ export default function SetupPage() {
                     <button
                       onClick={handleCreate}
                       disabled={isLoading}
-                      className="w-full bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[28px] p-5 flex items-center gap-5 hover:bg-white/[0.06] transition-all group shadow-[0_24px_48px_rgba(0,0,0,0.5)] text-left active:scale-[0.98]"
+                      className="w-full bg-[#1c1c1e]/90 border-[0.5px] border-white/10 rounded-[28px] p-5 flex items-center gap-5 hover:bg-[#2c2c2e] transition-all group shadow-[0_24px_48px_rgba(0,0,0,0.5)] text-left active:scale-[0.98]"
                     >
                       <div className="w-12 h-12 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center flex-shrink-0 shadow-inner">
                         {isLoading ? (
@@ -182,7 +179,7 @@ export default function SetupPage() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 15 }}
                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-full bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[28px] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center min-h-[220px]"
+                    className="w-full bg-[#1c1c1e]/90 border-[0.5px] border-white/10 rounded-[28px] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center min-h-[220px]"
                   >
                     <AnimatePresence mode="popLayout">
                       {joinStep === "matched" ? (
@@ -336,31 +333,15 @@ export default function SetupPage() {
                  <div className="absolute inset-0 flex items-center justify-center" style={{ filter: 'url(#gooey-effect-setup)' }}>
                    <motion.div 
                      className="absolute w-[96px] h-[96px] rounded-full bg-[#068562]"
-                     initial={{ x: -120, y: 0 }}
-                     animate={{ x: -60, y: [0, -8, 0] }}
-                     transition={{
-                       x: { duration: 1.2, type: "spring", bounce: 0.4 },
-                       y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
-                     }}
+                     initial={{ x: -60 }}
                    />
                    <motion.div 
                      className="absolute w-[96px] h-[96px] rounded-full bg-[#068562]"
-                     initial={{ x: 120, y: 0 }}
-                     animate={{ x: 60, y: [0, 8, 0] }}
-                     transition={{
-                       x: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
-                       y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.3 }
-                     }}
+                     initial={{ x: 60 }}
                    />
                    <motion.div 
                      className="absolute h-[50px] bg-[#013F4A]"
-                     initial={{ width: 0, opacity: 0, y: 0 }}
-                     animate={{ width: 120, opacity: 1, y: [0, -4, 4, 0] }}
-                     transition={{
-                       width: { duration: 1.0, delay: 0.2, type: "spring" },
-                       opacity: { duration: 1.0, delay: 0.2 },
-                       y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
-                     }}
+                     initial={{ width: 120, opacity: 1 }}
                    />
                  </div>
 
@@ -369,11 +350,10 @@ export default function SetupPage() {
                    <motion.div 
                      className="absolute w-[86px] h-[86px] rounded-full overflow-hidden border-2 border-[#111] shadow-[0_10px_30px_rgba(0,0,0,0.5)] bg-[#1c1c1e] flex items-center justify-center"
                      initial={{ x: -120, scale: 0.8, y: 0 }}
-                     animate={{ x: -60, scale: 1, y: [0, -8, 0] }}
+                     animate={{ x: -60, scale: 1, y: 0 }}
                      transition={{
-                       x: { duration: 1.2, type: "spring", bounce: 0.4 },
-                       scale: { duration: 1.2, type: "spring", bounce: 0.4 },
-                       y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
+                       opacity: { duration: 0.8, delay: 1.2 },
+                       scale: { type: "spring", stiffness: 300, damping: 20, delay: 1.2 },
                      }}
                    >
                      {user?.avatar ? (
@@ -385,11 +365,10 @@ export default function SetupPage() {
                    <motion.div 
                      className="absolute w-[86px] h-[86px] rounded-full overflow-hidden border-2 border-[#111] shadow-[0_10px_30px_rgba(0,0,0,0.5)] bg-[#1c2c24] flex items-center justify-center"
                      initial={{ x: 120, scale: 0.8, y: 0 }}
-                     animate={{ x: 60, scale: 1, y: [0, 8, 0] }}
+                     animate={{ x: 60, scale: 1, y: 0 }}
                      transition={{
-                       x: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
-                       scale: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
-                       y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.3 }
+                       opacity: { duration: 0.8, delay: 1.3 },
+                       scale: { type: "spring", stiffness: 300, damping: 20, delay: 1.3 },
                      }}
                    >
                      {partner?.avatar ? (

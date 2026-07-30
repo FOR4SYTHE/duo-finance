@@ -384,7 +384,7 @@ export function TripSetup() {
                                             WebkitMaskImage: 'radial-gradient(circle at center, black 40%, transparent 65%)',
                                             maskImage: 'radial-gradient(circle at center, black 40%, transparent 65%)'
                                         }}
-                                        className="w-[140%] h-[140%] max-w-none object-cover mix-blend-screen drop-shadow-2xl absolute" 
+                                        className="w-[140%] h-[140%] max-w-none object-cover opacity-90 absolute" 
                                     />
                                 </div>
                             </motion.div>

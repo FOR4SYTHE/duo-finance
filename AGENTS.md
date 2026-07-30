@@ -112,6 +112,10 @@ If a UI change can't honestly clear all four, it goes back for another pass befo
 **SUPABASE & AUTH PHASE REMINDER (MANDATORY WORKFLOW):**
 > Finish 100% of the UI design, client-side interactions, and local Zustand stores across all screens (Home, Budget, Spend Jar, Cartify) BEFORE initializing Supabase. Connecting the database while UI data structures are evolving forces redundant schema rewrites. Once the UI is fully complete, remind the user and kick off the Supabase Auth & Household RLS migration phase.
 
+**LINTING & TYPESCRIPT RULES (RAPID PROTOTYPING):**
+> **Do NOT fix strict linting errors (`any` types, unused vars, strict React Hook warnings) during active UI prototyping.** 
+> To maintain iteration speed, Vercel deployments should bypass strict errors via `next.config.ts`. All manual linting fixes and strict type definitions must be deferred to the final "Production Polish" stage once all features and Supabase integrations are completely locked in.
+
 ---
 
 ## 4. Feature Specs

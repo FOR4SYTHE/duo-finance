@@ -55,8 +55,12 @@ function ToolCardShell({ children, isLoading, error, onRetry, title }: { childre
 
 function EmergencyRunwayContent() {
     const [isLogging, setIsLogging] = useState(false);
-    const { categories, goals, config, setRunwayMultiplier, updateGoal } = useBudgetStore();
-    const { exchangeRate } = useCurrencyStore();
+    const categories = useBudgetStore((state) => state.categories);
+    const goals = useBudgetStore((state) => state.goals);
+    const config = useBudgetStore((state) => state.config);
+    const setRunwayMultiplier = useBudgetStore((state) => state.setRunwayMultiplier);
+    const updateGoal = useBudgetStore((state) => state.updateGoal);
+    const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     
     const multiplier = config.runwayMultiplier || 3;
@@ -182,8 +186,10 @@ function EmergencyRunwayContent() {
 
 // 2. Goals Component (Replaces Inflation Outlook)
 function GoalsContent() {
-    const { goals, addMoneyToGoal } = useBudgetStore();
-    const { exchangeRate, primaryCurrency } = useCurrencyStore();
+    const goals = useBudgetStore((state) => state.goals);
+    const addMoneyToGoal = useBudgetStore((state) => state.addMoneyToGoal);
+    const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
+    const primaryCurrency = useCurrencyStore((state) => state.primaryCurrency);
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     
     const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
@@ -363,8 +369,8 @@ function GoalsContent() {
 
 // 3. Grocery & Utility Inflation Guard Component
 function InflationGuardContent() {
-    const { categories } = useBudgetStore();
-    const { exchangeRate } = useCurrencyStore();
+    const categories = useBudgetStore((state) => state.categories);
+    const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
     const utilsCategory = categories.find(c => c.name.toLowerCase() === 'utilities');
@@ -421,8 +427,9 @@ function InflationGuardContent() {
 
 // 4. Salary Auto-Allocation Component
 function SalaryAllocationContent() {
-    const { categories, goals } = useBudgetStore();
-    const { exchangeRate } = useCurrencyStore();
+    const categories = useBudgetStore((state) => state.categories);
+    const goals = useBudgetStore((state) => state.goals);
+    const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     
     const [income, setIncome] = useState<number>(0);

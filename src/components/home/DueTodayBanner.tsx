@@ -10,7 +10,7 @@ interface DueTodayBannerProps {
 }
 
 export function DueTodayBanner({ onTap }: DueTodayBannerProps) {
-  const { bills } = useBillsStore();
+  const bills = useBillsStore((state) => state.bills);
   const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
   const [isVisible, setIsVisible] = useState(true);
   const [dueBills, setDueBills] = useState<typeof bills>([]);

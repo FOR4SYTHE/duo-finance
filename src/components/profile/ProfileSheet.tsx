@@ -71,7 +71,7 @@ export function ProfileSheet({ isOpen, onClose }: ProfileSheetProps) {
                {/* Partnership Matrix Hero */}
                <div className="bg-[#141416] border border-white/5 rounded-[32px] p-6 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)] relative overflow-hidden mb-6">
                  {/* Ambient glow */}
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#30D158]/5 blur-[40px] rounded-full mix-blend-screen" />
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#30D158]/5 blur-[40px] rounded-full" />
                  
                  <div className="flex items-center justify-between mb-8 relative z-10">
                    {/* User Card */}
@@ -90,7 +90,7 @@ export function ProfileSheet({ isOpen, onClose }: ProfileSheetProps) {
                           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-[#30D158]/50 to-transparent relative flex items-center justify-center mb-2">
                             <motion.div 
                               animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-                              transition={{ duration: 2, repeat: Infinity }}
+                              transition={{ duration: 0.8, ease: "easeOut" }}
                               className="w-1.5 h-1.5 rounded-full bg-[#30D158] shadow-[0_0_8px_#30D158]"
                             />
                           </div>

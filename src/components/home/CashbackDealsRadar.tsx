@@ -112,7 +112,7 @@ const DealCard = ({ deal, index, getBrandColor, getBrandArtwork, handleCopy, cop
           </div>
 
           {/* Right Side: Generated 3D Artwork */}
-          <div className="absolute right-[-30px] top-1/2 -translate-y-1/2 w-[220px] h-[220px] pointer-events-none z-10 opacity-100 mix-blend-screen"
+          <div className="absolute right-[-30px] top-1/2 -translate-y-1/2 w-[220px] h-[220px] pointer-events-none z-10 opacity-100"
                style={{
                    maskImage: 'radial-gradient(circle at center, black 30%, transparent 70%)',
                    WebkitMaskImage: 'radial-gradient(circle at center, black 30%, transparent 70%)'
@@ -238,11 +238,17 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
       {/* Scanning Radar Background Effect */}
       <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[50%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0A84FF]/20 via-[#0A0A0C]/0 to-transparent pointer-events-none opacity-50"></div>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <style>{`
+          @keyframes radar-sweep {
+            0% { transform: translateY(0%); }
+            50% { transform: translateY(100vh); }
+            100% { transform: translateY(0%); }
+          }
+        `}</style>
         {scanStatus === "scanning" && (
-            <motion.div 
-              animate={{ y: ["0%", "100%", "0%"] }} 
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            <div 
               className="w-full h-1 bg-gradient-to-r from-transparent via-[#0A84FF]/30 to-transparent blur-sm"
+              style={{ animation: 'radar-sweep 8s linear infinite' }}
             />
         )}
       </div>

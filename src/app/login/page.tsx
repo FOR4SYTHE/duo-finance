@@ -71,12 +71,9 @@ export default function LoginPage() {
           animate={{ 
             opacity: 1, 
             y: 0,
-            backgroundPosition: ["0% 50%", "200% 50%"] 
           }}
           transition={{ 
-            opacity: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
-            y: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
-            backgroundPosition: { duration: 5, repeat: Infinity, ease: "linear" } 
+            opacity: { duration: 0.8 },
           }}
           className="text-[32px] sm:text-[40px] font-extrabold uppercase tracking-[0.2em] relative mb-1"
           style={{
@@ -116,7 +113,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-[380px] bg-[#1c1c1e]/40 backdrop-blur-2xl border-[0.5px] border-white/10 rounded-[28px] p-5 sm:p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)]"
+          className="w-full max-w-[380px] bg-[#1c1c1e]/90 border-[0.5px] border-white/10 rounded-[28px] p-5 sm:p-6 shadow-[0_24px_48px_rgba(0,0,0,0.5)]"
         >
           {authMode === "magic_link_sent" ? (
             <form onSubmit={handleVerifyOtp} className="space-y-4 text-center">

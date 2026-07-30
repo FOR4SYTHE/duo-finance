@@ -91,10 +91,10 @@ function MonthCard({
       {/* Content */}
       <div className="relative z-10 w-full h-full p-5 flex flex-col justify-between">
         <div className="flex justify-between items-start w-full">
-          <span className="bg-white/5 backdrop-blur-xl text-white/90 text-[11px] font-medium px-3.5 py-1.5 rounded-full border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]">
+          <span className="bg-[#2c2c2e]/90 text-white/90 text-[11px] font-medium px-3.5 py-1.5 rounded-full border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]">
             {label}
           </span>
-          <div className="w-9 h-9 rounded-full bg-white/5 backdrop-blur-xl flex items-center justify-center border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]">
+          <div className="w-9 h-9 rounded-full bg-[#2c2c2e]/90 flex items-center justify-center border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]">
             <MoreHorizontal className="w-4 h-4 text-white/90" />
           </div>
         </div>
@@ -135,7 +135,7 @@ export function MonthPicker({ onClose, onSelectMonth }: MonthPickerProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl"
+        className="fixed inset-0 z-[100] bg-black/95"
       >
         <div className="w-full max-w-xl mx-auto h-full flex flex-col">
           {/* Header */}

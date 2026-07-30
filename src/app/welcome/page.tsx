@@ -22,12 +22,10 @@ export default function WelcomePage() {
           animate={{ 
             opacity: 1, 
             y: 0,
-            backgroundPosition: ["0% 50%", "200% 50%"] 
           }}
           transition={{ 
-            opacity: { duration: 1, ease: "easeOut" },
-            y: { duration: 1, ease: "easeOut" },
-            backgroundPosition: { duration: 5, repeat: Infinity, ease: "linear" } 
+            opacity: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
+            y: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
           }}
           className="text-[48px] font-extrabold uppercase tracking-[0.2em] relative"
           style={{

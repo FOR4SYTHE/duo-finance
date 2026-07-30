@@ -103,7 +103,7 @@ export function InsuranceModule() {
             {/* Premium Insurance Bottom Navigation */}
             {showNav && (
                 <div className="fixed bottom-6 left-4 right-4 z-50 will-change-transform">
-                <div className="bg-[#121212]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] p-2 flex items-center justify-between shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_12px_40px_rgba(0,0,0,0.8)] overflow-hidden relative">
+                <div className="bg-[#121212]/95 border border-white/10 rounded-[32px] p-2 flex items-center justify-between shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_12px_40px_rgba(0,0,0,0.8)] overflow-hidden relative">
                     <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                     
                     <div className="flex flex-1 justify-around items-center gap-1">

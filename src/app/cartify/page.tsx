@@ -90,7 +90,7 @@ export default function CartifyPage() {
                 {isActive && !isReceiptView && (
                     <button 
                         onClick={() => setShowCancelPrompt(true)}
-                        className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors shrink-0"
+                        className="w-10 h-10 rounded-full bg-white/[0.08] flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.12] transition-colors shrink-0"
                         title="Cancel Trip"
                     >
                         <X className="w-5 h-5 text-white/70" />

@@ -11,7 +11,7 @@ export default function InsurancePage() {
             <div className="flex justify-between items-center mb-8 relative z-20">
                 <div className="flex items-center gap-4">
                     <Link href="/">
-                        <div className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors">
+                        <div className="w-10 h-10 rounded-full bg-white/[0.08] flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.12] transition-colors">
                             <ChevronLeft className="w-5 h-5 text-white/70" />
                         </div>
                     </Link>
@@ -21,7 +21,7 @@ export default function InsurancePage() {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                    <button className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors relative">
+                    <button className="w-10 h-10 rounded-full bg-white/[0.08] flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.12] transition-colors relative">
                         <Bell className="w-5 h-5 text-white/70" />
                     </button>
                 </div>

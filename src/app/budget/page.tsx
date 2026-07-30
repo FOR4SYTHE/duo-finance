@@ -34,12 +34,21 @@ const PERIODS: { value: BudgetPeriod; label: string }[] = [
 export default function BudgetPage() {
     // Always animate on mount for a premium page transition feel
 
-  const { config, categories, setBudget, updateCategory, _hasHydrated, setActiveMonth } = useBudgetStore();
-  const { entries } = useSpendStore();
-  const { exchangeRate, primaryCurrency } = useCurrencyStore();
+  const config = useBudgetStore((state) => state.config);
+  const categories = useBudgetStore((state) => state.categories);
+  const setBudget = useBudgetStore((state) => state.setBudget);
+  const updateCategory = useBudgetStore((state) => state.updateCategory);
+  const _hasHydrated = useBudgetStore((state) => state._hasHydrated);
+  const setActiveMonth = useBudgetStore((state) => state.setActiveMonth);
+  
+  const entries = useSpendStore((state) => state.entries);
+  
+  const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
+  const primaryCurrency = useCurrencyStore((state) => state.primaryCurrency);
+  
   const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
-  const { bills } = useBillsStore();
-  const { subscriptions } = useSubscriptionsStore();
+  const bills = useBillsStore((state) => state.bills);
+  const subscriptions = useSubscriptionsStore((state) => state.subscriptions);
   
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [isHeroModalOpen, setIsHeroModalOpen] = useState(false);
@@ -237,11 +246,13 @@ export default function BudgetPage() {
             boxShadow: skin.boxShadow
         }}
       >
-        {/* Custom Background Image */}
+        {/* Custom Background Image - Optimized for LCP */}
         {customBg && (
-            <div 
-                className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 pointer-events-none z-0"
-                style={{ backgroundImage: `url(${customBg})` }}
+            <img 
+                src={customBg}
+                alt=""
+                fetchPriority="high"
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 pointer-events-none z-0"
             />
         )}
         

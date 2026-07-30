@@ -39,9 +39,17 @@ import { filterEntriesByMonth } from "@/utils/budgetFilters";
 export default function Home() {
   useNotificationEngine();
 
-  const { config, setLastSeenMonth, _hasHydrated, notifications, addNotification } = useBudgetStore();
-  const { entries, injectMockEntries } = useSpendStore();
-  const { exchangeRate } = useCurrencyStore();
+  const config = useBudgetStore((state) => state.config);
+  const setLastSeenMonth = useBudgetStore((state) => state.setLastSeenMonth);
+  const _hasHydrated = useBudgetStore((state) => state._hasHydrated);
+  const notifications = useBudgetStore((state) => state.notifications);
+  const addNotification = useBudgetStore((state) => state.addNotification);
+  
+  const entries = useSpendStore((state) => state.entries);
+  const injectMockEntries = useSpendStore((state) => state.injectMockEntries);
+  
+  const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
+  
   const { primarySymbol, secondarySymbol, getSecondaryValue } = useDualCurrency();
   
   const currentMonthEntries = useMemo(() => filterEntriesByMonth(entries, config.activeMonth || new Date().toISOString().slice(0, 7)), [entries, config.activeMonth]);

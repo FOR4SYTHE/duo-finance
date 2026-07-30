@@ -16,13 +16,13 @@ const PremiumSparkle = () => (
         {/* Ambient glow */}
         <motion.div 
             animate={{ opacity: [0.4, 0.8, 0.4], scale: [0.8, 1.2, 0.8] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
             className="absolute inset-0 bg-[#30D158] rounded-full blur-[4px]"
         />
         {/* Cross sparkles */}
         <motion.div
             animate={{ rotate: 90 }}
-            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
             className="absolute inset-0 flex items-center justify-center"
         >
             <div className="absolute w-3.5 h-[1.5px] bg-gradient-to-r from-transparent via-white to-transparent opacity-80" />

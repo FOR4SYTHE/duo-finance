@@ -12,8 +12,8 @@ export function AnimatedPiggyBank() {
   const [coins, setCoins] = useState<{ id: number; peakX: number; peakY: number; endX: number; endY: number; delay: number; duration: number; startX: number; startY: number; state: string; currency: string }[]>([]);
 
   // Get Spend Jar state
-  const { config } = useBudgetStore();
-  const { entries } = useSpendStore();
+  const config = useBudgetStore((state) => state.config);
+  const entries = useSpendStore((state) => state.entries);
   
   const percentageRef = useRef(0);
   const totalSpentRef = useRef(0);

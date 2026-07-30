@@ -17,9 +17,9 @@ interface BillsCalendarCardProps {
 }
 
 export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: BillsCalendarCardProps = {}) {
-  const { bills } = useBillsStore();
-  const { scheduledTrips } = useHouseholdStore();
-  const { savedTrips } = useCartifyStore();
+  const bills = useBillsStore((state) => state.bills);
+  const scheduledTrips = useHouseholdStore((state) => state.scheduledTrips);
+  const savedTrips = useCartifyStore((state) => state.savedTrips);
   const { primarySymbol, getPrimaryValue, getSecondaryValue, secondarySymbol } = useDualCurrency();
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [view, setView] = useState<'grid' | 'presentation'>('grid');

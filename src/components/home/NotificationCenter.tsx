@@ -12,7 +12,11 @@ interface NotificationCenterProps {
 }
 
 export function NotificationCenter({ isOpen, onClose, onActionClick }: NotificationCenterProps) {
-  const { notifications, markNotificationRead, markAllNotificationsRead, removeNotification, clearAllNotifications } = useBudgetStore();
+  const notifications = useBudgetStore((state) => state.notifications);
+  const markNotificationRead = useBudgetStore((state) => state.markNotificationRead);
+  const markAllNotificationsRead = useBudgetStore((state) => state.markAllNotificationsRead);
+  const removeNotification = useBudgetStore((state) => state.removeNotification);
+  const clearAllNotifications = useBudgetStore((state) => state.clearAllNotifications);
 
   const getIcon = (type: string) => {
     switch (type) {

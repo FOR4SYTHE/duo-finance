@@ -205,7 +205,7 @@ function SlideHit({ topCategory, topAmount }: any) {
           <span className="font-semibold text-white">{topCategory}</span>.
         </h2>
         
-        <div className="inline-flex items-center gap-4 bg-white/10 backdrop-blur-md rounded-full pl-2 pr-6 py-2 border border-white/10">
+        <div className="inline-flex items-center gap-4 bg-[#2c2c2e]/90 rounded-full pl-2 pr-6 py-2 border border-white/10">
           <div className="w-10 h-10 rounded-full bg-[#0A84FF] flex items-center justify-center text-white text-lg font-bold">
             {primarySymbol}
           </div>
@@ -296,8 +296,8 @@ const slideVariants = {
 };
 
 export function MonthRecap({ lastSeenMonthKey, currentMonthKey, onClose }: MonthRecapProps) {
-  const { config } = useBudgetStore();
-  const { entries } = useSpendStore();
+  const config = useBudgetStore((state) => state.config);
+  const entries = useSpendStore((state) => state.entries);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   const [[page, direction], setPage] = useState([0, 0]);

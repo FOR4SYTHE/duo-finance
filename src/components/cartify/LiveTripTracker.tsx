@@ -154,7 +154,7 @@ export function LiveTripTracker() {
                         <div className="relative w-[100px] h-[76px] rounded-r-[16px] bg-gradient-to-r from-black via-[#0a0a0a] to-[#181818] border-y border-r border-white/10 shadow-[12px_0_24px_rgba(0,0,0,0.9)] flex flex-col justify-end p-3 -ml-[20px] overflow-hidden">
                             <div className="self-end text-white/90 font-black italic text-[14px] tracking-tighter pr-0.5">DF</div>
                             {/* Card Right Edge Highlight */}
-                            <div className="absolute inset-y-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-white/50 to-transparent mix-blend-screen" />
+                            <div className="absolute inset-y-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-white/50 to-transparent" />
                         </div>
                         {/* Extra dark portal fade just to guarantee blending */}
                         <div className="absolute inset-y-0 left-0 w-[35px] bg-gradient-to-r from-black to-transparent pointer-events-none z-30" />
@@ -180,7 +180,7 @@ export function LiveTripTracker() {
                                     scaleX: 1.5 
                                 }}
                                 transition={{ duration: 1.5, ease: "easeInOut" }}
-                                className="absolute top-1/2 -translate-y-1/2 w-[120px] h-[36px] rounded-full blur-[12px] mix-blend-screen z-20"
+                                className="absolute top-1/2 -translate-y-1/2 w-[120px] h-[36px] rounded-full blur-[12px] opacity-70 z-20"
                                 style={{ backgroundColor: 'rgba(255,255,255,0.6)' }}
                             />
                         )}

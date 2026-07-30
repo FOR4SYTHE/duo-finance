@@ -141,14 +141,14 @@ export function ChildCareOnboarding() {
                 {/* Decorative floating elements */}
                 <motion.div 
                   animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
                   className="absolute top-[-10px] right-[15%] w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-xl z-20"
                 >
                   <span className="text-2xl text-[#FF7B54]">☆</span>
                 </motion.div>
                 <motion.div 
                   animate={{ y: [0, 8, 0] }}
-                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                  transition={{ duration: 0.8, ease: "easeOut", delay: 1 }}
                   className="absolute bottom-[-15px] left-[10%] w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-xl z-20"
                 >
                   <span className="text-xl text-[#B9E0F2]">♡</span>
@@ -349,7 +349,7 @@ export function ChildCareOnboarding() {
                   {/* Pulse Animation */}
                   <motion.div 
                     animate={{ scale: [1, 2, 2.5], opacity: [0.5, 0, 0] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
                     className="absolute w-12 h-12 bg-[#FF7B54] rounded-full"
                   />
                   {/* Glass Pin Base */}

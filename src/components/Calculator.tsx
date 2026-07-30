@@ -67,17 +67,17 @@ export function Calculator() {
                     {history.length > 0 ? (
                         <button 
                             onClick={() => setIsHistoryOpen(true)}
-                            className="w-9 h-9 rounded-full bg-white/[0.08] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.12] transition-colors active:scale-95"
+                            className="w-9 h-9 rounded-full bg-white/[0.12] flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.15] transition-colors active:scale-95"
                         >
                             <History className="w-4 h-4 text-white/70" strokeWidth={2.5} />
                         </button>
                     ) : (
-                        <div className="w-9 h-9 rounded-full bg-white/[0.08] backdrop-blur-md flex items-center justify-center border border-white/[0.05]">
+                        <div className="w-9 h-9 rounded-full bg-white/[0.12] flex items-center justify-center border border-white/[0.05]">
                             <span className="font-semibold text-[11px] tracking-wider text-white/70">DF</span>
                         </div>
                     )}
                 </div>
-                <div className="flex items-center gap-2 bg-white/[0.04] backdrop-blur-md px-3 py-1.5 rounded-full border border-white/[0.03]">
+                <div className="flex items-center gap-2 bg-white/[0.08] px-3 py-1.5 rounded-full border border-white/[0.03]">
                     <div className={`w-1.5 h-1.5 rounded-full bg-current ${statusColor} shadow-[0_0_8px_currentColor]`} />
                     <span className="text-[11px] font-medium text-white/70 tracking-widest uppercase">
                         Rate {exchangeRate.toFixed(2)}

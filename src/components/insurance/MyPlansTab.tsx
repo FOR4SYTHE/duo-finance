@@ -47,10 +47,10 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                     transition={{ duration: 0.5, delay: 0.1 }}
                     className="absolute top-12 left-6 right-6 flex justify-between items-center z-50"
                 >
-                    <button onClick={() => router.push('/')} className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors">
+                    <button onClick={() => router.push('/')} className="w-10 h-10 rounded-full bg-white/[0.08] flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.12] transition-colors">
                         <ChevronLeft className="w-5 h-5 text-white/70" />
                     </button>
-                    <button className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors relative">
+                    <button className="w-10 h-10 rounded-full bg-white/[0.08] flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.12] transition-colors relative">
                         <Bell className="w-5 h-5 text-white/70" />
                     </button>
                 </motion.div>

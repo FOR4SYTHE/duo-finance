@@ -112,7 +112,7 @@ function SlideTotals({ totalEntries, totalSpent, config }: any) {
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          className="bg-black/40 border border-[#D4AF37]/20 rounded-[32px] p-8 backdrop-blur-xl shadow-[0_0_40px_rgba(212,175,55,0.05)] relative"
+          className="bg-[#1c1c1e]/95 border border-[#D4AF37]/20 rounded-[32px] p-8 shadow-[0_0_40px_rgba(212,175,55,0.05)] relative"
         >
           {/* Dufi Champion peeking over the top card */}
           <motion.img 
@@ -195,7 +195,7 @@ function SlideHit({ topCategory, topAmount }: any) {
           <span className="font-bold text-[#D4AF37]">{topCategory}</span>.
         </h2>
         
-        <div className="inline-flex items-center gap-4 bg-white/5 backdrop-blur-md rounded-full pl-2 pr-6 py-2 border border-white/10">
+        <div className="inline-flex items-center gap-4 bg-[#2c2c2e]/90 rounded-full pl-2 pr-6 py-2 border border-white/10">
           <div className="w-10 h-10 rounded-full bg-[#D4AF37] flex items-center justify-center text-black text-lg font-bold">
             {primarySymbol}
           </div>
