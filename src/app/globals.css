@@ -22,6 +22,13 @@
   /* hue-spin removed — filter: hue-rotate() infinite animations
      force a per-frame GPU compositor layer re-render.
      Use a static gradient for the AI badge instead. */
+     
+  @keyframes scan {
+    0% { transform: translateY(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(100dvh); opacity: 0; }
+  }
 }
 
 @layer base {

@@ -2,9 +2,10 @@
 
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Image as ImageIcon, Loader2, AlertCircle, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Camera, Zap, X, AlertCircle, ArrowRight, ImageIcon } from 'lucide-react';
 import { useDualCurrency } from '@/hooks/useDualCurrency';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
+import { useAIChatStore } from '@/store/useAIChatStore';
 
 interface ScannedItem {
     name: string;
@@ -27,9 +28,12 @@ export function AIScannerView() {
     const [error, setError] = useState<string | null>(null);
     const [identifiedItem, setIdentifiedItem] = useState<ScannedItem | null>(null);
     const [listings, setListings] = useState<Listing[]>([]);
+    const [isSheetExpanded, setIsSheetExpanded] = useState(false);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const galleryInputRef = useRef<HTMLInputElement>(null);
     const { getSecondaryValue, primarySymbol, secondarySymbol } = useDualCurrency();
+    const { setActiveTab } = useAIChatStore();
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -68,9 +72,6 @@ export function AIScannerView() {
                     const data = await response.json();
                     setIdentifiedItem(data.item);
                     setListings(data.listings || []);
-                    if (data.searchError) {
-                        // Optional: we could show a toast that price search failed but vision succeeded
-                    }
                 } catch (err: any) {
                     setError(err.message || 'Error communicating with AI server.');
                 } finally {
@@ -88,174 +89,244 @@ export function AIScannerView() {
         setIdentifiedItem(null);
         setListings([]);
         setError(null);
+        setIsSheetExpanded(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     return (
-        <div className="flex flex-col h-full bg-[#050505] overflow-y-auto pb-32">
+        <div className="absolute inset-0 bg-[#050505] overflow-hidden flex flex-col z-40">
             
-            {/* Header */}
-            <div className="p-6 pb-2">
-                <h2 className="text-xl font-medium text-white mb-1">Shopping Scanner</h2>
-                <p className="text-sm text-white/50">Identify items and compare prices</p>
-            </div>
+            {/* Hidden File Input (Always in DOM) */}
+            <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*" 
+                capture="environment"
+                onChange={handleFileChange}
+            />
+            <input 
+                type="file" 
+                ref={galleryInputRef} 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleFileChange}
+            />
 
-            {/* Error Banner */}
+            {/* Error Banner overlaying the top */}
             <AnimatePresence>
                 {error && (
                     <motion.div 
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="px-6 py-2"
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="absolute top-20 left-4 right-4 z-50"
                     >
-                        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-start gap-3">
+                        <div className="bg-[#1C1C1E] border border-red-500/30 rounded-2xl p-4 flex items-start gap-3 shadow-2xl">
                             <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                            <p className="text-sm text-red-200 leading-snug">{error}</p>
+                            <div className="flex-1">
+                                <p className="text-[14px] text-white leading-snug">{error}</p>
+                            </div>
+                            <button onClick={() => setError(null)} className="p-1 -m-1 text-white/40 hover:text-white">
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            <div className="p-6 flex flex-col gap-6">
-                {/* Initial State / Image Capture */}
+            {/* Viewfinder Empty State */}
+            <AnimatePresence>
                 {!imageStr && !isScanning && (
                     <motion.div 
-                        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                        className="w-full aspect-[4/3] rounded-3xl border-2 border-dashed border-white/[0.08] bg-white/[0.01] hover:bg-white/[0.03] transition-colors flex flex-col items-center justify-center cursor-pointer group"
-                        onClick={() => fileInputRef.current?.click()}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.4 }}
+                        className="absolute inset-0 flex flex-col items-center justify-center"
                     >
-                        <div className="w-16 h-16 rounded-full bg-[#1C1C1E] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <Camera className="w-7 h-7 text-white/80" />
+                        {/* Simulating dark sleek camera background */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-[#1C1C1E] via-[#0A0A0A] to-[#050505]" />
+                        
+                        {/* Static Center Reticle with Instruction inside */}
+                        <div className="relative w-72 h-72 flex items-center justify-center z-10 pointer-events-none">
+                            {/* Reticle Brackets */}
+                            <div className="absolute top-0 left-0 w-12 h-12 border-t-[3px] border-l-[3px] border-white/80 rounded-tl-[24px]" />
+                            <div className="absolute top-0 right-0 w-12 h-12 border-t-[3px] border-r-[3px] border-white/80 rounded-tr-[24px]" />
+                            <div className="absolute bottom-0 left-0 w-12 h-12 border-b-[3px] border-l-[3px] border-white/80 rounded-bl-[24px]" />
+                            <div className="absolute bottom-0 right-0 w-12 h-12 border-b-[3px] border-r-[3px] border-white/80 rounded-br-[24px]" />
+
+                            {/* Instructional Pill in Center */}
+                            <div className="bg-[#1C1C1E] border border-white/[0.08] px-6 py-2.5 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
+                                <span className="text-[13px] font-medium text-white/90 tracking-wide">Find a product or barcode</span>
+                            </div>
                         </div>
-                        <h3 className="text-base font-medium text-white">Tap to Scan</h3>
-                        <p className="text-sm text-white/40 mt-1">Take a photo or upload an image</p>
+
+                        {/* Bottom Actions Row */}
+                        <div className="absolute bottom-12 left-0 w-full px-8 flex items-center justify-between z-10">
+                            {/* Gallery Upload (Replacing old X button) */}
+                            <button 
+                                onClick={() => galleryInputRef.current?.click()}
+                                className="w-14 h-14 rounded-full bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center text-white/60 hover:text-white hover:bg-[#2C2C2E] transition-colors shadow-lg"
+                                title="Upload Photo"
+                            >
+                                <ImageIcon className="w-6 h-6" />
+                            </button>
+                            
+                            {/* Primary Capture Button */}
+                            <button 
+                                onClick={() => fileInputRef.current?.click()}
+                                className="w-[84px] h-[84px] rounded-full bg-[#1C1C1E] border-[3px] border-white/80 text-white flex items-center justify-center shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:scale-105 active:scale-95 transition-transform shrink-0"
+                            >
+                                <DuoAIIcon forceState="star-idle" className="w-10 h-10" />
+                            </button>
+
+                            {/* Flashlight */}
+                            <button className="w-14 h-14 rounded-full bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center text-white/60 hover:text-white hover:bg-[#2C2C2E] transition-colors shadow-lg">
+                                <Zap className="w-6 h-6" />
+                            </button>
+                        </div>
                     </motion.div>
                 )}
+            </AnimatePresence>
 
-                {/* Hidden File Input */}
-                <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    accept="image/*" 
-                    capture="environment" // Suggests camera on mobile
-                    onChange={handleFileChange}
-                />
-
-                {/* Scanning / Loading State */}
-                {imageStr && isScanning && (
+            {/* Scanning & Results States */}
+            <AnimatePresence>
+                {imageStr && (
                     <motion.div 
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                        className="flex flex-col items-center justify-center py-12"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 flex flex-col"
                     >
-                        <div className="relative w-48 h-48 rounded-2xl overflow-hidden mb-8 border border-white/10 shadow-2xl">
-                            <img src={imageStr} alt="Scanning" className="w-full h-full object-cover blur-[2px] scale-105" />
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                <DuoAIIcon className="w-12 h-12 text-white animate-pulse" />
-                            </div>
-                            {/* Scanning line animation */}
-                            <motion.div 
-                                animate={{ top: ['0%', '100%', '0%'] }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                className="absolute left-0 right-0 h-1 bg-white/50 shadow-[0_0_20px_rgba(255,255,255,0.8)]"
-                            />
-                        </div>
-                        <h3 className="text-lg font-medium text-white mb-2">Identifying item...</h3>
-                        <p className="text-sm text-white/50">Searching for current prices</p>
-                    </motion.div>
-                )}
-
-                {/* Results State */}
-                {identifiedItem && !isScanning && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                        className="flex flex-col gap-6"
-                    >
-                        {/* Identified Item Hero */}
-                        <div className="bg-[#1C1C1E] rounded-3xl p-6 border border-white/[0.05] relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-4 opacity-5">
-                                <ShoppingBag className="w-32 h-32" />
-                            </div>
-                            <div className="relative z-10 flex gap-4 items-start">
-                                {imageStr && (
-                                    <div className="w-20 h-20 shrink-0 rounded-2xl overflow-hidden border border-white/10">
-                                        <img src={imageStr} alt="Scanned" className="w-full h-full object-cover" />
-                                    </div>
-                                )}
-                                <div>
-                                    {identifiedItem.brand && (
-                                        <span className="text-xs font-bold tracking-wider uppercase text-white/40 mb-1 block">
-                                            {identifiedItem.brand}
-                                        </span>
-                                    )}
-                                    <h3 className="text-2xl font-semibold text-white leading-tight mb-2">
-                                        {identifiedItem.name}
-                                    </h3>
-                                    <p className="text-sm text-white/60 leading-relaxed">
-                                        {identifiedItem.description}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Price Listings */}
-                        <div>
-                            <h4 className="text-sm font-medium text-white/60 mb-4 px-2 uppercase tracking-wider">Prices Found</h4>
-                            {listings.length === 0 ? (
-                                <div className="text-center py-8 bg-[#1C1C1E]/50 rounded-2xl border border-dashed border-white/10">
-                                    <p className="text-sm text-white/40">No online listings found for this item.</p>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {listings.map((listing, i) => (
-                                        <a 
-                                            key={i} 
-                                            href={listing.url} 
-                                            target="_blank" 
-                                            rel="noreferrer"
-                                            className="bg-[#1C1C1E] p-4 rounded-2xl border border-white/[0.03] hover:bg-[#2C2C2E] hover:border-white/[0.1] transition-all group flex flex-col justify-between"
-                                        >
-                                            <div>
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-xs font-semibold text-amber-100/70 bg-amber-900/30 px-2 py-0.5 rounded-md">
-                                                        {listing.source}
-                                                    </span>
-                                                    <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-white/80 transition-colors" />
-                                                </div>
-                                                <h5 className="text-sm font-medium text-white/90 line-clamp-2 leading-snug mb-3">
-                                                    {listing.name}
-                                                </h5>
-                                            </div>
-                                            <div className="flex items-baseline gap-2">
-                                                <span className="text-lg font-semibold text-white">
-                                                    {primarySymbol}{listing.price_php.toLocaleString()}
-                                                </span>
-                                                <span className="text-sm text-white/40">
-                                                    {secondarySymbol}{getSecondaryValue(listing.price_php).toFixed(2)}
-                                                </span>
-                                            </div>
-                                        </a>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Transparency Banner */}
-                        <div className="text-center px-4 mt-2">
-                            <p className="text-xs text-white/30 leading-relaxed">
-                                Prices are aggregated from online retailers via web search. Real-time availability and physical store pricing may vary.
-                            </p>
-                        </div>
-
-                        <button 
-                            onClick={handleReset}
-                            className="w-full py-4 mt-4 bg-white/[0.05] hover:bg-white/[0.1] text-white font-medium rounded-2xl transition-colors"
+                        {/* Scanned Image Background (Clickable to reset) */}
+                        <div 
+                            className="absolute inset-0 z-0 bg-black cursor-pointer"
+                            onClick={!isScanning ? handleReset : undefined}
                         >
-                            Scan Another Item
-                        </button>
+                            <img 
+                                src={imageStr} 
+                                alt="Scanned" 
+                                className={`w-full h-full object-cover transition-all duration-700 ${!isScanning ? 'opacity-30 blur-sm scale-105' : 'opacity-80 scale-100'}`} 
+                            />
+                            {/* Dark gradient overlay for readability */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent pointer-events-none" />
+                        </div>
+
+                        {/* Scanning Animation State */}
+                        {isScanning && (
+                            <div className="absolute inset-0 z-10">
+                                {/* CSS-Only High-Performance Scanning Line */}
+                                <div className="absolute left-0 right-0 h-[2px] bg-white shadow-[0_0_30px_rgba(255,255,255,1)] animate-[scan_2.5s_linear_infinite]" />
+                                
+                                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-[#1C1C1E] border border-white/[0.08] px-6 py-3 rounded-full flex items-center gap-3 shadow-[0_8px_30px_rgba(0,0,0,0.8)]">
+                                    <DuoAIIcon className="w-5 h-5 text-white animate-spin" />
+                                    <span className="text-[14px] font-medium text-white tracking-wide">Analyzing item...</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Results Bottom Sheet */}
+                        {identifiedItem && !isScanning && (
+                            <motion.div 
+                                drag="y"
+                                dragConstraints={{ top: 0, bottom: 0 }}
+                                dragElastic={0.2}
+                                onDragEnd={(e, info) => {
+                                    if (info.offset.y < -50) setIsSheetExpanded(true); // Dragged up
+                                    if (info.offset.y > 50) setIsSheetExpanded(false); // Dragged down
+                                }}
+                                initial={{ y: '100%' }}
+                                animate={{ y: isSheetExpanded ? '0%' : '45vh' }}
+                                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                                className={`absolute top-0 left-0 w-full h-full bg-[#1C1C1E] shadow-[0_-10px_50px_rgba(0,0,0,0.5)] z-20 flex flex-col transition-all duration-300 ${isSheetExpanded ? 'rounded-none' : 'rounded-t-[32px]'}`}
+                            >
+                                {/* Drag Indicator */}
+                                <div className="w-full flex justify-center py-4 shrink-0 cursor-grab active:cursor-grabbing">
+                                    <div className="w-12 h-1.5 rounded-full bg-white/20" />
+                                </div>
+
+                                <div className="px-6 pb-8 overflow-y-auto no-scrollbar flex-1 flex flex-col">
+                                    {/* Item Header */}
+                                    <div className="mb-6">
+                                        {identifiedItem.brand && (
+                                            <span className="text-xs font-bold tracking-[0.15em] uppercase text-white/40 mb-2 block">
+                                                {identifiedItem.brand}
+                                            </span>
+                                        )}
+                                        <h3 className="text-3xl font-semibold text-white leading-tight mb-3">
+                                            {identifiedItem.name}
+                                        </h3>
+                                        <p className="text-[15px] text-white/60 leading-relaxed">
+                                            {identifiedItem.description}
+                                        </p>
+                                    </div>
+
+                                    {/* Price Listings */}
+                                    <div className="mb-6 flex-1">
+                                        <h4 className="text-[11px] font-bold text-white/40 mb-3 uppercase tracking-wider">Available Prices</h4>
+                                        {listings.length === 0 ? (
+                                            <div className="text-center py-8 bg-[#0A0A0A] rounded-[24px] border border-white/[0.05]">
+                                                <p className="text-[14px] text-white/40">No online listings found for this item.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col gap-3">
+                                                {listings.map((listing, i) => (
+                                                    <a 
+                                                        key={i} 
+                                                        href={listing.url} 
+                                                        target="_blank" 
+                                                        rel="noreferrer"
+                                                        className="bg-gradient-to-br from-[#222224] to-[#151515] p-4 rounded-[20px] border border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/[0.15] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group flex items-center justify-between"
+                                                    >
+                                                        <div className="flex-1 pr-4">
+                                                            <div className="flex items-center gap-2 mb-1.5">
+                                                                <span className="text-[10px] font-bold text-[#E5E5EA] bg-white/[0.08] px-2.5 py-1 rounded-full uppercase tracking-widest shadow-inner">
+                                                                    {listing.source}
+                                                                </span>
+                                                            </div>
+                                                            <h5 className="text-[14px] font-medium text-white/90 line-clamp-1 group-hover:text-white transition-colors">
+                                                                {listing.name}
+                                                            </h5>
+                                                        </div>
+                                                        <div className="flex flex-col items-end shrink-0">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-xl font-bold text-white tracking-tight">
+                                                                    {primarySymbol}{listing.price_php.toLocaleString()}
+                                                                </span>
+                                                                <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-white transition-colors group-hover:translate-x-1 duration-300" />
+                                                            </div>
+                                                            <span className="text-[12px] text-white/50 font-medium tracking-wide">
+                                                                {secondarySymbol}{getSecondaryValue(listing.price_php).toFixed(2)}
+                                                            </span>
+                                                        </div>
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Scan Another Button & Transparency */}
+                                    <div className="mt-4 pt-4 border-t border-white/[0.05]">
+                                        <button 
+                                            onClick={handleReset}
+                                            className="w-full py-4 mb-4 bg-[#1C1C1E] border border-white/[0.08] hover:border-white/20 hover:bg-[#2C2C2E] text-white font-medium tracking-wide rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)] transition-all duration-300 active:scale-[0.98]"
+                                        >
+                                            Scan Another Item
+                                        </button>
+                                        
+                                        <div className="text-center pb-6">
+                                            <p className="text-[11px] text-white/30 leading-relaxed max-w-[280px] mx-auto">
+                                                Prices are aggregated from online retailers via web search. Availability and physical store pricing may vary.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
                     </motion.div>
                 )}
-            </div>
+            </AnimatePresence>
         </div>
     );
 }
