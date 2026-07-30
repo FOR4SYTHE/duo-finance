@@ -80,9 +80,9 @@ export function Navigation() {
           </div>
 
           {/* AI Corner Pill — pure CSS chromatic gradient, no MetalFx WebGL */}
-          <button
-            disabled
-            className="w-[64px] h-[64px] flex-shrink-0 flex flex-col items-center justify-center group transition-all opacity-80 cursor-not-allowed hover:opacity-100 relative overflow-hidden rounded-[32px] bg-[#0a0a0a] border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),inset_0_-1px_1px_rgba(0,0,0,0.5),0_16px_40px_rgba(0,0,0,0.8)]"
+          <Link
+            href="/ai"
+            className="w-[64px] h-[64px] flex-shrink-0 flex flex-col items-center justify-center group transition-all relative overflow-hidden rounded-[32px] bg-[#0a0a0a] border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),inset_0_-1px_1px_rgba(0,0,0,0.5),0_16px_40px_rgba(0,0,0,0.8)]"
           >
             {/* CSS chromatic sheen — replaces WebGL MetalFx shader */}
             <div className="absolute inset-0 rounded-[32px] overflow-hidden pointer-events-none">
@@ -99,10 +99,10 @@ export function Navigation() {
             <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.2] to-transparent z-10" />
             <div className="relative z-10 flex items-center justify-center">
               <DuoAIIcon
-                className="w-6 h-6 text-amber-300 transition-transform group-hover:scale-105"
+                className={`w-6 h-6 transition-transform group-hover:scale-105 ${pathname === '/ai' ? 'text-amber-300' : 'text-amber-300/80'}`}
               />
             </div>
-          </button>
+          </Link>
         </motion.div>
       )}
     </AnimatePresence>
