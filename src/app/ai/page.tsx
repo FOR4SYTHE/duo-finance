@@ -46,7 +46,7 @@ export default function AIAppPage() {
     return (
         <div className="fixed inset-0 z-[100] bg-[#050505] flex flex-col h-[100dvh] w-full overflow-hidden">
             {/* Header Strip with Close Button */}
-            <div className="flex items-center justify-between p-4 border-b border-white/[0.05] bg-[#0A0A0A] shrink-0">
+            <div className="flex items-center justify-between p-4 bg-[#0A0A0A] shrink-0 z-50">
                 <div className="flex items-center gap-2">
                     <button 
                         onClick={handleClose}
@@ -54,11 +54,17 @@ export default function AIAppPage() {
                     >
                         <ChevronDown className="w-6 h-6 text-white" />
                     </button>
-                    <h1 className="text-lg font-medium text-white ml-2">AI Corner</h1>
+                    <div className="flex flex-col ml-1">
+                        <h1 className="text-[15px] font-semibold text-white leading-tight">DUO AI</h1>
+                        <p className="text-[11px] text-white/50 leading-tight">Household Assistant</p>
+                    </div>
                 </div>
-                
-                {/* Tab Switcher using shared PillTabRow */}
-                <div className="w-48">
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-1 relative overflow-hidden bg-[#050505]">
+                {/* Floating Premium Toggle */}
+                <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 shadow-2xl rounded-full">
                     <PillTabRow 
                         tabs={tabs}
                         activeTab={activeTab}
@@ -67,10 +73,7 @@ export default function AIAppPage() {
                         }}
                     />
                 </div>
-            </div>
 
-            {/* Content Area */}
-            <div className="flex-1 relative overflow-hidden bg-[#050505]">
                 {activeTab === 'chat' ? <AIChatView /> : <AIScannerView />}
             </div>
         </div>

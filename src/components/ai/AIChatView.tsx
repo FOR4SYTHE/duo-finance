@@ -102,59 +102,21 @@ export function AIChatView() {
 
     return (
         <div className="flex flex-col h-full bg-[#050505] relative">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/[0.05] bg-[#0A0A0A]/80 backdrop-blur-md z-10 sticky top-0">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#1C1C1E] flex items-center justify-center">
-                        <DuoAIIcon className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                        <h2 className="font-semibold text-white">Duo AI</h2>
-                        <p className="text-xs text-white/50">Household Assistant</p>
-                    </div>
-                </div>
-                {messages.length > 0 && (
-                    <button onClick={clearChat} className="text-xs text-white/40 hover:text-white transition-colors">
-                        Clear
+            {messages.length > 0 && (
+                <div className="absolute top-4 right-4 z-10">
+                    <button onClick={clearChat} className="text-[11px] text-white/40 hover:text-white transition-colors bg-[#1C1C1E] px-3 py-1.5 rounded-full border border-white/[0.05]">
+                        Clear Chat
                     </button>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Chat History */}
             <div 
                 ref={scrollRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto p-4 space-y-6 pb-32"
+                className="flex-1 overflow-y-auto p-4 space-y-6 pb-32 no-scrollbar"
             >
-                {messages.length === 0 ? (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex flex-col items-center justify-center h-full text-center max-w-[280px] mx-auto mt-20"
-                    >
-                        <div className="relative mb-6">
-                            <DuoAIIcon className="w-16 h-16 text-white/20" forceState="star-idle" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-[11px] font-bold tracking-[0.2em] text-white/50 pl-[0.3em] mt-[1px]">DUO</span>
-                            </div>
-                        </div>
-                        <h3 className="text-xl font-semibold text-white mb-2">Hi! I'm Duo AI.</h3>
-                        <p className="text-sm text-white/60 mb-8 leading-relaxed">
-                            Your household finance assistant. I can help with budgeting, spending advice, and local cost-of-living insights.
-                        </p>
-                        <div className="flex flex-col gap-3 w-full">
-                            {suggestions.map((s, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => handleSend(s)}
-                                    className="px-4 py-3 rounded-2xl bg-[#1C1C1E] hover:bg-[#2C2C2E] text-sm text-white/80 transition-colors text-left"
-                                >
-                                    {s}
-                                </button>
-                            ))}
-                        </div>
-                    </motion.div>
-                ) : (
+                {messages.length > 0 && (
                     <AnimatePresence initial={false}>
                         {messages.map((msg) => (
                             <motion.div
@@ -167,9 +129,9 @@ export function AIChatView() {
                                     {msg.role === 'assistant' && (
                                         <div className="w-6 h-6 shrink-0 rounded-full bg-[#1C1C1E] flex items-center justify-center mb-1">
                                             {msg.status === 'streaming' ? (
-                                                <DuoAIIcon className="w-3.5 h-3.5 text-amber-300" />
+                                                <DuoAIIcon className="w-3.5 h-3.5 text-amber-300" forceState="star-idle" />
                                             ) : (
-                                                <DuoAIIcon className="w-3.5 h-3.5 text-white/60" />
+                                                <DuoAIIcon className="w-3.5 h-3.5 text-white/60" forceState="star-idle" />
                                             )}
                                         </div>
                                     )}
@@ -192,27 +154,99 @@ export function AIChatView() {
                 )}
             </div>
 
-            {/* Input Area */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent pt-10">
-                <div className="relative max-w-lg mx-auto">
+            {/* Dynamic Premium Input Area */}
+            <motion.div 
+                layout
+                className={`w-full px-4 z-20 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+                    messages.length === 0 
+                        ? 'absolute top-1/2 left-0 -translate-y-1/2' 
+                        : 'absolute bottom-0 left-0 pb-6'
+                }`}
+            >
+                <AnimatePresence>
+                    {messages.length === 0 && (
+                        <motion.div 
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+                            transition={{ duration: 0.3 }}
+                            className="flex flex-col items-center justify-center text-center mb-8"
+                        >
+                            <div className="relative mb-6 mx-auto w-16 h-16">
+                                <DuoAIIcon className="w-16 h-16 text-white/20" forceState="star-idle" />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-[11px] font-bold tracking-[0.2em] text-white/50 pl-[0.3em] mt-[1px]">DUO</span>
+                                </div>
+                            </div>
+                            <h3 className="text-3xl font-light text-white mb-2 tracking-tight">Hi! I'm DUO AI.</h3>
+                            <p className="text-sm text-white/50 max-w-xs mx-auto">
+                                Your household finance assistant.
+                            </p>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                <div className="relative max-w-2xl mx-auto flex items-center bg-[#1C1C1E] rounded-[32px] border border-white/[0.05] shadow-[0_8px_30px_rgba(0,0,0,0.8)]">
+                    {/* Plus / Features Menu Button */}
+                    <button 
+                        className="w-12 h-12 flex items-center justify-center shrink-0 text-white/40 hover:text-white transition-colors"
+                        onClick={() => {
+                            // Reserved for future: Upload Receipt, Voice, etc.
+                        }}
+                    >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                    
                     <input
                         type="text"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && !isStreaming && handleSend()}
                         disabled={isStreaming}
-                        placeholder={isStreaming ? "Duo AI is thinking..." : "Message Duo AI..."}
-                        className="w-full pl-5 pr-14 py-4 rounded-[28px] bg-[#1C1C1E] border border-white/[0.08] text-white placeholder-white/40 focus:outline-none focus:border-white/20 transition-all disabled:opacity-60 shadow-lg"
+                        placeholder={isStreaming ? "DUO AI is thinking..." : "Ask DUO AI"}
+                        className="flex-1 py-4 bg-transparent text-white placeholder-white/40 focus:outline-none transition-all disabled:opacity-60 text-[15px] font-medium"
                     />
-                    <button
-                        onClick={() => handleSend()}
-                        disabled={!inputValue.trim() || isStreaming}
-                        className="absolute right-2 top-2 bottom-2 w-10 bg-white rounded-full flex items-center justify-center disabled:opacity-30 disabled:bg-white/10 transition-colors"
-                    >
-                        <ArrowUp className={`w-5 h-5 ${!inputValue.trim() || isStreaming ? 'text-white' : 'text-black'}`} strokeWidth={2.5} />
-                    </button>
+                    
+                    <div className="pr-2 pl-1 flex items-center h-full">
+                        <button
+                            onClick={() => handleSend()}
+                            disabled={!inputValue.trim() || isStreaming}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${!inputValue.trim() || isStreaming ? 'bg-white/10 text-white/30' : 'bg-white text-black shadow-md scale-105'}`}
+                        >
+                            {isStreaming ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
+                            )}
+                        </button>
+                    </div>
                 </div>
-            </div>
+
+                <AnimatePresence>
+                    {messages.length === 0 && (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
+                            transition={{ duration: 0.3, delay: 0.1 }}
+                            className="mt-6 flex flex-wrap justify-center gap-2 max-w-2xl mx-auto"
+                        >
+                            {suggestions.map((s, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => handleSend(s)}
+                                    className="px-4 py-2 rounded-full bg-[#1C1C1E]/60 hover:bg-[#2C2C2E] border border-white/[0.05] text-[13px] text-white/70 transition-colors shadow-sm"
+                                >
+                                    {s}
+                                </button>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </motion.div>
         </div>
     );
 }
