@@ -333,27 +333,40 @@ export default function SetupPage() {
                  <div className="absolute inset-0 flex items-center justify-center" style={{ filter: 'url(#gooey-effect-setup)' }}>
                    <motion.div 
                      className="absolute w-[96px] h-[96px] rounded-full bg-[#068562]"
-                     initial={{ x: -60 }}
+                     initial={{ x: -120, y: 0 }}
+                     animate={{ x: -60, y: [0, -8, 0] }}
+                     transition={{
+                       x: { duration: 1.2, type: "spring", bounce: 0.4 },
+                     }}
                    />
                    <motion.div 
                      className="absolute w-[96px] h-[96px] rounded-full bg-[#068562]"
-                     initial={{ x: 60 }}
+                     initial={{ x: 120, y: 0 }}
+                     animate={{ x: 60, y: [0, 8, 0] }}
+                     transition={{
+                       x: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
+                     }}
                    />
                    <motion.div 
                      className="absolute h-[50px] bg-[#013F4A]"
-                     initial={{ width: 120, opacity: 1 }}
+                     initial={{ width: 0, opacity: 0, y: 0 }}
+                     animate={{ width: 120, opacity: 1, y: 0 }}
+                     transition={{
+                       width: { duration: 1.0, delay: 0.2, type: "spring" },
+                       opacity: { duration: 1.0, delay: 0.2 },
+                     }}
                    />
                  </div>
 
                  {/* Foreground Avatars (Sharp) */}
                  <div className="absolute inset-0 flex items-center justify-center z-10">
                    <motion.div 
-                     className="absolute w-[86px] h-[86px] rounded-full overflow-hidden border-2 border-[#111] shadow-[0_10px_30px_rgba(0,0,0,0.5)] bg-[#1c1c1e] flex items-center justify-center"
+                     className="absolute w-[86px] h-[86px] rounded-full overflow-hidden border-[2px] border-[#111] shadow-[0_10px_30px_rgba(0,0,0,0.5)] bg-[#1c1c1e] flex items-center justify-center"
                      initial={{ x: -120, scale: 0.8, y: 0 }}
                      animate={{ x: -60, scale: 1, y: 0 }}
                      transition={{
-                       opacity: { duration: 0.8, delay: 1.2 },
-                       scale: { type: "spring", stiffness: 300, damping: 20, delay: 1.2 },
+                        x: { duration: 1.2, type: "spring", bounce: 0.4 },
+                        scale: { duration: 1.2, type: "spring", bounce: 0.4 },
                      }}
                    >
                      {user?.avatar ? (
@@ -363,12 +376,12 @@ export default function SetupPage() {
                      )}
                    </motion.div>
                    <motion.div 
-                     className="absolute w-[86px] h-[86px] rounded-full overflow-hidden border-2 border-[#111] shadow-[0_10px_30px_rgba(0,0,0,0.5)] bg-[#1c2c24] flex items-center justify-center"
+                     className="absolute w-[86px] h-[86px] rounded-full overflow-hidden border-[2px] border-[#111] shadow-[0_10px_30px_rgba(0,0,0,0.5)] bg-[#1c2c24] flex items-center justify-center"
                      initial={{ x: 120, scale: 0.8, y: 0 }}
                      animate={{ x: 60, scale: 1, y: 0 }}
                      transition={{
-                       opacity: { duration: 0.8, delay: 1.3 },
-                       scale: { type: "spring", stiffness: 300, damping: 20, delay: 1.3 },
+                        x: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
+                        scale: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
                      }}
                    >
                      {partner?.avatar ? (
