@@ -18,8 +18,18 @@ const categorySuggestions: Record<string, string[]> = {
 };
 
 export function LiveTripTracker() {
-    const { items, budget, mode, activeCategory, setActiveCategory, updateItemPrice, incrementQuantity, decrementQuantity, removeItem, addItem, showReceipt } = useCartifyStore();
-    const { exchangeRate } = useCurrencyStore();
+    const items = useCartifyStore((state) => state.items);
+    const budget = useCartifyStore((state) => state.budget);
+    const mode = useCartifyStore((state) => state.mode);
+    const activeCategory = useCartifyStore((state) => state.activeCategory);
+    const setActiveCategory = useCartifyStore((state) => state.setActiveCategory);
+    const updateItemPrice = useCartifyStore((state) => state.updateItemPrice);
+    const incrementQuantity = useCartifyStore((state) => state.incrementQuantity);
+    const decrementQuantity = useCartifyStore((state) => state.decrementQuantity);
+    const removeItem = useCartifyStore((state) => state.removeItem);
+    const addItem = useCartifyStore((state) => state.addItem);
+    const showReceipt = useCartifyStore((state) => state.showReceipt);
+    const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     
     const [sortMode, setSortMode] = useState<'default' | 'asc' | 'desc'>('default');

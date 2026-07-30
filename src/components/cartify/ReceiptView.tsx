@@ -10,8 +10,13 @@ import { useEffect, useState } from "react";
 import { SaveTemplatePrompt } from "./SaveTemplatePrompt";
 
 export function ReceiptView() {
-    const { items, budget, mode, endTrip, hideReceipt } = useCartifyStore();
-    const { exchangeRate } = useCurrencyStore();
+    const items = useCartifyStore((state) => state.items);
+    const budget = useCartifyStore((state) => state.budget);
+    const mode = useCartifyStore((state) => state.mode);
+    const endTrip = useCartifyStore((state) => state.endTrip);
+    const hideReceipt = useCartifyStore((state) => state.hideReceipt);
+    
+    const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     
     const [showSavePrompt, setShowSavePrompt] = useState(false);

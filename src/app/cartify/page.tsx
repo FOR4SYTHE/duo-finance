@@ -15,7 +15,12 @@ import { useEffect } from "react";
 export default function CartifyPage() {
     // Always animate on mount for a premium page transition feel
 
-    const { isActive, isBuildingList, isReceiptView, endTrip, mode, setMode } = useCartifyStore();
+    const isActive = useCartifyStore((state) => state.isActive);
+    const isBuildingList = useCartifyStore((state) => state.isBuildingList);
+    const isReceiptView = useCartifyStore((state) => state.isReceiptView);
+    const endTrip = useCartifyStore((state) => state.endTrip);
+    const mode = useCartifyStore((state) => state.mode);
+    const setMode = useCartifyStore((state) => state.setMode);
     const [showCancelPrompt, setShowCancelPrompt] = useState(false);
     const [showModeSelector, setShowModeSelector] = useState(false);
 

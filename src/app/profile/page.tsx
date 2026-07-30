@@ -372,7 +372,7 @@ export default function ProfilePage() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
         >
           <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Primary Currency</h3>
           <div className="bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-full p-1.5 mb-3 flex relative shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
@@ -402,7 +402,7 @@ export default function ProfilePage() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+          transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
         >
           <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Household Guide</h3>
           <div className="flex flex-col gap-3 mb-10">
@@ -449,7 +449,7 @@ export default function ProfilePage() {
           id="settings-section"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+          transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
         >
           <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Settings & Security</h3>
           <div className="bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[32px] overflow-hidden mb-12 shadow-[0_16px_32px_rgba(0,0,0,0.4)]">

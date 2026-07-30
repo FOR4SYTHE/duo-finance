@@ -66,7 +66,10 @@ const QUICK_CATEGORIES = [
 ];
 
 export function PlannedListBuilder({ onRequestExit }: PlannedListBuilderProps = {}) {
-    const { items, addPlannedItem, finishBuildingList, removeItem } = useCartifyStore();
+    const items = useCartifyStore((state) => state.items);
+    const addPlannedItem = useCartifyStore((state) => state.addPlannedItem);
+    const finishBuildingList = useCartifyStore((state) => state.finishBuildingList);
+    const removeItem = useCartifyStore((state) => state.removeItem);
     const [newItemName, setNewItemName] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [showTemplatePicker, setShowTemplatePicker] = useState(false);
