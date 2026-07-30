@@ -323,7 +323,7 @@ export default function Home() {
           >
             <Bell className="w-5 h-5 text-white/70" />
             {unreadCount > 0 && (
-              <div className="absolute top-0 right-0 w-3 h-3 bg-[#FF453A] rounded-full border-2 border-[#0A0A0C] shadow-[0_0_8px_#FF453A]" />
+              <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-[#FF453A] rounded-full shadow-[0_0_8px_#FF453A]" />
             )}
           </button>
         </div>

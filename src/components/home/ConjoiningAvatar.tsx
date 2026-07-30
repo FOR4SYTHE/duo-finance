@@ -18,44 +18,44 @@ export function ConjoiningAvatar({ onTap }: ConjoiningAvatarProps) {
       className="relative flex items-center justify-center focus:outline-none touch-none"
     >
       {isShared ? (
-        <div className="relative w-[72px] h-[40px] flex items-center justify-center">
+        <div className="relative w-[76px] h-[44px] flex items-center justify-center">
           <svg width="0" height="0" className="absolute hidden">
             <filter id="gooey-effect-avatar">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
               <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo" />
             </filter>
           </svg>
 
           {/* Background Gooey Layer */}
           <div className="absolute inset-0 flex items-center justify-center z-0" style={{ filter: 'url(#gooey-effect-avatar)' }}>
-            <div className="absolute left-[-2px] w-[44px] h-[44px] rounded-full bg-[#068562]" />
-            <div className="absolute right-[-2px] w-[44px] h-[44px] rounded-full bg-[#068562]" />
-            <div className="absolute w-[40px] h-[28px] bg-[#013F4A]" />
+            <div className="absolute left-[-2px] top-[-2px] w-[48px] h-[48px] rounded-full bg-[#068562]" />
+            <div className="absolute right-[-2px] top-1/2 -translate-y-1/2 w-[32px] h-[32px] rounded-full bg-[#068562]" />
+            <div className="absolute w-[36px] h-[24px] bg-[#013F4A] top-1/2 -translate-y-1/2" />
           </div>
 
-          {/* Foreground Sharp Avatars — static positioning, no infinite Framer Motion */}
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            {/* Left Avatar (User) */}
+          {/* Foreground Sharp Avatars */}
+          <div className="absolute inset-0 z-10">
+            {/* Left Avatar (User) - BIGGER */}
             <div
-              className="absolute left-0 w-[40px] h-[40px] rounded-full border border-[#0a0a0a]/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] overflow-hidden bg-[#1c1c1e] flex items-center justify-center"
+              className="absolute left-0 top-0 w-[44px] h-[44px] rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] overflow-hidden bg-[#1c1c1e] flex items-center justify-center"
             >
               {user?.avatar ? (
                 <img src={user.avatar} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-[#1c1c1e] flex items-center justify-center text-white text-[15px] font-bold select-none">
+                <div className="w-full h-full bg-[#1c1c1e] flex items-center justify-center text-white text-[16px] font-bold select-none">
                   {user?.name?.[0]?.toUpperCase() || "U"}
                 </div>
               )}
             </div>
 
-            {/* Right Avatar (Partner) */}
+            {/* Right Avatar (Partner) - SMALLER */}
             <div
-              className="absolute right-0 w-[40px] h-[40px] rounded-full border border-[#0a0a0a]/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] overflow-hidden bg-[#1c2c24] flex items-center justify-center"
+              className="absolute right-0 top-1/2 -translate-y-1/2 w-[28px] h-[28px] rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] overflow-hidden bg-[#1c2c24] flex items-center justify-center"
             >
               {partner?.avatar ? (
                 <img src={partner.avatar} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-[#1c2c24] flex items-center justify-center text-emerald-400 text-[15px] font-bold select-none">
+                <div className="w-full h-full bg-[#1c2c24] flex items-center justify-center text-emerald-400 text-[11px] font-bold select-none">
                   {partner?.name?.[0]?.toUpperCase() || "P"}
                 </div>
               )}
