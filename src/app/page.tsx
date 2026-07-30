@@ -92,12 +92,8 @@ export default function Home() {
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setShowInsuranceFamily(prev => !prev);
-    }, 4500);
-    return () => clearInterval(interval);
-  }, []);
+  // setInterval removed — it was re-rendering the entire Home component tree every 4.5s.
+  // showInsuranceFamily toggle is not visually used anywhere currently.
 
   useEffect(() => {
     if (_hasHydrated && config.lastSeenMonth) {
@@ -315,7 +311,7 @@ export default function Home() {
           
           <button 
             onClick={() => setShowNotifCenter(true)}
-            className="w-10 h-10 rounded-full bg-white/[0.04] backdrop-blur-md flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.08] transition-colors relative"
+            className="w-10 h-10 rounded-full bg-[#1A1A1E]/80 flex items-center justify-center border border-white/[0.06] hover:bg-white/[0.08] transition-colors relative shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
           >
             <Bell className="w-5 h-5 text-white/70" />
             {unreadCount > 0 && (
@@ -430,30 +426,41 @@ export default function Home() {
           <div className="aspect-[5/3] rounded-[32px] p-1.5 relative bg-gradient-to-b from-white/10 to-white/5 shadow-[0_12px_32px_rgba(0,0,0,0.5)] flex">
             <div className="flex-1 bg-gradient-to-b from-[#1C1C1E] to-[#151516] rounded-[26px] p-5 relative flex flex-col items-center justify-center border border-black/50 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)]">
               {/* Top Center Mini Icon */}
-              <motion.div 
-                animate={{ y: [-2, 2, -2], x: [-0.5, 0.5, -0.5] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              {/* CSS keyframe float — runs on compositor thread, not main JS thread */}
+              <div 
                 className="mb-2 relative z-10"
+                style={{ animation: 'gentle-float 5s ease-in-out infinite' }}
               >
                 <div className="w-7 h-7 rounded-full bg-gradient-to-b from-[#2A2A2C] to-[#1A1A1C] flex items-center justify-center border border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
                   <Shield className="w-3.5 h-3.5 text-[#30D158]" />
                 </div>
-              </motion.div>
+              </div>
 
               <p className="text-[#E5E5E5] text-[15px] font-medium leading-[1.3] text-center tracking-tight relative z-10 px-1">
                 <span className="text-white/40">Prioritize your</span><br/>emergency fund first this month.
               </p>
 
-              {/* Floating Right Mini Squircle */}
-              <motion.div 
-                animate={{ y: [-3, 3, -3], rotate: [3, 9, 3] }}
-                transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+              {/* Floating Right Mini Squircle — CSS keyframe, not Framer Motion */}
+              <div 
                 className="absolute right-4 bottom-5 w-7 h-7 rounded-[8px] bg-gradient-to-br from-white/30 to-white/5 p-[1px] shadow-[0_8px_16px_rgba(0,0,0,0.4)] z-20"
+                style={{ animation: 'gentle-float-delayed 6.5s ease-in-out infinite' }}
               >
                 <div className="w-full h-full bg-[#1A1A1C] rounded-[7px] flex items-center justify-center">
                    <PiggyBank className="w-4 h-4 text-[#FF9F0A]" strokeWidth={2.5} />
                 </div>
-              </motion.div>
+              </div>
+
+              {/* CSS keyframes for floating — compositor thread, zero main-thread cost */}
+              <style jsx>{`
+                @keyframes gentle-float {
+                  0%, 100% { transform: translateY(-2px) translateX(-0.5px); }
+                  50% { transform: translateY(2px) translateX(0.5px); }
+                }
+                @keyframes gentle-float-delayed {
+                  0%, 100% { transform: translateY(-3px) rotate(3deg); }
+                  50% { transform: translateY(3px) rotate(9deg); }
+                }
+              `}</style>
             </div>
           </div>
 
@@ -479,7 +486,7 @@ export default function Home() {
                <span className="text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase ml-2 flex items-center">
                    CASHBACK
                    <span 
-                       className="ml-1.5 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-500 drop-shadow-[0_0_6px_rgba(129,140,248,0.5)] animate-hue-spin"
+                       className="ml-1.5 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-500 drop-shadow-[0_0_6px_rgba(129,140,248,0.5)]"
                    >
                        AI
                    </span>

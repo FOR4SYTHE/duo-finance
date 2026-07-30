@@ -11,13 +11,6 @@ export function ConjoiningAvatar({ onTap }: ConjoiningAvatarProps) {
   const { user, partner } = useAuthStore();
   const isShared = !!partner;
 
-  // Animation values for extremely subtle breathing/floating
-  const duration = 10;
-  const bounceLeft = { x: [-0.3, 0.3, -0.3], y: [0, 0.2, 0] };
-  const bounceRight = { x: [0.3, -0.3, 0.3], y: [0, -0.2, 0] };
-  const transitionL: any = { duration, repeat: Infinity, ease: "easeInOut" };
-  const transitionR: any = { duration, repeat: Infinity, ease: "easeInOut", delay: 0.1 };
-
   return (
     <motion.button
       whileTap={{ scale: 0.94 }}
@@ -26,34 +19,19 @@ export function ConjoiningAvatar({ onTap }: ConjoiningAvatarProps) {
     >
       {isShared ? (
         <div className="relative w-[72px] h-[40px] flex items-center justify-center">
-          {/* SVG Filter for subtle Gooey Effect */}
-          <svg width="0" height="0" className="absolute hidden">
-            <filter id="home-gooey">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur" />
-              <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
-            </filter>
-          </svg>
-
-          {/* Background Gooey Layer (The Bridge) */}
-          <div className="absolute inset-0 flex items-center justify-center z-0" style={{ filter: 'url(#home-gooey)' }}>
-            <motion.div
-              animate={bounceLeft}
-              transition={transitionL}
-              className="absolute w-[44px] h-[44px] rounded-full bg-[#183626] left-[-2px]"
-            />
-            <motion.div
-              animate={bounceRight}
-              transition={transitionR}
-              className="absolute w-[44px] h-[44px] rounded-full bg-[#183626] right-[-2px]"
-            />
+          {/* 
+            Gooey bridge effect via CSS only — no SVG feGaussianBlur filter.
+            A dark pill shape behind the overlapping avatars creates
+            the "conjoined" look without any per-frame filter re-rasterization.
+          */}
+          <div className="absolute inset-0 flex items-center justify-center z-0">
+            <div className="absolute w-[70px] h-[36px] rounded-full bg-[#183626] shadow-[0_0_8px_4px_rgba(24,54,38,0.6)]" />
           </div>
 
-          {/* Foreground Sharp Avatars */}
+          {/* Foreground Sharp Avatars — static positioning, no infinite Framer Motion */}
           <div className="absolute inset-0 flex items-center justify-center z-10">
             {/* Left Avatar (User) */}
-            <motion.div
-              animate={bounceLeft}
-              transition={transitionL}
+            <div
               className="absolute left-0 w-[40px] h-[40px] rounded-full border-[2px] border-[#0A0A0C] overflow-hidden bg-[#111] shadow-[0_4px_12px_rgba(0,0,0,0.5)] flex items-center justify-center"
             >
               {user?.avatar ? (
@@ -63,12 +41,10 @@ export function ConjoiningAvatar({ onTap }: ConjoiningAvatarProps) {
                   {user?.name?.[0]?.toUpperCase() || "U"}
                 </div>
               )}
-            </motion.div>
+            </div>
 
             {/* Right Avatar (Partner) */}
-            <motion.div
-              animate={bounceRight}
-              transition={transitionR}
+            <div
               className="absolute right-0 w-[40px] h-[40px] rounded-full border-[2px] border-[#0A0A0C] overflow-hidden bg-[#111] shadow-[0_4px_12px_rgba(0,0,0,0.5)] flex items-center justify-center"
             >
               {partner?.avatar ? (
@@ -78,7 +54,7 @@ export function ConjoiningAvatar({ onTap }: ConjoiningAvatarProps) {
                   {partner?.name?.[0]?.toUpperCase() || "P"}
                 </div>
               )}
-            </motion.div>
+            </div>
           </div>
         </div>
       ) : (

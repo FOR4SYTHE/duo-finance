@@ -98,11 +98,17 @@ export function AnimatedPiggyBank() {
 
   return (
     <>
-      {/* Dynamic Background Glow based on State */}
-      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none transition-colors duration-1000">
-        {currentState === "danger" && <div className="absolute inset-0 bg-[#FF453A] blur-3xl animate-pulse" />}
-        {currentState === "warning" && <div className="absolute inset-0 bg-[#FF9F0A] blur-3xl" />}
-      </div>
+      {/* Dynamic Background Glow — box-shadow inset, no blur-3xl or animate-pulse */}
+      <div 
+        className="absolute inset-0 z-0 pointer-events-none rounded-[inherit] transition-shadow duration-1000"
+        style={{
+          boxShadow: currentState === "danger" 
+            ? "inset 0 0 60px rgba(255,69,58,0.15)" 
+            : currentState === "warning" 
+            ? "inset 0 0 60px rgba(255,159,10,0.12)" 
+            : "none"
+        }}
+      />
 
       {/* Falling Coins (Layered above everything: z-30) */}
       <div className="absolute inset-0 overflow-hidden z-[30] pointer-events-none">

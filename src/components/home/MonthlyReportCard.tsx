@@ -226,7 +226,7 @@ export function MonthlyReportCard() {
           {/* Top Row: Budget overlay + overflow */}
           <div className="flex justify-between items-start w-full">
             {/* Budget Status Pill - Apple Ultra Luxury Dark Glass (Floating Overlay) */}
-            <div className={`absolute top-5 left-5 z-20 bg-black/40 backdrop-blur-2xl rounded-[20px] px-4 py-3 border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.2)] flex flex-col gap-1 min-w-[145px] transition-opacity duration-300 ${isAdjusting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <div className={`absolute top-5 left-5 z-20 bg-[#0A0A0A]/75 rounded-[20px] px-4 py-3 border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col gap-1 min-w-[145px] transition-opacity duration-300 ${isAdjusting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
               <div className="flex items-center gap-2 mb-0.5">
                 <div
                   className="w-1.5 h-1.5 rounded-full"
@@ -277,7 +277,7 @@ export function MonthlyReportCard() {
               className={`actions-container flex items-center gap-1.5 z-30 pointer-events-auto transition-opacity duration-300 ${isAdjusting ? 'opacity-100' : ''}`}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center bg-white/5 backdrop-blur-xl rounded-full border border-white/10 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)] p-0.5">
+              <div className="flex items-center bg-[#1A1A1E]/80 rounded-full border border-white/10 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)] p-0.5">
                 {/* Adjust Photo Position Button */}
                 {customPhotoUrl && (
                   <>
@@ -343,7 +343,7 @@ export function MonthlyReportCard() {
               {!isAdjusting && (
                 <button
                   onClick={handleOverflowTap}
-                  className="w-9 h-9 rounded-full bg-white/5 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1)] hover:bg-white/10 transition-colors"
+                  className="w-9 h-9 rounded-full bg-[#1A1A1E]/80 flex items-center justify-center border border-white/20 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1)] hover:bg-white/10 transition-colors"
                 >
                   <MoreHorizontal className="w-4 h-4 text-white/80" />
                 </button>
@@ -368,7 +368,7 @@ export function MonthlyReportCard() {
 
             {/* Entry count badge - Bottom Right */}
             <div className="absolute bottom-2 right-0 z-20">
-              <span className="bg-black/40 backdrop-blur-xl text-white/90 text-[10px] font-medium px-3.5 py-1.5 rounded-full border border-white/20 shadow-[0_4px_10px_rgba(0,0,0,0.2)]">
+              <span className="bg-[#0A0A0A]/70 text-white/90 text-[10px] font-medium px-3.5 py-1.5 rounded-full border border-white/20 shadow-[0_4px_10px_rgba(0,0,0,0.2)]">
                 {monthEntries.length} entries logged
               </span>
             </div>

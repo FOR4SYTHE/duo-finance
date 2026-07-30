@@ -63,10 +63,38 @@ If a UI change can't honestly clear all four, it goes back for another pass befo
 **STRICT EDIT SCOPE & ISOLATION RULE:** When performing UI modifications or bug fixes, NEVER touch, alter, or refactor anything outside of the specific target component/task requested by the user. Do not make collateral visual adjustments to adjacent cards, headers, or global styles. Unrequested modifications introduce small breaks and unnecessary regression loops.
 
 **Performance & Rendering Guardrails (Mobile/Tablet Optimization) — MANDATORY:**
-- **PERFORMANCE AUDIT RULE:** Everything built moving forward MUST undergo a performance audit before completion. The UI must remain buttery smooth, lite, and fast at all times. No heavy main-thread blocking, no unoptimized reflows.
-- **No Excessive CSS `backdrop-blur` on Mapped/Repeated Items:** `backdrop-blur` (e.g. `backdrop-blur-3xl`, `backdrop-blur-xl`) applied to dynamic list rows or repeated cards causes severe GPU thrashing and frame drops on tablets and mobile devices. Use solid, semi-opaque backgrounds (e.g., `#1c1c1e`, `#0a0a0a`) with subtle borders and inset highlights for depth instead. Reserve heavy blurs *strictly* for single-instance, static headers (like the Dynamic Island hero card).
-- **No Framer Motion `layout` Thrashing on Swipable Lists:** Do not add `layout` props directly to mapped draggable or swappable items in dynamic lists. Avoid `filter: blur(...)` during Framer Motion `initial`/`animate`/`exit` entrance transitions. Use snappy `tween` easeOut transitions (0.1s–0.2s) for gestures rather than heavy, squishy spring physics.
+
+> **Target device baseline:** Huawei MatePad SE (Unisoc T770, Mali-G57 MP2 — budget GPU, 2 shader cores). If it runs at 60 fps on this device, it will run everywhere. Every rule below exists because a specific violation was found during a full audit that caused real, measurable lag on this hardware.
+
+- **PERFORMANCE AUDIT RULE:** Everything built moving forward MUST undergo a performance audit before completion. The UI must remain buttery smooth, lite, and fast at all times. No heavy main-thread blocking, no unoptimized reflows. Before marking any UI work as done, test with Chrome DevTools **4× CPU throttle** enabled — if it stutters there, it will be unusable on the MatePad.
+
+- **GPU Compositor Layer Budget — Max 5 concurrent layers per page at rest.** Each `backdrop-blur`, `filter`, `mix-blend-mode`, `will-change: transform` (when actively composited), and WebGL `<canvas>` creates a GPU compositor layer. Desktop GPUs handle 24+ layers invisibly; the Mali-G57 MP2 chokes above ~5. Count layers before declaring a page done.
+
+- **No `backdrop-blur` on persistently visible or always-on-screen elements.** This includes the bottom navigation bar, sticky headers, notification bell buttons, action toolbars, and any element visible during scroll. Use solid semi-opaque backgrounds instead (e.g. `bg-[#0A0A0A]/90`, `bg-[#1C1C1E]/80`). Reserve `backdrop-blur` *exclusively* for single-instance, user-triggered overlays (modals, sheets) that appear briefly and dismiss — never for resting-state UI that composites over scrolling content every frame.
+
+- **No Excessive CSS `backdrop-blur` on Mapped/Repeated Items:** `backdrop-blur` (e.g. `backdrop-blur-3xl`, `backdrop-blur-xl`) applied to dynamic list rows or repeated cards causes severe GPU thrashing and frame drops on tablets and mobile devices. Use solid, semi-opaque backgrounds (e.g., `#1c1c1e`, `#0a0a0a`) with subtle borders and inset highlights for depth instead.
+
+- **No WebGL shaders or `<canvas>`-based effects in always-visible UI.** Libraries like `metal-fx` (animated WebGL metal shader) run `requestAnimationFrame` loops with full GPU shader pipelines every single frame. On a budget GPU, this alone can consume 40-60% of available GPU capacity. WebGL is acceptable ONLY for user-triggered, single-instance, temporary features (e.g. a one-time celebration animation) — never in persistent navigation, headers, or any component that remains mounted across route changes.
+
+- **No `repeat: Infinity` Framer Motion animations for decorative/ambient motion.** Framer Motion animations run on the **main JavaScript thread**, not the GPU compositor thread. Multiple simultaneous infinite Framer Motion animations (floating icons, breathing effects, ambient rotations) block the main thread and cause jank during scroll and interaction. For ambient/decorative motion that must loop, use **CSS `@keyframes`** with `will-change: transform` instead — CSS animations run on the compositor thread and are free from main-thread contention. If a decorative animation is only visible when the element is in viewport, gate it with `IntersectionObserver` or Framer Motion's `whileInView`.
+
+- **No SVG `feGaussianBlur` or `feColorMatrix` filters on animated elements.** SVG filter chains (`feGaussianBlur`, gooey effects via `feColorMatrix`) force per-frame CPU-side rasterization when combined with any animation. The gooey "liquid merge" effect between avatar circles, for example, re-rasterizes the entire SVG filter pipeline on every animation tick. Pre-render such effects as static images/SVGs, or achieve similar visual effects with CSS `border-radius` overlap and `box-shadow`.
+
+- **No `mix-blend-mode` on more than 2 stacked elements.** Each `mix-blend-screen`, `mix-blend-multiply`, etc. forces its element into a separate compositor layer with per-frame blending calculations. Stacking 6+ blend-mode elements (as in orbital ring effects) is catastrophic on budget GPUs. Pre-composite complex visual effects into a single PNG/WebP asset and apply color changes via CSS `filter: hue-rotate()` or `opacity` if needed.
+
+- **No `filter: hue-rotate()` infinite CSS animations.** `hue-rotate()` forces the element into its own compositor layer and re-renders the filter every frame, indefinitely. Use a static CSS gradient instead. The visual difference on small text labels is imperceptible; the GPU cost is not.
+
+- **No `blur-3xl` (64px) combined with `animate-pulse` or any infinite animation.** A full-element Gaussian blur at 64px radius must re-render every frame the opacity/scale changes. Replace with `box-shadow: inset 0 0 60px rgba(...)` for glow effects — visually equivalent, zero compositor cost, and does not re-render on animation ticks.
+
+- **No `setInterval` or `setTimeout` that calls `setState` in large component trees.** A `setInterval` toggling state in a parent component (like Home) causes the entire subtree (all cards, all animations, all children) to re-render on every tick. If periodic state changes are needed, isolate them into the smallest possible leaf component so re-render scope is minimal.
+
+- **No Framer Motion `layout` Thrashing on Swipable Lists:** Do not add `layout` props directly to mapped draggable or swappable items in dynamic lists. Avoid `filter: blur(...)` during Framer Motion `initial`/`animate`/`exit` entrance transitions. Use snappy `tween` easeOut transitions (0.1s–0.2s) for gestures rather than heavy, squishy spring physics. Reserve `layout` and `layoutId` for at most 1-2 elements per page that genuinely animate between positions (e.g. an active tab indicator), not for decorative purposes.
+
+- **No oversized rotating elements for border effects.** A 300% × 300% div rotating via Framer Motion (as in `BorderBeam`) wastes GPU memory on the oversized texture and runs the rotation on the main thread. Use CSS `@keyframes rotate` on a properly sized element, or replace with a static gradient border.
+
 - **Viewport-Fixed Modals (`fixed` vs `absolute`):** All modal sheets, inline calculators, numpads, and dropdown overlays MUST use `fixed` positioning with viewport-relative constraints (`dvh`, `-translate-y-1/2`) rather than `absolute` positioning inside fluid/scrollable containers. Absolute positioning breaks when list heights shrink or stretch.
+
+- **`prefers-reduced-motion` must be respected.** Wrap all decorative animations (CSS and Framer Motion) in a `prefers-reduced-motion` media query or Framer Motion's `useReducedMotion()` hook. When reduced motion is preferred, skip to the final state instantly. This is both an accessibility requirement and a performance safety valve for users on underpowered hardware.
 
 ---
 

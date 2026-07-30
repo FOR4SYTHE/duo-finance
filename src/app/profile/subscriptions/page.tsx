@@ -24,7 +24,7 @@ export default function SubscriptionsPage() {
     <div className="w-full h-[100dvh] overflow-hidden bg-[#000000] text-white font-sans selection:bg-white/10 flex flex-col relative pb-4">
       
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-black/60 backdrop-blur-xl border-b border-white/5 px-6 pt-14 pb-4 flex items-center justify-between">
+      <div className="sticky top-0 z-50 bg-[#050505]/95 border-b border-white/5 px-6 pt-14 pb-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => router.back()}

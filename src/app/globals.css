@@ -18,11 +18,10 @@
   --color-status-warn: #FF9F0A;
   --color-status-danger: #FF453A;
 
-  --animate-hue-spin: hue-spin 4s linear infinite;
-  @keyframes hue-spin {
-    from { filter: hue-rotate(0deg); }
-    to { filter: hue-rotate(360deg); }
-  }
+
+  /* hue-spin removed — filter: hue-rotate() infinite animations
+     force a per-frame GPU compositor layer re-render.
+     Use a static gradient for the AI badge instead. */
 }
 
 @layer base {

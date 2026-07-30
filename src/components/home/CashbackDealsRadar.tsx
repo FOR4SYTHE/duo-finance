@@ -90,10 +90,10 @@ const DealCard = ({ deal, index, getBrandColor, getBrandArtwork, handleCopy, cop
               <div className="flex items-center gap-3 mt-auto pt-2">
                 <button
                     onClick={() => handleCopy(deal.id, deal.code)}
-                    className={`flex items-center justify-center w-11 h-11 rounded-full transition-all overflow-hidden relative backdrop-blur-md shadow-md ${
-                    copiedId === deal.id 
-                        ? "bg-[#34C759] text-white" 
-                        : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
+                    className={`flex items-center justify-center w-11 h-11 rounded-full transition-all overflow-hidden relative shadow-md ${
+                        copiedId === deal.id 
+                            ? 'bg-[#34C759] text-white' 
+                            : 'bg-[#1C1C1E] text-white border border-white/10 hover:bg-[#2C2C2E]'
                     }`}
                     title="Copy Promo Code"
                 >
@@ -131,7 +131,7 @@ const DealCard = ({ deal, index, getBrandColor, getBrandArtwork, handleCopy, cop
           
           {/* Hot Badge Overlay */}
           {deal.hot && (
-              <div className="absolute top-6 right-6 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 border border-[#FF9500]/30 backdrop-blur-md shadow-lg">
+              <div className="absolute top-6 right-6 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1A1A1E]/80 border border-[#FF9500]/30 shadow-lg">
                   <Flame className="w-3.5 h-3.5 text-[#FF9500]" />
                   <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#FF9500]">Hot</span>
               </div>
@@ -402,7 +402,7 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                 </div>
                 ) : filteredDeals.length > 0 ? (
                 <div className="flex flex-col gap-0 relative pt-2">
-                    <div className="flex items-center gap-2 mb-4 px-2 sticky top-0 z-50 bg-[#0A0A0C]/80 backdrop-blur-md py-2 -mx-2">
+                    <div className="flex items-center gap-2 mb-4 px-2 sticky top-0 z-50 bg-[#050505]/95 py-2 -mx-2">
                         <span className="text-white/50 text-xs font-bold tracking-widest uppercase ml-2">
                             Here are some of the deals in {location || 'the Philippines'}
                         </span>

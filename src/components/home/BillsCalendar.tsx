@@ -218,7 +218,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
     >
       <div className="w-full max-w-xl mx-auto min-h-full pb-12">
         {/* Header */}
-        <div className="sticky top-0 z-20 bg-[#050505]/90 backdrop-blur-xl px-6 pt-14 pb-4 flex items-center justify-between border-b border-white/[0.04]">
+        <div className="sticky top-0 z-20 bg-[#050505]/95 px-6 pt-14 pb-4 flex items-center justify-between border-b border-white/[0.04]">
           <h1 className="text-xl font-light text-white tracking-tight">
             Bills & Calendar
           </h1>

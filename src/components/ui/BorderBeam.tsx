@@ -1,7 +1,14 @@
 "use client";
 
-import { motion } from "framer-motion";
 import React from "react";
+
+/**
+ * BorderBeam — animated border glow via CSS @keyframes.
+ * 
+ * Uses a CSS rotation animation on the compositor thread instead
+ * of Framer Motion (which runs on the main JS thread).
+ * The element is properly sized (no 300% oversized div).
+ */
 
 interface BorderBeamProps {
   className?: string;
@@ -14,18 +21,15 @@ interface BorderBeamProps {
 
 export function BorderBeam({
   className = "",
-  size = 200,
   duration = 8,
-  colorFrom = "#FF9F0A", // Match the amber color for due today
+  colorFrom = "#FF9F0A",
   colorTo = "transparent",
   borderWidth = 1.5,
 }: BorderBeamProps) {
   return (
     <div
       className={`absolute inset-0 pointer-events-none rounded-[inherit] overflow-hidden ${className}`}
-      style={{
-        zIndex: 0,
-      }}
+      style={{ zIndex: 0 }}
     >
       <div 
         className="absolute inset-0 rounded-[inherit]"
@@ -37,23 +41,28 @@ export function BorderBeam({
           WebkitMaskComposite: "destination-out",
         }}
       >
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{
-            repeat: Infinity,
-            ease: "linear",
-            duration: duration,
-          }}
-          className="absolute inset-[-100%]"
+        {/* CSS keyframe rotation — runs on compositor thread, not main JS thread */}
+        <div
+          className="absolute inset-[-50%]"
           style={{
             background: `conic-gradient(from 90deg at 50% 50%, ${colorTo} 0%, ${colorTo} 50%, ${colorFrom} 100%)`,
-            width: "300%",
-            height: "300%",
-            top: "-100%",
-            left: "-100%",
+            width: "200%",
+            height: "200%",
+            top: "-50%",
+            left: "-50%",
+            animation: `border-beam-rotate ${duration}s linear infinite`,
+            willChange: "transform",
           }}
         />
       </div>
+
+      {/* Inject the CSS keyframe once — no Framer Motion needed */}
+      <style jsx>{`
+        @keyframes border-beam-rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

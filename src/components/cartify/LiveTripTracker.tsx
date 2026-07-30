@@ -270,30 +270,46 @@ export function LiveTripTracker() {
                             style={{ backgroundColor: getOrbColor() }}
                         />
                         
-                        {/* Orb Core (A soft hazy energy cloud) */}
-                        <div className="w-[32px] h-[32px] rounded-full relative z-20 mix-blend-screen">
+                        {/* Orb Core — single element, no mix-blend-screen stack */}
+                        <div className="w-[32px] h-[32px] rounded-full relative z-20">
                             <div 
                                 className="w-full h-full rounded-full blur-[12px] opacity-90 transition-colors duration-1000 ease-in-out"
                                 style={{ backgroundColor: getOrbColor() }}
                             />
                         </div>
                         
-                        {/* Soft Glowing Atom Rings */}
-                        <motion.div 
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
+                        {/* Simplified Atom Rings — CSS keyframe, 2 elements max (not 6) */}
+                        <div
                             className="absolute inset-0 m-auto flex items-center justify-center pointer-events-none"
+                            style={{ animation: 'orb-rotate 24s linear infinite', willChange: 'transform' }}
                         >
-                            {/* Loop 1 */}
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-90 mix-blend-screen blur-[2.5px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-60 mix-blend-screen blur-[6px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-30 mix-blend-screen blur-[12px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(25deg)' }} />
-                            
-                            {/* Loop 2 */}
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-90 mix-blend-screen blur-[2.5px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-60 mix-blend-screen blur-[6px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
-                            <div className="absolute w-[56px] h-[16px] rounded-[50%] border-[5px] opacity-30 mix-blend-screen blur-[12px] transition-colors duration-1000 ease-in-out" style={{ borderColor: getOrbColor(), transform: 'rotate(155deg)' }} />
-                        </motion.div>
+                            {/* Ring 1 — single element with box-shadow for soft glow, no mix-blend */}
+                            <div 
+                                className="absolute w-[56px] h-[16px] rounded-[50%] border-[4px] opacity-70 transition-colors duration-1000 ease-in-out" 
+                                style={{ 
+                                    borderColor: getOrbColor(), 
+                                    transform: 'rotate(25deg)',
+                                    boxShadow: `0 0 8px ${getOrbColor()}`
+                                }} 
+                            />
+                            {/* Ring 2 */}
+                            <div 
+                                className="absolute w-[56px] h-[16px] rounded-[50%] border-[4px] opacity-70 transition-colors duration-1000 ease-in-out" 
+                                style={{ 
+                                    borderColor: getOrbColor(), 
+                                    transform: 'rotate(155deg)',
+                                    boxShadow: `0 0 8px ${getOrbColor()}`
+                                }} 
+                            />
+                        </div>
+
+                        {/* CSS keyframe for rotation — compositor thread */}
+                        <style jsx>{`
+                            @keyframes orb-rotate {
+                                from { transform: rotate(0deg); }
+                                to { transform: rotate(360deg); }
+                            }
+                        `}</style>
                     </motion.div>
                 </div>
 

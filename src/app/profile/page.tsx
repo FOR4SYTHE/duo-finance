@@ -88,25 +88,23 @@ export default function ProfilePage() {
         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none z-0" />
         
         {/* Navigation */}
-        <motion.div layout="position" className="flex items-center justify-between mb-6 relative z-10">
-          <motion.button 
-            layout="position"
+        <div className="flex items-center justify-between mb-6 relative z-10">
+          <button 
             onClick={() => router.back()}
             className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors shadow-sm border-[0.5px] border-white/5"
           >
             <ChevronLeft className="w-6 h-6 pr-0.5" />
-          </motion.button>
-          <motion.div 
-            layout="position"
+          </button>
+          <div 
             onClick={() => document.getElementById('settings-section')?.scrollIntoView({ behavior: 'smooth' })}
             className="w-10 h-10 flex items-center justify-center text-white/50 hover:text-white transition-colors cursor-pointer bg-white/5 rounded-full border-[0.5px] border-white/5"
           >
              <Settings className="w-5 h-5" />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Interconnected Avatars & Info */}
-        <motion.div layout="position" className="flex flex-col items-center justify-center relative z-10">
+        <div className="flex flex-col items-center justify-center relative z-10">
           <div className="flex items-center justify-center mb-6">
             <input 
               type="file" 
@@ -161,9 +159,9 @@ export default function ProfilePage() {
               {partner && !isEditingAvatar && (
                 <motion.div 
                   className="absolute -top-1 -right-2 z-20 pointer-events-none"
-                  initial={{ y: 0 }}
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                   <div className="relative">
                     <div className="w-[42px] h-[42px] rounded-full border-[2.5px] border-[#0A0A0C] shadow-[0_8px_16px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden z-10 relative bg-gradient-to-b from-[#1C2C24] to-[#0A1A12]">
@@ -173,26 +171,11 @@ export default function ProfilePage() {
                          <span className="text-emerald-400 font-bold text-[16px] select-none">{partner?.name?.[0]?.toUpperCase() || 'P'}</span>
                        )}
                     </div>
-                    <motion.div 
-                      className="absolute -top-1.5 -left-1.5 w-3 h-3 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)] border-[1px] border-[#0A0A0C]"
-                      animate={{ y: [0, -3, 0], x: [0, -1, 0] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-                    />
-                    <motion.div 
-                      className="absolute top-1 -left-3 w-2 h-2 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] border-[1px] border-[#0A0A0C]"
-                      animate={{ y: [0, -2, 0], x: [0, -2, 0] }}
-                      transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                    />
-                    <motion.div 
-                      className="absolute -bottom-1 -right-1.5 w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] border-[1px] border-[#0A0A0C]"
-                      animate={{ y: [0, 2, 0], x: [0, 1, 0] }}
-                      transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
-                    />
-                    <motion.div 
-                      className="absolute bottom-2 -right-2.5 w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] border-[1px] border-[#0A0A0C]"
-                      animate={{ y: [0, 3, 0], x: [0, 2, 0] }}
-                      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.7 }}
-                    />
+                    {/* Static positioned dots — no infinite Framer Motion floats */}
+                    <div className="absolute -top-1.5 -left-1.5 w-3 h-3 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)] border-[1px] border-[#0A0A0C]" />
+                    <div className="absolute top-1 -left-3 w-2 h-2 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] border-[1px] border-[#0A0A0C]" />
+                    <div className="absolute -bottom-1 -right-1.5 w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] border-[1px] border-[#0A0A0C]" />
+                    <div className="absolute bottom-2 -right-2.5 w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#30D158] to-[#1E8F3C] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] border-[1px] border-[#0A0A0C]" />
                   </div>
                 </motion.div>
               )}
@@ -234,10 +217,10 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <motion.h2 layout="position" className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1">
+          <h2 className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1">
             {user?.name || 'You'} {partner ? `& ${partner.name}` : ''}
-          </motion.h2>
-          <motion.p layout="position" className="text-[14px] text-white/50 mb-7 font-medium">{user?.email || 'user@example.com'}</motion.p>
+          </h2>
+          <p className="text-[14px] text-white/50 mb-7 font-medium">{user?.email || 'user@example.com'}</p>
           
           {partner ? (
             <div className="flex flex-col items-center gap-4">
@@ -380,7 +363,7 @@ export default function ProfilePage() {
               </AnimatePresence>
             </div>
           )}
-        </motion.div>
+        </div>
       </motion.div>
 
       <div className="px-6 pt-10 pb-32 z-10 flex flex-col shrink-0">
@@ -566,7 +549,7 @@ export default function ProfilePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 backdrop-blur-3xl"
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95"
           >
             {/* SVG Filter for Metaballs */}
             <svg width="0" height="0" className="absolute hidden">

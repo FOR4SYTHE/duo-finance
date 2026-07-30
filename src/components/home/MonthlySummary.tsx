@@ -254,7 +254,7 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
     >
       <div className="w-full max-w-xl mx-auto min-h-full pb-12 relative z-10">
         {/* Header */}
-        <div className="sticky top-0 z-20 bg-black/60 backdrop-blur-2xl px-6 pt-14 pb-4 flex items-center justify-between border-b border-white/5">
+        <div className="sticky top-0 z-20 bg-[#050505]/95 px-6 pt-14 pb-4 flex items-center justify-between border-b border-white/5">
           <div>
             <h1 className="text-2xl font-light text-white tracking-tight">
               {monthName}
@@ -263,7 +263,7 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
           </div>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-colors shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+            className="w-10 h-10 rounded-full bg-[#1A1A1E]/80 flex items-center justify-center hover:bg-white/20 transition-colors shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
           >
             <X className="w-5 h-5 text-white/90" />
           </button>
@@ -286,7 +286,7 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
           <div className="px-6 pt-6 flex flex-col gap-6">
             {/* Status Banner */}
             <div
-              className="flex items-center p-3 pl-4 rounded-full border border-white/10 bg-white/5 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] relative overflow-hidden"
+              className="flex items-center p-3 pl-4 rounded-full border border-white/10 bg-[#111]/90 shadow-[0_8px_32px_rgba(0,0,0,0.36),_inset_0_1px_1px_rgba(255,255,255,0.05)] relative overflow-hidden"
             >
               <div 
                  className="absolute inset-0 opacity-[0.15]"

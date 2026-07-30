@@ -246,7 +246,7 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#D4AF37]/10 via-black to-black opacity-60 pointer-events-none" />
         
         {/* Header */}
-        <div className="sticky top-0 z-20 bg-[#0A0A0A]/80 backdrop-blur-2xl px-6 pt-14 pb-4 flex items-center justify-between border-b border-[#D4AF37]/10">
+        <div className="sticky top-0 z-20 bg-[#050505]/95 px-6 pt-14 pb-4 flex items-center justify-between border-b border-[#D4AF37]/10">
           <div>
             <h1 className="text-2xl font-light text-white tracking-tight flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[#D4AF37]" /> {year}
@@ -255,7 +255,7 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
           </div>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-[#D4AF37]/10 backdrop-blur-md flex items-center justify-center hover:bg-[#D4AF37]/20 transition-colors shadow-[inset_0_1px_1px_rgba(212,175,55,0.2)]"
+            className="w-10 h-10 rounded-full bg-[#1A1A1E]/80 flex items-center justify-center hover:bg-[#D4AF37]/20 transition-colors shadow-[inset_0_1px_1px_rgba(212,175,55,0.2)]"
           >
             <X className="w-5 h-5 text-[#D4AF37]" />
           </button>
@@ -275,7 +275,7 @@ export function YearlySummary({ year, onClose }: YearlySummaryProps) {
           <div className="px-6 pt-6 flex flex-col gap-6 relative z-10">
             {/* Status Banner */}
             <div
-              className="flex items-center p-3 pl-4 rounded-full border border-[#D4AF37]/20 bg-gradient-to-br from-[#111] to-black backdrop-blur-2xl shadow-[0_8px_32px_rgba(212,175,55,0.1),_inset_0_1px_1px_rgba(212,175,55,0.1)] relative overflow-hidden"
+              className="flex items-center p-3 pl-4 rounded-full border border-[#D4AF37]/20 bg-[#111]/90 shadow-[0_8px_32px_rgba(212,175,55,0.1),_inset_0_1px_1px_rgba(212,175,55,0.1)] relative overflow-hidden"
             >
               <div 
                  className="absolute inset-0 opacity-[0.1]"

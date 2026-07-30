@@ -14,7 +14,7 @@ export default function BiometricsPage() {
     <div className="w-full h-[100dvh] overflow-hidden bg-[#000000] text-white font-sans selection:bg-white/10 flex flex-col relative pb-4">
       
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-black/60 backdrop-blur-xl border-b border-white/5 px-6 pt-14 pb-4 flex items-center gap-4">
+      <div className="sticky top-0 z-50 bg-[#050505]/95 border-b border-white/5 px-6 pt-14 pb-4 flex items-center gap-4">
         <button 
           onClick={() => router.back()}
           className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors border-[0.5px] border-white/5 active:scale-95"
