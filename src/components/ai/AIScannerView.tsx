@@ -33,7 +33,7 @@ export function AIScannerView() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
     const { getSecondaryValue, primarySymbol, secondarySymbol } = useDualCurrency();
-    const { setActiveTab } = useAIChatStore();
+    const { setActiveTab, setScannerExpanded, setScannerHasResults } = useAIChatStore();
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -44,6 +44,9 @@ export function AIScannerView() {
         setIdentifiedItem(null);
         setListings([]);
         setIsScanning(true);
+        setScannerHasResults(false);
+        setIsSheetExpanded(false);
+        setScannerExpanded(false);
 
         try {
             // Read file as base64
@@ -72,6 +75,7 @@ export function AIScannerView() {
                     const data = await response.json();
                     setIdentifiedItem(data.item);
                     setListings(data.listings || []);
+                    setScannerHasResults(true);
                 } catch (err: any) {
                     setError(err.message || 'Error communicating with AI server.');
                 } finally {
@@ -90,6 +94,8 @@ export function AIScannerView() {
         setListings([]);
         setError(null);
         setIsSheetExpanded(false);
+        setScannerExpanded(false);
+        setScannerHasResults(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
@@ -233,8 +239,14 @@ export function AIScannerView() {
                                 dragConstraints={{ top: 0, bottom: 0 }}
                                 dragElastic={0.2}
                                 onDragEnd={(e, info) => {
-                                    if (info.offset.y < -50) setIsSheetExpanded(true); // Dragged up
-                                    if (info.offset.y > 50) setIsSheetExpanded(false); // Dragged down
+                                    if (info.offset.y < -50) {
+                                        setIsSheetExpanded(true); // Dragged up
+                                        setScannerExpanded(true);
+                                    }
+                                    if (info.offset.y > 50) {
+                                        setIsSheetExpanded(false); // Dragged down
+                                        setScannerExpanded(false);
+                                    }
                                 }}
                                 initial={{ y: '100%' }}
                                 animate={{ y: isSheetExpanded ? '0%' : '45vh' }}

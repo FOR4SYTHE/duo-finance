@@ -2,16 +2,25 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowUp, Loader2 } from 'lucide-react';
+import { Send, ArrowUp, Loader2, Copy, Share2, Check } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { buildHouseholdContext } from '@/lib/buildHouseholdContext';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export function AIChatView() {
     const { messages, isStreaming, addUserMessage, startAssistantMessage, appendToMessage, completeMessage, errorMessage, setStreaming, clearChat, isFirstVisit, userName } = useAIChatStore();
     const [inputValue, setInputValue] = useState('');
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isScrolledUp, setIsScrolledUp] = useState(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+
+    const handleCopy = (id: string, text: string) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
     
     // For randomized returning greetings without hydration errors
     const [greeting, setGreeting] = useState(`Ready to check your budget today, ${userName}?`);
@@ -152,16 +161,38 @@ export function AIChatView() {
                                             )}
                                         </div>
                                     )}
-                                    <div 
-                                        className={`px-4 py-3 rounded-[20px] text-[15px] leading-relaxed whitespace-pre-wrap shadow-sm ${
-                                            msg.role === 'user' 
-                                                ? 'bg-white text-black rounded-br-md' 
-                                                : 'bg-[#1C1C1E] text-white/90 rounded-bl-md border border-white/[0.05]'
-                                        } ${msg.status === 'error' ? 'border-red-500/30 text-red-400' : ''}`}
-                                    >
-                                        {msg.content}
-                                        {msg.status === 'streaming' && (
-                                            <span className="inline-block w-1.5 h-4 ml-1 bg-white/40 animate-pulse align-middle" />
+                                    <div className="flex flex-col gap-1">
+                                        <div 
+                                            className={`px-4 py-3 rounded-[20px] text-[15px] leading-relaxed shadow-sm ${
+                                                msg.role === 'user' 
+                                                    ? 'bg-white text-black rounded-br-md whitespace-pre-wrap' 
+                                                    : 'bg-[#1C1C1E] text-white/90 rounded-bl-md border border-white/[0.05] prose prose-invert prose-p:leading-relaxed prose-pre:bg-black/50 max-w-none'
+                                            } ${msg.status === 'error' ? 'border-red-500/30 text-red-400' : ''}`}
+                                        >
+                                            {msg.role === 'assistant' ? (
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                    {msg.content}
+                                                </ReactMarkdown>
+                                            ) : (
+                                                msg.content
+                                            )}
+                                            {msg.status === 'streaming' && (
+                                                <span className="inline-block w-1.5 h-4 ml-1 bg-white/40 animate-pulse align-middle" />
+                                            )}
+                                        </div>
+
+                                        {msg.role === 'assistant' && msg.status !== 'streaming' && (
+                                            <div className="flex items-center gap-4 px-2 mt-1">
+                                                <button 
+                                                    onClick={() => handleCopy(msg.id, msg.content)}
+                                                    className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors"
+                                                >
+                                                    {copiedId === msg.id ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                                </button>
+                                                <button className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors">
+                                                    <Share2 className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -211,47 +242,65 @@ export function AIChatView() {
                     )}
                 </AnimatePresence>
 
-                <div className="relative max-w-2xl mx-auto flex items-center bg-[#1C1C1E] rounded-[32px] border border-white/[0.05] shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden">
-                    {/* High-Performance CSS Mono Beam (Zero-Lag Replacement for BorderBeam) */}
-                    <div className="absolute top-0 left-[20%] right-[20%] h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent shadow-[0_0_15px_rgba(255,255,255,0.4)] opacity-80" />
-                    
-                    {/* Plus / Features Menu Button */}
-                    <button 
-                        className="w-12 h-12 flex items-center justify-center shrink-0 text-white/40 hover:text-white transition-colors relative z-10"
-                        onClick={() => {
-                            // Reserved for future: Upload Receipt, Voice, etc.
-                        }}
-                    >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </button>
-                    
-                    <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && !isStreaming && handleSend()}
-                        disabled={isStreaming}
-                        placeholder={isStreaming ? "DUO AI is thinking..." : "Ask DUO AI"}
-                        className="flex-1 py-4 bg-transparent text-white placeholder-white/40 focus:outline-none transition-all disabled:opacity-60 text-[15px] font-medium relative z-10"
-                    />
-                    
-                    <div className="pr-2 pl-1 flex items-center h-full relative z-10">
-                        <button
-                            onClick={() => handleSend()}
-                            disabled={!inputValue.trim() || isStreaming}
-                            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${!inputValue.trim() || isStreaming ? 'bg-white/10 text-white/30' : 'bg-white text-black shadow-md scale-105'}`}
+                <AnimatePresence mode="wait">
+                    {isStreaming ? (
+                        <motion.div 
+                            key="loading"
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                            className="flex justify-center items-center py-4"
                         >
-                            {isStreaming ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                                <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
-                            )}
-                        </button>
-                    </div>
-                </div>
+                            <div className="bg-[#1C1C1E] border border-white/[0.08] px-6 py-3 rounded-full flex items-center gap-3 shadow-[0_8px_30px_rgba(0,0,0,0.8)]">
+                                <DuoAIIcon className="w-5 h-5 animate-spin" forceState="star-idle" />
+                                <span className="text-[13px] font-medium text-white/90">Thinking...</span>
+                            </div>
+                        </motion.div>
+                    ) : (
+                        <motion.div 
+                            key="input"
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                            className="relative max-w-2xl mx-auto flex items-center bg-[#1C1C1E] rounded-[32px] border border-white/[0.05] shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden"
+                        >
+                            {/* High-Performance CSS Mono Beam */}
+                            <div className="absolute top-0 left-[20%] right-[20%] h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent shadow-[0_0_15px_rgba(255,255,255,0.4)] opacity-80" />
+                            
+                            {/* Plus / Features Menu Button */}
+                            <button 
+                                className="w-12 h-12 flex items-center justify-center shrink-0 text-white/40 hover:text-white transition-colors relative z-10"
+                                onClick={() => {}}
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                            
+                            <input
+                                type="text"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && !isStreaming && handleSend()}
+                                placeholder="Ask DUO AI"
+                                className="flex-1 py-4 bg-transparent text-white placeholder-white/40 focus:outline-none transition-all text-[15px] font-medium relative z-10"
+                            />
+                            
+                            <div className="pr-2 pl-1 flex items-center h-full relative z-10">
+                                <button
+                                    onClick={() => handleSend()}
+                                    disabled={!inputValue.trim()}
+                                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${!inputValue.trim() ? 'bg-white/10 text-white/30' : 'bg-white text-black shadow-md scale-105'}`}
+                                >
+                                    <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 <AnimatePresence>
                     {messages.length === 0 && (

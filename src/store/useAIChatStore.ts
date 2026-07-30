@@ -28,6 +28,12 @@ interface AIChatState {
     isFirstVisit: boolean;
     toggleFirstVisit: () => void;
     userName: string;
+    
+    // Scanner UI state for header coordination
+    isScannerHasResults: boolean;
+    setScannerHasResults: (hasResults: boolean) => void;
+    isScannerExpanded: boolean;
+    setScannerExpanded: (expanded: boolean) => void;
 }
 
 export const useAIChatStore = create<AIChatState>()(
@@ -94,6 +100,11 @@ export const useAIChatStore = create<AIChatState>()(
             toggleFirstVisit: () => set((state) => ({ isFirstVisit: !state.isFirstVisit })),
             
             userName: "Alex",
+            
+            isScannerHasResults: false,
+            setScannerHasResults: (hasResults) => set({ isScannerHasResults: hasResults }),
+            isScannerExpanded: false,
+            setScannerExpanded: (expanded) => set({ isScannerExpanded: expanded })
         }),
         {
             name: 'duo-ai-chat-storage',
