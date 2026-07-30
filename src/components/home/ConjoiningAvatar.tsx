@@ -19,25 +19,30 @@ export function ConjoiningAvatar({ onTap }: ConjoiningAvatarProps) {
     >
       {isShared ? (
         <div className="relative w-[72px] h-[40px] flex items-center justify-center">
-          {/* 
-            Gooey bridge effect via CSS only — no SVG feGaussianBlur filter.
-            A dark pill shape behind the overlapping avatars creates
-            the "conjoined" look without any per-frame filter re-rasterization.
-          */}
-          <div className="absolute inset-0 flex items-center justify-center z-0">
-            <div className="absolute w-[70px] h-[36px] rounded-full bg-[#183626] shadow-[0_0_8px_4px_rgba(24,54,38,0.6)]" />
+          <svg width="0" height="0" className="absolute hidden">
+            <filter id="gooey-effect-avatar">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+              <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo" />
+            </filter>
+          </svg>
+
+          {/* Background Gooey Layer */}
+          <div className="absolute inset-0 flex items-center justify-center z-0" style={{ filter: 'url(#gooey-effect-avatar)' }}>
+            <div className="absolute left-[-2px] w-[44px] h-[44px] rounded-full bg-[#068562]" />
+            <div className="absolute right-[-2px] w-[44px] h-[44px] rounded-full bg-[#068562]" />
+            <div className="absolute w-[40px] h-[28px] bg-[#013F4A]" />
           </div>
 
           {/* Foreground Sharp Avatars — static positioning, no infinite Framer Motion */}
           <div className="absolute inset-0 flex items-center justify-center z-10">
             {/* Left Avatar (User) */}
             <div
-              className="absolute left-0 w-[40px] h-[40px] rounded-full border-[2px] border-[#0A0A0C] overflow-hidden bg-[#111] shadow-[0_4px_12px_rgba(0,0,0,0.5)] flex items-center justify-center"
+              className="absolute left-0 w-[40px] h-[40px] rounded-full border border-[#0a0a0a]/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] overflow-hidden bg-[#1c1c1e] flex items-center justify-center"
             >
               {user?.avatar ? (
                 <img src={user.avatar} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-gradient-to-b from-[#2A2A2C] to-[#141416] flex items-center justify-center text-white text-[15px] font-bold select-none">
+                <div className="w-full h-full bg-[#1c1c1e] flex items-center justify-center text-white text-[15px] font-bold select-none">
                   {user?.name?.[0]?.toUpperCase() || "U"}
                 </div>
               )}
@@ -45,12 +50,12 @@ export function ConjoiningAvatar({ onTap }: ConjoiningAvatarProps) {
 
             {/* Right Avatar (Partner) */}
             <div
-              className="absolute right-0 w-[40px] h-[40px] rounded-full border-[2px] border-[#0A0A0C] overflow-hidden bg-[#111] shadow-[0_4px_12px_rgba(0,0,0,0.5)] flex items-center justify-center"
+              className="absolute right-0 w-[40px] h-[40px] rounded-full border border-[#0a0a0a]/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] overflow-hidden bg-[#1c2c24] flex items-center justify-center"
             >
               {partner?.avatar ? (
                 <img src={partner.avatar} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-gradient-to-b from-[#1C2C24] to-[#0A1A12] flex items-center justify-center text-emerald-400 text-[15px] font-bold select-none">
+                <div className="w-full h-full bg-[#1c2c24] flex items-center justify-center text-emerald-400 text-[15px] font-bold select-none">
                   {partner?.name?.[0]?.toUpperCase() || "P"}
                 </div>
               )}
