@@ -47,7 +47,7 @@ export function ChildCareOnboarding() {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-start h-[100dvh] overflow-hidden w-full px-6 pt-12 pb-24 no-scrollbar bg-[#0A0A0A]">
+    <div className="relative flex flex-col items-center justify-start h-[100dvh] overflow-hidden w-full px-6 pt-12 pb-8 no-scrollbar bg-[#0A0A0A]">
       {/* Fixed Background Layer to prevent black overscroll revealing the body background */}
       <div className="fixed inset-0 bg-[#0A0A0A] -z-10 pointer-events-none" />
       
@@ -114,20 +114,20 @@ export function ChildCareOnboarding() {
                   </div>
               </motion.header>
 
-              <h2 className="text-3xl font-black tracking-tight text-white mb-3 mt-10">
+              <h2 className="text-3xl font-black tracking-tight text-white mb-2 mt-6">
                 Shape their future.
               </h2>
-              <p className="text-white/60 font-medium mb-12 text-[15px] max-w-[260px] leading-relaxed">
+              <p className="text-white/60 font-medium mb-6 text-[15px] max-w-[260px] leading-relaxed">
                 A nurturing space to track, learn, and grow together.
               </p>
               
               {/* Slanted Polaroid Image */}
-              <div className="relative mb-14 mt-6 flex justify-center w-full">
+              <div className="relative mb-8 mt-2 flex justify-center w-full">
                 <motion.div 
                   initial={{ rotate: -10, scale: 0.9, opacity: 0 }}
                   animate={{ rotate: -5, scale: 1, opacity: 1 }}
                   transition={{ type: "spring", damping: 15, stiffness: 100 }}
-                  className="w-[200px] sm:w-[240px] bg-[#F9F9F9] p-2 sm:p-3 pb-10 sm:pb-12 rounded-sm shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)] border border-white/10 relative z-10"
+                  className="w-[170px] sm:w-[220px] bg-[#F9F9F9] p-2 pb-8 sm:p-3 sm:pb-12 rounded-sm shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)] border border-white/10 relative z-10"
                 >
                   <div className="relative w-full aspect-[512/770] bg-[#1A1A1A] overflow-hidden rounded-sm shadow-inner">
                     <img 
@@ -156,7 +156,7 @@ export function ChildCareOnboarding() {
               </div>
 
               {/* Progress Dots */}
-              <div className="flex justify-center gap-2 mb-8">
+              <div className="flex justify-center gap-2 mb-6">
                 {[1, 2, 3].map((s) => (
                   <div key={s} className={`h-1.5 rounded-full transition-all duration-500 ${step === s ? 'w-6 bg-[#FF7B54]' : 'w-1.5 bg-[#B9E0F2]/30'}`} />
                 ))}
