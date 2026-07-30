@@ -108,7 +108,7 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.4 }}
-                        className="text-[22px] text-white/90 font-semibold tracking-tight leading-snug mb-8 text-center text-balance max-w-[320px] mx-auto relative z-10"
+                        className="text-[17px] text-white/80 font-medium tracking-tight leading-relaxed mb-5 text-center text-balance max-w-[280px] mx-auto relative z-10"
                     >
                         Store your policies, understand your benefits, compare plans, and track medical expenses in one place.
                     </motion.h2>
@@ -117,7 +117,7 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.5 }}
-                        className="flex flex-wrap justify-center gap-2 mb-8 w-full px-4"
+                        className="flex flex-wrap justify-center gap-2 mb-6 w-full px-4"
                     >
                         {["Read Benefits", "Compare Plans", "Track Medical Visits", "Never Miss Renewals"].map((bullet, i) => (
                             <span key={i} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-white/60 text-[11px] font-bold tracking-wide">
@@ -130,7 +130,7 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.6 }}
-                        className="flex flex-col gap-3 w-full relative z-10 mb-6"
+                        className="flex flex-col gap-2.5 w-full relative z-10 mb-5"
                     >
                         <button 
                             onClick={onAddPlan}
@@ -151,25 +151,25 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.7 }}
-                        className="w-full flex flex-col gap-2 relative z-10"
+                        className="w-full flex flex-col gap-1.5 relative z-10"
                     >
                         {/* Disabled Preview Cards */}
-                        <div className="w-full p-4 rounded-[20px] bg-white/[0.02] border border-white/[0.02] opacity-40 select-none flex items-center justify-between">
+                        <div className="w-full p-3 rounded-[16px] bg-white/[0.02] border border-white/[0.02] opacity-50 select-none flex items-center justify-between">
                             <div className="flex flex-col gap-0.5">
-                                <span className="text-white font-bold text-[14px]">Benefits Reader</span>
-                                <span className="text-white/50 text-[11px] font-medium">Understand exactly what your policy covers.</span>
+                                <span className="text-white font-bold text-[13px]">Benefits Reader</span>
+                                <span className="text-white/40 text-[10.5px] font-medium tracking-wide">Understand exactly what your policy covers.</span>
                             </div>
                         </div>
-                        <div className="w-full p-4 rounded-[20px] bg-white/[0.02] border border-white/[0.02] opacity-40 select-none flex items-center justify-between">
+                        <div className="w-full p-3 rounded-[16px] bg-white/[0.02] border border-white/[0.02] opacity-40 select-none flex items-center justify-between">
                             <div className="flex flex-col gap-0.5">
-                                <span className="text-white font-bold text-[14px]">Medical History</span>
-                                <span className="text-white/50 text-[11px] font-medium">Keep every consultation in one place.</span>
+                                <span className="text-white font-bold text-[13px]">Medical History</span>
+                                <span className="text-white/40 text-[10.5px] font-medium tracking-wide">Keep every consultation in one place.</span>
                             </div>
                         </div>
-                        <div className="w-full p-4 rounded-[20px] bg-white/[0.02] border border-white/[0.02] opacity-40 select-none flex items-center justify-between">
+                        <div className="w-full p-3 rounded-[16px] bg-white/[0.02] border border-white/[0.02] opacity-30 select-none flex items-center justify-between">
                             <div className="flex flex-col gap-0.5">
-                                <span className="text-white font-bold text-[14px]">Renewal Calendar</span>
-                                <span className="text-white/50 text-[11px] font-medium">Never forget an upcoming premium.</span>
+                                <span className="text-white font-bold text-[13px]">Renewal Calendar</span>
+                                <span className="text-white/40 text-[10.5px] font-medium tracking-wide">Never forget an upcoming premium.</span>
                             </div>
                         </div>
                     </motion.div>
