@@ -316,9 +316,12 @@ export default function BudgetPage() {
                                     <div className={`w-2 h-2 rounded-full ${displayAllocated > displayTarget ? 'bg-[#FF453A]' : 'bg-white/40'} shrink-0`} />
                                     <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Allocated</span>
                                 </div>
-                                <div className="flex items-baseline gap-1">
+                                <div className="flex flex-col">
                                     <span className={`font-semibold ${displayAllocated > displayTarget ? 'text-[#FF453A]' : skin.textColor} text-[15px]`}>
                                         {primarySymbol}{getPrimaryValue(displayAllocated).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                    </span>
+                                    <span className={`${skin.textTertiary} text-[9px] font-medium tracking-wider leading-none mt-0.5`}>
+                                        ≈ {secondarySymbol}{getSecondaryValue(displayAllocated).toLocaleString(undefined, {maximumFractionDigits: 0})}
                                     </span>
                                 </div>
                             </div>
@@ -332,9 +335,14 @@ export default function BudgetPage() {
                                     <div className={`w-2 h-2 rounded-full ${totalSpent > displayTarget ? 'bg-[#FF453A]' : 'bg-[#30D158]'} shrink-0 shadow-[0_0_8px_rgba(48,209,88,0.5)]`} />
                                     <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Spent</span>
                                 </div>
-                                <span className={`font-semibold text-[15px] ${totalSpent > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
-                                    {primarySymbol}{getPrimaryValue(totalSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                </span>
+                                <div className="flex flex-col">
+                                    <span className={`font-semibold text-[15px] ${totalSpent > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
+                                        {primarySymbol}{getPrimaryValue(totalSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                    </span>
+                                    <span className={`${skin.textTertiary} text-[9px] font-medium tracking-wider leading-none mt-0.5`}>
+                                        ≈ {secondarySymbol}{getSecondaryValue(totalSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                    </span>
+                                </div>
                             </div>
 
                             {/* Divider */}
@@ -346,9 +354,14 @@ export default function BudgetPage() {
                                     <div className="w-2 h-2 rounded-full border border-current opacity-40 shrink-0" style={{ color: skin.textSecondary.split('-')[1] || '#fff' }} />
                                     <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Left</span>
                                 </div>
-                                <span className={`font-semibold text-[15px] ${totalSpent > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
-                                    {primarySymbol}{getPrimaryValue(Math.max(0, displayTarget - totalSpent)).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                </span>
+                                <div className="flex flex-col">
+                                    <span className={`font-semibold text-[15px] ${totalSpent > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
+                                        {primarySymbol}{getPrimaryValue(Math.max(0, displayTarget - totalSpent)).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                    </span>
+                                    <span className={`${skin.textTertiary} text-[9px] font-medium tracking-wider leading-none mt-0.5`}>
+                                        ≈ {secondarySymbol}{getSecondaryValue(Math.max(0, displayTarget - totalSpent)).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -474,24 +487,35 @@ export default function BudgetPage() {
                                         <span className="text-white/40 text-[10px] font-medium tracking-wider ml-1">≈ {secondarySymbol}{getSecondaryValue(catTarget).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
                                     </div>
                                     
-                                    <div className="flex flex-col gap-1 mt-2">
-                                        <div className="flex justify-between items-center text-[10px]">
-                                            <span className="text-white/50 tracking-wide uppercase">Spent</span>
-                                            <span className="text-white font-medium">{primarySymbol}{getPrimaryValue(catSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                    <div className="flex flex-col gap-2 mt-2">
+                                        <div className="flex justify-between items-start text-[10px]">
+                                            <span className="text-white/50 tracking-wide uppercase mt-0.5">Spent</span>
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-white font-medium">{primarySymbol}{getPrimaryValue(catSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                                <span className="text-white/30 text-[8.5px] font-medium tracking-widest mt-0.5">≈ {secondarySymbol}{getSecondaryValue(catSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                            </div>
                                         </div>
                                         
                                         {committed > 0 && (
-                                            <div className="flex justify-between items-center text-[10px]">
-                                                <span className="text-white/40 tracking-wide uppercase">Bills</span>
-                                                <span className="text-white/70 font-medium">{primarySymbol}{getPrimaryValue(committed).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                            <div className="flex justify-between items-start text-[10px]">
+                                                <span className="text-white/40 tracking-wide uppercase mt-0.5">Bills</span>
+                                                <div className="flex flex-col items-end">
+                                                    <span className="text-white/70 font-medium">{primarySymbol}{getPrimaryValue(committed).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                                    <span className="text-white/30 text-[8.5px] font-medium tracking-widest mt-0.5">≈ {secondarySymbol}{getSecondaryValue(committed).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                                </div>
                                             </div>
                                         )}
                                         
-                                        <div className="flex justify-between items-center text-[10px]">
-                                            <span className="text-white/50 tracking-wide uppercase">Left</span>
-                                            <span className={`font-medium ${catSpent > catTarget ? 'text-[#FF453A]' : 'text-white'}`}>
-                                                {primarySymbol}{getPrimaryValue(Math.max(0, catTarget - catSpent)).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                            </span>
+                                        <div className="flex justify-between items-start text-[10px]">
+                                            <span className="text-white/50 tracking-wide uppercase mt-0.5">Left</span>
+                                            <div className="flex flex-col items-end">
+                                                <span className={`font-medium ${catSpent > catTarget ? 'text-[#FF453A]' : 'text-white'}`}>
+                                                    {primarySymbol}{getPrimaryValue(Math.max(0, catTarget - catSpent)).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                                </span>
+                                                <span className="text-white/30 text-[8.5px] font-medium tracking-widest mt-0.5">
+                                                    ≈ {secondarySymbol}{getSecondaryValue(Math.max(0, catTarget - catSpent)).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
 

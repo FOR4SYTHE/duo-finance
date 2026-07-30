@@ -189,7 +189,7 @@ export function MonthlyReportCard() {
         {/* Photo Background */}
         {customPhotoUrl ? (
           <div
-            className={`absolute inset-0 bg-cover ${isAdjusting ? 'transition-none' : 'transition-opacity duration-300'} ease-out scale-[1.02]`}
+            className={`absolute inset-0 bg-cover scale-[1.02]`}
             style={{ 
               backgroundImage: `url(${customPhotoUrl})`,
               backgroundPosition: `${customPhotoPosition.x}% ${displayY}%`
@@ -197,7 +197,7 @@ export function MonthlyReportCard() {
           />
         ) : photo && !error ? (
           <div
-            className="absolute inset-0 bg-cover bg-center transition-opacity duration-300 ease-out scale-[1.02]"
+            className="absolute inset-0 bg-cover bg-center scale-[1.02]"
             style={{
               backgroundImage: `url(${photo.url})`,
               backgroundColor: photo.color || "#1a1a1a",
