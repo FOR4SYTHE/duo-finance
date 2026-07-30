@@ -23,6 +23,11 @@ interface AIChatState {
     setStreaming: (streaming: boolean) => void;
     setActiveTab: (tab: 'chat' | 'scanner') => void;
     clearChat: () => void;
+    
+    // For testing
+    isFirstVisit: boolean;
+    toggleFirstVisit: () => void;
+    userName: string;
 }
 
 export const useAIChatStore = create<AIChatState>()(
@@ -84,10 +89,20 @@ export const useAIChatStore = create<AIChatState>()(
             setStreaming: (streaming: boolean) => set({ isStreaming: streaming }),
             setActiveTab: (tab: 'chat' | 'scanner') => set({ activeTab: tab }),
             clearChat: () => set({ messages: [], isStreaming: false }),
+            
+            isFirstVisit: true,
+            toggleFirstVisit: () => set((state) => ({ isFirstVisit: !state.isFirstVisit })),
+            
+            userName: "Alex",
         }),
         {
             name: 'duo-ai-chat-storage',
-            partialize: (state) => ({ messages: state.messages, activeTab: state.activeTab }),
+            partialize: (state) => ({ 
+                messages: state.messages, 
+                activeTab: state.activeTab, 
+                isFirstVisit: state.isFirstVisit,
+                userName: state.userName 
+            }),
         }
     )
 );

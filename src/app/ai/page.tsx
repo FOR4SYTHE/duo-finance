@@ -7,10 +7,11 @@ import { AIChatView } from '@/components/ai/AIChatView';
 import { AIScannerView } from '@/components/ai/AIScannerView';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { PillTabRow } from '@/components/ui/PillTabRow';
+import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
 
 export default function AIAppPage() {
     const router = useRouter();
-    const { activeTab, setActiveTab } = useAIChatStore();
+    const { activeTab, setActiveTab, isFirstVisit, toggleFirstVisit } = useAIChatStore();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -43,6 +44,8 @@ export default function AIAppPage() {
         }
     ];
 
+    if (!mounted) return null;
+
     return (
         <div className="fixed inset-0 z-[100] bg-[#050505] flex flex-col h-[100dvh] w-full overflow-hidden">
             {/* Header Strip with Close Button */}
@@ -58,6 +61,22 @@ export default function AIAppPage() {
                         <h1 className="text-[15px] font-semibold text-white leading-tight">DUO AI</h1>
                         <p className="text-[11px] text-white/50 leading-tight">Household Assistant</p>
                     </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={toggleFirstVisit} 
+                        className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 bg-white/10 rounded hover:bg-white/20 text-white/50 hover:text-white transition-colors"
+                        title="Toggle Empty States"
+                    >
+                        Mock Test
+                    </button>
+                    
+                    {!isFirstVisit && (
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.03]">
+                            <DuoAIIcon className="w-5 h-5 text-white" forceState="star-idle" />
+                        </div>
+                    )}
                 </div>
             </div>
 
