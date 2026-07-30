@@ -23,7 +23,7 @@ const TABS: TabItem[] = [
     { 
         id: 'my-plans', 
         icon: <Shield className="w-5 h-5" />, 
-        label: 'My Plans'
+        label: 'Plans'
     },
     { 
         id: 'benefits', 
@@ -38,12 +38,12 @@ const TABS: TabItem[] = [
     { 
         id: 'what-to-get', 
         icon: <ShoppingBag className="w-5 h-5" />, 
-        label: 'What to Get'
+        label: 'For You'
     },
     { 
         id: 'medical-log', 
         icon: <ClipboardList className="w-5 h-5" />, 
-        label: 'Medical Log'
+        label: 'History'
     }
 ];
 
