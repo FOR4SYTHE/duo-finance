@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings } from 'lucide-react';
+import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings, ChevronRight, ChevronDown } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { useRouter } from 'next/navigation';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
@@ -18,6 +18,8 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editTitle, setEditTitle] = useState('');
+    const [isPinnedExpanded, setIsPinnedExpanded] = useState(true);
+    const [isRecentsExpanded, setIsRecentsExpanded] = useState(true);
 
     const toggleDropdown = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -75,20 +77,20 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                     </span>
                 )}
 
-                <div className={`flex items-center shrink-0 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+                <div className="flex items-center shrink-0">
                     <button 
                         onClick={(e) => {
                             e.stopPropagation();
                             togglePinChat(chat.id);
                         }}
-                        className="w-6 h-6 rounded flex items-center justify-center hover:bg-white/10"
+                        className={`w-6 h-6 rounded flex items-center justify-center hover:bg-white/10 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                         title={chat.isPinned ? "Unpin" : "Pin"}
                     >
                         <Pin className="w-4 h-4 text-white/60" />
                     </button>
                     <button 
                         onClick={(e) => toggleDropdown(chat.id, e)}
-                        className="w-6 h-6 rounded flex items-center justify-center hover:bg-white/10"
+                        className="w-6 h-6 rounded flex items-center justify-center hover:bg-white/10 opacity-100"
                     >
                         <MoreVertical className="w-4 h-4 text-white/60" />
                     </button>
@@ -149,16 +151,22 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 z-[100] backdrop-blur-sm"
+                        className="fixed inset-0 bg-black/60 z-[100] md:hidden"
                     />
 
                     {/* Drawer */}
                     <motion.div 
-                        initial={{ x: '-100%' }}
-                        animate={{ x: 0 }}
-                        exit={{ x: '-100%' }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed top-0 left-0 h-[100dvh] w-[280px] bg-[#1C1C1E] z-[110] flex flex-col shadow-2xl border-r border-white/5"
+                        initial={{ 
+                            x: typeof window !== 'undefined' && window.innerWidth >= 768 ? 0 : '-100%', 
+                            marginLeft: typeof window !== 'undefined' && window.innerWidth >= 768 ? -280 : 0 
+                        }}
+                        animate={{ x: 0, marginLeft: 0 }}
+                        exit={{ 
+                            x: typeof window !== 'undefined' && window.innerWidth >= 768 ? 0 : '-100%', 
+                            marginLeft: typeof window !== 'undefined' && window.innerWidth >= 768 ? -280 : 0 
+                        }}
+                        transition={{ type: 'tween', ease: 'easeInOut', duration: 0.3 }}
+                        className="fixed md:relative top-0 left-0 h-[100dvh] w-[280px] bg-[#1C1C1E] z-[110] md:z-auto flex flex-col shadow-2xl md:shadow-none border-r border-white/5 shrink-0"
                     >
                         {/* Header */}
                         <div className="h-16 flex items-center px-4 border-b border-white/5 shrink-0">
@@ -211,10 +219,25 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
 
                             {recentChats.length > 0 && (
                                 <div>
-                                    <h3 className="text-[11px] font-bold text-white/40 uppercase tracking-widest mb-3 pl-2 mt-4">Recent Chats</h3>
-                                    <div className="flex flex-col gap-1">
-                                        {recentChats.map(renderChatRow)}
-                                    </div>
+                                    <h3 
+                                        onClick={() => setIsRecentsExpanded(!isRecentsExpanded)}
+                                        className="flex items-center gap-1 text-[11px] font-bold text-white/40 uppercase tracking-widest mb-3 pl-2 mt-4 cursor-pointer hover:text-white/60 transition-colors select-none w-fit"
+                                    >
+                                        Recent Chats {isRecentsExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                                    </h3>
+                                    <AnimatePresence initial={false}>
+                                        {isRecentsExpanded && (
+                                            <motion.div 
+                                                key="recents-list"
+                                                initial={{ height: 0, opacity: 0, overflow: 'hidden' }}
+                                                animate={{ height: 'auto', opacity: 1, transitionEnd: { overflow: 'visible' } }}
+                                                exit={{ height: 0, opacity: 0, overflow: 'hidden' }}
+                                                className="flex flex-col gap-1"
+                                            >
+                                                {recentChats.map(renderChatRow)}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             )}
                         </div>

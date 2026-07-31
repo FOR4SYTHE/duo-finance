@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowUp, Loader2, Copy, Share2, Check, Plus } from 'lucide-react';
+import { Send, ArrowUp, Loader2, Copy, Share2, Check, Plus, Mic } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { buildHouseholdContext } from '@/lib/buildHouseholdContext';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
@@ -12,6 +12,14 @@ import remarkGfm from 'remark-gfm';
 export function AIChatView() {
     const { chats, currentChatId, isStreaming, addUserMessage, startAssistantMessage, appendToMessage, completeMessage, errorMessage, setStreaming, startNewChat, isFirstVisit, userName } = useAIChatStore();
     const [inputValue, setInputValue] = useState('');
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = `${Math.min(Math.max(textareaRef.current.scrollHeight, 56), 200)}px`;
+        }
+    }, [inputValue]);
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isScrolledUp, setIsScrolledUp] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -248,29 +256,38 @@ export function AIChatView() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
                             transition={{ duration: 0.2 }}
-                            className="relative max-w-2xl mx-auto flex items-center bg-[#1C1C1E] rounded-[32px] border border-white/[0.05] shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden"
+                            className="relative max-w-2xl mx-auto flex items-end bg-[#1C1C1E] rounded-3xl border border-white/[0.05] shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden"
                         >
                             {/* High-Performance CSS Mono Beam */}
                             <div className="absolute top-0 left-[20%] right-[20%] h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent shadow-[0_0_15px_rgba(255,255,255,0.4)] opacity-80" />
                             
                             {/* Plus / Features Menu Button */}
                             <button 
-                                className="w-12 h-12 flex items-center justify-center shrink-0 text-white/40 hover:text-white transition-colors relative z-10"
+                                className="w-12 h-14 flex items-center justify-center shrink-0 text-white/40 hover:text-white transition-colors relative z-10"
                                 onClick={() => {}}
                             >
                                 <Plus className="w-6 h-6" />
                             </button>
                             
-                            <input
-                                type="text"
+                            <textarea
+                                ref={textareaRef}
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && !isStreaming && handleSend()}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        if (!isStreaming) handleSend();
+                                    }
+                                }}
                                 placeholder="Ask DUO AI"
-                                className="flex-1 py-4 bg-transparent text-white placeholder-white/40 focus:outline-none transition-all text-[15px] font-medium relative z-10"
+                                className="flex-1 py-[17px] bg-transparent text-white placeholder-white/40 focus:outline-none transition-all text-[15px] font-medium relative z-10 resize-none min-h-[56px] max-h-[200px]"
+                                rows={1}
                             />
                             
-                            <div className="pr-2 pl-1 flex items-center h-full relative z-10">
+                            <div className="pr-2 pl-1 h-14 flex items-center relative z-10 gap-1 shrink-0">
+                                <button className="w-9 h-9 rounded-full flex items-center justify-center text-white/40 hover:text-white/80 transition-colors">
+                                    <Mic className="w-5 h-5" />
+                                </button>
                                 <button
                                     onClick={() => handleSend()}
                                     disabled={!inputValue.trim()}
