@@ -285,37 +285,43 @@ export function AIScannerView() {
                                             </div>
                                         ) : (
                                             <div className="flex flex-col gap-3">
-                                                {listings.map((listing, i) => (
-                                                    <a 
-                                                        key={i} 
-                                                        href={listing.url} 
-                                                        target="_blank" 
-                                                        rel="noreferrer"
-                                                        className="bg-gradient-to-br from-[#222224] to-[#151515] p-4 rounded-[20px] border border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/[0.15] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group flex items-center justify-between"
-                                                    >
-                                                        <div className="flex-1 pr-4">
-                                                            <div className="flex items-center gap-2 mb-1.5">
-                                                                <span className="text-[10px] font-bold text-[#E5E5EA] bg-white/[0.08] px-2.5 py-1 rounded-full uppercase tracking-widest shadow-inner">
-                                                                    {listing.source}
+                                                {listings.map((listing, i) => {
+                                                    const numericPrice = typeof listing.price_php === 'number' 
+                                                        ? listing.price_php 
+                                                        : (parseFloat(String(listing.price_php || '0').replace(/,/g, '')) || 0);
+                                                        
+                                                    return (
+                                                        <a 
+                                                            key={i} 
+                                                            href={listing.url} 
+                                                            target="_blank" 
+                                                            rel="noreferrer"
+                                                            className="bg-gradient-to-br from-[#222224] to-[#151515] p-4 rounded-[20px] border border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_4px_20px_rgba(0,0,0,0.2)] hover:border-white/[0.15] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group flex items-center justify-between"
+                                                        >
+                                                            <div className="flex-1 pr-4">
+                                                                <div className="flex items-center gap-2 mb-1.5">
+                                                                    <span className="text-[10px] font-bold text-[#E5E5EA] bg-white/[0.08] px-2.5 py-1 rounded-full uppercase tracking-widest shadow-inner">
+                                                                        {listing.source}
+                                                                    </span>
+                                                                </div>
+                                                                <h5 className="text-[14px] font-medium text-white/90 line-clamp-1 group-hover:text-white transition-colors">
+                                                                    {listing.name}
+                                                                </h5>
+                                                            </div>
+                                                            <div className="flex flex-col items-end shrink-0">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-xl font-bold text-white tracking-tight">
+                                                                        {primarySymbol}{numericPrice.toLocaleString()}
+                                                                    </span>
+                                                                    <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-white transition-colors group-hover:translate-x-1 duration-300" />
+                                                                </div>
+                                                                <span className="text-[12px] text-white/50 font-medium tracking-wide">
+                                                                    {secondarySymbol}{getSecondaryValue(numericPrice).toFixed(2)}
                                                                 </span>
                                                             </div>
-                                                            <h5 className="text-[14px] font-medium text-white/90 line-clamp-1 group-hover:text-white transition-colors">
-                                                                {listing.name}
-                                                            </h5>
-                                                        </div>
-                                                        <div className="flex flex-col items-end shrink-0">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-xl font-bold text-white tracking-tight">
-                                                                    {primarySymbol}{listing.price_php.toLocaleString()}
-                                                                </span>
-                                                                <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-white transition-colors group-hover:translate-x-1 duration-300" />
-                                                            </div>
-                                                            <span className="text-[12px] text-white/50 font-medium tracking-wide">
-                                                                {secondarySymbol}{getSecondaryValue(listing.price_php).toFixed(2)}
-                                                            </span>
-                                                        </div>
-                                                    </a>
-                                                ))}
+                                                        </a>
+                                                    );
+                                                })}
                                             </div>
                                         )}
                                     </div>

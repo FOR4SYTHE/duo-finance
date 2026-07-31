@@ -38,6 +38,7 @@ export function AIChatView() {
     const [isScrolledUp, setIsScrolledUp] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const pendingScanRef = useRef(false);
 
     const hasRecentChat = chats.some(c => c.messages.length > 0);
     const currentChat = chats.find(c => c.id === currentChatId);
@@ -150,13 +151,13 @@ export function AIChatView() {
         // Attach the scanContext to the user message in the UI state
         addUserMessage(content, { isScan: !!scanContext, scanContext: scanContext || undefined });
 
-        // Build enriched context if scan data is available
         let enrichedContent = content;
         if (scanContext) {
-            const listingsText = scanContext.listings.map(l => 
-                `- ${l.source}: ${l.name} — ₱${l.price_php.toLocaleString()}`
-            ).join('\n');
-            enrichedContent = `I just scanned a product. Here are the details:\n\nItem: ${scanContext.brand ? `${scanContext.brand} ` : ''}${scanContext.itemName}\nDescription: ${scanContext.description}\n\nOnline prices found:\n${listingsText}\n\nPlease tell me about this product — is it a good deal? Does it fit within our current budget? Any better alternatives?`;
+            const listingsText = scanContext.listings.map(l => {
+                const numericPrice = typeof l.price_php === 'number' ? l.price_php : (parseFloat(String(l.price_php || '0').replace(/,/g, '')) || 0);
+                return `- [${l.source}](${l.url}): ${l.name} — ₱${numericPrice.toLocaleString()}`;
+            }).join('\n');
+            enrichedContent = `I just scanned a product. Here are the details:\n\nItem: ${scanContext.brand ? `${scanContext.brand} ` : ''}${scanContext.itemName}\nDescription: ${scanContext.description}\n\nOnline prices found:\n${listingsText}\n\nPlease tell me about this product — is it a good deal? Does it fit within our current budget? Any better alternatives?\n\nVERY IMPORTANT: When you mention the price or best deal, you MUST include the markdown link to the product so the user can click it! (e.g. "[Shopee](url)")`;
         }
 
         // Keep last 10 messages for context (20 roles)
@@ -220,16 +221,20 @@ export function AIChatView() {
 
     // Auto-fire chat when coming from the scanner
     useEffect(() => {
-        if (pendingScanContext && !isStreaming) {
+        if (pendingScanContext && !isStreaming && !pendingScanRef.current) {
+            pendingScanRef.current = true;
             const ctx = pendingScanContext;
             setPendingScanContext(null);
             // Small delay to let Zustand state settle after startNewChat()
             setTimeout(() => {
                 const itemLabel = ctx.brand ? `${ctx.brand} ${ctx.itemName}` : ctx.itemName;
                 handleSend(`Tell me more about this: ${itemLabel}`, ctx);
+                setTimeout(() => {
+                    pendingScanRef.current = false;
+                }, 100);
             }, 50);
         }
-    }, [pendingScanContext]);
+    }, [pendingScanContext, isStreaming]);
 
     const suggestions = [
         "How's our budget this month?",
