@@ -12,7 +12,9 @@ import { useRouter } from 'next/navigation';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
 
 export default function AIAppPage() {
-    const { activeTab, setActiveTab, clearChat, isScannerHasResults, isScannerExpanded, messages } = useAIChatStore();
+    const { activeTab, setActiveTab, startNewChat, isScannerHasResults, isScannerExpanded, chats, currentChatId } = useAIChatStore();
+    const currentChat = chats.find(c => c.id === currentChatId);
+    const messages = currentChat?.messages || [];
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -113,7 +115,7 @@ export default function AIAppPage() {
                                     <button 
                                         onClick={() => {
                                             if (activeTab === 'chat') {
-                                                clearChat();
+                                                startNewChat();
                                             }
                                         }}
                                         className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors text-white"

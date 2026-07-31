@@ -10,11 +10,14 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 export function AIChatView() {
-    const { messages, isStreaming, addUserMessage, startAssistantMessage, appendToMessage, completeMessage, errorMessage, setStreaming, clearChat, isFirstVisit, userName } = useAIChatStore();
+    const { chats, currentChatId, isStreaming, addUserMessage, startAssistantMessage, appendToMessage, completeMessage, errorMessage, setStreaming, startNewChat, isFirstVisit, userName } = useAIChatStore();
     const [inputValue, setInputValue] = useState('');
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isScrolledUp, setIsScrolledUp] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
+
+    const currentChat = chats.find(c => c.id === currentChatId);
+    const messages = currentChat?.messages || [];
 
     const handleCopy = (id: string, text: string) => {
         navigator.clipboard.writeText(text);
@@ -25,7 +28,7 @@ export function AIChatView() {
     // For randomized returning greetings without hydration errors
     const [greeting, setGreeting] = useState(`Ready to check your budget today, ${userName}?`);
     useEffect(() => {
-        if (!isFirstVisit) {
+        if (chats.length > 0) {
             const greetings = [
                 `Ready to check your budget today, ${userName}?`,
                 `Let's review this week's spending, ${userName}.`,
@@ -34,7 +37,7 @@ export function AIChatView() {
             ];
             setGreeting(greetings[Math.floor(Math.random() * greetings.length)]);
         }
-    }, [isFirstVisit, userName]);
+    }, [chats.length, userName]);
 
     const scrollToBottom = () => {
         if (!isScrolledUp && scrollRef.current) {
@@ -125,17 +128,6 @@ export function AIChatView() {
 
     return (
         <div className="flex flex-col h-full bg-[#050505] relative">
-            {messages.length > 0 && (
-                <div className="absolute top-4 right-4 z-10">
-                    <button 
-                        onClick={clearChat} 
-                        className="text-[11px] uppercase font-bold tracking-wider px-3 py-1.5 bg-white/5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors"
-                    >
-                        Clear
-                    </button>
-                </div>
-            )}
-
             {/* Chat History */}
             <div 
                 ref={scrollRef}
@@ -224,23 +216,25 @@ export function AIChatView() {
                             transition={{ duration: 0.3 }}
                             className="flex flex-col items-center justify-center text-center mb-8"
                         >
-                            {isFirstVisit && (
-                                <div className="relative mb-6 mx-auto w-16 h-16">
-                                    <DuoAIIcon className="w-16 h-16 text-white/20" forceState="star-idle" />
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <span className="text-[11px] font-bold tracking-[0.2em] text-white/50 pl-[0.3em] mt-[1px]">DUO</span>
+                            {chats.length === 0 ? (
+                                <>
+                                    <div className="relative mb-6 mx-auto w-16 h-16">
+                                        <DuoAIIcon className="w-16 h-16 text-white/20" forceState="star-idle" />
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <span className="text-[11px] font-bold tracking-[0.2em] text-white/50 pl-[0.3em] mt-[1px]">DUO</span>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-                            
-                            <h3 className="text-3xl font-light text-white mb-2 tracking-tight">
-                                {isFirstVisit ? `Hi, ${userName}. I'm DUO AI.` : greeting}
-                            </h3>
-                            
-                            {isFirstVisit && (
-                                <p className="text-[14px] text-white/40 max-w-sm mx-auto leading-relaxed">
-                                    Your household finance assistant. I can help with budgeting, spending advice, and local cost-of-living insights.
-                                </p>
+                                    <h3 className="text-3xl font-light text-white mb-2 tracking-tight">
+                                        Hi, {userName}. I'm DUO AI.
+                                    </h3>
+                                    <p className="text-[14px] text-white/40 max-w-sm mx-auto leading-relaxed">
+                                        Your household finance assistant. I can help with budgeting, spending advice, and local cost-of-living insights.
+                                    </p>
+                                </>
+                            ) : (
+                                <h3 className="text-3xl font-light text-white mb-2 tracking-tight">
+                                    {greeting}
+                                </h3>
                             )}
                         </motion.div>
                     )}
