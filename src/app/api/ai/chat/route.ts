@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-    if (!process.env.GEMINI_API_KEY) {
+    if (!process.env.GEMINI_CHAT_API_KEY) {
         return new Response(JSON.stringify({ error: 'Gemini API key missing.' }), { 
             status: 500,
             headers: { 'Content-Type': 'application/json' }
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
             });
         }
 
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_CHAT_API_KEY });
         
         const systemPrompt = `You are Duo AI, a friendly and knowledgeable household finance assistant for a couple (one Filipino, one South African) living in the Philippines. You help with budgeting questions, spending advice, and local cost-of-living insights. Always show amounts in both ₱PHP and RZAR when discussing money. Be concise, warm, and practical. 
 

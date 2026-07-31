@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Hourly scan limit reached.' }, { status: 429 });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
+    if (!process.env.GEMINI_SCANNER_API_KEY) {
         return NextResponse.json({ error: 'Gemini API key missing.' }, { status: 500 });
     }
 
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Image data missing.' }, { status: 400 });
         }
 
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_SCANNER_API_KEY });
 
         // STEP 1: Vision Identification
         const visionPrompt = `
