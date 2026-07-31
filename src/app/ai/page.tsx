@@ -8,6 +8,8 @@ import { SharedScratchpadView } from '@/components/ai/SharedScratchpadView';
 import { PluginsView } from '@/components/ai/PluginsView';
 import { ReceiptVaultView } from '@/components/ai/ReceiptVaultView';
 import { RelocationHubView } from '@/components/ai/RelocationHubView';
+import { ExchangeAlertsView } from '@/components/ai/ExchangeAlertsView';
+import { DreamBoardView } from '@/components/ai/DreamBoardView';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { PillTabRow } from '@/components/ui/PillTabRow';
 import { SidebarDrawer } from '@/components/ai/SidebarDrawer';
@@ -255,6 +257,8 @@ export default function AIAppPage() {
                     {activeTab === 'plugins' && <PluginsView />}
                     {activeTab === 'receipt-vault' && <ReceiptVaultView />}
                     {activeTab === 'relocation-hub' && <RelocationHubView />}
+                    {activeTab === 'exchange-alerts' && <ExchangeAlertsView />}
+                    {activeTab === 'dream-board' && <DreamBoardView />}
                 </div>
             </div>
             {/* Custom Rename Modal */}

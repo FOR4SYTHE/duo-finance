@@ -43,18 +43,13 @@ export function buildHouseholdContext(): string {
     }).join(' | ');
 
     // 4. Document Vault Summary
-    const { documents } = usePluginsStore.getState();
+    const { documents, relocationTasks, shippingRateZarPerKg, targetExchangeRate } = usePluginsStore.getState();
     const vaultSummary = documents.length > 0 
         ? documents.map(d => `- ${d.title} (${d.category}, ${d.date})${d.amount ? ` ₱${d.amount}` : ''} [Tags: ${d.tags.join(', ')}]`).join('\n')
         : '';
 
-    // 5. Relocation Hub Summary
-    const { relocationTasks, shippingRateZarPerKg } = usePluginsStore.getState();
-    const completedRelo = relocationTasks.filter(t => t.completed).length;
-    const reloPct = relocationTasks.length > 0 ? Math.round((completedRelo / relocationTasks.length) * 100) : 0;
-    const reloSummary = relocationTasks.length > 0
-        ? `Relocation Progress: ${reloPct}% (${completedRelo}/${relocationTasks.length} tasks done).\nShipping Rate Est: ${shippingRateZarPerKg} ZAR/kg.`
-        : '';
+    // 5. Relocation Summary
+    const completedTasks = relocationTasks.filter(t => t.completed).length;
 
     // Compile the final context string
     return `
@@ -65,10 +60,22 @@ Household Snapshot:
 - Total Spent: ₱${Math.round(totalSpentPhp).toLocaleString()}
 ${topCategories ? `- Top Spend Categories: ${topCategories}` : ''}
 ${goalsSummary ? `- Goals: ${goalsSummary}` : ''}
-- Exchange Rate: 1 PHP = ${exchangeRate.toFixed(4)} ZAR
 
-${reloSummary ? `${reloSummary}\n` : ''}
-${vaultSummary ? `Document Vault (Uploaded files):\n${vaultSummary}\n` : ''}
-${scratchpadContent ? `Shared Scratchpad Notes (Read these to assist the user):\n${scratchpadContent.replace(/<[^>]*>?/gm, ' ')}` : ''}
+Current Exchange Rate (Frankfurter API):
+- 1 ZAR = ₱${exchangeRate.toFixed(2)}
+- 1 PHP = R${(1 / exchangeRate).toFixed(4)}
+- FOREX TARGET ALERT: The user has set a target alert to notify them when 1 ZAR hits ₱${targetExchangeRate?.toFixed(2) ?? 'N/A'}. If the current rate is at or above this target, tell them it's a great time to transfer money.
+
+${unallocated > 0 ? `Alert: There is ₱${unallocated.toLocaleString()} unallocated in the budget. Suggest allocating this to a specific category or saving it.` : ''}
+
+Recent Shared Scratchpad Notes:
+${scratchpadContent?.substring(0, 1000).replace(/<[^>]*>?/gm, ' ') || 'None.'}
+
+Document Vault Inventory:
+${vaultSummary || 'No documents uploaded yet.'}
+
+Relocation Progress:
+- ${completedTasks}/${relocationTasks.length} tasks completed on the Master Move Checklist.
+- Shipping Rate Est: ${shippingRateZarPerKg} ZAR/kg.
 `.trim();
 }

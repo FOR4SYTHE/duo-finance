@@ -4,7 +4,7 @@ import { useAIChatStore } from '@/store/useAIChatStore';
 export function PluginsView() {
     const { setActiveTab } = useAIChatStore();
 
-    const installedPlugins = [
+    const householdPlugins = [
         {
             id: 'scratchpad',
             name: 'Shared Scratchpad',
@@ -31,9 +31,6 @@ export function PluginsView() {
         }
     ];
 
-    const householdPlugins = [
-    ];
-
     const financePlugins = [
         {
             id: 'exchange-alerts',
@@ -41,15 +38,15 @@ export function PluginsView() {
             description: 'Get notified when the ZAR to PHP rate hits your target.',
             icon: <BarChart3 className="w-5 h-5 text-white" />,
             color: 'bg-orange-500',
-            active: false
+            active: true
         },
         {
             id: 'dream-board',
             name: 'Dream Board Goals',
             description: 'Visual savings tracker for big purchases and Boracay trips.',
             icon: <Target className="w-5 h-5 text-white" />,
-            color: 'bg-pink-500',
-            active: false
+            color: 'bg-rose-500',
+            active: true
         }
     ];
 
@@ -100,14 +97,6 @@ export function PluginsView() {
             {/* Content Grids */}
             <div className="w-full max-w-4xl px-6 flex flex-col gap-10">
                 
-                {/* Installed */}
-                <section>
-                    <h2 className="text-[12px] font-bold text-white/40 uppercase tracking-wider mb-4 pl-1">Installed</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {installedPlugins.map(p => <PluginCard key={p.id} plugin={p} />)}
-                    </div>
-                </section>
-
                 {/* Household Management */}
                 <section>
                     <h2 className="text-[12px] font-bold text-white/40 uppercase tracking-wider mb-4 pl-1">Household Management</h2>

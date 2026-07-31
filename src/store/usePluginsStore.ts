@@ -28,6 +28,10 @@ interface PluginsState {
     deleteRelocationTask: (id: string) => void;
     shippingRateZarPerKg: number;
     setShippingRateZarPerKg: (rate: number) => void;
+
+    // Exchange Alerts
+    targetExchangeRate: number | null;
+    setTargetExchangeRate: (rate: number | null) => void;
 }
 
 export const usePluginsStore = create<PluginsState>()(
@@ -58,6 +62,10 @@ export const usePluginsStore = create<PluginsState>()(
             })),
             shippingRateZarPerKg: 350, // Average rate for airfreight per KG from SA to PH
             setShippingRateZarPerKg: (rate) => set({ shippingRateZarPerKg: rate }),
+
+            // Exchange Alerts defaults
+            targetExchangeRate: 3.25,
+            setTargetExchangeRate: (rate) => set({ targetExchangeRate: rate }),
         }),
         {
             name: 'duo-plugins-storage',
