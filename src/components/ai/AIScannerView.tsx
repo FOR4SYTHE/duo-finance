@@ -29,6 +29,7 @@ export function AIScannerView() {
     const [identifiedItem, setIdentifiedItem] = useState<ScannedItem | null>(null);
     const [listings, setListings] = useState<Listing[]>([]);
     const [isSheetExpanded, setIsSheetExpanded] = useState(false);
+    const [isNavigating, setIsNavigating] = useState(false);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -323,7 +324,10 @@ export function AIScannerView() {
                                     {/* Action Buttons & Transparency */}
                                     <div className="mt-4 pt-4 border-t border-white/[0.05] flex flex-col gap-3">
                                         <button 
+                                            disabled={isNavigating}
                                             onClick={() => {
+                                                if (isNavigating) return;
+                                                setIsNavigating(true);
                                                 // Set scan context for AIChatView to pick up
                                                 setPendingScanContext({
                                                     itemName: identifiedItem?.name || 'Unknown Item',
@@ -335,10 +339,10 @@ export function AIScannerView() {
                                                 startNewChat();
                                                 setActiveTab('chat');
                                             }}
-                                            className="w-full py-4 bg-[#F5F5F7] text-[#1D1D1F] font-semibold tracking-wide rounded-[20px] shadow-[0_4px_20px_rgba(255,255,255,0.08)] hover:bg-white hover:shadow-[0_8px_30px_rgba(255,255,255,0.15)] transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2.5"
+                                            className={`w-full py-4 bg-[#F5F5F7] text-[#1D1D1F] font-semibold tracking-wide rounded-[20px] shadow-[0_4px_20px_rgba(255,255,255,0.08)] transition-all duration-300 flex items-center justify-center gap-2.5 ${isNavigating ? 'opacity-70 cursor-not-allowed' : 'hover:bg-white hover:shadow-[0_8px_30px_rgba(255,255,255,0.15)] active:scale-[0.98]'}`}
                                         >
-                                            <DuoAIIcon forceState="star-idle" className="w-[18px] h-[18px]" />
-                                            Ask DUO AI about this
+                                            <DuoAIIcon forceState={isNavigating ? "thinking" : "star-idle"} className="w-[18px] h-[18px]" />
+                                            {isNavigating ? 'Opening Chat...' : 'Ask DUO AI about this'}
                                         </button>
 
                                         <button 
