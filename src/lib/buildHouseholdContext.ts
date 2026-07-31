@@ -1,12 +1,14 @@
 import { useBudgetStore } from '@/store/useBudgetStore';
 import { useSpendStore } from '@/store/useSpendStore';
 import { useCurrencyStore } from '@/store/useCurrencyStore';
+import { usePluginsStore } from '@/store/usePluginsStore';
 
 export function buildHouseholdContext(): string {
     // Read directly from stores
     const { config, categories, goals } = useBudgetStore.getState();
     const { entries } = useSpendStore.getState();
     const { exchangeRate } = useCurrencyStore.getState();
+    const { scratchpadContent } = usePluginsStore.getState();
 
     // 1. Budget Summary
     const period = config.period;
@@ -50,5 +52,7 @@ Household Snapshot:
 ${topCategories ? `- Top Spend Categories: ${topCategories}` : ''}
 ${goalsSummary ? `- Goals: ${goalsSummary}` : ''}
 - Exchange Rate: 1 PHP = ${exchangeRate.toFixed(4)} ZAR
+
+${scratchpadContent ? `Shared Scratchpad Notes (Read these to assist the user):\n${scratchpadContent.replace(/<[^>]*>?/gm, ' ')}` : ''}
 `.trim();
 }

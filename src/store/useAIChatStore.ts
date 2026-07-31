@@ -30,7 +30,7 @@ interface AIChatState {
     chats: ChatSession[];
     currentChatId: string | null;
     isStreaming: boolean;
-    activeTab: 'chat' | 'scanner';
+    activeTab: 'chat' | 'scanner' | 'scratchpad';
     
     // Settings
     aiSettings: {
@@ -45,7 +45,7 @@ interface AIChatState {
     completeMessage: (id: string) => void;
     errorMessage: (id: string, error: string) => void;
     setStreaming: (streaming: boolean) => void;
-    setActiveTab: (tab: 'chat' | 'scanner') => void;
+    setActiveTab: (tab: 'chat' | 'scanner' | 'scratchpad') => void;
     
     // Chat History Actions
     startNewChat: () => void;
@@ -193,7 +193,7 @@ export const useAIChatStore = create<AIChatState>()(
             }),
 
             setStreaming: (streaming: boolean) => set({ isStreaming: streaming }),
-            setActiveTab: (tab: 'chat' | 'scanner') => set({ activeTab: tab }),
+            setActiveTab: (tab: 'chat' | 'scanner' | 'scratchpad') => set({ activeTab: tab }),
             
             startNewChat: () => set({ currentChatId: null, isStreaming: false }),
             loadChat: (id: string) => set({ currentChatId: id, isStreaming: false }),
