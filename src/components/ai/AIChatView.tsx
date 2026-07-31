@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowUp, Loader2, Copy, Share2, Check, Plus, Mic, Volume2, FileText, Square, ScanBarcode } from 'lucide-react';
+import { Send, ArrowUp, Loader2, Copy, Share2, Check, Plus, Mic, Volume2, FileText, Square, ScanBarcode, Sparkles, ChevronDown } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { buildHouseholdContext } from '@/lib/buildHouseholdContext';
@@ -37,7 +37,9 @@ export function AIChatView() {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isScrolledUp, setIsScrolledUp] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [showSuggestions, setShowSuggestions] = useState(false);
 
+    const hasRecentChat = chats.some(c => c.messages.length > 0);
     const currentChat = chats.find(c => c.id === currentChatId);
     const messages = currentChat?.messages || [];
 
@@ -447,7 +449,7 @@ export function AIChatView() {
                     )}
                 </AnimatePresence>
 
-                {messages.length === 0 && (
+                {messages.length === 0 && !hasRecentChat && (
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -464,6 +466,47 @@ export function AIChatView() {
                             </button>
                         ))}
                     </motion.div>
+                )}
+                
+                {messages.length === 0 && hasRecentChat && (
+                    <div className="mt-4 flex flex-col items-center max-w-2xl mx-auto w-full">
+                        <AnimatePresence>
+                            {showSuggestions ? (
+                                <motion.div 
+                                    initial={{ opacity: 0, height: 0, y: -10 }}
+                                    animate={{ opacity: 1, height: 'auto', y: 0 }}
+                                    exit={{ opacity: 0, height: 0, y: -10 }}
+                                    className="flex flex-wrap justify-center gap-2 mb-3 overflow-hidden"
+                                >
+                                    {suggestions.map((s, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => {
+                                                handleSend(s);
+                                                setShowSuggestions(false);
+                                            }}
+                                            className="px-4 py-2 rounded-full bg-[#1C1C1E]/60 hover:bg-[#2C2C2E] border border-white/[0.05] text-[13px] text-white/70 transition-colors shadow-sm"
+                                        >
+                                            {s}
+                                        </button>
+                                    ))}
+                                </motion.div>
+                            ) : null}
+                        </AnimatePresence>
+                        <button 
+                            onClick={() => setShowSuggestions(!showSuggestions)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1C1C1E] border border-white/[0.05] shadow-sm hover:bg-[#2C2C2E] transition-colors text-white/40 hover:text-white/70 text-[12px] font-medium"
+                        >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            {showSuggestions ? 'Hide Suggestions' : 'Suggestions'}
+                            <motion.div
+                                animate={{ rotate: showSuggestions ? 180 : 0 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            >
+                                <ChevronDown className="w-3.5 h-3.5" />
+                            </motion.div>
+                        </button>
+                    </div>
                 )}
             </div>
         </div>
