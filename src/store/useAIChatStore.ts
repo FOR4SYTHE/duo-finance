@@ -30,7 +30,7 @@ interface AIChatState {
     chats: ChatSession[];
     currentChatId: string | null;
     isStreaming: boolean;
-    activeTab: 'chat' | 'scanner' | 'scratchpad' | 'plugins' | 'receipt-vault';
+    activeTab: 'chat' | 'scanner' | 'scratchpad' | 'plugins' | 'receipt-vault' | 'relocation-hub';
     
     // Settings
     aiSettings: {
@@ -45,7 +45,7 @@ interface AIChatState {
     completeMessage: (id: string) => void;
     errorMessage: (id: string, error: string) => void;
     setStreaming: (streaming: boolean) => void;
-    setActiveTab: (tab: 'chat' | 'scanner' | 'scratchpad' | 'plugins' | 'receipt-vault') => void;
+    setActiveTab: (tab: 'chat' | 'scanner' | 'scratchpad' | 'plugins' | 'receipt-vault' | 'relocation-hub') => void;
     
     // Chat History Actions
     startNewChat: () => void;
@@ -193,7 +193,7 @@ export const useAIChatStore = create<AIChatState>()(
             }),
 
             setStreaming: (streaming: boolean) => set({ isStreaming: streaming }),
-            setActiveTab: (tab: 'chat' | 'scanner' | 'scratchpad' | 'plugins' | 'receipt-vault') => set({ activeTab: tab }),
+            setActiveTab: (tab: 'chat' | 'scanner' | 'scratchpad' | 'plugins' | 'receipt-vault' | 'relocation-hub') => set({ activeTab: tab }),
             
             startNewChat: () => set({ currentChatId: null, isStreaming: false }),
             loadChat: (id: string) => set({ currentChatId: id, isStreaming: false }),

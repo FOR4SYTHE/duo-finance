@@ -20,18 +20,18 @@ export function PluginsView() {
             icon: <FolderLock className="w-5 h-5 text-white" />,
             color: 'bg-blue-500',
             active: true
-        }
-    ];
-
-    const householdPlugins = [
+        },
         {
             id: 'relocation-hub',
             name: 'Relocation Hub',
             description: 'Flight tracker, shipping calculator, and SA to PH move checklist.',
             icon: <Plane className="w-5 h-5 text-white" />,
             color: 'bg-purple-500',
-            active: false
+            active: true
         }
+    ];
+
+    const householdPlugins = [
     ];
 
     const financePlugins = [

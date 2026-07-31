@@ -48,6 +48,14 @@ export function buildHouseholdContext(): string {
         ? documents.map(d => `- ${d.title} (${d.category}, ${d.date})${d.amount ? ` ₱${d.amount}` : ''} [Tags: ${d.tags.join(', ')}]`).join('\n')
         : '';
 
+    // 5. Relocation Hub Summary
+    const { relocationTasks, shippingRateZarPerKg } = usePluginsStore.getState();
+    const completedRelo = relocationTasks.filter(t => t.completed).length;
+    const reloPct = relocationTasks.length > 0 ? Math.round((completedRelo / relocationTasks.length) * 100) : 0;
+    const reloSummary = relocationTasks.length > 0
+        ? `Relocation Progress: ${reloPct}% (${completedRelo}/${relocationTasks.length} tasks done).\nShipping Rate Est: ${shippingRateZarPerKg} ZAR/kg.`
+        : '';
+
     // Compile the final context string
     return `
 Household Snapshot:
@@ -59,6 +67,7 @@ ${topCategories ? `- Top Spend Categories: ${topCategories}` : ''}
 ${goalsSummary ? `- Goals: ${goalsSummary}` : ''}
 - Exchange Rate: 1 PHP = ${exchangeRate.toFixed(4)} ZAR
 
+${reloSummary ? `${reloSummary}\n` : ''}
 ${vaultSummary ? `Document Vault (Uploaded files):\n${vaultSummary}\n` : ''}
 ${scratchpadContent ? `Shared Scratchpad Notes (Read these to assist the user):\n${scratchpadContent.replace(/<[^>]*>?/gm, ' ')}` : ''}
 `.trim();
