@@ -73,17 +73,17 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                         if (typeof window !== 'undefined' && window.innerWidth < 768) onClose();
                     }
                 }}
-                className={`relative group flex items-center w-full h-9 rounded-lg transition-colors text-left cursor-pointer ${
+                className={`relative group flex items-center w-full h-11 md:h-9 rounded-lg transition-colors text-left cursor-pointer ${
                     isActive ? 'bg-white/[0.08]' : 'hover:bg-white/[0.05]'
                 }`}
                 title={!isOpen ? chat.title : undefined}
             >
                 {!isOpen && (
-                    <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                    <div className="w-9 h-11 md:h-9 flex items-center justify-center shrink-0">
                         {chat.isPinned ? (
-                            <Pin className={`w-[16px] h-[16px] ${isActive ? 'text-white' : 'text-white/40 group-hover:text-white/70'}`} />
+                            <Pin className={`w-[18px] h-[18px] md:w-[16px] md:h-[16px] ${isActive ? 'text-white' : 'text-white/40 group-hover:text-white/70'}`} />
                         ) : (
-                            <MessageSquare className={`w-[16px] h-[16px] ${isActive ? 'text-white' : 'text-white/40 group-hover:text-white/70'}`} />
+                            <MessageSquare className={`w-[18px] h-[18px] md:w-[16px] md:h-[16px] ${isActive ? 'text-white' : 'text-white/40 group-hover:text-white/70'}`} />
                         )}
                     </div>
                 )}
@@ -96,10 +96,10 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                             onKeyDown={(e) => e.key === 'Enter' && handleRenameSave(chat.id)}
                             onBlur={() => handleRenameSave(chat.id)}
                             onClick={(e) => e.stopPropagation()}
-                            className="flex-1 min-w-0 bg-black text-white text-[13px] font-semibold px-2 py-0.5 rounded outline-none border border-white/20 z-10"
+                            className="flex-1 min-w-0 bg-black text-white text-[15px] md:text-[13px] font-semibold px-2 py-0.5 rounded outline-none border border-white/20 z-10"
                         />
                     ) : (
-                        <span className={`text-[13px] truncate flex-1 min-w-0 pr-2 ${isActive ? 'font-semibold text-white' : 'font-medium text-white/70 group-hover:text-white/90'}`}>
+                        <span className={`text-[15px] md:text-[13px] truncate flex-1 min-w-0 pr-2 ${isActive ? 'font-semibold text-white' : 'font-medium text-white/70 group-hover:text-white/90'}`}>
                             {chat.title}
                         </span>
                     )}
@@ -107,10 +107,10 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                     <div className="flex items-center shrink-0 pr-1 gap-[2px]">
                         {chat.isScan && (
                             <div 
-                                className="w-5 h-6 flex items-center justify-center opacity-40 hover:opacity-80 transition-opacity cursor-default" 
+                                className="w-6 h-8 md:w-5 md:h-6 flex items-center justify-center opacity-40 hover:opacity-80 transition-opacity cursor-default" 
                                 title="Scanned Item Chat"
                             >
-                                <ScanBarcode className="w-[13px] h-[13px] text-emerald-400/80" />
+                                <ScanBarcode className="w-[15px] h-[15px] md:w-[13px] md:h-[13px] text-emerald-400/80" />
                             </div>
                         )}
                         <button 
@@ -118,16 +118,16 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                                 e.stopPropagation();
                                 togglePinChat(chat.id);
                             }}
-                            className={`w-6 h-6 rounded flex items-center justify-center hover:bg-white/10 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                            className={`w-8 h-8 md:w-6 md:h-6 rounded flex items-center justify-center hover:bg-white/10 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                             title={chat.isPinned ? "Unpin" : "Pin"}
                         >
-                            <Pin className="w-[14px] h-[14px] text-white/60" />
+                            <Pin className="w-[16px] h-[16px] md:w-[14px] md:h-[14px] text-white/60" />
                         </button>
                         <button 
                             onClick={(e) => toggleDropdown(chat.id, e)}
-                            className="w-6 h-6 rounded flex items-center justify-center hover:bg-white/10 opacity-100"
+                            className="w-8 h-8 md:w-6 md:h-6 rounded flex items-center justify-center hover:bg-white/10 opacity-100"
                         >
-                            <MoreVertical className="w-[14px] h-[14px] text-white/60" />
+                            <MoreVertical className="w-[16px] h-[16px] md:w-[14px] md:h-[14px] text-white/60" />
                         </button>
                     </div>
                 </div>
@@ -196,12 +196,12 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
             <div 
                 className={`fixed md:relative top-0 left-0 h-[100dvh] bg-[#0A0A0A] z-[110] md:z-auto flex flex-col shadow-2xl md:shadow-none border-r border-white/5 shrink-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] print:hidden ${
                     isOpen 
-                        ? 'w-[240px] translate-x-0' 
-                        : 'w-[240px] md:w-[40px] -translate-x-full md:translate-x-0'
+                        ? 'w-[280px] md:w-[260px] translate-x-0' 
+                        : 'w-[280px] md:w-[40px] -translate-x-full md:translate-x-0'
                 }`}
             >
                 {/* Inner Fixed-Width Content */}
-                <div className="w-[240px] h-full flex flex-col">
+                <div className="w-[280px] md:w-[260px] h-full flex flex-col">
                     
                     {/* Header */}
                     <div className="h-[52px] flex items-center px-[2px] shrink-0 group/header relative mt-1">
@@ -220,14 +220,14 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                             )}
                         </button>
                         
-                        <div className="w-[190px] flex items-center justify-between ml-[8px]">
-                            <span className="text-[14px] font-semibold text-white tracking-wide truncate">DUO AI</span>
+                        <div className="w-[230px] md:w-[210px] flex items-center justify-between ml-[8px]">
+                            <span className="text-[15px] md:text-[14px] font-semibold text-white tracking-wide truncate">DUO AI</span>
                             <button 
                                 onClick={onClose}
-                                className="w-7 h-7 rounded-full hover:bg-white/[0.08] flex items-center justify-center transition-colors mr-1"
+                                className="w-8 h-8 md:w-7 md:h-7 rounded-full hover:bg-white/[0.08] flex items-center justify-center transition-colors mr-1"
                                 title="Close sidebar"
                             >
-                                <PanelLeftClose className="w-[16px] h-[16px] text-white/80" />
+                                <PanelLeftClose className="w-[18px] h-[18px] md:w-[16px] md:h-[16px] text-white/80" />
                             </button>
                         </div>
                     </div>
@@ -240,13 +240,13 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                                 setActiveTab('chat');
                                 if (typeof window !== 'undefined' && window.innerWidth < 768) onClose();
                             }}
-                            className={`h-9 flex items-center rounded-lg hover:bg-white/[0.08] transition-all overflow-hidden text-left group/btn ${isOpen ? 'w-full' : 'w-9'}`}
+                            className={`h-11 md:h-9 flex items-center rounded-lg hover:bg-white/[0.08] transition-all overflow-hidden text-left group/btn ${isOpen ? 'w-full' : 'w-9'}`}
                             title="New chat"
                         >
-                            <div className="w-9 h-9 flex items-center justify-center shrink-0">
-                                <SquarePen className="w-[16px] h-[16px] text-white/80 group-hover/btn:text-white transition-colors" />
+                            <div className="w-9 h-11 md:h-9 flex items-center justify-center shrink-0">
+                                <SquarePen className="w-[20px] h-[20px] md:w-[16px] md:h-[16px] text-white/80 group-hover/btn:text-white transition-colors" />
                             </div>
-                            <span className="text-[13px] font-medium pl-1 text-white whitespace-nowrap">New chat</span>
+                            <span className="text-[15px] md:text-[13px] font-medium pl-1 text-white whitespace-nowrap">New chat</span>
                         </button>
                         
                         <button 
@@ -254,13 +254,13 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                                 setActiveTab('scanner');
                                 if (typeof window !== 'undefined' && window.innerWidth < 768) onClose();
                             }}
-                            className={`h-9 flex items-center rounded-lg hover:bg-white/[0.08] transition-all overflow-hidden text-left group/btn ${isOpen ? 'w-full' : 'w-9'}`}
+                            className={`h-11 md:h-9 flex items-center rounded-lg hover:bg-white/[0.08] transition-all overflow-hidden text-left group/btn ${isOpen ? 'w-full' : 'w-9'}`}
                             title="Shopping Scanner"
                         >
-                            <div className="w-9 h-9 flex items-center justify-center shrink-0">
-                                <ScanLine className="w-[16px] h-[16px] text-white/80 group-hover/btn:text-white transition-colors" />
+                            <div className="w-9 h-11 md:h-9 flex items-center justify-center shrink-0">
+                                <ScanLine className="w-[20px] h-[20px] md:w-[16px] md:h-[16px] text-white/80 group-hover/btn:text-white transition-colors" />
                             </div>
-                            <span className="text-[13px] font-medium pl-1 text-white/90 whitespace-nowrap">Shopping Scanner</span>
+                            <span className="text-[15px] md:text-[13px] font-medium pl-1 text-white/90 whitespace-nowrap">Shopping Scanner</span>
                         </button>
 
                         {/* Search Bar / Button */}
@@ -271,17 +271,17 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                                         if (!isOpen) onOpen();
                                         setIsSearchActive(true);
                                     }}
-                                    className={`h-9 flex items-center rounded-lg hover:bg-white/[0.08] transition-all overflow-hidden text-left group/searchbtn ${isOpen ? 'w-full' : 'w-9'}`}
+                                    className={`h-11 md:h-9 flex items-center rounded-lg hover:bg-white/[0.08] transition-all overflow-hidden text-left group/searchbtn ${isOpen ? 'w-full' : 'w-9'}`}
                                     title="Search chats"
                                 >
-                                    <div className="w-9 h-9 flex items-center justify-center shrink-0">
-                                        <Search className="w-[16px] h-[16px] text-white/80 group-hover/searchbtn:text-white transition-colors" />
+                                    <div className="w-9 h-11 md:h-9 flex items-center justify-center shrink-0">
+                                        <Search className="w-[20px] h-[20px] md:w-[16px] md:h-[16px] text-white/80 group-hover/searchbtn:text-white transition-colors" />
                                     </div>
-                                    <span className="text-[13px] font-medium pl-1 text-white/90 whitespace-nowrap">Search Chats</span>
+                                    <span className="text-[15px] md:text-[13px] font-medium pl-1 text-white/90 whitespace-nowrap">Search Chats</span>
                                 </button>
                             ) : (
-                                <div className={`transition-all duration-300 ${isOpen ? 'opacity-100 h-9' : 'opacity-0 h-0 overflow-hidden'}`}>
-                                    <div className="relative flex items-center w-full h-9 bg-white/[0.05] border border-white/10 rounded-md overflow-hidden focus-within:bg-white/[0.08] focus-within:border-white/20 transition-colors">
+                                <div className={`transition-all duration-300 ${isOpen ? 'opacity-100 h-11 md:h-9' : 'opacity-0 h-0 overflow-hidden'}`}>
+                                    <div className="relative flex items-center w-full h-11 md:h-9 bg-white/[0.05] border border-white/10 rounded-md overflow-hidden focus-within:bg-white/[0.08] focus-within:border-white/20 transition-colors">
                                         <Search className="w-4 h-4 text-white/40 ml-[10px] shrink-0" />
                                         <input 
                                             autoFocus
@@ -292,7 +292,7 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                                             onBlur={() => {
                                                 if (!searchTerm) setIsSearchActive(false);
                                             }}
-                                            className="w-full h-full bg-transparent border-none outline-none text-[13px] text-white placeholder:text-white/40 px-2"
+                                            className="w-full h-full bg-transparent border-none outline-none text-[15px] md:text-[13px] text-white placeholder:text-white/40 px-2"
                                         />
                                     </div>
                                 </div>
@@ -305,8 +305,8 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                         {(!isOpen || pinnedChats.length > 0) && (
                             <div className={`${isOpen ? 'mb-4' : 'mb-[2px]'}`}>
                                 {isOpen ? (
-                                    <div className="h-6 flex items-center mb-1">
-                                        <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-[12px] whitespace-nowrap">Pinned</h3>
+                                    <div className="h-8 md:h-6 flex items-center mb-1 mt-1 md:mt-0">
+                                        <h3 className="text-[12px] md:text-[10px] font-bold text-white/40 uppercase tracking-widest pl-[12px] whitespace-nowrap">Pinned</h3>
                                     </div>
                                 ) : (
                                     <button onClick={onOpen} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/[0.08] transition-colors group/btn" title="Pinned Chats">
@@ -324,10 +324,10 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                                 {isOpen ? (
                                     <div 
                                         onClick={() => setIsRecentsExpanded(!isRecentsExpanded)}
-                                        className="h-6 flex items-center mb-1 cursor-pointer group/header"
+                                        className="h-8 md:h-6 flex items-center mb-1 mt-2 md:mt-1 cursor-pointer group/header"
                                     >
-                                        <h3 className="flex items-center gap-1 text-[10px] font-bold text-white/40 uppercase tracking-widest pl-[12px] hover:text-white/60 transition-colors select-none whitespace-nowrap">
-                                            Recent Chats {isRecentsExpanded ? <ChevronDown className="w-3 h-3 shrink-0" /> : <ChevronRight className="w-3 h-3 shrink-0" />}
+                                        <h3 className="flex items-center gap-1 text-[12px] md:text-[10px] font-bold text-white/40 uppercase tracking-widest pl-[12px] hover:text-white/60 transition-colors select-none whitespace-nowrap">
+                                            Recent Chats {isRecentsExpanded ? <ChevronDown className="w-[14px] h-[14px] md:w-3 md:h-3 shrink-0" /> : <ChevronRight className="w-[14px] h-[14px] md:w-3 md:h-3 shrink-0" />}
                                         </h3>
                                     </div>
                                 ) : (
@@ -371,10 +371,10 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                         </div>
 
                         {isOpen && (
-                            <div className="w-[190px] flex items-center justify-between ml-[8px]">
-                                <span className="text-[13px] font-medium text-white/90 truncate">{user?.name || userName}</span>
-                                <button onClick={() => setIsSettingsModalOpen(true)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors shrink-0 mr-1">
-                                    <Settings className="w-[16px] h-[16px]" />
+                            <div className="w-[230px] md:w-[210px] flex items-center justify-between ml-[8px]">
+                                <span className="text-[15px] md:text-[13px] font-medium text-white/90 truncate">{user?.name || userName}</span>
+                                <button onClick={() => setIsSettingsModalOpen(true)} className="w-8 h-8 md:w-7 md:h-7 flex items-center justify-center rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors shrink-0 mr-1">
+                                    <Settings className="w-[18px] h-[18px] md:w-[16px] md:h-[16px]" />
                                 </button>
                             </div>
                         )}
