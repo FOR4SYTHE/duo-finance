@@ -1,4 +1,6 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export interface PDFExportTemplateProps {
     chatTitle: string;
@@ -33,8 +35,14 @@ export const PDFExportTemplate = React.forwardRef<HTMLDivElement, PDFExportTempl
                                             : 'bg-white text-black border border-gray-200'
                                     }`}
                                 >
-                                    <div className="prose prose-sm prose-black max-w-none">
-                                        {msg.content}
+                                    <div className="prose prose-sm prose-black max-w-none prose-p:leading-relaxed prose-pre:bg-gray-100 prose-pre:text-black">
+                                        {msg.role === 'user' ? (
+                                            msg.content
+                                        ) : (
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                {msg.content}
+                                            </ReactMarkdown>
+                                        )}
                                     </div>
                                 </div>
                             </div>
