@@ -207,60 +207,52 @@ export function AIChatView() {
             </div>
 
             {/* Dynamic Premium Input Area */}
-            <motion.div 
-                layout
-                className={`w-full px-4 z-20 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+            <div 
+                className={`w-full px-4 z-20 ${
                     messages.length === 0 
                         ? 'absolute top-1/2 left-0 -translate-y-1/2' 
                         : 'absolute bottom-0 left-0 pb-6'
                 }`}
             >
-                <AnimatePresence>
-                    {messages.length === 0 && (
-                        <motion.div 
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
-                            transition={{ duration: 0.3 }}
-                            className="flex flex-col items-center justify-center text-center mb-8"
-                        >
-                            {chats.length === 0 ? (
-                                <>
-                                    <div className="relative mb-6 mx-auto w-16 h-16">
-                                        <DuoAIIcon className="w-16 h-16 text-white/20" forceState="star-idle" />
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <span className="text-[11px] font-bold tracking-[0.2em] text-white/50 pl-[0.3em] mt-[1px]">DUO</span>
-                                        </div>
+                {messages.length === 0 && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex flex-col items-center justify-center text-center mb-8"
+                    >
+                        {chats.length === 0 ? (
+                            <>
+                                <div className="relative mb-6 mx-auto w-16 h-16">
+                                    <DuoAIIcon className="w-16 h-16 text-white/20" forceState="star-idle" />
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="text-[11px] font-bold tracking-[0.2em] text-white/50 pl-[0.3em] mt-[1px]">DUO</span>
                                     </div>
-                                    <h3 className="text-3xl font-light text-white mb-2 tracking-tight">
-                                        Hi, {userName}. I'm DUO AI.
-                                    </h3>
-                                    <p className="text-[14px] text-white/40 max-w-sm mx-auto leading-relaxed">
-                                        Your household finance assistant. I can help with budgeting, spending advice, and local cost-of-living insights.
-                                    </p>
-                                </>
-                            ) : (
+                                </div>
                                 <h3 className="text-3xl font-light text-white mb-2 tracking-tight">
-                                    {greeting}
+                                    Hi, {userName}. I'm DUO AI.
                                 </h3>
-                            )}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                                <p className="text-[14px] text-white/40 max-w-sm mx-auto leading-relaxed">
+                                    Your household finance assistant. I can help with budgeting, spending advice, and local cost-of-living insights.
+                                </p>
+                            </>
+                        ) : (
+                            <h3 className="text-3xl font-light text-white mb-2 tracking-tight">
+                                {greeting}
+                            </h3>
+                        )}
+                    </motion.div>
+                )}
 
                 <AnimatePresence mode="wait">
                     {!isStreaming && (
                         <motion.div 
                             key="input"
-                            layout
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            transition={{ 
-                                duration: 0.2,
-                                layout: { type: 'tween', ease: 'easeOut', duration: 0.25 }
-                            }}
-                            className={`relative max-w-2xl mx-auto bg-[#1C1C1E] border border-white/[0.05] shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-300 ${
+                            transition={{ duration: 0.2 }}
+                            className={`relative max-w-2xl mx-auto bg-[#1C1C1E] border border-white/[0.05] shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden ${
                                 inputValue.length > 0 ? 'rounded-[24px]' : 'rounded-[32px]'
                             }`}
                         >
@@ -278,7 +270,7 @@ export function AIChatView() {
                                     }
                                 }}
                                 placeholder="Ask DUO AI"
-                                className={`w-full bg-transparent text-white placeholder-white/40 focus:outline-none transition-all duration-300 text-[15px] font-medium relative z-10 resize-none block ${
+                                className={`w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-[15px] font-medium relative z-10 resize-none block ${
                                     inputValue.length > 0 
                                         ? 'min-h-[120px] pt-4 px-4 pb-[52px]' 
                                         : 'min-h-[56px] py-[17px] pl-12 pr-[88px]'
@@ -287,7 +279,7 @@ export function AIChatView() {
                             />
                             
                             {/* Left Button */}
-                            <div className="absolute left-1 bottom-1 transition-all duration-300 z-20">
+                            <div className="absolute left-1 bottom-1 z-20">
                                 <button 
                                     className="w-12 h-[48px] flex items-center justify-center text-white/40 hover:text-white transition-colors"
                                     onClick={() => {}}
@@ -313,28 +305,25 @@ export function AIChatView() {
                     )}
                 </AnimatePresence>
 
-                <AnimatePresence>
-                    {messages.length === 0 && (
-                        <motion.div 
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
-                            transition={{ duration: 0.3, delay: 0.1 }}
-                            className="mt-6 flex flex-wrap justify-center gap-2 max-w-2xl mx-auto"
-                        >
-                            {suggestions.map((s, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => handleSend(s)}
-                                    className="px-4 py-2 rounded-full bg-[#1C1C1E]/60 hover:bg-[#2C2C2E] border border-white/[0.05] text-[13px] text-white/70 transition-colors shadow-sm"
-                                >
-                                    {s}
-                                </button>
-                            ))}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </motion.div>
+                {messages.length === 0 && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.1 }}
+                        className="mt-6 flex flex-wrap justify-center gap-2 max-w-2xl mx-auto"
+                    >
+                        {suggestions.map((s, i) => (
+                            <button
+                                key={i}
+                                onClick={() => handleSend(s)}
+                                className="px-4 py-2 rounded-full bg-[#1C1C1E]/60 hover:bg-[#2C2C2E] border border-white/[0.05] text-[13px] text-white/70 transition-colors shadow-sm"
+                            >
+                                {s}
+                            </button>
+                        ))}
+                    </motion.div>
+                )}
+            </div>
         </div>
     );
 }

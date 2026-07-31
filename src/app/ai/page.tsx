@@ -54,6 +54,7 @@ export default function AIAppPage() {
             <SidebarDrawer 
                 isOpen={isSidebarOpen} 
                 onClose={() => setIsSidebarOpen(false)} 
+                onOpen={() => setIsSidebarOpen(true)}
             />
 
             {/* Main Column */}
@@ -70,7 +71,7 @@ export default function AIAppPage() {
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.8 }}
                                     onClick={() => setIsSidebarOpen(true)}
-                                    className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors"
+                                    className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors md:hidden"
                                 >
                                     <Menu className="w-5 h-5 text-white/90" />
                                 </motion.button>
@@ -79,14 +80,16 @@ export default function AIAppPage() {
                         
                         <button 
                             onClick={() => router.back()}
-                            className="flex items-center gap-2 group"
+                            className={`flex items-center group mt-[6px] ${isSidebarOpen ? '' : 'gap-2'}`}
                         >
-                            <div className="w-8 h-8 rounded-full bg-white/[0.05] group-hover:bg-white/[0.1] flex items-center justify-center transition-colors">
+                            {!isSidebarOpen && (
+                                <div className="flex flex-col items-start">
+                                    <h1 className="text-[14px] font-semibold text-white leading-tight">DUO AI</h1>
+                                    <p className="text-[10px] text-white/50 leading-tight">Household Assistant</p>
+                                </div>
+                            )}
+                            <div className="w-8 h-8 rounded-full bg-white/[0.05] group-hover:bg-white/[0.1] flex items-center justify-center transition-colors shrink-0">
                                 <ChevronDown className="w-5 h-5 text-white" />
-                            </div>
-                            <div className="flex flex-col items-start">
-                                <h1 className="text-[14px] font-semibold text-white leading-tight">DUO AI</h1>
-                                <p className="text-[10px] text-white/50 leading-tight">Household Assistant</p>
                             </div>
                         </button>
                     </div>
@@ -94,46 +97,40 @@ export default function AIAppPage() {
                     {/* Right Side: Actions */}
                     <div className="flex items-center gap-1 relative h-10">
                         <AnimatePresence mode="popLayout">
-                            {!showScannerToggle && (
-                                messages.length === 0 ? (
-                                    <motion.div
-                                        key="logo"
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.8 }}
-                                        className="w-10 h-10 flex items-center justify-center"
+                            {!showScannerToggle && messages.length > 0 && (
+                                <motion.div 
+                                    key="actions"
+                                    className="flex items-center gap-1"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                >
+                                    {/* New Chat / New Scan Button */}
+                                    <button 
+                                        onClick={() => {
+                                            if (activeTab === 'chat') {
+                                                startNewChat();
+                                            }
+                                        }}
+                                        className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors text-white"
+                                        title={activeTab === 'chat' ? "New Chat" : "New Scan"}
                                     >
-                                        <DuoAIIcon className="w-5 h-5 text-white/30" forceState="star-idle" />
-                                    </motion.div>
-                                ) : (
-                                    <motion.div 
-                                        key="actions"
-                                        className="flex items-center gap-1"
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.8 }}
-                                    >
-                                        {/* New Chat / New Scan Button */}
-                                        <button 
-                                            onClick={() => {
-                                                if (activeTab === 'chat') {
-                                                    startNewChat();
-                                                }
-                                            }}
-                                            className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors text-white"
-                                            title={activeTab === 'chat' ? "New Chat" : "New Scan"}
-                                        >
-                                            {activeTab === 'chat' ? <Plus className="w-5 h-5" /> : <ScanLine className="w-5 h-5" />}
-                                        </button>
+                                        {activeTab === 'chat' ? <Plus className="w-5 h-5" /> : <ScanLine className="w-5 h-5" />}
+                                    </button>
 
-                                        {/* 3-Dots Menu */}
-                                        <div className="relative">
-                                            <button 
-                                                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                                className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors"
-                                            >
-                                                <MoreVertical className="w-5 h-5 text-white/90" />
-                                            </button>
+                                    {/* Duo AI Logo */}
+                                    <div className="w-10 h-10 flex items-center justify-center pointer-events-none">
+                                        <DuoAIIcon className="w-[18px] h-[18px] text-white/50" forceState="star-idle" />
+                                    </div>
+
+                                    {/* 3-Dots Menu */}
+                                    <div className="relative">
+                                        <button 
+                                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                            className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors"
+                                        >
+                                            <MoreVertical className="w-5 h-5 text-white/90" />
+                                        </button>
                                             
                                             {isMenuOpen && (
                                                 <>
@@ -161,7 +158,6 @@ export default function AIAppPage() {
                                             )}
                                         </div>
                                     </motion.div>
-                                )
                             )}
                         </AnimatePresence>
                     </div>
