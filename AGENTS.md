@@ -104,7 +104,7 @@ If a UI change can't honestly clear all four, it goes back for another pass befo
 - **Backend/data:** Supabase free tier — Postgres + Auth, shared between two accounts (the couple shares budget data).
 - **Hosting:** Vercel free tier.
 - **Currency rates:** Frankfurter API (free, no key, ECB-based) as primary; exchangerate-api.com free tier as fallback. Cache rate + timestamp; refresh hourly, not per keystroke.
-- **Vision/scanning & AI Chat:** Gemini 3.6 Flash (or newest/smartest cost-effective model) handles item identification from photos with Google Search grounding, and powers the grounded token-by-token streaming AI Chat — single provider, one free tier to manage.
+- **Vision/scanning & AI Chat:** Gemini 3.6 Flash (or newest/smartest cost-effective model) handles item identification from photos with Google Search grounding, and powers the grounded token-by-token streaming AI Chat. **Important Architecture Note:** To bypass Google's strict 20-request daily limits per key on free tiers, the API keys have been intentionally split. The application requires two separate keys: `GEMINI_SCANNER_API_KEY` (for vision/scanning) and `GEMINI_CHAT_API_KEY` (for the chat assistant). They must be sourced from different Google accounts to effectively double the daily free-tier quota.
 - **Budget/AI check-ins (optional, later):** a single LLM call at period-end (Spend Jar) or trip-end (Cartify) — never per-entry — summarizing status and suggesting adjustments. Keep these rare and cheap to stay within free tiers.
 
 **Everything must run on free tiers only.** Flag any feature that would require a paid API before building it, and propose a free-tier-compatible alternative or a scoped-down mock version instead.
