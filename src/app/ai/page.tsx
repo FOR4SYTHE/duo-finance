@@ -22,9 +22,6 @@ export default function AIAppPage() {
 
     useEffect(() => {
         setMounted(true);
-        if (window.innerWidth >= 768) {
-            setIsSidebarOpen(true);
-        }
         document.body.style.overflow = 'hidden';
         return () => {
             document.body.style.overflow = 'unset';
@@ -67,12 +64,12 @@ export default function AIAppPage() {
                     <div className="flex items-center gap-2">
                         {/* Hide Hamburger if we are showing the toggle switch instead */}
                         <AnimatePresence mode="popLayout">
-                            {!showScannerToggle && (
+                            {!showScannerToggle && !isSidebarOpen && (
                                 <motion.button 
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.8 }}
-                                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                                    onClick={() => setIsSidebarOpen(true)}
                                     className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors"
                                 >
                                     <Menu className="w-5 h-5 text-white/90" />

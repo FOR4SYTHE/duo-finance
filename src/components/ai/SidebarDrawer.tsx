@@ -169,15 +169,17 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                         className="fixed md:relative top-0 left-0 h-[100dvh] w-[280px] bg-[#1C1C1E] z-[110] md:z-auto flex flex-col shadow-2xl md:shadow-none border-r border-white/5 shrink-0"
                     >
                         {/* Header */}
-                        <div className="h-16 flex items-center px-4 border-b border-white/5 shrink-0">
+                        <div className="h-16 flex items-center px-4 border-b border-white/5 shrink-0 justify-between">
+                            <div className="flex items-center">
+                                <DuoAIIcon className="w-5 h-5 text-white mr-2" forceState="star-idle" />
+                                <span className="text-[15px] font-semibold text-white tracking-wide">DUO AI</span>
+                            </div>
                             <button 
                                 onClick={onClose}
-                                className="w-10 h-10 rounded-full hover:bg-white/[0.08] flex items-center justify-center transition-colors mr-1"
+                                className="w-10 h-10 rounded-full hover:bg-white/[0.08] flex items-center justify-center transition-colors -mr-2"
                             >
                                 <X className="w-5 h-5 text-white/80" />
                             </button>
-                            <DuoAIIcon className="w-5 h-5 text-white mr-2" forceState="star-idle" />
-                            <span className="text-[15px] font-semibold text-white tracking-wide">DUO AI</span>
                         </div>
 
                         {/* Actions */}

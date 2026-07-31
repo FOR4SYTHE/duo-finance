@@ -17,7 +17,7 @@ export function AIChatView() {
     useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
-            textareaRef.current.style.height = `${Math.min(Math.max(textareaRef.current.scrollHeight, 56), 200)}px`;
+            textareaRef.current.style.height = `${Math.min(Math.max(textareaRef.current.scrollHeight, inputValue.length > 0 ? 120 : 56), 200)}px`;
         }
     }, [inputValue]);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -252,22 +252,20 @@ export function AIChatView() {
                     {!isStreaming && (
                         <motion.div 
                             key="input"
+                            layout
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            transition={{ duration: 0.2 }}
-                            className="relative max-w-2xl mx-auto flex items-end bg-[#1C1C1E] rounded-3xl border border-white/[0.05] shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden"
+                            transition={{ 
+                                duration: 0.2,
+                                layout: { type: 'tween', ease: 'easeOut', duration: 0.25 }
+                            }}
+                            className={`relative max-w-2xl mx-auto bg-[#1C1C1E] border border-white/[0.05] shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-300 ${
+                                inputValue.length > 0 ? 'rounded-[24px]' : 'rounded-[32px]'
+                            }`}
                         >
                             {/* High-Performance CSS Mono Beam */}
                             <div className="absolute top-0 left-[20%] right-[20%] h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent shadow-[0_0_15px_rgba(255,255,255,0.4)] opacity-80" />
-                            
-                            {/* Plus / Features Menu Button */}
-                            <button 
-                                className="w-12 h-14 flex items-center justify-center shrink-0 text-white/40 hover:text-white transition-colors relative z-10"
-                                onClick={() => {}}
-                            >
-                                <Plus className="w-6 h-6" />
-                            </button>
                             
                             <textarea
                                 ref={textareaRef}
@@ -280,11 +278,26 @@ export function AIChatView() {
                                     }
                                 }}
                                 placeholder="Ask DUO AI"
-                                className="flex-1 py-[17px] bg-transparent text-white placeholder-white/40 focus:outline-none transition-all text-[15px] font-medium relative z-10 resize-none min-h-[56px] max-h-[200px]"
+                                className={`w-full bg-transparent text-white placeholder-white/40 focus:outline-none transition-all duration-300 text-[15px] font-medium relative z-10 resize-none block ${
+                                    inputValue.length > 0 
+                                        ? 'min-h-[120px] pt-4 px-4 pb-[52px]' 
+                                        : 'min-h-[56px] py-[17px] pl-12 pr-[88px]'
+                                }`}
                                 rows={1}
                             />
                             
-                            <div className="pr-2 pl-1 h-14 flex items-center relative z-10 gap-1 shrink-0">
+                            {/* Left Button */}
+                            <div className="absolute left-1 bottom-1 transition-all duration-300 z-20">
+                                <button 
+                                    className="w-12 h-[48px] flex items-center justify-center text-white/40 hover:text-white transition-colors"
+                                    onClick={() => {}}
+                                >
+                                    <Plus className="w-6 h-6" />
+                                </button>
+                            </div>
+                            
+                            {/* Right Buttons */}
+                            <div className="absolute right-1 bottom-1 flex items-center gap-1 transition-all duration-300 pr-1 h-[48px] z-20">
                                 <button className="w-9 h-9 rounded-full flex items-center justify-center text-white/40 hover:text-white/80 transition-colors">
                                     <Mic className="w-5 h-5" />
                                 </button>
