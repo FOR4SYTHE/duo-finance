@@ -12,18 +12,18 @@ export function PluginsView() {
             icon: <FileText className="w-5 h-5 text-white" />,
             color: 'bg-emerald-500',
             active: true
-        }
-    ];
-
-    const householdPlugins = [
+        },
         {
             id: 'receipt-vault',
             name: 'Receipt & Doc Vault',
             description: 'AI-scanned storage for warranties, visas, and household receipts.',
             icon: <FolderLock className="w-5 h-5 text-white" />,
             color: 'bg-blue-500',
-            active: false
-        },
+            active: true
+        }
+    ];
+
+    const householdPlugins = [
         {
             id: 'relocation-hub',
             name: 'Relocation Hub',

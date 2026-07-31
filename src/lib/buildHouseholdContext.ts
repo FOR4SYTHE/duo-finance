@@ -42,6 +42,12 @@ export function buildHouseholdContext(): string {
         return `${g.name}: ${pct}% (₱${Math.round(g.savedAmount).toLocaleString()})`;
     }).join(' | ');
 
+    // 4. Document Vault Summary
+    const { documents } = usePluginsStore.getState();
+    const vaultSummary = documents.length > 0 
+        ? documents.map(d => `- ${d.title} (${d.category}, ${d.date})${d.amount ? ` ₱${d.amount}` : ''} [Tags: ${d.tags.join(', ')}]`).join('\n')
+        : '';
+
     // Compile the final context string
     return `
 Household Snapshot:
@@ -53,6 +59,7 @@ ${topCategories ? `- Top Spend Categories: ${topCategories}` : ''}
 ${goalsSummary ? `- Goals: ${goalsSummary}` : ''}
 - Exchange Rate: 1 PHP = ${exchangeRate.toFixed(4)} ZAR
 
+${vaultSummary ? `Document Vault (Uploaded files):\n${vaultSummary}\n` : ''}
 ${scratchpadContent ? `Shared Scratchpad Notes (Read these to assist the user):\n${scratchpadContent.replace(/<[^>]*>?/gm, ' ')}` : ''}
 `.trim();
 }
