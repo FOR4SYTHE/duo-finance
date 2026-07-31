@@ -32,12 +32,12 @@ export function Navigation() {
   return (
     <AnimatePresence>
       {!isHiddenRoute && (
-        <motion.div 
+          <motion.div 
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="absolute bottom-6 left-4 right-4 z-50 flex items-center justify-center gap-3"
+          className="absolute bottom-6 left-4 right-4 z-50 flex items-center justify-center gap-3 print:hidden"
         >
           {/* Main Navigation Capsule — solid dark glass, no backdrop-blur */}
           <div ref={navRef} className="flex-1 max-w-[340px] p-2 flex items-center justify-between relative overflow-hidden rounded-[32px] bg-[#0A0A0A]/95 border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),inset_0_-1px_1px_rgba(0,0,0,0.5),0_16px_40px_rgba(0,0,0,0.8)]">

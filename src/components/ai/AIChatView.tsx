@@ -255,39 +255,39 @@ export function AIChatView() {
                                         </div>
 
                                         {msg.role === 'assistant' && msg.status !== 'streaming' && (
-                                            <div className="flex items-center gap-4 mt-1">
+                                            <div className="flex items-center gap-1 mt-2 -ml-2">
                                                 <button 
                                                     onClick={() => handleCopy(msg.id, msg.content)}
-                                                    className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors"
+                                                    className="p-2 text-white/40 hover:text-white/80 hover:bg-white/5 rounded-lg transition-colors"
                                                     title="Copy message"
                                                 >
-                                                    {copiedId === msg.id ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                                                    {copiedId === msg.id ? <Check className="w-[18px] h-[18px] text-green-400" /> : <Copy className="w-[18px] h-[18px]" />}
                                                 </button>
                                                 <button 
                                                     onClick={() => handleSpeak(msg.id, msg.content)}
-                                                    className={`flex items-center gap-1.5 text-[11px] hover:text-white/80 transition-colors ${
-                                                        speakingId === msg.id ? 'text-white' : 'text-white/40'
+                                                    className={`p-2 hover:bg-white/5 rounded-lg transition-colors ${
+                                                        speakingId === msg.id ? 'text-white' : 'text-white/40 hover:text-white/80'
                                                     }`}
                                                     title={speakingId === msg.id ? "Stop reading" : "Read aloud"}
                                                 >
                                                     {speakingId === msg.id ? (
-                                                        <Square className="w-4 h-4 fill-white text-white" />
+                                                        <Square className="w-[18px] h-[18px] fill-white text-white" />
                                                     ) : (
-                                                        <Volume2 className="w-4 h-4" />
+                                                        <Volume2 className="w-[18px] h-[18px]" />
                                                     )}
                                                 </button>
                                                 <button 
-                                                    className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors"
+                                                    className="p-2 text-white/40 hover:text-white/80 hover:bg-white/5 rounded-lg transition-colors"
                                                     title="Share message"
                                                 >
-                                                    <Share2 className="w-4 h-4" />
+                                                    <Share2 className="w-[18px] h-[18px]" />
                                                 </button>
                                                 <button 
                                                     onClick={() => window.print()}
-                                                    className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors"
+                                                    className="p-2 text-white/40 hover:text-white/80 hover:bg-white/5 rounded-lg transition-colors"
                                                     title="Download as PDF"
                                                 >
-                                                    <FileText className="w-4 h-4" />
+                                                    <FileText className="w-[18px] h-[18px]" />
                                                 </button>
                                             </div>
                                         )}
