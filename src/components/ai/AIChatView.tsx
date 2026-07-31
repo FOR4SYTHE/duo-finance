@@ -14,10 +14,21 @@ export function AIChatView() {
     const [inputValue, setInputValue] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+    const prevLength = useRef(0);
+
     useEffect(() => {
         if (textareaRef.current) {
-            textareaRef.current.style.height = 'auto';
-            textareaRef.current.style.height = `${Math.min(Math.max(textareaRef.current.scrollHeight, inputValue.length > 0 ? 120 : 56), 200)}px`;
+            const isDeleting = inputValue.length < prevLength.current;
+            prevLength.current = inputValue.length;
+
+            if (inputValue.length === 0) {
+                textareaRef.current.style.height = '56px';
+            } else {
+                if (isDeleting) {
+                    textareaRef.current.style.height = 'auto';
+                }
+                textareaRef.current.style.height = `${Math.min(Math.max(textareaRef.current.scrollHeight, 120), 200)}px`;
+            }
         }
     }, [inputValue]);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -252,7 +263,7 @@ export function AIChatView() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
                             transition={{ duration: 0.2 }}
-                            className={`relative max-w-2xl mx-auto bg-[#1C1C1E] border border-white/[0.05] shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden ${
+                            className={`relative max-w-2xl mx-auto bg-[#1C1C1E] border border-white/[0.05] shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-[300ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
                                 inputValue.length > 0 ? 'rounded-[24px]' : 'rounded-[32px]'
                             }`}
                         >
@@ -270,7 +281,7 @@ export function AIChatView() {
                                     }
                                 }}
                                 placeholder="Ask DUO AI"
-                                className={`w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-[15px] font-medium relative z-10 resize-none block ${
+                                className={`w-full bg-transparent text-white placeholder-white/40 focus:outline-none transition-all duration-[300ms] ease-[cubic-bezier(0.23,1,0.32,1)] text-[15px] font-medium relative z-10 resize-none block [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
                                     inputValue.length > 0 
                                         ? 'min-h-[120px] pt-4 px-4 pb-[52px]' 
                                         : 'min-h-[56px] py-[17px] pl-12 pr-[88px]'
