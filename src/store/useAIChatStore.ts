@@ -22,6 +22,12 @@ interface AIChatState {
     currentChatId: string | null;
     isStreaming: boolean;
     activeTab: 'chat' | 'scanner';
+    
+    // Settings
+    aiSettings: {
+        personality: 'general' | 'strict' | 'shopper' | 'custom';
+        customInstructions: string;
+    };
 
     // Actions
     addUserMessage: (content: string) => void;
@@ -39,6 +45,7 @@ interface AIChatState {
     togglePinChat: (id: string) => void;
     renameChat: (id: string, newTitle: string) => void;
     clearAllHistory: () => void;
+    updateAISettings: (settings: Partial<AIChatState['aiSettings']>) => void;
     
     // For testing
     isFirstVisit: boolean;
@@ -59,6 +66,10 @@ export const useAIChatStore = create<AIChatState>()(
             currentChatId: null,
             isStreaming: false,
             activeTab: 'chat',
+            aiSettings: {
+                personality: 'general',
+                customInstructions: '',
+            },
 
             addUserMessage: (content: string) => set((state) => {
                 const newMessage: ChatMessage = {
@@ -185,6 +196,13 @@ export const useAIChatStore = create<AIChatState>()(
                 chats: state.chats.map(c => c.id === id ? { ...c, title: newTitle } : c)
             })),
             clearAllHistory: () => set({ chats: [], currentChatId: null }),
+
+            updateAISettings: (settings) => set((state) => ({
+                aiSettings: {
+                    ...state.aiSettings,
+                    ...settings
+                }
+            })),
             
             isFirstVisit: true,
             toggleFirstVisit: () => set((state) => ({ isFirstVisit: !state.isFirstVisit })),

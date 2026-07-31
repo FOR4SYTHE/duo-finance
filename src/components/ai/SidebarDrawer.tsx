@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen, SquarePen, Search } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
+import { AISettingsModal } from './AISettingsModal';
 
 interface SidebarDrawerProps {
     isOpen: boolean;
@@ -15,6 +17,7 @@ interface SidebarDrawerProps {
 
 export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
     const { setActiveTab, startNewChat, loadChat, deleteChat, togglePinChat, renameChat, userName, chats, currentChatId } = useAIChatStore();
+    const { user } = useAuthStore();
     const router = useRouter();
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -23,6 +26,7 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
     const [isRecentsExpanded, setIsRecentsExpanded] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearchActive, setIsSearchActive] = useState(false);
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
     const toggleDropdown = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -330,24 +334,40 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                         )}
                     </div>
 
-                    {/* Footer (User Account) */}
-                    <div className="px-[2px] py-2 shrink-0 flex items-center overflow-hidden">
-                        <button className={`h-9 flex items-center rounded-lg hover:bg-white/[0.08] transition-all overflow-hidden group/account ${isOpen ? 'w-full' : 'w-9'}`}>
-                            <div className="w-9 h-9 flex items-center justify-center shrink-0">
-                                <div className="w-[22px] h-[22px] rounded-full bg-gradient-to-tr from-blue-500 to-emerald-400 flex items-center justify-center">
-                                    <span className="text-[10px] font-bold text-white leading-none mt-[1px]">{userName.charAt(0)}</span>
-                                </div>
+                    {/* Footer (User Account & Settings) */}
+                    <div className={`px-[2px] shrink-0 flex ${isOpen ? 'h-[52px] flex-row items-center mb-1' : 'flex-col items-start justify-end gap-2 pb-3 pt-2'} overflow-hidden transition-all duration-300`}>
+                        {!isOpen && (
+                            <button onClick={() => setIsSettingsModalOpen(true)} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors shrink-0">
+                                <Settings className="w-[18px] h-[18px]" />
+                            </button>
+                        )}
+                        
+                        <div className="w-9 h-9 flex items-center justify-center shrink-0">
+                            <div className="w-[22px] h-[22px] rounded-full overflow-hidden bg-gradient-to-tr from-blue-500 to-emerald-400 flex items-center justify-center">
+                                {user?.avatar ? (
+                                    <img src={user.avatar} alt={user.name || userName} className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-[10px] font-bold text-white leading-none mt-[1px] pt-[1px] block">{(user?.name || userName).charAt(0).toUpperCase()}</span>
+                                )}
                             </div>
-                            <div className="w-[230px] flex items-center justify-between pl-1">
-                                <span className="text-[13px] font-medium text-white/90 truncate pr-2 whitespace-nowrap">{userName}</span>
-                                <div className="w-6 h-6 rounded flex items-center justify-center mr-1 shrink-0">
-                                    <Settings className="w-[14px] h-[14px] text-white/60" />
-                                </div>
+                        </div>
+
+                        {isOpen && (
+                            <div className="w-[190px] flex items-center justify-between ml-[8px]">
+                                <span className="text-[13px] font-medium text-white/90 truncate">{user?.name || userName}</span>
+                                <button onClick={() => setIsSettingsModalOpen(true)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors shrink-0 mr-1">
+                                    <Settings className="w-[16px] h-[16px]" />
+                                </button>
                             </div>
-                        </button>
+                        )}
                     </div>
                 </div>
             </div>
+
+            <AISettingsModal 
+                isOpen={isSettingsModalOpen}
+                onClose={() => setIsSettingsModalOpen(false)}
+            />
         </>
     );
 }
