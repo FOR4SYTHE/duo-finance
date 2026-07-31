@@ -217,11 +217,10 @@ export function AIChatView() {
             const ctx = pendingScanContext;
             setPendingScanContext(null);
             // Small delay to let Zustand state settle after startNewChat()
-            const timer = setTimeout(() => {
+            setTimeout(() => {
                 const itemLabel = ctx.brand ? `${ctx.brand} ${ctx.itemName}` : ctx.itemName;
                 handleSend(`Tell me more about this: ${itemLabel}`, ctx);
             }, 50);
-            return () => clearTimeout(timer);
         }
     }, [pendingScanContext]);
 

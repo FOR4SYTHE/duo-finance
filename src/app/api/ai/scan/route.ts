@@ -129,8 +129,12 @@ ${JSON.stringify(searchResults)}
                 } else {
                     searchError = true;
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Search pipeline error:", err);
+                // If it was a Gemini API rate limit error, throw it so the main catch handles it
+                if (err?.message?.includes('429') || err?.message?.includes('RESOURCE_EXHAUSTED') || err?.message?.includes('Quota')) {
+                    throw err;
+                }
                 searchError = true;
             }
         } else {
