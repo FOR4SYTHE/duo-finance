@@ -5,6 +5,7 @@ import { Menu, MoreVertical, Plus, ScanLine, Share, Pin, Edit2, Trash2, Download
 import { AIChatView } from '@/components/ai/AIChatView';
 import { AIScannerView } from '@/components/ai/AIScannerView';
 import { SharedScratchpadView } from '@/components/ai/SharedScratchpadView';
+import { PluginsView } from '@/components/ai/PluginsView';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { PillTabRow } from '@/components/ui/PillTabRow';
 import { SidebarDrawer } from '@/components/ai/SidebarDrawer';
@@ -249,6 +250,7 @@ export default function AIAppPage() {
                     {activeTab === 'chat' && <AIChatView />}
                     {activeTab === 'scanner' && <AIScannerView />}
                     {activeTab === 'scratchpad' && <SharedScratchpadView />}
+                    {activeTab === 'plugins' && <PluginsView />}
                 </div>
             </div>
             {/* Custom Rename Modal */}

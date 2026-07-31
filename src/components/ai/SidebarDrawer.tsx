@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen, SquarePen, Search, ScanBarcode, FileText } from 'lucide-react';
+import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen, SquarePen, Search, ScanBarcode, FileText, Blocks } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
@@ -262,26 +262,19 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                             <span className="text-[15px] md:text-[13px] font-medium pl-1 text-white/90 whitespace-nowrap">Shopping Scanner</span>
                         </button>
 
-                        {/* Plugins Header */}
-                        {isOpen && (
-                            <div className="mt-4 mb-1 pl-3 text-[10px] font-bold text-white/40 uppercase tracking-wider">
-                                Plugins
-                            </div>
-                        )}
-                        
-                        {/* Scratchpad Plugin */}
+                        {/* Plugins Hub */}
                         <button 
                             onClick={() => {
-                                setActiveTab('scratchpad');
+                                setActiveTab('plugins');
                                 if (typeof window !== 'undefined' && window.innerWidth < 768) onClose();
                             }}
-                            className={`h-11 md:h-9 flex items-center rounded-lg hover:bg-white/[0.08] transition-all overflow-hidden text-left group/btn ${isOpen ? 'w-full' : 'w-9 mt-4'}`}
-                            title="Shared Scratchpad"
+                            className={`h-11 md:h-9 flex items-center rounded-lg hover:bg-white/[0.08] transition-all overflow-hidden text-left group/btn ${isOpen ? 'w-full' : 'w-9'}`}
+                            title="Plugins"
                         >
                             <div className="w-9 h-11 md:h-9 flex items-center justify-center shrink-0">
-                                <FileText className="w-[18px] h-[18px] md:w-[15px] md:h-[15px] text-emerald-400/80 group-hover/btn:text-emerald-400 transition-colors" />
+                                <Blocks className="w-[20px] h-[20px] md:w-[16px] md:h-[16px] text-white/80 group-hover/btn:text-white transition-colors" />
                             </div>
-                            <span className="text-[15px] md:text-[13px] font-medium pl-1 text-white/90 whitespace-nowrap">Shared Scratchpad</span>
+                            <span className="text-[15px] md:text-[13px] font-medium pl-1 text-white/90 whitespace-nowrap">Plugins</span>
                         </button>
 
                         {/* Search Bar / Button */}
