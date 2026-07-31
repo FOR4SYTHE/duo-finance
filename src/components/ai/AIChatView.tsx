@@ -303,6 +303,32 @@ export function AIChatView() {
                                                             <div className="text-[11px] text-emerald-400/80 font-medium tracking-wide">
                                                                 {msg.scanContext.listings?.length || 0} online listings found
                                                             </div>
+                                                            {msg.scanContext.listings && msg.scanContext.listings.length > 0 && (
+                                                                <div className="mt-2 flex flex-col gap-1.5 pt-2 border-t border-white/[0.05]">
+                                                                    {msg.scanContext.listings.map((l, i) => {
+                                                                        const numericPrice = typeof l.price_php === 'number' 
+                                                                            ? l.price_php 
+                                                                            : (parseFloat(String(l.price_php || '0').replace(/,/g, '')) || 0);
+                                                                        return (
+                                                                            <a 
+                                                                                key={i} 
+                                                                                href={l.url} 
+                                                                                target="_blank" 
+                                                                                rel="noreferrer"
+                                                                                className="flex items-center justify-between text-[11px] bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] p-2 rounded-lg transition-colors group"
+                                                                            >
+                                                                                <div className="flex flex-col gap-0.5 overflow-hidden">
+                                                                                    <span className="text-white/60 font-bold uppercase tracking-wider text-[9px]">{l.source}</span>
+                                                                                    <span className="text-white/80 line-clamp-1 truncate pr-2">{l.name}</span>
+                                                                                </div>
+                                                                                <span className="text-emerald-400 font-bold shrink-0 ml-2 group-hover:text-emerald-300 transition-colors">
+                                                                                    ₱{numericPrice.toLocaleString()}
+                                                                                </span>
+                                                                            </a>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
                                                     {msg.content}
