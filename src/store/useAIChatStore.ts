@@ -7,6 +7,7 @@ export interface ChatMessage {
     content: string;
     timestamp: number;
     status: 'sending' | 'streaming' | 'complete' | 'error';
+    scanContext?: ScanContext;
 }
 
 export interface ChatSession {
@@ -38,7 +39,7 @@ interface AIChatState {
     };
 
     // Actions
-    addUserMessage: (content: string, options?: { isScan?: boolean }) => void;
+    addUserMessage: (content: string, options?: { isScan?: boolean; scanContext?: ScanContext }) => void;
     startAssistantMessage: () => string; // returns new message id
     appendToMessage: (id: string, text: string) => void;
     completeMessage: (id: string) => void;
@@ -83,13 +84,14 @@ export const useAIChatStore = create<AIChatState>()(
                 customInstructions: '',
             },
 
-            addUserMessage: (content: string, options?: { isScan?: boolean }) => set((state) => {
+            addUserMessage: (content: string, options?: { isScan?: boolean; scanContext?: ScanContext }) => set((state) => {
                 const newMessage: ChatMessage = {
                     id: crypto.randomUUID(),
                     role: 'user',
                     content,
                     timestamp: Date.now(),
-                    status: 'complete' // Optimistic UI
+                    status: 'complete', // Optimistic UI
+                    scanContext: options?.scanContext
                 };
 
                 let newChats = [...state.chats];

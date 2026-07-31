@@ -145,8 +145,19 @@ ${JSON.stringify(searchResults)}
 
     } catch (error: any) {
         console.error("Scanner Pipeline Error:", error);
+        
+        let errorMsg = error.message || 'Failed to process image.';
+        if (errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED') || errorMsg.includes('Quota')) {
+            errorMsg = "DUO AI is currently resting. (Free tier limit of 15 scans/min reached). Please try again in a moment.";
+        } else if (errorMsg.includes('{"error"')) {
+            try {
+                const parsed = JSON.parse(errorMsg);
+                errorMsg = parsed.error?.message || "An unexpected error occurred.";
+            } catch (e) {}
+        }
+        
         return NextResponse.json(
-            { error: error.message || 'Failed to process image.' }, 
+            { error: errorMsg }, 
             { status: 500 }
         );
     }

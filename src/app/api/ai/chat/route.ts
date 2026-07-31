@@ -79,8 +79,18 @@ ${householdContext}
 
     } catch (error: any) {
         console.error("Chat API Error:", error);
+        let errorMsg = error.message || 'Failed to process chat request.';
+        if (errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED') || errorMsg.includes('Quota')) {
+            errorMsg = "DUO AI's brain is taking a quick breather (API Limit Reached). Please wait a moment and try again.";
+        } else if (errorMsg.includes('{"error"')) {
+            try {
+                const parsed = JSON.parse(errorMsg);
+                errorMsg = parsed.error?.message || "An unexpected error occurred.";
+            } catch (e) {}
+        }
+        
         return new Response(
-            JSON.stringify({ error: error.message || 'Failed to process chat request.' }), 
+            JSON.stringify({ error: errorMsg }), 
             { status: 500, headers: { 'Content-Type': 'application/json' } }
         );
     }

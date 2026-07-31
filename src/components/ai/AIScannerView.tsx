@@ -128,12 +128,14 @@ export function AIScannerView() {
                         exit={{ opacity: 0, y: -20 }}
                         className="absolute top-20 left-4 right-4 z-50"
                     >
-                        <div className="bg-[#1C1C1E] border border-red-500/30 rounded-2xl p-4 flex items-start gap-3 shadow-2xl">
-                            <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                            <div className="flex-1">
-                                <p className="text-[14px] text-white leading-snug">{error}</p>
+                        <div className="bg-[#1C1C1E]/95 backdrop-blur-xl border border-red-500/20 rounded-[20px] p-4 flex items-center gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.5)] max-w-sm mx-auto">
+                            <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
+                                <AlertCircle className="w-4 h-4 text-red-400" />
                             </div>
-                            <button onClick={() => setError(null)} className="p-1 -m-1 text-white/40 hover:text-white">
+                            <div className="flex-1">
+                                <p className="text-[13px] font-medium text-white/90 leading-snug">{error}</p>
+                            </div>
+                            <button onClick={() => setError(null)} className="p-2 -mr-2 text-white/40 hover:text-white/80 transition-colors rounded-full hover:bg-white/5 active:scale-95">
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
@@ -331,8 +333,6 @@ export function AIScannerView() {
                                                 });
                                                 // Create a new chat tagged as scan
                                                 startNewChat();
-                                                const itemLabel = identifiedItem?.brand ? `${identifiedItem.brand} ${identifiedItem.name}` : identifiedItem?.name;
-                                                addUserMessage(`Tell me more about this: ${itemLabel}`, { isScan: true });
                                                 setActiveTab('chat');
                                             }}
                                             className="w-full py-4 bg-[#F5F5F7] text-[#1D1D1F] font-semibold tracking-wide rounded-[20px] shadow-[0_4px_20px_rgba(255,255,255,0.08)] hover:bg-white hover:shadow-[0_8px_30px_rgba(255,255,255,0.15)] transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2.5"

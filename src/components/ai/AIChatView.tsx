@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowUp, Loader2, Copy, Share2, Check, Plus, Mic, Volume2, FileText, Square } from 'lucide-react';
+import { Send, ArrowUp, Loader2, Copy, Share2, Check, Plus, Mic, Volume2, FileText, Square, ScanBarcode } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { buildHouseholdContext } from '@/lib/buildHouseholdContext';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
@@ -142,11 +142,8 @@ export function AIChatView() {
 
         setInputValue('');
         
-        // If this is NOT a scan-triggered call, add the user message normally
-        // (scan-triggered calls already added the user message from AIScannerView)
-        if (!scanContext) {
-            addUserMessage(content);
-        }
+        // Attach the scanContext to the user message in the UI state
+        addUserMessage(content, { isScan: !!scanContext, scanContext: scanContext || undefined });
 
         // Build enriched context if scan data is available
         let enrichedContent = content;
@@ -213,13 +210,17 @@ export function AIChatView() {
 
     // Auto-fire chat when coming from the scanner
     useEffect(() => {
-        if (pendingScanContext && currentChatId && !isStreaming) {
+        if (pendingScanContext && !isStreaming) {
             const ctx = pendingScanContext;
             setPendingScanContext(null);
-            const itemLabel = ctx.brand ? `${ctx.brand} ${ctx.itemName}` : ctx.itemName;
-            handleSend(`Tell me more about this: ${itemLabel}`, ctx);
+            // Small delay to let Zustand state settle after startNewChat()
+            const timer = setTimeout(() => {
+                const itemLabel = ctx.brand ? `${ctx.brand} ${ctx.itemName}` : ctx.itemName;
+                handleSend(`Tell me more about this: ${itemLabel}`, ctx);
+            }, 50);
+            return () => clearTimeout(timer);
         }
-    }, [pendingScanContext, currentChatId]);
+    }, [pendingScanContext]);
 
     const suggestions = [
         "How's our budget this month?",
@@ -274,7 +275,24 @@ export function AIChatView() {
                                                     </>
                                                 )
                                             ) : (
-                                                msg.content
+                                                <>
+                                                    {msg.scanContext && (
+                                                        <div className="mb-3 p-3 bg-black/40 rounded-xl border border-white/[0.05] flex flex-col gap-2 shadow-inner">
+                                                            <div className="flex items-center gap-2">
+                                                                <ScanBarcode className="w-[14px] h-[14px] text-emerald-400" />
+                                                                <span className="text-[10px] font-bold text-white/50 tracking-wider uppercase">Scanned Item</span>
+                                                            </div>
+                                                            <div className="text-[15px] leading-snug font-medium text-white/90">
+                                                                {msg.scanContext.brand && <span className="text-white/50 font-normal mr-1">{msg.scanContext.brand}</span>}
+                                                                {msg.scanContext.itemName}
+                                                            </div>
+                                                            <div className="text-[11px] text-emerald-400/80 font-medium tracking-wide">
+                                                                {msg.scanContext.listings?.length || 0} online listings found
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {msg.content}
+                                                </>
                                             )}
                                         </div>
 
