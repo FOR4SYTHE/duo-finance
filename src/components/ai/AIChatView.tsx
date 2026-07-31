@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowUp, Loader2, Copy, Share2, Check, Plus, Mic } from 'lucide-react';
+import { Send, ArrowUp, Loader2, Copy, Share2, Check, Plus, Mic, Volume2, FileText, Square } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { buildHouseholdContext } from '@/lib/buildHouseholdContext';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
@@ -42,6 +42,59 @@ export function AIChatView() {
         navigator.clipboard.writeText(text);
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
+    };
+    
+    const [speakingId, setSpeakingId] = useState<string | null>(null);
+
+    // Cleanup speech on unmount
+    useEffect(() => {
+        return () => {
+            if (typeof window !== 'undefined' && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        };
+    }, []);
+
+    const handleSpeak = (id: string, text: string) => {
+        if (typeof window === 'undefined' || !window.speechSynthesis) return;
+        
+        // If clicking the currently speaking message, stop it
+        if (speakingId === id) {
+            window.speechSynthesis.cancel();
+            setSpeakingId(null);
+            return;
+        }
+
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        
+        // Strip markdown formatting before reading
+        const cleanText = text
+            .replace(/[*_]{1,3}/g, '') // Remove bold/italic markers
+            .replace(/#+\s?/g, '') // Remove headers
+            .replace(/`/g, '') // Remove code ticks
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links but keep text
+            .replace(/^- /gm, '') // Remove list dashes
+            .replace(/\n/g, '. '); // Replace newlines with periods for natural pausing
+            
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        
+        // Wait a tiny bit for voices to load if they haven't (browser quirk)
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(v => 
+            v.name.includes('Siri') || 
+            v.name.includes('Samantha') || 
+            v.name.includes('Daniel') || 
+            (v.name.includes('Google') && v.lang.includes('en-GB')) ||
+            v.name.includes('Premium')
+        );
+        if (preferredVoice) utterance.voice = preferredVoice;
+
+        utterance.onend = () => setSpeakingId(null);
+        utterance.onerror = () => setSpeakingId(null);
+        
+        setSpeakingId(id);
+        window.speechSynthesis.speak(utterance);
     };
     
     // For randomized returning greetings without hydration errors
@@ -201,11 +254,35 @@ export function AIChatView() {
                                                 <button 
                                                     onClick={() => handleCopy(msg.id, msg.content)}
                                                     className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors"
+                                                    title="Copy message"
                                                 >
                                                     {copiedId === msg.id ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                                                 </button>
-                                                <button className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors">
+                                                <button 
+                                                    onClick={() => handleSpeak(msg.id, msg.content)}
+                                                    className={`flex items-center gap-1.5 text-[11px] hover:text-white/80 transition-colors ${
+                                                        speakingId === msg.id ? 'text-white' : 'text-white/40'
+                                                    }`}
+                                                    title={speakingId === msg.id ? "Stop reading" : "Read aloud"}
+                                                >
+                                                    {speakingId === msg.id ? (
+                                                        <Square className="w-4 h-4 fill-white text-white" />
+                                                    ) : (
+                                                        <Volume2 className="w-4 h-4" />
+                                                    )}
+                                                </button>
+                                                <button 
+                                                    className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors"
+                                                    title="Share message"
+                                                >
                                                     <Share2 className="w-4 h-4" />
+                                                </button>
+                                                <button 
+                                                    onClick={() => window.print()}
+                                                    className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors"
+                                                    title="Download as PDF"
+                                                >
+                                                    <FileText className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         )}

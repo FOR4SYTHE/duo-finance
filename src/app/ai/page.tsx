@@ -7,6 +7,7 @@ import { AIScannerView } from '@/components/ai/AIScannerView';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { PillTabRow } from '@/components/ui/PillTabRow';
 import { SidebarDrawer } from '@/components/ai/SidebarDrawer';
+import { PDFExportTemplate } from '@/components/ai/PDFExportTemplate';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
@@ -300,6 +301,16 @@ export default function AIAppPage() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Hidden PDF Export Template */}
+            <div className="hidden print:block absolute inset-0 z-[9999] bg-white">
+                {currentChat && (
+                    <PDFExportTemplate 
+                        chatTitle={currentChat.title} 
+                        messages={messages} 
+                    />
+                )}
+            </div>
         </div>
     );
 }
