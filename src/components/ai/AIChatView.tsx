@@ -4,13 +4,16 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, ArrowUp, Loader2, Copy, Share2, Check, Plus, Mic, Volume2, FileText, Square, ScanBarcode } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { buildHouseholdContext } from '@/lib/buildHouseholdContext';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 export function AIChatView() {
-    const { chats, currentChatId, isStreaming, addUserMessage, startAssistantMessage, appendToMessage, completeMessage, errorMessage, setStreaming, startNewChat, isFirstVisit, userName, pendingScanContext, setPendingScanContext } = useAIChatStore();
+    const { chats, currentChatId, isStreaming, addUserMessage, startAssistantMessage, appendToMessage, completeMessage, errorMessage, setStreaming, startNewChat, isFirstVisit, userName: defaultUserName, pendingScanContext, setPendingScanContext } = useAIChatStore();
+    const { user } = useAuthStore();
+    const userName = user?.name || defaultUserName;
     const [inputValue, setInputValue] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 

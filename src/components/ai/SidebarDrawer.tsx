@@ -28,6 +28,16 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
     const [isSearchActive, setIsSearchActive] = useState(false);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
+    // Reset drawer state when it closes
+    useEffect(() => {
+        if (!isOpen) {
+            setActiveTab('chat');
+            setOpenDropdownId(null);
+            setSearchTerm('');
+            setIsSearchActive(false);
+        }
+    }, [isOpen, setActiveTab]);
+
     const toggleDropdown = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         setOpenDropdownId(openDropdownId === id ? null : id);
