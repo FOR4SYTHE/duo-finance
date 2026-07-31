@@ -42,14 +42,14 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
     const modalContent = (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-12 font-hanken">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center sm:p-6 md:p-12 font-hanken">
                     {/* Backdrop */}
                     <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/40 backdrop-blur-md"
+                        className="absolute inset-0 bg-black/40 backdrop-blur-md hidden sm:block"
                     />
 
                     {/* Modal */}
@@ -58,7 +58,7 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="relative w-full max-w-[800px] h-[600px] max-h-[85vh] sm:max-h-[700px] bg-[#0A0A0A] rounded-[20px] shadow-2xl flex flex-col sm:flex-row overflow-hidden border border-white/[0.08]"
+                        className="relative w-full h-full sm:max-w-[800px] sm:h-[600px] sm:max-h-[700px] bg-[#0A0A0A] sm:rounded-[20px] shadow-2xl flex flex-col sm:flex-row overflow-hidden sm:border border-white/[0.08]"
                     >
                         {/* Sidebar */}
                         <div className="w-full sm:w-[240px] shrink-0 bg-[#0A0A0A] border-b sm:border-b-0 sm:border-r border-white/[0.05] flex flex-col hidden sm:flex">

@@ -10,7 +10,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 export function AIChatView() {
-    const { chats, currentChatId, isStreaming, addUserMessage, startAssistantMessage, appendToMessage, completeMessage, errorMessage, setStreaming, startNewChat, isFirstVisit, userName } = useAIChatStore();
+    const { chats, currentChatId, isStreaming, addUserMessage, startAssistantMessage, appendToMessage, completeMessage, errorMessage, setStreaming, startNewChat, isFirstVisit, userName, pendingScanContext, setPendingScanContext } = useAIChatStore();
     const [inputValue, setInputValue] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -136,15 +136,29 @@ export function AIChatView() {
         setIsScrolledUp(!isNearBottom);
     };
 
-    const handleSend = async (presetMessage?: string) => {
+    const handleSend = async (presetMessage?: string, scanContext?: { itemName: string; brand: string | null; description: string; listings: { name: string; price_php: number; source: string; url: string }[] } | null) => {
         const content = presetMessage || inputValue.trim();
         if (!content || isStreaming) return;
 
         setInputValue('');
-        addUserMessage(content);
+        
+        // If this is NOT a scan-triggered call, add the user message normally
+        // (scan-triggered calls already added the user message from AIScannerView)
+        if (!scanContext) {
+            addUserMessage(content);
+        }
+
+        // Build enriched context if scan data is available
+        let enrichedContent = content;
+        if (scanContext) {
+            const listingsText = scanContext.listings.map(l => 
+                `- ${l.source}: ${l.name} — ₱${l.price_php.toLocaleString()}`
+            ).join('\n');
+            enrichedContent = `I just scanned a product. Here are the details:\n\nItem: ${scanContext.brand ? `${scanContext.brand} ` : ''}${scanContext.itemName}\nDescription: ${scanContext.description}\n\nOnline prices found:\n${listingsText}\n\nPlease tell me about this product — is it a good deal? Does it fit within our current budget? Any better alternatives?`;
+        }
 
         // Keep last 10 messages for context (20 roles)
-        const recentMessages = [...messages, { role: 'user', content }].slice(-20);
+        const recentMessages = [...messages, { role: 'user', content: enrichedContent }].slice(-20);
         const householdContext = buildHouseholdContext();
 
         const assistantMsgId = startAssistantMessage();
@@ -196,6 +210,16 @@ export function AIChatView() {
             errorMessage(assistantMsgId, error.message || 'Something went wrong.');
         }
     };
+
+    // Auto-fire chat when coming from the scanner
+    useEffect(() => {
+        if (pendingScanContext && currentChatId && !isStreaming) {
+            const ctx = pendingScanContext;
+            setPendingScanContext(null);
+            const itemLabel = ctx.brand ? `${ctx.brand} ${ctx.itemName}` : ctx.itemName;
+            handleSend(`Tell me more about this: ${itemLabel}`, ctx);
+        }
+    }, [pendingScanContext, currentChatId]);
 
     const suggestions = [
         "How's our budget this month?",

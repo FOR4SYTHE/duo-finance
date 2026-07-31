@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen, SquarePen, Search } from 'lucide-react';
+import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen, SquarePen, Search, ScanBarcode } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
@@ -94,7 +94,15 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                         </span>
                     )}
 
-                    <div className="flex items-center shrink-0 pr-1">
+                    <div className="flex items-center shrink-0 pr-1 gap-[2px]">
+                        {chat.isScan && (
+                            <div 
+                                className="w-5 h-6 flex items-center justify-center opacity-40 hover:opacity-80 transition-opacity cursor-default" 
+                                title="Scanned Item Chat"
+                            >
+                                <ScanBarcode className="w-[13px] h-[13px] text-emerald-400/80" />
+                            </div>
+                        )}
                         <button 
                             onClick={(e) => {
                                 e.stopPropagation();

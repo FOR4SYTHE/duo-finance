@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Zap, X, AlertCircle, ArrowRight, ImageIcon } from 'lucide-react';
+import { Camera, Zap, X, AlertCircle, ArrowRight, ImageIcon, Sparkles } from 'lucide-react';
 import { useDualCurrency } from '@/hooks/useDualCurrency';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
 import { useAIChatStore } from '@/store/useAIChatStore';
@@ -33,7 +33,7 @@ export function AIScannerView() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
     const { getSecondaryValue, primarySymbol, secondarySymbol } = useDualCurrency();
-    const { setActiveTab, setScannerExpanded, setScannerHasResults } = useAIChatStore();
+    const { setActiveTab, setScannerExpanded, setScannerHasResults, startNewChat, addUserMessage, startAssistantMessage, setPendingScanContext } = useAIChatStore();
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -318,11 +318,32 @@ export function AIScannerView() {
                                         )}
                                     </div>
 
-                                    {/* Scan Another Button & Transparency */}
-                                    <div className="mt-4 pt-4 border-t border-white/[0.05]">
+                                    {/* Action Buttons & Transparency */}
+                                    <div className="mt-4 pt-4 border-t border-white/[0.05] flex flex-col gap-3">
+                                        <button 
+                                            onClick={() => {
+                                                // Set scan context for AIChatView to pick up
+                                                setPendingScanContext({
+                                                    itemName: identifiedItem?.name || 'Unknown Item',
+                                                    brand: identifiedItem?.brand || null,
+                                                    description: identifiedItem?.description || '',
+                                                    listings: listings.map(l => ({ name: l.name, price_php: l.price_php, source: l.source, url: l.url }))
+                                                });
+                                                // Create a new chat tagged as scan
+                                                startNewChat();
+                                                const itemLabel = identifiedItem?.brand ? `${identifiedItem.brand} ${identifiedItem.name}` : identifiedItem?.name;
+                                                addUserMessage(`Tell me more about this: ${itemLabel}`, { isScan: true });
+                                                setActiveTab('chat');
+                                            }}
+                                            className="w-full py-4 bg-[#F5F5F7] text-[#1D1D1F] font-semibold tracking-wide rounded-[20px] shadow-[0_4px_20px_rgba(255,255,255,0.08)] hover:bg-white hover:shadow-[0_8px_30px_rgba(255,255,255,0.15)] transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2.5"
+                                        >
+                                            <DuoAIIcon forceState="star-idle" className="w-[18px] h-[18px]" />
+                                            Ask DUO AI about this
+                                        </button>
+
                                         <button 
                                             onClick={handleReset}
-                                            className="w-full py-4 mb-4 bg-[#1C1C1E] border border-white/[0.08] hover:border-white/20 hover:bg-[#2C2C2E] text-white font-medium tracking-wide rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)] transition-all duration-300 active:scale-[0.98]"
+                                            className="w-full py-4 bg-[#1C1C1E] border border-white/[0.08] hover:border-white/20 hover:bg-[#2C2C2E] text-white font-medium tracking-wide rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)] transition-all duration-300 active:scale-[0.98]"
                                         >
                                             Scan Another Item
                                         </button>

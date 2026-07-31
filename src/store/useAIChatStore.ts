@@ -14,7 +14,15 @@ export interface ChatSession {
     title: string;
     messages: ChatMessage[];
     isPinned: boolean;
+    isScan?: boolean;
     updatedAt: number;
+}
+
+export interface ScanContext {
+    itemName: string;
+    brand: string | null;
+    description: string;
+    listings: { name: string; price_php: number; source: string; url: string }[];
 }
 
 interface AIChatState {
@@ -30,7 +38,7 @@ interface AIChatState {
     };
 
     // Actions
-    addUserMessage: (content: string) => void;
+    addUserMessage: (content: string, options?: { isScan?: boolean }) => void;
     startAssistantMessage: () => string; // returns new message id
     appendToMessage: (id: string, text: string) => void;
     completeMessage: (id: string) => void;
@@ -57,6 +65,10 @@ interface AIChatState {
     setScannerHasResults: (hasResults: boolean) => void;
     isScannerExpanded: boolean;
     setScannerExpanded: (expanded: boolean) => void;
+    
+    // Pending scan context for handoff to chat
+    pendingScanContext: ScanContext | null;
+    setPendingScanContext: (ctx: ScanContext | null) => void;
 }
 
 export const useAIChatStore = create<AIChatState>()(
@@ -71,7 +83,7 @@ export const useAIChatStore = create<AIChatState>()(
                 customInstructions: '',
             },
 
-            addUserMessage: (content: string) => set((state) => {
+            addUserMessage: (content: string, options?: { isScan?: boolean }) => set((state) => {
                 const newMessage: ChatMessage = {
                     id: crypto.randomUUID(),
                     role: 'user',
@@ -90,6 +102,7 @@ export const useAIChatStore = create<AIChatState>()(
                         title: content.slice(0, 30) + (content.length > 30 ? '...' : ''),
                         messages: [newMessage],
                         isPinned: false,
+                        isScan: options?.isScan,
                         updatedAt: Date.now()
                     };
                     newChats.unshift(newChat);
@@ -212,7 +225,10 @@ export const useAIChatStore = create<AIChatState>()(
             isScannerHasResults: false,
             setScannerHasResults: (hasResults) => set({ isScannerHasResults: hasResults }),
             isScannerExpanded: false,
-            setScannerExpanded: (expanded) => set({ isScannerExpanded: expanded })
+            setScannerExpanded: (expanded) => set({ isScannerExpanded: expanded }),
+            
+            pendingScanContext: null,
+            setPendingScanContext: (ctx) => set({ pendingScanContext: ctx })
         }),
         {
             name: 'duo-ai-chat-storage',
