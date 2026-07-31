@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, Database, Trash2, Download } from 'lucide-react';
+import { X, Check, Download } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 
 interface AISettingsModalProps {
@@ -49,7 +49,7 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        className="absolute inset-0 bg-black/40 backdrop-blur-md"
                     />
 
                     {/* Modal */}
@@ -58,133 +58,134 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="relative w-full max-w-[800px] h-[600px] max-h-[85vh] sm:max-h-[700px] bg-[#111111] rounded-2xl shadow-[0_0_80px_rgba(0,0,0,0.8)] flex flex-col sm:flex-row overflow-hidden border border-white/[0.08]"
+                        className="relative w-full max-w-[800px] h-[600px] max-h-[85vh] sm:max-h-[700px] bg-[#0A0A0A] rounded-[20px] shadow-2xl flex flex-col sm:flex-row overflow-hidden border border-white/[0.08]"
                     >
                         {/* Sidebar */}
-                        <div className="w-full sm:w-[240px] shrink-0 bg-[#0A0A0A] border-b sm:border-b-0 sm:border-r border-white/[0.05] p-4 flex flex-col sm:block hidden sm:flex">
-                            <div className="flex items-center justify-between mb-6 px-2">
-                                <h2 className="text-[15px] font-semibold text-white">Settings</h2>
+                        <div className="w-full sm:w-[240px] shrink-0 bg-[#0A0A0A] border-b sm:border-b-0 sm:border-r border-white/[0.05] flex flex-col hidden sm:flex">
+                            <div className="h-[68px] flex items-center px-6">
+                                <h2 className="text-[17px] font-semibold text-white tracking-tight">Settings</h2>
                             </div>
                             
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-[2px] px-3">
                                 <button 
                                     onClick={() => setActiveTab('personalization')}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors ${activeTab === 'personalization' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white/90 hover:bg-white/5'}`}
+                                    className={`w-full flex items-center px-3 py-2 rounded-[8px] text-[15px] tracking-tight transition-colors ${activeTab === 'personalization' ? 'bg-[#1C1C1E] text-white font-medium' : 'text-[#8E8E93] hover:bg-[#1C1C1E]/50'}`}
                                 >
-                                    <Sparkles className="w-4 h-4" />
                                     Personalization
                                 </button>
                                 <button 
                                     onClick={() => setActiveTab('data')}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors ${activeTab === 'data' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white/90 hover:bg-white/5'}`}
+                                    className={`w-full flex items-center px-3 py-2 rounded-[8px] text-[15px] tracking-tight transition-colors ${activeTab === 'data' ? 'bg-[#1C1C1E] text-white font-medium' : 'text-[#8E8E93] hover:bg-[#1C1C1E]/50'}`}
                                 >
-                                    <Database className="w-4 h-4" />
                                     Data controls
                                 </button>
                             </div>
                         </div>
 
                         {/* Mobile Header */}
-                        <div className="sm:hidden shrink-0 h-14 border-b border-white/[0.05] flex items-center justify-between px-4 bg-[#111111] relative z-10">
-                             <h2 className="text-[15px] font-semibold text-white">Settings</h2>
-                             <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white">
+                        <div className="sm:hidden shrink-0 h-14 border-b border-white/[0.05] flex items-center justify-between px-4 bg-[#0A0A0A] relative z-10">
+                             <h2 className="text-[17px] font-semibold text-white tracking-tight">Settings</h2>
+                             <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1C1C1E] text-[#8E8E93] hover:text-white transition-colors">
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
 
                         {/* Content Area */}
-                        <div className="flex-1 overflow-y-auto p-4 sm:p-8 relative no-scrollbar">
+                        <div className="flex-1 overflow-y-auto bg-[#0A0A0A] relative no-scrollbar">
                             {/* Close button desktop */}
-                            <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 hidden sm:flex items-center justify-center rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors">
+                            <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 hidden sm:flex items-center justify-center rounded-full bg-[#1C1C1E] hover:bg-[#2C2C2E] text-[#8E8E93] hover:text-white transition-colors z-20">
                                 <X className="w-4 h-4" />
                             </button>
 
-                            {/* Mobile Tabs */}
-                            <div className="flex sm:hidden gap-2 mb-6 border-b border-white/10 pb-4">
-                                <button 
-                                    onClick={() => setActiveTab('personalization')}
-                                    className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors ${activeTab === 'personalization' ? 'bg-white/10 text-white' : 'text-white/50 bg-white/5'}`}
-                                >
-                                    Personalization
-                                </button>
-                                <button 
-                                    onClick={() => setActiveTab('data')}
-                                    className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors ${activeTab === 'data' ? 'bg-white/10 text-white' : 'text-white/50 bg-white/5'}`}
-                                >
-                                    Data controls
-                                </button>
-                            </div>
-
-                            {activeTab === 'personalization' && (
-                                <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300 pb-8">
-                                    <div className="space-y-1">
-                                        <h3 className="text-[20px] font-semibold tracking-tight text-white/90">AI Personality</h3>
-                                        <p className="text-[14px] text-white/50">Choose how DUO AI responds to you. This affects its tone, strictness, and expertise focus.</p>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 gap-3">
-                                        {personalities.map((p) => (
-                                            <button
-                                                key={p.id}
-                                                onClick={() => updateAISettings({ personality: p.id as any })}
-                                                className={`flex items-start text-left p-4 rounded-xl border transition-all duration-300 ${
-                                                    aiSettings.personality === p.id 
-                                                        ? 'bg-gradient-to-br from-white/[0.08] to-white/[0.02] border-white/20 shadow-[0_2px_10px_rgba(255,255,255,0.02)]' 
-                                                        : 'bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04] hover:border-white/10'
-                                                }`}
-                                            >
-                                                <div className={`mt-0.5 w-[18px] h-[18px] rounded-full border-[1.5px] flex items-center justify-center shrink-0 transition-all duration-300 ${
-                                                    aiSettings.personality === p.id ? 'border-emerald-400 bg-emerald-400/10' : 'border-white/20'
-                                                }`}>
-                                                    {aiSettings.personality === p.id && <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />}
-                                                </div>
-                                                <div className="ml-3">
-                                                    <div className="text-[15px] font-medium text-white/90">{p.label}</div>
-                                                    <div className="text-[13px] text-white/40 mt-1">{p.description}</div>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {aiSettings.personality === 'custom' && (
-                                        <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                                            <h4 className="text-[14px] font-medium text-white/80 mb-2">Custom Instructions</h4>
-                                            <textarea
-                                                value={aiSettings.customInstructions}
-                                                onChange={(e) => updateAISettings({ customInstructions: e.target.value })}
-                                                placeholder="e.g., We are vegetarian, we shop at Dali, always prioritize saving money over convenience..."
-                                                className="w-full h-32 bg-black/40 border border-white/[0.08] rounded-xl p-3 text-[14px] text-white placeholder:text-white/30 resize-none focus:outline-none focus:border-white/20 focus:bg-black/60 transition-colors"
-                                            />
-                                            <p className="text-[12px] text-white/40 mt-2">These instructions are appended to every message you send to DUO AI.</p>
-                                        </div>
-                                    )}
+                            <div className="p-4 sm:p-8 sm:pt-[52px]">
+                                {/* Mobile Tabs */}
+                                <div className="flex sm:hidden gap-2 mb-6 border-b border-white/[0.05] pb-4">
+                                    <button 
+                                        onClick={() => setActiveTab('personalization')}
+                                        className={`px-4 py-1.5 rounded-full text-[13px] tracking-tight transition-colors ${activeTab === 'personalization' ? 'bg-[#1C1C1E] text-white font-medium' : 'text-[#8E8E93] bg-white/5'}`}
+                                    >
+                                        Personalization
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveTab('data')}
+                                        className={`px-4 py-1.5 rounded-full text-[13px] tracking-tight transition-colors ${activeTab === 'data' ? 'bg-[#1C1C1E] text-white font-medium' : 'text-[#8E8E93] bg-white/5'}`}
+                                    >
+                                        Data controls
+                                    </button>
                                 </div>
-                            )}
 
-                            {activeTab === 'data' && (
-                                <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300 pb-8">
-                                    <div className="space-y-1">
-                                        <h3 className="text-[20px] font-semibold tracking-tight text-white/90">Data Controls</h3>
-                                        <p className="text-[14px] text-white/50">Manage your conversation history and exports.</p>
-                                    </div>
+                                {/* Desktop Title */}
+                                <div className="px-4 mb-6 hidden sm:block">
+                                    <h3 className="text-[32px] font-bold text-white tracking-tight">
+                                        {activeTab === 'personalization' ? 'Personalization' : 'Data Controls'}
+                                    </h3>
+                                </div>
 
-                                    <div className="space-y-3">
-                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] gap-4">
-                                            <div>
-                                                <div className="text-[15px] font-medium text-white/90">Export Chat History</div>
-                                                <div className="text-[13px] text-white/40 mt-1">Download all your conversations as a ZIP file.</div>
-                                            </div>
-                                            <button className="h-9 px-4 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] border border-white/[0.05] transition-colors text-white/90 text-[13px] font-medium flex items-center justify-center gap-2 whitespace-nowrap">
-                                                <Download className="w-4 h-4" />
-                                                Export
-                                            </button>
+                                {activeTab === 'personalization' && (
+                                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 pb-8">
+                                        <div className="px-4 mb-2 mt-4 sm:mt-0">
+                                            <span className="text-[13px] uppercase text-[#8E8E93] font-medium tracking-wider">AI Personality</span>
+                                        </div>
+                                        <div className="bg-[#1C1C1E] rounded-[10px] overflow-hidden">
+                                            {personalities.map((p, index) => (
+                                                <button
+                                                    key={p.id}
+                                                    onClick={() => updateAISettings({ personality: p.id as any })}
+                                                    className={`w-full flex items-center justify-between p-4 text-left transition-colors hover:bg-white/[0.04] ${
+                                                        index !== personalities.length - 1 ? 'border-b border-white/[0.04]' : ''
+                                                    }`}
+                                                >
+                                                    <div className="flex-1 pr-4">
+                                                        <div className="text-[17px] text-white tracking-tight">{p.label}</div>
+                                                        <div className="text-[15px] text-[#8E8E93] mt-[2px] leading-snug">{p.description}</div>
+                                                    </div>
+                                                    <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                                                        {aiSettings.personality === p.id && <Check className="w-[18px] h-[18px] text-[#0A84FF]" strokeWidth={2.5} />}
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="px-4 mt-2 mb-8">
+                                            <p className="text-[13px] text-[#8E8E93] leading-relaxed">Choose how DUO AI responds to you. This affects its tone, strictness, and expertise focus.</p>
                                         </div>
 
-                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-red-500/5 border border-red-500/10 gap-4">
-                                            <div>
-                                                <div className="text-[15px] font-medium text-red-400">Clear All History</div>
-                                                <div className="text-[13px] text-red-400/50 mt-1">Permanently delete all your AI chats. This cannot be undone.</div>
-                                            </div>
+                                        {aiSettings.personality === 'custom' && (
+                                            <motion.div 
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="px-4 mb-2">
+                                                    <span className="text-[13px] uppercase text-[#8E8E93] font-medium tracking-wider">Custom Instructions</span>
+                                                </div>
+                                                <div className="bg-[#1C1C1E] rounded-[10px] overflow-hidden p-3">
+                                                    <textarea
+                                                        value={aiSettings.customInstructions}
+                                                        onChange={(e) => updateAISettings({ customInstructions: e.target.value })}
+                                                        placeholder="e.g., We are vegetarian, we shop at Dali, always prioritize saving money over convenience..."
+                                                        className="w-full h-32 bg-transparent text-[17px] text-white placeholder:text-[#8E8E93] resize-none focus:outline-none"
+                                                    />
+                                                </div>
+                                                <div className="px-4 mt-2">
+                                                    <p className="text-[13px] text-[#8E8E93]">These instructions are appended to every message you send to DUO AI.</p>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {activeTab === 'data' && (
+                                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 pb-8">
+                                        <div className="px-4 mb-2 mt-4 sm:mt-0">
+                                            <span className="text-[13px] uppercase text-[#8E8E93] font-medium tracking-wider">Data Management</span>
+                                        </div>
+                                        <div className="bg-[#1C1C1E] rounded-[10px] overflow-hidden">
+                                            <button className="w-full flex items-center justify-between p-4 text-left transition-colors hover:bg-white/[0.04] border-b border-white/[0.04]">
+                                                <div className="text-[17px] text-white tracking-tight">Export Chat History</div>
+                                                <div className="flex items-center text-[#8E8E93]">
+                                                    <Download className="w-5 h-5" />
+                                                </div>
+                                            </button>
                                             <button 
                                                 onClick={() => {
                                                     if (window.confirm("Are you sure you want to permanently delete all your chats?")) {
@@ -192,15 +193,17 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
                                                         onClose();
                                                     }
                                                 }}
-                                                className="h-9 px-4 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 transition-colors text-red-400 hover:text-red-300 text-[13px] font-medium flex items-center justify-center gap-2 whitespace-nowrap"
+                                                className="w-full flex items-center p-4 text-left transition-colors hover:bg-white/[0.04]"
                                             >
-                                                <Trash2 className="w-4 h-4" />
-                                                Clear
+                                                <div className="text-[17px] text-[#FF453A] tracking-tight">Clear All History</div>
                                             </button>
                                         </div>
+                                        <div className="px-4 mt-2">
+                                            <p className="text-[13px] text-[#8E8E93] leading-relaxed">Exporting will download a ZIP file. Clearing history will permanently delete all your AI chats. This cannot be undone.</p>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </motion.div>
                 </div>
