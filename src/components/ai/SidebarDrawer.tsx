@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen, SquarePen, Search, ScanBarcode, FileText, Blocks } from 'lucide-react';
+import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen, SquarePen, Search, ScanBarcode, FileText, Blocks, FolderLock, Plane, BarChart3, Target } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { usePluginsStore } from '@/store/usePluginsStore';
 import { useRouter } from 'next/navigation';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
 import { AISettingsModal } from './AISettingsModal';
@@ -16,7 +17,8 @@ interface SidebarDrawerProps {
 }
 
 export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
-    const { setActiveTab, startNewChat, loadChat, deleteChat, togglePinChat, renameChat, userName, chats, currentChatId } = useAIChatStore();
+    const { setActiveTab, startNewChat, loadChat, deleteChat, togglePinChat, renameChat, userName, chats, currentChatId, activeTab } = useAIChatStore();
+    const { pinnedPlugins } = usePluginsStore();
     const { user } = useAuthStore();
     const router = useRouter();
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -272,10 +274,42 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                             title="Plugins"
                         >
                             <div className="w-9 h-11 md:h-9 flex items-center justify-center shrink-0">
-                                <Blocks className="w-[20px] h-[20px] md:w-[16px] md:h-[16px] text-white/80 group-hover/btn:text-white transition-colors" />
+                                <Blocks className={`w-[20px] h-[20px] md:w-[16px] md:h-[16px] transition-colors ${activeTab === 'plugins' ? 'text-white' : 'text-white/80 group-hover/btn:text-white'}`} />
                             </div>
-                            <span className="text-[15px] md:text-[13px] font-medium pl-1 text-white/90 whitespace-nowrap">Plugins</span>
+                            <span className={`text-[15px] md:text-[13px] pl-1 whitespace-nowrap ${activeTab === 'plugins' ? 'text-white font-semibold' : 'text-white/90 font-medium'}`}>Plugins</span>
                         </button>
+
+                        {/* Pinned Plugins */}
+                        {pinnedPlugins.map(pluginId => {
+                            let PluginIcon = Blocks;
+                            let pluginName = '';
+                            let iconColor = '';
+                            
+                            switch(pluginId) {
+                                case 'scratchpad': PluginIcon = FileText; pluginName = 'Scratchpad'; iconColor = 'text-emerald-400'; break;
+                                case 'receipt-vault': PluginIcon = FolderLock; pluginName = 'Receipt Vault'; iconColor = 'text-blue-400'; break;
+                                case 'relocation-hub': PluginIcon = Plane; pluginName = 'Relocation Hub'; iconColor = 'text-purple-400'; break;
+                                case 'exchange-alerts': PluginIcon = BarChart3; pluginName = 'Exchange Alerts'; iconColor = 'text-orange-400'; break;
+                                case 'dream-board': PluginIcon = Target; pluginName = 'Dream Board'; iconColor = 'text-rose-400'; break;
+                            }
+
+                            return (
+                                <button 
+                                    key={pluginId}
+                                    onClick={() => {
+                                        setActiveTab(pluginId as any);
+                                        if (typeof window !== 'undefined' && window.innerWidth < 768) onClose();
+                                    }}
+                                    className={`h-11 md:h-9 flex items-center rounded-lg hover:bg-white/[0.08] transition-all overflow-hidden text-left group/btn ${isOpen ? 'w-full' : 'w-9'}`}
+                                    title={pluginName}
+                                >
+                                    <div className="w-9 h-11 md:h-9 flex items-center justify-center shrink-0">
+                                        <PluginIcon className={`w-[20px] h-[20px] md:w-[16px] md:h-[16px] transition-colors ${iconColor} ${activeTab === pluginId ? 'opacity-100' : 'opacity-60 group-hover/btn:opacity-100'}`} />
+                                    </div>
+                                    <span className={`text-[15px] md:text-[13px] pl-1 whitespace-nowrap ${activeTab === pluginId ? 'text-white font-semibold' : 'text-white/70 font-medium group-hover/btn:text-white/90'}`}>{pluginName}</span>
+                                </button>
+                            );
+                        })}
 
                         {/* Search Bar / Button */}
                         <div className="transition-all duration-300">

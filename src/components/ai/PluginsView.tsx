@@ -1,8 +1,10 @@
-import { Search, Plus, ExternalLink, FileText, FolderLock, Plane, BarChart3, Target } from 'lucide-react';
+import { Search, Plus, ExternalLink, FileText, FolderLock, Plane, BarChart3, Target, Pin } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
+import { usePluginsStore } from '@/store/usePluginsStore';
 
 export function PluginsView() {
     const { setActiveTab } = useAIChatStore();
+    const { pinnedPlugins, togglePinnedPlugin } = usePluginsStore();
 
     const householdPlugins = [
         {
@@ -50,29 +52,39 @@ export function PluginsView() {
         }
     ];
 
-    const PluginCard = ({ plugin }: { plugin: any }) => (
-        <div 
-            onClick={() => {
-                if (plugin.active) {
-                    setActiveTab(plugin.id as any);
-                } else {
-                    // Placeholder for future routing
-                }
-            }}
-            className={`flex items-start gap-4 p-4 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.04] transition-all group cursor-pointer hover:border-white/20`}
-        >
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${plugin.color}`}>
-                {plugin.icon}
+    const PluginCard = ({ plugin }: { plugin: any }) => {
+        const isPinned = pinnedPlugins.includes(plugin.id);
+        return (
+            <div 
+                onClick={() => {
+                    if (plugin.active) {
+                        setActiveTab(plugin.id as any);
+                    } else {
+                        // Placeholder for future routing
+                    }
+                }}
+                className={`flex items-start gap-4 p-4 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.04] transition-all group cursor-pointer hover:border-white/20 relative`}
+            >
+                <button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        togglePinnedPlugin(plugin.id);
+                    }}
+                    className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all ${isPinned ? 'bg-white/10' : 'bg-transparent hover:bg-white/5 opacity-0 group-hover:opacity-100'}`}
+                >
+                    <Pin className={`w-4 h-4 ${isPinned ? 'text-white' : 'text-white/40'}`} />
+                </button>
+
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${plugin.color}`}>
+                    {plugin.icon}
+                </div>
+                <div className="flex-1 min-w-0 flex flex-col gap-1 pr-8">
+                    <h3 className="text-[15px] font-semibold text-white truncate">{plugin.name}</h3>
+                    <p className="text-[13px] text-white/50 line-clamp-2 leading-snug">{plugin.description}</p>
+                </div>
             </div>
-            <div className="flex-1 min-w-0 flex flex-col gap-1">
-                <h3 className="text-[15px] font-semibold text-white truncate">{plugin.name}</h3>
-                <p className="text-[13px] text-white/50 line-clamp-2 leading-snug">{plugin.description}</p>
-            </div>
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 group-hover:bg-white/10 shrink-0">
-                <ExternalLink className="w-4 h-4 text-white/70" />
-            </div>
-        </div>
-    );
+        );
+    };
 
     return (
         <div className="flex flex-col h-full bg-[#050505] relative w-full items-center overflow-y-auto pb-32">

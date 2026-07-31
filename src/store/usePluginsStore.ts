@@ -32,6 +32,10 @@ interface PluginsState {
     // Exchange Alerts
     targetExchangeRate: number | null;
     setTargetExchangeRate: (rate: number | null) => void;
+
+    // Pinned Plugins
+    pinnedPlugins: string[];
+    togglePinnedPlugin: (id: string) => void;
 }
 
 export const usePluginsStore = create<PluginsState>()(
@@ -63,9 +67,17 @@ export const usePluginsStore = create<PluginsState>()(
             shippingRateZarPerKg: 350, // Average rate for airfreight per KG from SA to PH
             setShippingRateZarPerKg: (rate) => set({ shippingRateZarPerKg: rate }),
 
-            // Exchange Alerts defaults
-            targetExchangeRate: 3.25,
+            // Exchange Alerts
+            targetExchangeRate: null,
             setTargetExchangeRate: (rate) => set({ targetExchangeRate: rate }),
+
+            // Pinned Plugins
+            pinnedPlugins: [],
+            togglePinnedPlugin: (id) => set((state) => ({
+                pinnedPlugins: state.pinnedPlugins.includes(id) 
+                    ? state.pinnedPlugins.filter(p => p !== id)
+                    : [...state.pinnedPlugins, id]
+            }))
         }),
         {
             name: 'duo-plugins-storage',
