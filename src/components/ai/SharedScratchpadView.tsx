@@ -1,7 +1,8 @@
 import { useRef, useEffect } from 'react';
-import { Bold, Italic, List, ListOrdered, Underline, Eraser, Sparkles } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered, Underline, Eraser } from 'lucide-react';
 import { usePluginsStore } from '@/store/usePluginsStore';
 import { useAIChatStore } from '@/store/useAIChatStore';
+import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
 
 export function SharedScratchpadView() {
     const editorRef = useRef<HTMLDivElement>(null);
@@ -45,8 +46,8 @@ export function SharedScratchpadView() {
                     onClick={() => setActiveTab('chat')}
                     className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-[13px] font-semibold text-white/80 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
-                    <Sparkles className="w-4 h-4 text-emerald-400" />
-                    <span>Ask AI</span>
+                    <DuoAIIcon className="w-[14px] h-[14px] text-emerald-400" forceState="star-idle" />
+                    <span>Ask DUO</span>
                 </button>
             </div>
 
