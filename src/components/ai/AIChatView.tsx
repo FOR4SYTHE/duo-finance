@@ -75,7 +75,12 @@ export function AIChatView() {
             .replace(/`/g, '') // Remove code ticks
             .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links but keep text
             .replace(/^- /gm, '') // Remove list dashes
-            .replace(/\n/g, '. '); // Replace newlines with periods for natural pausing
+            .replace(/[-—]{2,}/g, ' ') // Remove horizontal rules or repeated dashes
+            .replace(/\.{2,}/g, '.') // Reduce ellipses to a single dot
+            .replace(/\n+/g, '. ') // Replace newlines with periods for natural pausing
+            .replace(/\s+/g, ' ') // Collapse multiple spaces
+            .replace(/\.{2,}/g, '.') // Catch any double dots created by newlines
+            .trim();
             
         const utterance = new SpeechSynthesisUtterance(cleanText);
         
