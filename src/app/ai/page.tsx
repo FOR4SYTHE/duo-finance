@@ -25,6 +25,7 @@ export default function AIAppPage() {
 
     useEffect(() => {
         setMounted(true);
+        setActiveTab('chat');
         document.body.style.overflow = 'hidden';
         return () => {
             document.body.style.overflow = 'unset';

@@ -31,12 +31,11 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
     // Reset drawer state when it closes
     useEffect(() => {
         if (!isOpen) {
-            setActiveTab('chat');
             setOpenDropdownId(null);
             setSearchTerm('');
             setIsSearchActive(false);
         }
-    }, [isOpen, setActiveTab]);
+    }, [isOpen]);
 
     const toggleDropdown = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
