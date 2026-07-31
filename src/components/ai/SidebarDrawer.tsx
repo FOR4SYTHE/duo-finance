@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { X, MessageSquare, ScanLine, Plus, MoreVertical, Share, Pin, Edit2, Download, Trash2, Settings, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen, SquarePen, Search } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { useRouter } from 'next/navigation';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
@@ -21,6 +21,8 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
     const [editTitle, setEditTitle] = useState('');
     const [isPinnedExpanded, setIsPinnedExpanded] = useState(true);
     const [isRecentsExpanded, setIsRecentsExpanded] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isSearchActive, setIsSearchActive] = useState(false);
 
     const toggleDropdown = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -40,8 +42,9 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
         setEditingId(null);
     };
 
-    const pinnedChats = chats.filter(c => c.isPinned);
-    const recentChats = chats.filter(c => !c.isPinned);
+    const filteredChats = chats.filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()));
+    const pinnedChats = filteredChats.filter(c => c.isPinned);
+    const recentChats = filteredChats.filter(c => !c.isPinned);
 
     const renderChatRow = (chat: any) => {
         const isActive = chat.id === currentChatId;
@@ -219,7 +222,7 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                             title="New chat"
                         >
                             <div className="w-9 h-9 flex items-center justify-center shrink-0">
-                                <Edit2 className="w-[16px] h-[16px] text-white/80 group-hover/btn:text-white transition-colors" />
+                                <SquarePen className="w-[16px] h-[16px] text-white/80 group-hover/btn:text-white transition-colors" />
                             </div>
                             <span className="text-[13px] font-medium pl-1 text-white whitespace-nowrap">New chat</span>
                         </button>
@@ -237,11 +240,47 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                             </div>
                             <span className="text-[13px] font-medium pl-1 text-white/90 whitespace-nowrap">Shopping Scanner</span>
                         </button>
+
+                        {/* Search Bar / Button */}
+                        <div className="transition-all duration-300">
+                            {(!isOpen || (!isSearchActive && !searchTerm)) ? (
+                                <button 
+                                    onClick={() => {
+                                        if (!isOpen) onOpen();
+                                        setIsSearchActive(true);
+                                    }}
+                                    className={`h-9 flex items-center rounded-lg hover:bg-white/[0.08] transition-all overflow-hidden text-left group/searchbtn ${isOpen ? 'w-full' : 'w-9'}`}
+                                    title="Search chats"
+                                >
+                                    <div className="w-9 h-9 flex items-center justify-center shrink-0">
+                                        <Search className="w-[16px] h-[16px] text-white/80 group-hover/searchbtn:text-white transition-colors" />
+                                    </div>
+                                    <span className="text-[13px] font-medium pl-1 text-white/90 whitespace-nowrap">Search Chats</span>
+                                </button>
+                            ) : (
+                                <div className={`transition-all duration-300 ${isOpen ? 'opacity-100 h-9' : 'opacity-0 h-0 overflow-hidden'}`}>
+                                    <div className="relative flex items-center w-full h-9 bg-white/[0.05] border border-white/10 rounded-md overflow-hidden focus-within:bg-white/[0.08] focus-within:border-white/20 transition-colors">
+                                        <Search className="w-4 h-4 text-white/40 ml-[10px] shrink-0" />
+                                        <input 
+                                            autoFocus
+                                            type="text" 
+                                            placeholder="Search chats..." 
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            onBlur={() => {
+                                                if (!searchTerm) setIsSearchActive(false);
+                                            }}
+                                            className="w-full h-full bg-transparent border-none outline-none text-[13px] text-white placeholder:text-white/40 px-2"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Recents */}
-                    <div className={`flex-1 overflow-y-auto px-[2px] pb-2 no-scrollbar ${isOpen ? 'pt-6' : 'pt-[2px]'}`} onClick={() => setOpenDropdownId(null)}>
-                        {pinnedChats.length > 0 && (
+                    <div className={`flex-1 overflow-y-auto px-[2px] pb-2 no-scrollbar ${isOpen ? 'pt-2' : 'pt-[2px]'}`} onClick={() => setOpenDropdownId(null)}>
+                        {(!isOpen || pinnedChats.length > 0) && (
                             <div className={`${isOpen ? 'mb-4' : 'mb-[2px]'}`}>
                                 {isOpen ? (
                                     <div className="h-6 flex items-center mb-1">
@@ -258,7 +297,7 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                             </div>
                         )}
 
-                        {recentChats.length > 0 && (
+                        {(!isOpen || recentChats.length > 0) && (
                             <div>
                                 {isOpen ? (
                                     <div 

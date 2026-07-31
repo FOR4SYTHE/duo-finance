@@ -63,6 +63,23 @@ Plugs directly into the `household_id` Supabase migration model.
 
 ---
 
+### Phase 3: AI Chat, Google Integrations & Public Sharing (Post-Supabase)
+
+#### 1. Google Docs & Google Sheets Integration
+- **Google OAuth Integration:** Securely connect household accounts to Google APIs via Supabase Auth providers.
+- **Export Chat to Google Docs:** Generate structured, formatted Google Docs directly from any DUO AI conversation thread.
+- **Export Expenses to Google Sheets:** Compile weekly/monthly household expense logs, Spend Jar entries, and Cartify receipts directly into a formatted Google Sheet for easy tracking, printing, or tax reporting.
+
+#### 2. Public Conversation Sharing (`/share/[id]`)
+- **Shared Snapshot Table (`shared_chats`):** Store immutable, read-only chat snapshots with a unique `share_id` in Supabase.
+- **Public Share Web View:** Create a dedicated, clean `/share/[id]` route allowing shared links to be opened by third parties without exposing private household context or requiring an account.
+
+#### 3. Deep AI Household Data Querying & Actions
+- **Database Function Calling:** Empower DUO AI to query user expense tables (e.g., *"Gather my expenses for this week and compile a printable summary"*).
+- **Automated Document Generation:** Trigger background jobs to format and export AI data compilations to PDF, Docs, or Sheets upon request.
+
+---
+
 ## 🔒 Verification & Quality Checklist
 - Dual PHP/ZAR currency display across all insurance policy statistics and premiums.
 - RLS security verification: Users can only view/edit policies belonging to their own `household_id`.
