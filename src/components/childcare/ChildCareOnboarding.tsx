@@ -47,14 +47,14 @@ export function ChildCareOnboarding() {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-start h-[100dvh] overflow-hidden w-full px-6 pt-12 pb-8 no-scrollbar bg-[#0A0A0A]">
+    <div className="relative flex flex-col items-center justify-start h-[100dvh] overflow-y-auto overflow-x-hidden w-full px-6 pt-12 pb-8 no-scrollbar bg-[#0A0A0A]">
       {/* Fixed Background Layer to prevent black overscroll revealing the body background */}
       <div className="fixed inset-0 bg-[#0A0A0A] -z-10 pointer-events-none" />
       
       {/* Exit Button */}
       <Link 
         href="/"
-        className="absolute top-6 right-6 w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-colors z-50 shadow-lg"
+        className="fixed top-6 right-6 w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-colors z-50 shadow-lg"
       >
         <X className="w-5 h-5" />
       </Link>

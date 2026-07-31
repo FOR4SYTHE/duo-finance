@@ -174,11 +174,7 @@ export default function SpendJarPage() {
         style={{ background: bgGradient }}
       />
 
-      <motion.div 
-        key="jar-page"
-        variants={premiumPageVariants}
-        initial="hidden"
-        animate="visible"
+      <div 
         className="relative flex flex-col w-full min-h-full"
       >
 
@@ -420,7 +416,7 @@ export default function SpendJarPage() {
         type={animationType}
         onComplete={() => setAnimationType(null)}
       />
-    </motion.div>
+      </div>
     </>
   );
 }
