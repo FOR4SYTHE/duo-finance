@@ -151,7 +151,7 @@ export function AIChatView() {
             <div 
                 ref={scrollRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto p-4 pb-32 no-scrollbar flex flex-col items-center"
+                className="flex-1 overflow-y-auto p-4 pb-32 no-scrollbar flex flex-col items-center print:overflow-visible print:h-auto print:pb-0"
             >
                 <div className="w-full max-w-3xl flex flex-col gap-6">
                     {messages.length > 0 && (
@@ -219,7 +219,7 @@ export function AIChatView() {
 
             {/* Dynamic Premium Input Area */}
             <div 
-                className={`w-full px-4 z-20 ${
+                className={`w-full px-4 z-20 print:hidden ${
                     messages.length === 0 
                         ? 'absolute top-1/2 left-0 -translate-y-1/2' 
                         : 'absolute bottom-0 left-0 pb-6'

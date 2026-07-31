@@ -61,14 +61,16 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                 }`}
                 title={!isOpen ? chat.title : undefined}
             >
-                <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                    {chat.isPinned ? (
-                        <Pin className={`w-[16px] h-[16px] ${isActive ? 'text-white' : 'text-white/40 group-hover:text-white/70'}`} />
-                    ) : (
-                        <MessageSquare className={`w-[16px] h-[16px] ${isActive ? 'text-white' : 'text-white/40 group-hover:text-white/70'}`} />
-                    )}
-                </div>
-                <div className="w-[200px] flex items-center pl-2">
+                {!isOpen && (
+                    <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                        {chat.isPinned ? (
+                            <Pin className={`w-[16px] h-[16px] ${isActive ? 'text-white' : 'text-white/40 group-hover:text-white/70'}`} />
+                        ) : (
+                            <MessageSquare className={`w-[16px] h-[16px] ${isActive ? 'text-white' : 'text-white/40 group-hover:text-white/70'}`} />
+                        )}
+                    </div>
+                )}
+                <div className={`flex items-center flex-1 min-w-0 ${isOpen ? 'pl-3' : 'pl-2'}`}>
                     {isEditing ? (
                         <input
                             autoFocus
@@ -167,14 +169,14 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
 
             {/* Drawer Container */}
             <div 
-                className={`fixed md:relative top-0 left-0 h-[100dvh] bg-[#0A0A0A] z-[110] md:z-auto flex flex-col shadow-2xl md:shadow-none border-r border-white/5 shrink-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                className={`fixed md:relative top-0 left-0 h-[100dvh] bg-[#0A0A0A] z-[110] md:z-auto flex flex-col shadow-2xl md:shadow-none border-r border-white/5 shrink-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] print:hidden ${
                     isOpen 
-                        ? 'w-[280px] translate-x-0' 
-                        : 'w-[280px] md:w-[40px] -translate-x-full md:translate-x-0'
+                        ? 'w-[240px] translate-x-0' 
+                        : 'w-[240px] md:w-[40px] -translate-x-full md:translate-x-0'
                 }`}
             >
                 {/* Inner Fixed-Width Content */}
-                <div className="w-[280px] h-full flex flex-col">
+                <div className="w-[240px] h-full flex flex-col">
                     
                     {/* Header */}
                     <div className="h-[52px] flex items-center px-[2px] shrink-0 group/header relative mt-1">
@@ -193,7 +195,7 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                             )}
                         </button>
                         
-                        <div className="w-[230px] flex items-center justify-between ml-[8px]">
+                        <div className="w-[190px] flex items-center justify-between ml-[8px]">
                             <span className="text-[14px] font-semibold text-white tracking-wide truncate">DUO AI</span>
                             <button 
                                 onClick={onClose}
@@ -238,7 +240,7 @@ export function SidebarDrawer({ isOpen, onClose, onOpen }: SidebarDrawerProps) {
                     </div>
 
                     {/* Recents */}
-                    <div className="flex-1 overflow-y-auto px-[2px] pt-[2px] pb-2 no-scrollbar" onClick={() => setOpenDropdownId(null)}>
+                    <div className={`flex-1 overflow-y-auto px-[2px] pb-2 no-scrollbar ${isOpen ? 'pt-6' : 'pt-[2px]'}`} onClick={() => setOpenDropdownId(null)}>
                         {pinnedChats.length > 0 && (
                             <div className={`${isOpen ? 'mb-4' : 'mb-[2px]'}`}>
                                 {isOpen ? (
