@@ -171,7 +171,12 @@ export function AIChatView() {
             });
 
             if (!response.ok || !response.body) {
-                throw new Error('Failed to connect to AI');
+                let errorMsg = 'Failed to connect to AI';
+                try {
+                    const errorData = await response.json();
+                    if (errorData.error) errorMsg = errorData.error;
+                } catch(e) {}
+                throw new Error(errorMsg);
             }
 
             const reader = response.body.getReader();

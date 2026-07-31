@@ -80,8 +80,10 @@ ${householdContext}
     } catch (error: any) {
         console.error("Chat API Error:", error);
         let errorMsg = error.message || 'Failed to process chat request.';
-        if (errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED') || errorMsg.includes('Quota')) {
-            errorMsg = "DUO AI's brain is taking a quick breather (API Limit Reached). Please wait a moment and try again.";
+        if (errorMsg.includes('GenerateRequestsPerDay')) {
+            errorMsg = "DUO AI has reached its daily free-tier capacity! Please check back tomorrow to chat more.";
+        } else if (errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED') || errorMsg.includes('Quota')) {
+            errorMsg = "DUO AI's brain is taking a quick breather (API Limit Reached). Please wait a minute and try again.";
         } else if (errorMsg.includes('{"error"')) {
             try {
                 const parsed = JSON.parse(errorMsg);

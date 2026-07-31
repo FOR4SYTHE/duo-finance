@@ -151,8 +151,10 @@ ${JSON.stringify(searchResults)}
         console.error("Scanner Pipeline Error:", error);
         
         let errorMsg = error.message || 'Failed to process image.';
-        if (errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED') || errorMsg.includes('Quota')) {
-            errorMsg = "DUO AI is currently resting. (Free tier limit of 15 scans/min reached). Please try again in a moment.";
+        if (errorMsg.includes('GenerateRequestsPerDay')) {
+            errorMsg = "DUO AI has reached its daily free-tier capacity! Please check back tomorrow to scan more items.";
+        } else if (errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED') || errorMsg.includes('Quota')) {
+            errorMsg = "DUO AI is currently resting. (Free tier limit reached). Please try again in a minute.";
         } else if (errorMsg.includes('{"error"')) {
             try {
                 const parsed = JSON.parse(errorMsg);
