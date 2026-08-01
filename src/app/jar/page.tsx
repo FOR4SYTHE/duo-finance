@@ -20,7 +20,7 @@ export default function SpendJarPage() {
   const router = useRouter();
   // Always animate on mount for a premium page transition feel
 
-  const { config, categories } = useBudgetStore();
+  const { config, categories, setActiveMonth, _hasHydrated } = useBudgetStore();
   const { entries, addExpense, clearEntries } = useSpendStore();
   const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
   
@@ -53,11 +53,30 @@ export default function SpendJarPage() {
     }
   }, [entries.length]);
 
+  const currentMonth = budgetFilters.getEffectiveCurrentMonth();
+  const displayMonth = config.activeMonth || currentMonth;
+  const isPastMonth = displayMonth < currentMonth;
+
+  useEffect(() => {
+      if (_hasHydrated && config.activeMonth && config.activeMonth < currentMonth) {
+          setActiveMonth(currentMonth);
+      }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [_hasHydrated, currentMonth]);
+
   // Calculate totals based on allowed percentage of UNALLOCATED budget
   const totalAllocated = categories.reduce((sum, cat) => sum + (cat.targetAmount || 0), 0);
   const unallocatedAmount = Math.max(0, config.targetAmount - totalAllocated);
-  const currentMonthEntries = filterEntriesByMonth(entries, config.activeMonth || new Date().toISOString().slice(0, 7));
-  const totalSpent = currentMonthEntries.reduce((sum, entry) => sum + entry.amount, 0);
+  const currentMonthEntries = filterEntriesByMonth(entries, displayMonth);
+  
+  // Filter out any entries that perfectly match a defined Budget Category
+  const unallocatedEntries = currentMonthEntries.filter(entry => {
+      if (!entry.category) return true; // Uncategorized = Spend Jar
+      const isAllocated = categories.some(c => c.name.toLowerCase() === entry.category?.toLowerCase());
+      return !isAllocated;
+  });
+
+  const totalSpent = unallocatedEntries.reduce((sum, entry) => sum + entry.amount, 0);
   const allowedSpend = unallocatedAmount * ((config.jarAllowedPercentage || 20) / 100);
   const isBudgetSet = config.targetAmount > 0;
   
@@ -109,7 +128,7 @@ export default function SpendJarPage() {
   // Compute cumulative color for logs
   // Entries are newest first, so we reverse to process oldest to newest, then reverse back
   let runningTotal = 0;
-  const logsWithColor = [...currentMonthEntries].reverse().map(entry => {
+  const logsWithColor = [...unallocatedEntries].reverse().map(entry => {
       runningTotal += entry.amount;
       const perc = (runningTotal / allowedSpend) * 100;
       let colorClass = "text-[#30D158]"; // Green
@@ -182,10 +201,18 @@ export default function SpendJarPage() {
       <div className="pt-12 px-6 flex justify-between items-center z-50">
         <div className="flex flex-col gap-1">
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl text-white font-medium tracking-tight drop-shadow-md">Spend Jar</h1>
+              <h1 className="text-3xl text-white font-medium tracking-tight drop-shadow-md flex items-center">
+                Spend Jar
+                {isPastMonth && (
+                    <span className="ml-3 px-2 py-0.5 rounded-md bg-white/10 text-white/50 text-[10px] uppercase font-bold tracking-widest border border-white/5">
+                        Archived
+                    </span>
+                )}
+              </h1>
               <button 
                   onClick={() => clearEntries()} 
-                  className="px-2 py-1 bg-white/[0.05] text-white/50 rounded-md text-[10px] uppercase font-bold tracking-wider hover:bg-white/[0.1] hover:text-white transition-colors border border-white/[0.1]"
+                  disabled={isPastMonth}
+                  className="px-2 py-1 bg-white/[0.05] text-white/50 rounded-md text-[10px] uppercase font-bold tracking-wider hover:bg-white/[0.1] hover:text-white transition-colors border border-white/[0.1] disabled:opacity-30 disabled:cursor-not-allowed"
               >
                   Reset Logs
               </button>
@@ -327,8 +354,10 @@ export default function SpendJarPage() {
 
           <button 
             onClick={handleMainAction}
+            disabled={isPastMonth}
             className={`w-full h-14 rounded-full flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_8px_20px_rgba(0,0,0,0.3)]
-              ${!isBudgetSet
+              ${isPastMonth ? 'bg-[#1a1a1a] text-white/30 border border-white/5 cursor-not-allowed' :
+                !isBudgetSet
                 ? 'bg-[#1a1a1a] text-white/50 border border-white/10'
                 : isLocked 
                 ? 'bg-[#1a0a0a] text-[#FF453A] border border-[#FF453A]/30 cursor-not-allowed opacity-80' 
@@ -336,7 +365,9 @@ export default function SpendJarPage() {
               }
             `}
           >
-            {!isBudgetSet ? (
+            {isPastMonth ? (
+              <Lock className="w-4 h-4" strokeWidth={2.5} />
+            ) : !isBudgetSet ? (
               <Settings2 className="w-4 h-4" strokeWidth={2.5} />
             ) : isLocked ? (
               <Lock className="w-4 h-4" strokeWidth={2.5} />
@@ -344,7 +375,7 @@ export default function SpendJarPage() {
               <Plus className="w-5 h-5" strokeWidth={2.5} />
             )}
             <span className="font-bold tracking-widest text-xs uppercase">
-              {!isBudgetSet ? 'Setup Budget' : isLocked ? 'Jar Locked' : 'Quick Log Spend'}
+              {isPastMonth ? 'Locked (Past Month)' : !isBudgetSet ? 'Setup Budget' : isLocked ? 'Jar Locked' : 'Quick Log Spend'}
             </span>
           </button>
         </div>
@@ -352,10 +383,11 @@ export default function SpendJarPage() {
         {/* Premium Solid Recent Entries Feed */}
         <div className="w-[85%] mx-auto mt-12 flex flex-col gap-3 relative z-20">
           <div className="flex justify-between items-center mb-3 px-1">
-            <h2 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase">Recent Drops ({currentMonthEntries.length})</h2>
+            <h2 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase">Recent Drops ({unallocatedEntries.length})</h2>
             <button 
                 onClick={() => clearEntries()} 
-                className="text-white/20 text-[9px] uppercase font-bold tracking-[0.15em] hover:text-white/60 transition-colors"
+                disabled={isPastMonth}
+                className="text-white/20 text-[9px] uppercase font-bold tracking-[0.15em] hover:text-white/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
                 Reset
             </button>
@@ -381,7 +413,7 @@ export default function SpendJarPage() {
             </div>
           ))}
 
-          {currentMonthEntries.length === 0 && (
+          {unallocatedEntries.length === 0 && (
             <div className="text-center py-16 opacity-30 flex flex-col items-center">
               <div className="w-16 h-16 rounded-full border border-dashed border-white/20 mb-4 flex items-center justify-center">
                 <PiggyBank className="w-6 h-6 text-white/50" />

@@ -12,9 +12,11 @@ interface CategoryDetailsSheetProps {
     isOpen: boolean;
     onClose: () => void;
     categoryId: string | null;
+    monthKey?: string;
+    readOnly?: boolean;
 }
 
-export function CategoryDetailsSheet({ isOpen, onClose, categoryId }: CategoryDetailsSheetProps) {
+export function CategoryDetailsSheet({ isOpen, onClose, categoryId, readOnly = false }: CategoryDetailsSheetProps) {
     const { categories, updateSubCategory, addSubCategory } = useBudgetStore();
     const { primaryCurrency, exchangeRate } = useCurrencyStore();
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
@@ -89,10 +91,12 @@ export function CategoryDetailsSheet({ isOpen, onClose, categoryId }: CategoryDe
                                         <button
                                             key={sub.id}
                                             onClick={() => {
-                                                setSelectedSubId(sub.id);
-                                                setIsAmountModalOpen(true);
+                                                if (!readOnly) {
+                                                    setSelectedSubId(sub.id);
+                                                    setIsAmountModalOpen(true);
+                                                }
                                             }}
-                                            className="flex justify-between items-center w-full p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-colors text-left"
+                                            className={`flex justify-between items-center w-full p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-left ${!readOnly ? 'hover:bg-white/[0.06] transition-colors' : 'cursor-default opacity-80'}`}
                                         >
                                             <span className="text-white font-medium text-sm">{sub.name}</span>
                                             <div className="flex flex-col items-end">
@@ -107,31 +111,35 @@ export function CategoryDetailsSheet({ isOpen, onClose, categoryId }: CategoryDe
                                     );
                                 })}
 
-                                {isAdding ? (
-                                    <form onSubmit={handleAddItem} className="flex gap-2 items-center p-2 rounded-2xl bg-white/[0.05] border border-white/10">
-                                        <input
-                                            type="text"
-                                            value={newItemName}
-                                            onChange={(e) => setNewItemName(e.target.value)}
-                                            placeholder="Item name..."
-                                            className="flex-1 bg-transparent border-none outline-none text-white text-sm px-2"
-                                            autoFocus
-                                        />
-                                        <button type="submit" disabled={!newItemName.trim()} className="px-4 py-2 bg-white text-black text-xs font-semibold rounded-full disabled:opacity-50">
-                                            Add
-                                        </button>
-                                        <button type="button" onClick={() => { setIsAdding(false); setNewItemName(''); }} className="px-4 py-2 bg-white/10 text-white/70 text-xs font-semibold rounded-full">
-                                            Cancel
-                                        </button>
-                                    </form>
-                                ) : (
-                                    <button 
-                                        onClick={() => setIsAdding(true)}
-                                        className="flex items-center gap-3 w-full p-4 rounded-2xl border border-dashed border-white/20 text-white/50 hover:text-white hover:border-white/40 hover:bg-white/[0.02] transition-colors"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                        <span className="text-sm font-medium tracking-wide">Add Custom Item</span>
-                                    </button>
+                                {!readOnly && (
+                                    <>
+                                        {isAdding ? (
+                                            <form onSubmit={handleAddItem} className="flex gap-2 items-center p-2 rounded-2xl bg-white/[0.05] border border-white/10">
+                                                <input
+                                                    type="text"
+                                                    value={newItemName}
+                                                    onChange={(e) => setNewItemName(e.target.value)}
+                                                    placeholder="Item name..."
+                                                    className="flex-1 bg-transparent border-none outline-none text-white text-sm px-2"
+                                                    autoFocus
+                                                />
+                                                <button type="submit" disabled={!newItemName.trim()} className="px-4 py-2 bg-white text-black text-xs font-semibold rounded-full disabled:opacity-50">
+                                                    Add
+                                                </button>
+                                                <button type="button" onClick={() => { setIsAdding(false); setNewItemName(''); }} className="px-4 py-2 bg-white/10 text-white/70 text-xs font-semibold rounded-full">
+                                                    Cancel
+                                                </button>
+                                            </form>
+                                        ) : (
+                                            <button 
+                                                onClick={() => setIsAdding(true)}
+                                                className="flex items-center gap-3 w-full p-4 rounded-2xl border border-dashed border-white/20 text-white/50 hover:text-white hover:border-white/40 hover:bg-white/[0.02] transition-colors"
+                                            >
+                                                <Plus className="w-4 h-4" />
+                                                <span className="text-sm font-medium tracking-wide">Add Custom Item</span>
+                                            </button>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </motion.div>

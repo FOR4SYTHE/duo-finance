@@ -58,8 +58,16 @@ export default function BudgetPage() {
   const [menuCategory, setMenuCategory] = useState<BudgetCategory | null>(null);
   const [isCardSettingsOpen, setIsCardSettingsOpen] = useState(false);
 
-  const currentMonth = format(new Date(), 'yyyy-MM');
+  const currentMonth = budgetFilters.getEffectiveCurrentMonth();
   const displayMonth = config.activeMonth || currentMonth;
+  const isPastMonth = displayMonth < currentMonth;
+
+  useEffect(() => {
+      if (_hasHydrated && config.activeMonth && config.activeMonth < currentMonth) {
+          setActiveMonth(currentMonth);
+      }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [_hasHydrated, currentMonth]);
 
   // Computed Values
   const monthEntries = budgetFilters.filterEntriesByMonth(entries, displayMonth);
@@ -170,8 +178,20 @@ export default function BudgetPage() {
   if (!_hasHydrated) {
       return (
           <div className="flex flex-col w-full pb-8 pt-12 px-6">
-              <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-3xl text-white font-light tracking-tight">Budget</h1>
+              <div className="flex justify-between items-center px-4 w-full relative z-10 shrink-0">
+                  <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                          <h1 className="text-3xl text-white font-light tracking-tight flex items-center">
+                              Budget
+                              {isPastMonth && (
+                                  <span className="ml-3 px-2 py-0.5 rounded-md bg-white/10 text-white/50 text-[10px] uppercase font-bold tracking-widest border border-white/5">
+                                      Archived
+                                  </span>
+                              )}
+                          </h1>
+                      </div>
+                      <span className="text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase mt-1">Household Overview</span>
+                  </div>
                   <div className="w-24 h-9 bg-white/[0.04] rounded-full animate-pulse" />
               </div>
               <div className="w-full rounded-[24px] aspect-[1.58/1] bg-white/[0.02] border border-white/[0.03] animate-pulse mb-8" />
@@ -191,7 +211,14 @@ export default function BudgetPage() {
       
       {/* Header */}
       <div className="flex justify-between items-center mb-6 relative z-30 shrink-0">
-        <h1 className="text-3xl text-white font-light tracking-tight">Budget</h1>
+        <h1 className="text-3xl text-white font-light tracking-tight flex items-center">
+            Budget
+            {isPastMonth && (
+                <span className="ml-3 px-2 py-0.5 rounded-md bg-white/10 text-white/50 text-[10px] uppercase font-bold tracking-widest border border-white/5">
+                    Archived
+                </span>
+            )}
+        </h1>
         <div className="relative">
             <button 
                 onClick={() => setIsPeriodDropdownOpen(!isPeriodDropdownOpen)}
@@ -239,8 +266,8 @@ export default function BudgetPage() {
       {/* Hero Card - Virtual Bank Card Style */}
       <div>
         <div 
-          onClick={() => setIsHeroModalOpen(true)}
-          className={`w-full rounded-[24px] p-6 mb-8 relative z-20 cursor-pointer overflow-hidden border ${skin.border} group shadow-2xl flex flex-col justify-between aspect-[1.58/1] transition-all duration-500`}
+          onClick={() => !isPastMonth && setIsHeroModalOpen(true)}
+          className={`w-full rounded-[24px] p-6 mb-8 relative z-20 ${!isPastMonth ? 'cursor-pointer' : ''} overflow-hidden border ${skin.border} group shadow-2xl flex flex-col justify-between aspect-[1.58/1] transition-all duration-500`}
         style={{
             background: customBg ? 'transparent' : skin.background,
             boxShadow: skin.boxShadow
@@ -282,9 +309,11 @@ export default function BudgetPage() {
                 >
                     <Icons.Settings2 className="w-3.5 h-3.5" />
                 </button>
-                <div className={`w-8 h-8 rounded-full ${skin.buttonBg} flex items-center justify-center transition-colors`}>
-                    <Edit2 className="w-3.5 h-3.5" />
-                </div>
+                {!isPastMonth && (
+                    <div className={`w-8 h-8 rounded-full ${skin.buttonBg} flex items-center justify-center transition-colors`}>
+                        <Edit2 className="w-3.5 h-3.5" />
+                    </div>
+                )}
             </div>
         </div>
 
@@ -409,9 +438,11 @@ export default function BudgetPage() {
       </div>
       </div>
 
-      <div>
-        <SmartTools />
-      </div>
+      {!isPastMonth && (
+        <div>
+          <SmartTools />
+        </div>
+      )}
 
       {/* Category Bento Grid */}
       <div className="flex flex-col relative z-20 flex-1">
@@ -444,7 +475,7 @@ export default function BudgetPage() {
                             const isSubCatCategory = cat.subCategories || nameLower === 'utilities' || nameLower === 'bills';
                             if (isSubCatCategory) {
                                 setDetailsCategory(cat);
-                            } else {
+                            } else if (!isPastMonth) {
                                 setEditingCategory(cat);
                             }
                         }}
@@ -539,20 +570,26 @@ export default function BudgetPage() {
             })}
             
             {/* Add Category Tile */}
-            <div 
-                onClick={() => setIsAddCategoryOpen(true)}
-                className="rounded-[28px] p-5 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-white/[0.04] active:scale-[0.97] min-h-[160px] relative overflow-hidden"
-                style={{
-                    background: 'rgba(255,255,255,0.01)',
-                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
-                }}
-            >
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/[0.02] pointer-events-none" />
-                <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/[0.03] mb-3 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-white/[0.05]">
-                    <Plus className="w-5 h-5 text-white/40" />
+            {isPastMonth ? (
+                <div className="flex items-center justify-center p-3 rounded-[20px] bg-white/[0.02] border border-white/[0.02] text-white/30 text-xs font-medium min-h-[160px]">
+                    Editing locked for past months
                 </div>
-                <span className="text-[11px] font-semibold uppercase tracking-widest text-white/30">Add Category</span>
-            </div>
+            ) : (
+                <div 
+                    onClick={() => setIsAddCategoryOpen(true)}
+                    className="rounded-[28px] p-5 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-white/[0.04] active:scale-[0.97] min-h-[160px] relative overflow-hidden"
+                    style={{
+                        background: 'rgba(255,255,255,0.01)',
+                        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
+                    }}
+                >
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/[0.02] pointer-events-none" />
+                    <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/[0.03] mb-3 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-white/[0.05]">
+                        <Plus className="w-5 h-5 text-white/40" />
+                    </div>
+                    <span className="text-[11px] font-semibold uppercase tracking-widest text-white/30">Add Category</span>
+                </div>
+            )}
         </div>
       </div>
 
@@ -574,11 +611,22 @@ export default function BudgetPage() {
           />
       )}
 
-      <CategoryDetailsSheet
-        isOpen={!!detailsCategory}
-        onClose={() => setDetailsCategory(null)}
-        categoryId={detailsCategory?.id || null}
-      />
+      {isPastMonth ? (
+          <CategoryDetailsSheet
+              isOpen={!!detailsCategory}
+              onClose={() => setDetailsCategory(null)}
+              categoryId={detailsCategory?.id || null}
+              monthKey={displayMonth}
+              readOnly={true}
+          />
+      ) : (
+          <CategoryDetailsSheet
+              isOpen={!!detailsCategory}
+              onClose={() => setDetailsCategory(null)}
+              categoryId={detailsCategory?.id || null}
+              monthKey={displayMonth}
+          />
+      )}
 
       <CategoryMenuSheet
         isOpen={!!menuCategory}

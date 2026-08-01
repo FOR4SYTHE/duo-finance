@@ -142,12 +142,24 @@ export const useCartifyStore = create<CartifyState>()(
                 const state = get();
                 // Filter only items that were actually put in the cart
                 const purchasedItems = state.items.filter(i => i.status === 'in-cart');
-                const totalAmount = purchasedItems.reduce((sum, item) => sum + item.amount, 0);
 
-                if (totalAmount > 0) {
+                if (purchasedItems.length > 0) {
                     const spendStore = useSpendStore.getState();
                     const tripId = `trip-${Date.now()}`;
-                    spendStore.addExpense(totalAmount, 'PHP', 'Groceries', 'Cartify trip', tripId);
+                    
+                    // Group items by category (defaulting to 'Groceries' if uncategorized)
+                    const byCategory = purchasedItems.reduce((acc, item) => {
+                        const cat = item.category || 'Groceries';
+                        acc[cat] = (acc[cat] || 0) + item.amount;
+                        return acc;
+                    }, {} as Record<string, number>);
+
+                    // Dispatch an expense for each category group
+                    Object.entries(byCategory).forEach(([category, amount]) => {
+                        if (amount > 0) {
+                            spendStore.addExpense(amount, 'PHP', category, 'Cartify trip', tripId);
+                        }
+                    });
                 }
 
                 if (state.scheduledTripId) {
