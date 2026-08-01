@@ -132,6 +132,9 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
     });
 
     savedTrips.forEach(t => {
+      if (t.scheduledTripId && scheduledTrips.some(st => st.id === t.scheduledTripId)) {
+        return;
+      }
       const d = new Date(t.date);
       if (d.getMonth() === viewMonth && d.getFullYear() === viewYear) {
         events.push({

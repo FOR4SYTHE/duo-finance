@@ -96,6 +96,9 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
     });
 
     savedTrips.forEach(t => {
+      if (t.scheduledTripId && scheduledTrips.some(st => st.id === t.scheduledTripId)) {
+        return;
+      }
       const d = new Date(t.date);
       events.push({
         id: t.id,
