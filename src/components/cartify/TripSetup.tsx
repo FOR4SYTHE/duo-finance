@@ -6,7 +6,7 @@ import { useCartifyStore, CartifyMode, SavedTrip } from "@/store/useCartifyStore
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { Delete, ChevronRight, Check, ArrowUpDown, ShoppingCart, Zap, ListTodo, Layers } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BorderBeam } from "border-beam";
+
 import { SavedTripsSheet } from "./SavedTripsSheet";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 
@@ -97,7 +97,6 @@ export function TripSetup() {
                         exit={{ opacity: 0, y: -20, height: 0 }}
                         className="px-4 mb-4"
                     >
-                        <BorderBeam size="pulse-inner" colorVariant="mono" strength={0.7} className="rounded-[24px]">
                             <div className="relative w-full bg-gradient-to-b from-[#1C1C1E] to-[#111112] border border-white/5 rounded-[24px] p-4 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
                                 
                                 <div className="flex items-center gap-3 relative z-10">
@@ -128,7 +127,6 @@ export function TripSetup() {
                                     </button>
                                 </div>
                             </div>
-                        </BorderBeam>
                     </motion.div>
                 )}
 
@@ -143,7 +141,6 @@ export function TripSetup() {
                         <div className="absolute top-0 left-6 right-6 h-full bg-[#1C1C1E]/50 border border-white/5 rounded-[24px] translate-y-2 scale-[0.96] shadow-lg pointer-events-none" />
                         <div className="absolute top-0 left-8 right-8 h-full bg-[#1C1C1E]/30 border border-white/5 rounded-[24px] translate-y-4 scale-[0.92] shadow-sm pointer-events-none" />
 
-                        <BorderBeam size="pulse-outside" colorVariant="mono" strength={0.7} className="rounded-[24px]">
                             <button 
                                 onClick={() => setIsSavedTripsOpen(true)}
                                 className="relative w-full bg-gradient-to-b from-[#1C1C1E] to-[#111112] border border-white/5 rounded-[24px] p-4 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)] text-left group active:scale-[0.98] transition-all"
@@ -165,7 +162,6 @@ export function TripSetup() {
                                     <ChevronRight className="w-4 h-4 text-white/50" />
                                 </div>
                             </button>
-                        </BorderBeam>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -422,7 +418,7 @@ export function TripSetup() {
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 onClick={() => setShowStartPrompt(false)}
-                                className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+                                className="absolute inset-0 bg-[#0A0A0A]/95" 
                             />
                             
                             <motion.div 
