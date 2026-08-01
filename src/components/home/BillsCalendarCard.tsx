@@ -123,7 +123,7 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
       .filter((b) => {
         // Simple heuristic for upcoming next 7 days (assuming mostly same month or early next month)
         const daysUntil = b.dueDay >= currentDay ? b.dueDay - currentDay : daysInMonth - currentDay + b.dueDay;
-        return daysUntil <= 7 && daysUntil >= 0;
+        return daysUntil <= 7 && daysUntil >= 0 && !b.isPaid;
       })
       .sort((a, b) => {
         const da = a.dueDay >= currentDay ? b.dueDay - currentDay : daysInMonth - currentDay + a.dueDay;

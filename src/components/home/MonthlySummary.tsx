@@ -21,6 +21,7 @@ import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { ActivityRingsChart } from "./ActivityRingsChart";
 import { Sparkline } from "./Sparkline";
 import { AnimatedCounter } from "./AnimatedCounter";
+import { calculateAllocations } from "@/utils/budgetMath";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -178,7 +179,7 @@ export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
   );
 
   const totalSpent = monthEntries.reduce((s, e) => s + e.amount, 0);
-  const totalBudget = config.targetAmount;
+  const { displayTarget: totalBudget } = calculateAllocations(config, categories, totalSpent, monthKey);
   const remaining = totalBudget - totalSpent;
   const spendRatio = totalBudget > 0 ? totalSpent / totalBudget : 0;
 

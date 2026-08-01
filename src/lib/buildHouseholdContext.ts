@@ -3,20 +3,38 @@ import { useSpendStore } from '@/store/useSpendStore';
 import { useCurrencyStore } from '@/store/useCurrencyStore';
 import { usePluginsStore } from '@/store/usePluginsStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useBillsStore } from '@/store/useBillsStore';
+import { useCartifyStore } from '@/store/useCartifyStore';
+import { useSubscriptionsStore } from '@/store/useSubscriptionsStore';
+import { useChildCareStore } from '@/store/useChildCareStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { calculateAllocations } from '@/utils/budgetMath';
 
 export function buildHouseholdContext(): string {
     // Read directly from stores
     const { config, categories, goals } = useBudgetStore.getState();
     const { entries } = useSpendStore.getState();
     const { exchangeRate } = useCurrencyStore.getState();
-    const { scratchpadContent } = usePluginsStore.getState();
+    const { scratchpadContent, documents, relocationTasks, shippingRateZarPerKg, targetExchangeRate } = usePluginsStore.getState();
     const { user, partner, householdId } = useAuthStore.getState();
+    const { bills } = useBillsStore.getState();
+    const { currentTrip, trips } = useCartifyStore.getState();
+    const { subscriptions } = useSubscriptionsStore.getState();
+    const { profile: childProfile, cachedData: childData, configuration: childConfig } = useChildCareStore.getState();
+    const settings = useSettingsStore.getState();
 
-    // 1. Budget Summary
-    const period = config.period;
-    const targetBudget = config.targetAmount || 0;
-    const allocated = categories.reduce((sum, cat) => sum + (cat.targetAmount || 0), 0);
-    const unallocated = Math.max(0, targetBudget - allocated);
+    const today = new Date();
+    const currentMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    const todayString = today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    // 1. Current Month Breakdown
+    const monthEntries = entries.filter((e) => {
+      const d = new Date(e.timestamp);
+      return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+    });
+    const totalSpentThisMonth = monthEntries.reduce((s, e) => s + (e.currency === 'PHP' ? e.amount : e.amount / exchangeRate), 0);
+    const { displayTarget: monthlyTarget } = calculateAllocations(config, categories, totalSpentThisMonth, currentMonthKey);
+    const monthlyRemaining = Math.max(0, monthlyTarget - totalSpentThisMonth);
 
     // 2. Spending Summary (Basic rollup of all entries for context)
     const totalSpentPhp = entries.reduce((sum, entry) => {
@@ -31,7 +49,6 @@ export function buildHouseholdContext(): string {
         return acc;
     }, {} as Record<string, number>);
 
-    // Top 3 categories
     const topCategories = Object.entries(spendByCategory)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 3)
@@ -44,13 +61,27 @@ export function buildHouseholdContext(): string {
         return `${g.name}: ${pct}% (₱${Math.round(g.savedAmount).toLocaleString()})`;
     }).join(' | ');
 
-    // 4. Document Vault Summary
-    const { documents, relocationTasks, shippingRateZarPerKg, targetExchangeRate } = usePluginsStore.getState();
+    // 4. Bills Summary
+    const upcomingBills = bills.filter(b => !b.isPaid).map(b => `${b.name} (₱${b.amount}, Due: Day ${b.dueDay})`).join(', ');
+    const paidBills = bills.filter(b => b.isPaid).length;
+
+    // 5. Cartify Summary
+    const activeCartify = currentTrip 
+        ? `Active Trip: ${currentTrip.items.length} items, ₱${currentTrip.items.reduce((s, i) => s + (i.price * i.quantity), 0).toLocaleString()} current total.` 
+        : 'No active Cartify trip.';
+    const pastTripsCount = trips.length;
+
+    // 6. Subscriptions
+    const activeSubs = subscriptions.map(s => `${s.name} (₱${s.amount}/${s.cycle})`).join(', ');
+
+    // 7. Child Care
+    const selectedSchool = childData.schools.find(s => s.id === childConfig.selectedSchoolId);
+    const childCareSummary = `${childProfile.nickname || 'Child'} (${childProfile.age || '?'}yo) in ${childProfile.location}. ${selectedSchool ? `School: ${selectedSchool.name} (₱${selectedSchool.monthlyTuition}/mo)` : 'No school selected.'}`;
+
+    // 8. Document Vault & Relocation
     const vaultSummary = documents.length > 0 
         ? documents.map(d => `- ${d.title} (${d.category}, ${d.date})${d.amount ? ` ₱${d.amount}` : ''} [Tags: ${d.tags.join(', ')}]`).join('\n')
         : '';
-
-    // 5. Relocation Summary
     const completedTasks = relocationTasks.filter(t => t.completed).length;
 
     // Compile the final context string
@@ -58,41 +89,54 @@ export function buildHouseholdContext(): string {
 === SYSTEM AWARENESS & CAPABILITIES ===
 You are DUO AI, the brain of this household management app. 
 You currently have full READ access to: 
-- User Profile & Authentication (Who is logged in, their partner, and their household ID)
-- Budget System (Targets, allocated funds, and goals)
+- User Profile & Authentication
+- Budget System (Targets, allocated funds, categories, and goals)
 - Spend Jar (All logged expenses and categories)
+- Recurring Bills (Upcoming and paid bills)
+- Cartify (Shopping trips and grocery tracking)
+- Subscriptions
+- Child Care (Schools, costs, activities)
 - Relocation Hub (Master Move Checklist and shipping rates)
 - Dream Board (Savings goals)
 - Shared Scratchpad (Notes)
 - Document Vault (Receipts, warranties, visas)
 - Exchange Alerts (Forex targets)
+- Vision Scanner (Can read uploaded receipts and product photos)
 
 You DO NOT have access to:
-- Shopping Scanner Plugin (Not wired yet)
-- Cartify (Not wired yet)
-- App Settings
+- Changing App Settings for the user (you can only read data, not modify UI settings directly)
 
-If the user asks about features you don't have access to, acknowledge your limitation and state that you are still being built and connected to those systems.
+=== CURRENT CONTEXT ===
+- Today's Date: ${todayString}
 
 === HOUSEHOLD PROFILE ===
 - Primary User: ${user ? `${user.name} (${user.email})` : 'Guest / Not logged in'}
 - Partner: ${partner ? `${partner.name} (${partner.email})` : 'None linked'}
 - Household ID: ${householdId || 'Not connected'}
 
-=== HOUSEHOLD SNAPSHOT ===
-- Budget Period: ${period}
-- Target Budget: ₱${targetBudget.toLocaleString()}
-- Allocated: ₱${allocated.toLocaleString()} | Unallocated: ₱${unallocated.toLocaleString()}
-- Total Spent: ₱${Math.round(totalSpentPhp).toLocaleString()}
-${topCategories ? `- Top Spend Categories: ${topCategories}` : ''}
+=== MONTHLY REPORT (${currentMonthKey}) ===
+- Target Budget: ₱${monthlyTarget.toLocaleString()}
+- Total Spent This Month: ₱${Math.round(totalSpentThisMonth).toLocaleString()}
+- Remaining Budget: ₱${Math.round(monthlyRemaining).toLocaleString()}
+
+=== OVERALL SPENDING SNAPSHOT ===
+- Total Lifetime Spent: ₱${Math.round(totalSpentPhp).toLocaleString()}
+${topCategories ? `- Top Lifetime Categories: ${topCategories}` : ''}
 ${goalsSummary ? `- Goals: ${goalsSummary}` : ''}
+
+=== BILLS & SHOPPING ===
+- Upcoming Bills: ${upcomingBills || 'None'}
+- Bills Paid This Period: ${paidBills}
+- Active Subscriptions: ${activeSubs || 'None'}
+- Cartify Status: ${activeCartify} (Past trips: ${pastTripsCount})
+
+=== CHILD CARE ===
+- ${childCareSummary}
 
 Current Exchange Rate (Frankfurter API):
 - 1 ZAR = ₱${exchangeRate.toFixed(2)}
 - 1 PHP = R${(1 / exchangeRate).toFixed(4)}
-- FOREX TARGET ALERT: The user has set a target alert to notify them when 1 ZAR hits ₱${targetExchangeRate?.toFixed(2) ?? 'N/A'}. If the current rate is at or above this target, tell them it's a great time to transfer money.
-
-${unallocated > 0 ? `Alert: There is ₱${unallocated.toLocaleString()} unallocated in the budget. Suggest allocating this to a specific category or saving it.` : ''}
+- FOREX TARGET ALERT: The user has set a target alert for 1 ZAR to hit ₱${targetExchangeRate?.toFixed(2) ?? 'N/A'}.
 
 Recent Shared Scratchpad Notes:
 ${scratchpadContent?.substring(0, 1000).replace(/<[^>]*>?/gm, ' ') || 'None.'}
@@ -103,5 +147,9 @@ ${vaultSummary || 'No documents uploaded yet.'}
 Relocation Progress:
 - ${completedTasks}/${relocationTasks.length} tasks completed on the Master Move Checklist.
 - Shipping Rate Est: ${shippingRateZarPerKg} ZAR/kg.
+
+App Settings:
+- Budget Alerts: ${settings.budgetAlerts ? 'ON' : 'OFF'}
+- Reminders: ${settings.reminders ? 'ON' : 'OFF'}
 `.trim();
 }

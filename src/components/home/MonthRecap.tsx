@@ -8,6 +8,7 @@ import { useSpendStore } from "@/store/useSpendStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { formatCurrency } from "@/lib/format";
+import { calculateAllocations } from "@/utils/budgetMath";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -297,6 +298,7 @@ const slideVariants = {
 
 export function MonthRecap({ lastSeenMonthKey, currentMonthKey, onClose }: MonthRecapProps) {
   const config = useBudgetStore((state) => state.config);
+  const categories = useBudgetStore((state) => state.categories);
   const entries = useSpendStore((state) => state.entries);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
@@ -321,7 +323,7 @@ export function MonthRecap({ lastSeenMonthKey, currentMonthKey, onClose }: Month
   });
 
   const totalSpent = monthEntries.reduce((s, e) => s + e.amount, 0);
-  const totalBudget = config.targetAmount;
+  const { displayTarget: totalBudget } = calculateAllocations(config, categories, totalSpent, lastSeenMonthKey);
   const remaining = totalBudget - totalSpent;
   const isOver = remaining < 0;
 

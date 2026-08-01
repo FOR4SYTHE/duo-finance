@@ -65,12 +65,11 @@ export function MonthlyReportCard() {
   });
   const totalSpent = monthEntries.reduce((s, e) => s + e.amount, 0);
   
-  const { displayTarget, displayAllocated, displayUnallocated } = calculateAllocations(config, categories, totalSpent);
+  const { displayTarget } = calculateAllocations(config, categories, totalSpent, currentMonthKey);
   
-  const effectiveSpent = displayAllocated + totalSpent;
-  const remaining = displayUnallocated;
+  const remaining = Math.max(0, displayTarget - totalSpent);
   
-  const spendRatio = displayTarget > 0 ? effectiveSpent / displayTarget : 0;
+  const spendRatio = displayTarget > 0 ? totalSpent / displayTarget : 0;
   const progressPct = Math.min(Math.max(spendRatio * 100, 0), 100);
 
   const statusColor =
