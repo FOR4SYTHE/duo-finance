@@ -341,6 +341,8 @@ export function ChildCareOnboarding() {
                   }}
                   mouseEvents={false}
                   touchEvents={false}
+                  attribution={false}
+                  attributionPrefix={false}
                 />
 
                 {/* Center Pin & Pulse (Overlaid perfectly in the center) */}
