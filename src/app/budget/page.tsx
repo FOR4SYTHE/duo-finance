@@ -18,6 +18,7 @@ import { AmountInputModal } from "@/components/budget/AmountInputModal";
 import { AddCategorySheet } from "@/components/budget/AddCategorySheet";
 import { CategoryDetailsSheet } from "@/components/budget/CategoryDetailsSheet";
 import { CategoryMenuSheet } from "@/components/budget/CategoryMenuSheet";
+import { CategoryHistorySheet } from "@/components/budget/CategoryHistorySheet";
 import { CardSettingsSheet } from "@/components/budget/CardSettingsSheet";
 import * as budgetMath from "@/utils/budgetMath";
 import * as budgetFilters from "@/utils/budgetFilters";
@@ -58,6 +59,7 @@ export default function BudgetPage() {
   const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
   const [detailsCategory, setDetailsCategory] = useState<BudgetCategory | null>(null);
   const [menuCategory, setMenuCategory] = useState<BudgetCategory | null>(null);
+  const [historyCategory, setHistoryCategory] = useState<BudgetCategory | null>(null);
   const [isCardSettingsOpen, setIsCardSettingsOpen] = useState(false);
 
   const currentMonth = budgetFilters.getEffectiveCurrentMonth();
@@ -666,10 +668,19 @@ export default function BudgetPage() {
           />
       )}
 
-      <CategoryMenuSheet
+      <CategoryMenuSheet 
         isOpen={!!menuCategory}
         onClose={() => setMenuCategory(null)}
         category={menuCategory}
+        onViewHistory={() => {
+          if (menuCategory) setHistoryCategory(menuCategory);
+        }}
+      />
+      
+      <CategoryHistorySheet 
+        isOpen={!!historyCategory}
+        onClose={() => setHistoryCategory(null)}
+        category={historyCategory}
       />
 
       <CardSettingsSheet

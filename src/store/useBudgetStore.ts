@@ -33,6 +33,7 @@ interface BudgetState {
     updateCategoriesTarget: (updates: { id: string, targetAmount: number }[]) => void;
     removeCategory: (id: string) => void;
     syncSnapshots: (entries: ExpenseEntry[], currentMonth: string) => void;
+    reset: () => void;
     
     // Sub-category operations
     updateSubCategory: (categoryId: string, subId: string, amount: number) => void;
@@ -156,15 +157,19 @@ export const useBudgetStore = create<BudgetState>()(
                         }
 
                         // Write to newSpendHistory
+                        const newTargetHistory = { ...(cat.targetHistory || {}) };
                         Object.entries(monthlySums).forEach(([m, sum]) => {
                             if (newSpendHistory[m] === undefined) {
                                 newSpendHistory[m] = sum;
+                                if (newTargetHistory[m] === undefined) {
+                                    newTargetHistory[m] = cat.targetAmount;
+                                }
                                 hasChanges = true;
                             }
                         });
 
                         if (hasChanges) {
-                            return { ...cat, spendHistory: newSpendHistory };
+                            return { ...cat, spendHistory: newSpendHistory, targetHistory: newTargetHistory };
                         }
                         return cat;
                     });
@@ -322,6 +327,14 @@ export const useBudgetStore = create<BudgetState>()(
                     if (id === 'goal-1') return state; // Protect Emergency Fund from deletion
                     return { goals: state.goals.filter(g => g.id !== id) };
                 }),
+            reset: () =>
+                set(() => ({
+                    config: { targetAmount: 0, period: 'monthly', jarAllowedPercentage: 20 },
+                    categories: DEFAULT_CATEGORIES,
+                    goals: DEFAULT_GOALS,
+                    notifications: [],
+                    _hasHydrated: true
+                })),
             addMoneyToGoal: (id, amount) =>
                 set((state) => ({
                     goals: state.goals.map(g => g.id === id ? { ...g, savedAmount: g.savedAmount + amount } : g)

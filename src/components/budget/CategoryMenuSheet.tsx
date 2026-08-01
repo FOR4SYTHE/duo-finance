@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, History } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { BudgetCategory } from "@/types/finance";
 import { useState } from "react";
@@ -10,9 +10,10 @@ interface CategoryMenuSheetProps {
     isOpen: boolean;
     onClose: () => void;
     category: BudgetCategory | null;
+    onViewHistory?: () => void;
 }
 
-export function CategoryMenuSheet({ isOpen, onClose, category }: CategoryMenuSheetProps) {
+export function CategoryMenuSheet({ isOpen, onClose, category, onViewHistory }: CategoryMenuSheetProps) {
     const { removeCategory } = useBudgetStore();
     const [isConfirming, setIsConfirming] = useState(false);
 
@@ -54,6 +55,18 @@ export function CategoryMenuSheet({ isOpen, onClose, category }: CategoryMenuShe
 
                         {!isConfirming ? (
                             <div className="flex flex-col gap-2">
+                                {onViewHistory && (
+                                    <button 
+                                        onClick={() => {
+                                            onClose();
+                                            onViewHistory();
+                                        }}
+                                        className="w-full flex items-center gap-3 p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors border border-white/5 font-medium text-white/80"
+                                    >
+                                        <History className="w-5 h-5 text-white/50" />
+                                        View History
+                                    </button>
+                                )}
                                 <button 
                                     onClick={() => setIsConfirming(true)}
                                     className="w-full flex items-center gap-3 p-4 rounded-2xl bg-[#FF453A]/10 text-[#FF453A] hover:bg-[#FF453A]/20 transition-colors border border-[#FF453A]/10 font-medium"
