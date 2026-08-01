@@ -271,7 +271,6 @@ export function PlannedListBuilder({ onRequestExit }: PlannedListBuilderProps = 
             <ScheduleTripModal
                 isOpen={showScheduleModal}
                 onClose={() => setShowScheduleModal(false)}
-                onSaveComplete={onRequestExit}
             />
         </div>
     );

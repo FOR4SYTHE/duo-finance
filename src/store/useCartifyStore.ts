@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartifyItem } from '@/types/finance';
 import { useSpendStore } from '@/store/useSpendStore';
+import { useHouseholdStore } from '@/store/useHouseholdStore';
 
 export type CartifyMode = 'simple' | 'planned';
 
@@ -11,6 +12,7 @@ export interface SavedTrip {
     budget: number;
     mode: CartifyMode;
     items: CartifyItem[];
+    scheduledTripId?: string;
 }
 
 interface CartifyState {
@@ -21,13 +23,14 @@ interface CartifyState {
     items: CartifyItem[];
     activeCategory: string | null;
     isReceiptView: boolean;
+    scheduledTripId?: string;
     savedTrips: SavedTrip[];
     
     // Actions
     startTrip: (budget: number, mode: CartifyMode) => void;
     finishBuildingList: () => void;
     resumeBuildingList: () => void;
-    saveForLater: () => void;
+    saveForLater: (scheduledTripId?: string) => void;
     resumeTrip: () => void; // Resumes the single active trip (for backward compatibility if needed)
     resumeSpecificTrip: (id: string) => void;
     deleteSavedTrip: (id: string) => void;
@@ -72,13 +75,14 @@ export const useCartifyStore = create<CartifyState>()(
                 budget, 
                 mode, 
                 items: [], 
-                activeCategory: null 
+                activeCategory: null,
+                scheduledTripId: undefined
             }),
 
             finishBuildingList: () => set({ isBuildingList: false }),
             resumeBuildingList: () => set({ isBuildingList: true }),
             
-            saveForLater: () => {
+            saveForLater: (scheduledTripId?: string) => {
                 const state = get();
                 if (state.budget > 0 || state.items.length > 0) {
                     const newSavedTrip: SavedTrip = {
@@ -86,7 +90,8 @@ export const useCartifyStore = create<CartifyState>()(
                         date: new Date().toISOString(),
                         budget: state.budget,
                         mode: state.mode,
-                        items: state.items
+                        items: state.items,
+                        scheduledTripId: scheduledTripId || state.scheduledTripId
                     };
                     set({ 
                         savedTrips: [newSavedTrip, ...state.savedTrips],
@@ -96,7 +101,8 @@ export const useCartifyStore = create<CartifyState>()(
                         mode: 'simple',
                         items: [],
                         activeCategory: null,
-                        isReceiptView: false
+                        isReceiptView: false,
+                        scheduledTripId: undefined
                     });
                 } else {
                     set({ isActive: false });
@@ -115,12 +121,18 @@ export const useCartifyStore = create<CartifyState>()(
                         budget: tripToResume.budget,
                         mode: tripToResume.mode,
                         items: tripToResume.items,
+                        scheduledTripId: tripToResume.scheduledTripId,
                         savedTrips: state.savedTrips.filter(t => t.id !== id)
                     });
                 }
             },
             
             deleteSavedTrip: (id) => {
+                const state = get();
+                const tripToDelete = state.savedTrips.find(t => t.id === id);
+                if (tripToDelete?.scheduledTripId) {
+                    useHouseholdStore.getState().deleteScheduledTrip(tripToDelete.scheduledTripId);
+                }
                 set((state) => ({
                     savedTrips: state.savedTrips.filter(t => t.id !== id)
                 }));
@@ -138,6 +150,10 @@ export const useCartifyStore = create<CartifyState>()(
                     spendStore.addExpense(totalAmount, 'PHP', 'Groceries', 'Cartify trip', tripId);
                 }
 
+                if (state.scheduledTripId) {
+                    useHouseholdStore.getState().deleteScheduledTrip(state.scheduledTripId);
+                }
+
                 set({ 
                     isActive: false, 
                     isBuildingList: false,
@@ -145,7 +161,8 @@ export const useCartifyStore = create<CartifyState>()(
                     mode: 'simple', 
                     items: [], 
                     activeCategory: null,
-                    isReceiptView: false
+                    isReceiptView: false,
+                    scheduledTripId: undefined
                 });
             },
 

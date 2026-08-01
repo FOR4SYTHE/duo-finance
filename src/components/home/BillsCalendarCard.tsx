@@ -20,6 +20,8 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
   const bills = useBillsStore((state) => state.bills);
   const scheduledTrips = useHouseholdStore((state) => state.scheduledTrips);
   const savedTrips = useCartifyStore((state) => state.savedTrips);
+  const activeScheduledTripId = useCartifyStore((state) => state.scheduledTripId);
+  const deleteScheduledTrip = useHouseholdStore((state) => state.deleteScheduledTrip);
   const { primarySymbol, getPrimaryValue, getSecondaryValue, secondarySymbol } = useDualCurrency();
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [view, setView] = useState<'grid' | 'presentation'>('grid');
@@ -28,6 +30,24 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Thorough fix: Auto-cleanup orphaned ghost trips from the calendar
+  useEffect(() => {
+    if (!mounted) return;
+    
+    // Collect all valid IDs that Cartify is currently tracking
+    const validIds = new Set([
+      activeScheduledTripId,
+      ...savedTrips.map(t => t.scheduledTripId)
+    ].filter(Boolean));
+
+    // Find and delete scheduled trips that aren't tracked by Cartify and aren't standalone templates
+    scheduledTrips.forEach(trip => {
+      if (!trip.templateId && !validIds.has(trip.id)) {
+        deleteScheduledTrip(trip.id);
+      }
+    });
+  }, [mounted, scheduledTrips, savedTrips, activeScheduledTripId, deleteScheduledTrip]);
 
   const today = useMemo(() => new Date(), []);
   const currentDay = today.getDate();

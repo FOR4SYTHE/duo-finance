@@ -43,12 +43,17 @@ export function ScheduleTripModal({ isOpen, onClose, onSaveComplete }: ScheduleT
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
         
+        const scheduledId = `scheduled-${Date.now()}`;
         scheduleTrip({
-            id: `scheduled-${Date.now()}`,
+            id: scheduledId,
             date: selectedDate.toISOString(),
             // Only tracking the estimated budget for now based on what's in their planned cart
             estimatedBudgetPHP: budget > 0 ? budget : undefined,
+            storeName: storeName.trim() ? storeName.trim() : undefined,
         });
+        
+        // Save the Cartify state linked to this schedule ID
+        useCartifyStore.getState().saveForLater(scheduledId);
         
         onClose();
         if (onSaveComplete) onSaveComplete();
