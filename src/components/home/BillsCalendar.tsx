@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -26,6 +27,7 @@ import { useBillsStore, Bill } from "@/store/useBillsStore";
 import { useHouseholdStore } from "@/store/useHouseholdStore";
 import { useCartifyStore } from "@/store/useCartifyStore";
 import { useSpendStore } from "@/store/useSpendStore";
+import { useBudgetStore } from "@/store/useBudgetStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { formatCurrency } from "@/lib/format";
 
@@ -104,8 +106,13 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
   const [newName, setNewName] = useState("");
   const [newAmount, setNewAmount] = useState("");
   const [newCategory, setNewCategory] = useState("Other");
+  const [newDueDay, setNewDueDay] = useState(now.getDate());
   const [newRecurring, setNewRecurring] = useState(true);
   const [newColor, setNewColor] = useState<string>("");
+  const [newCategoryId, setNewCategoryId] = useState<string | null>(null);
+  const { categories } = useBudgetStore();
+
+  const router = useRouter();
 
   const handleTogglePaid = (bill: Bill) => {
     if (!bill.isPaid) {
@@ -128,7 +135,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
       addExpense(
         pendingLogBill.amount,
         pendingLogBill.currency,
-        pendingLogBill.budgetCategoryId ? 'Bills' : pendingLogBill.category, // fallback
+        pendingLogBill.category,
         `Paid: ${pendingLogBill.name}`,
         undefined, // tripId
         pendingLogBill.id // sourceBillId
@@ -140,9 +147,14 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
 
   const declineLogPaidBill = () => {
     if (pendingLogBill) {
-      togglePaid(pendingLogBill.id);
       setPendingLogBill(null);
     }
+  };
+
+  const handleLogAndViewBudget = () => {
+    confirmLogPaidBill();
+    onClose();
+    router.push('/budget');
   };
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -207,7 +219,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
     return map;
   }, [allEvents]);
 
-  const selectedDayBills = selectedDay ? eventsByDay[selectedDay] || [] : [];
+  const selectedDayBills = selectedDay ? (eventsByDay[selectedDay] || []).filter((b: any) => !b.isPaid) : [];
 
   const handlePrevMonth = () => {
     if (viewMonth === 0) {
@@ -230,13 +242,14 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
   };
 
   const handleAddBill = () => {
-    if (!newName.trim() || !newAmount.trim() || !selectedDay) return;
+    if (!newName.trim() || !newAmount.trim()) return;
     addBill({
       name: newName.trim(),
       amount: parseFloat(newAmount) || 0,
       currency: "PHP",
-      dueDay: selectedDay!,
+      dueDay: newDueDay,
       category: newCategory,
+      budgetCategoryId: newCategoryId || undefined,
       isRecurring: newRecurring,
       reminderEnabled: true,
       isPaid: false,
@@ -245,6 +258,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
     setNewName("");
     setNewAmount("");
     setNewCategory("Other");
+    setNewCategoryId(null);
     setNewRecurring(true);
     setNewColor("");
     setShowAddForm(false);
@@ -317,7 +331,8 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
             <div className="grid grid-cols-7 gap-1.5">
               {calendarDays.map((day, i) => {
                 const billsForDay = day ? eventsByDay[day] : [];
-                const hasBills = billsForDay && billsForDay.length > 0;
+                const activeBillsForDay = billsForDay ? billsForDay.filter((b: any) => !b.isPaid) : [];
+                const hasBills = activeBillsForDay && activeBillsForDay.length > 0;
                 const isSelected = day === selectedDay;
                 const todayFlag = day && isToday(day);
 
@@ -326,20 +341,20 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                 let hasRegularBill = false;
                 
                 if (hasBills) {
-                  const cartifyBill = billsForDay.find(b => b.category === "Cartify");
+                  const cartifyBill = activeBillsForDay.find((b: any) => b.category === "Cartify");
                   if (cartifyBill) {
                      hasCartify = true;
                      art = getCategoryArt("Cartify");
-                     hasRegularBill = billsForDay.some(b => b.category !== "Cartify");
+                     hasRegularBill = activeBillsForDay.some((b: any) => b.category !== "Cartify");
                   } else {
-                     art = getCategoryArt(billsForDay[0].category);
+                     art = getCategoryArt(activeBillsForDay[0].category);
                   }
                 }
 
                 // Derive the ring color: custom color on the bill, or fall back to category hex
-                const regularBill = hasBills ? billsForDay.find(b => b.category !== "Cartify") : undefined;
+                const regularBill = hasBills ? activeBillsForDay.find((b: any) => b.category !== "Cartify") : undefined;
                 const ringHex = regularBill?.color || (regularBill ? CATEGORY_HEX[regularBill.category] || "#FF9F0A" : undefined);
-                const customBillColor = hasBills ? billsForDay[0]?.color : undefined;
+                const customBillColor = hasBills ? activeBillsForDay[0]?.color : undefined;
                 
                 const tailwindBgClass = !hasCartify && !customBillColor ? art?.color : "";
 
@@ -384,9 +399,9 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                           <art.icon className="w-[18px] h-[18px] mt-2 opacity-90" strokeWidth={2.5} />
                         )}
                         
-                        {billsForDay.length > 1 && (
+                        {activeBillsForDay.length > 1 && (
                           <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-black rounded-full text-white text-[9px] font-bold flex items-center justify-center border border-white/20 shadow-md z-50">
-                            {billsForDay.length}
+                            {activeBillsForDay.length}
                           </div>
                         )}
                         {isSelected && (
@@ -402,8 +417,25 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
             </div>
           </div>
 
-          {/* Selected Day Bills */}
+          {/* Selected Day Bills or Default Art */}
           <AnimatePresence mode="wait">
+            {!selectedDay && !showAddForm && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mb-8 text-center py-10 bg-white/[0.02] rounded-[24px] border border-white/[0.04]"
+              >
+                <img 
+                    src="/mascot/dufi-bills-relaxed.webp" 
+                    alt="No bills" 
+                    className="w-20 h-20 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)] mx-auto mb-3"
+                />
+                <p className="text-sm font-semibold text-white/60">No bills scheduled</p>
+                <p className="text-[11px] text-white/30 mt-1">Select a day to view schedule</p>
+              </motion.div>
+            )}
+
             {selectedDay && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
@@ -415,20 +447,6 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                   <h3 className="text-xs font-bold text-white/50 tracking-widest uppercase">
                     Schedule for {MONTH_NAMES[viewMonth].slice(0, 3)} {selectedDay}
                   </h3>
-                  <button
-                    onClick={() => {
-                      setShowAddForm(true);
-                      requestAnimationFrame(() => {
-                        setTimeout(() => {
-                          formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 300);
-                      });
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-white/20 transition-colors border border-white/10"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    New Bill
-                  </button>
                 </div>
 
                 {selectedDayBills.length > 0 ? (
@@ -535,7 +553,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
 
           {/* Add Bill Form */}
           <AnimatePresence>
-            {showAddForm && selectedDay && (
+            {showAddForm && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
@@ -545,7 +563,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                 <div ref={formRef} className="bg-[#111111] rounded-[28px] border border-white/[0.08] p-6 shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                   <h4 className="text-[15px] font-bold text-white mb-5 tracking-tight">
-                    Add Bill for Day {selectedDay}
+                    Add New Bill
                   </h4>
 
                   <div className="flex flex-col gap-4">
@@ -556,23 +574,37 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                       onChange={(e) => setNewName(e.target.value)}
                       className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-colors"
                     />
-                    <input
-                      type="number"
-                      placeholder="Amount (PHP)"
-                      value={newAmount}
-                      onChange={(e) => setNewAmount(e.target.value)}
-                      className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-colors"
-                    />
+                    <div className="flex gap-4">
+                      <input
+                        type="number"
+                        placeholder="Amount (PHP)"
+                        value={newAmount}
+                        onChange={(e) => setNewAmount(e.target.value)}
+                        className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-colors"
+                      />
+                      <input
+                        type="number"
+                        min="1"
+                        max="31"
+                        placeholder="Day (1-31)"
+                        value={newDueDay || ''}
+                        onChange={(e) => setNewDueDay(parseInt(e.target.value) || 1)}
+                        className="w-28 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-colors"
+                      />
+                    </div>
 
                     {/* Category selector */}
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {BILL_CATEGORIES.map((cat) => {
-                        const art = getCategoryArt(cat);
-                        const isCatSelected = newCategory === cat;
+                      {categories.map((cat) => {
+                        const art = getCategoryArt(cat.name);
+                        const isCatSelected = newCategoryId === cat.id;
                         return (
                           <button
-                            key={cat}
-                            onClick={() => setNewCategory(cat)}
+                            key={cat.id}
+                            onClick={() => {
+                              setNewCategoryId(cat.id);
+                              setNewCategory(cat.name);
+                            }}
                             className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ${
                               isCatSelected
                                 ? `${art.color} text-black`
@@ -580,10 +612,25 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                             }`}
                           >
                             <art.icon className="w-3.5 h-3.5" />
-                            {cat}
+                            {cat.name}
                           </button>
                         );
                       })}
+                      {/* Fallback Other option if no budget category fits */}
+                      <button
+                        onClick={() => {
+                          setNewCategoryId(null);
+                          setNewCategory("Other");
+                        }}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ${
+                          !newCategoryId && newCategory === "Other"
+                            ? `bg-white/90 text-black`
+                            : "bg-white/[0.04] text-white/50 hover:bg-white/[0.1] border border-white/5"
+                        }`}
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        Other
+                      </button>
                     </div>
 
                     {/* Color selector */}
@@ -648,17 +695,34 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
 
           {/* All Bills Overview */}
           <div className="mb-8 pt-4">
-            <h3 className="text-[11px] font-bold text-white/30 tracking-[0.2em] uppercase mb-4">
-              All Recurring Bills
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[11px] font-bold text-white/30 tracking-[0.2em] uppercase mb-0">
+                All Recurring Bills
+              </h3>
+              <button
+                onClick={() => {
+                  setSelectedDay(null);
+                  setShowAddForm(true);
+                  requestAnimationFrame(() => {
+                    setTimeout(() => {
+                      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                  });
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-white/20 transition-colors border border-white/10"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                New Bill
+              </button>
+            </div>
             <div className="flex flex-col gap-3">
               {allEvents.filter(e => e.isRecurring || e.eventType === 'trip').map((bill) => {
                 const art = getCategoryArt(bill.category);
                 return (
                   <div
                     key={bill.id}
-                    onClick={() => setSelectedDay(bill.dueDay)}
-                    className="relative overflow-hidden flex flex-col justify-between p-4 bg-white/[0.03] rounded-[24px] border border-white/[0.04] cursor-pointer hover:bg-white/[0.06] transition-all active:scale-[0.98] min-h-[110px]"
+                    onClick={() => { if (!bill.isPaid) setSelectedDay(bill.dueDay); }}
+                    className={`relative overflow-hidden flex flex-col justify-between p-4 bg-white/[0.03] rounded-[24px] border border-white/[0.04] transition-all min-h-[110px] ${bill.isPaid ? 'opacity-40 grayscale' : 'cursor-pointer hover:bg-white/[0.06] active:scale-[0.98]'}`}
                   >
                     <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-[40px] opacity-[0.15] pointer-events-none ${art.glow}`} />
                     
@@ -672,10 +736,54 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                           <span className="text-[10px] text-white/40 uppercase tracking-widest mt-0.5">{bill.category}</span>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end">
-                        <span className="text-[13px] font-bold text-white/60">Day {bill.dueDay}</span>
-                        {bill.isRecurring && <span className="text-[8px] text-white/30 uppercase tracking-[0.2em] mt-1">Monthly</span>}
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="flex flex-col items-end">
+                          <span className="text-[13px] font-bold text-white/60">Day {bill.dueDay}</span>
+                          {bill.isRecurring && <span className="text-[8px] text-white/30 uppercase tracking-[0.2em] mt-1">Monthly</span>}
+                        </div>
                       </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 mt-4 relative z-10 w-full mb-1">
+                      {bill.eventType === 'bill' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTogglePaid(bill as Bill);
+                          }}
+                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-widest transition-colors ${bill.isPaid ? 'bg-[#30D158]/20 text-[#30D158] border-[#30D158]/30' : 'bg-white/[0.04] text-white/50 hover:bg-white/[0.1] border-white/5'}`}
+                        >
+                          {bill.isPaid && <Check className="w-3 h-3" />}
+                          {bill.isPaid ? 'Paid' : 'Mark Paid'}
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleReminder(bill.id); }}
+                        className="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center hover:bg-white/[0.1] transition-colors border border-white/5"
+                      >
+                        {bill.reminderEnabled ? (
+                          <Bell className={`w-3.5 h-3.5 text-[#0A84FF]`} />
+                        ) : (
+                          <BellOff className="w-3.5 h-3.5 text-white/30" />
+                        )}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (bill.eventType === 'trip') {
+                            if (bill.tripType === 'scheduled') {
+                              deleteScheduledTrip(bill.id);
+                            } else {
+                              deleteSavedTrip(bill.id);
+                            }
+                          } else {
+                            removeBill(bill.id);
+                          }
+                        }}
+                        className="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center hover:bg-[#FF453A]/20 transition-colors border border-white/5"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-white/30 hover:text-[#FF453A]" />
+                      </button>
                     </div>
 
                     <div className="flex items-end justify-between mt-5 relative z-10">
@@ -683,8 +791,8 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                         <span className="text-[26px] font-black text-white tracking-tighter leading-none">{primarySymbol}{formatCurrency(getPrimaryValue(bill.amount))}</span>
                         <span className="text-[12px] font-bold text-white/40 tracking-tight">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(bill.amount))}</span>
                       </div>
-                      <div className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest bg-white/10 text-white/90 border border-white/5`}>
-                        {bill.eventType === 'trip' ? (bill.tripType === 'scheduled' ? 'Scheduled Trip' : 'Saved Trip') : 'Scheduled'}
+                      <div className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${bill.isPaid ? 'bg-[#30D158]/10 text-[#30D158] border border-[#30D158]/20' : 'bg-white/10 text-white/90 border border-white/5'}`}>
+                        {bill.isPaid ? 'Paid' : (bill.eventType === 'trip' ? (bill.tripType === 'scheduled' ? 'Scheduled Trip' : 'Saved Trip') : 'Scheduled')}
                       </div>
                     </div>
                   </div>
@@ -742,16 +850,16 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
             <p className="text-white/60 text-sm mb-8 leading-relaxed">
               Log {pendingLogBill.currency === 'PHP' ? primarySymbol : secondarySymbol}{pendingLogBill.currency === 'PHP' ? getPrimaryValue(pendingLogBill.amount).toLocaleString() : getSecondaryValue(pendingLogBill.amount).toLocaleString()} to the {pendingLogBill.category} budget in your Spend Jar?
             </p>
-            <div className="flex w-full gap-3">
+            <div className="flex flex-col w-full gap-3">
               <button
-                onClick={declineLogPaidBill}
-                className="flex-1 py-3.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] transition-colors text-white/70 font-semibold"
+                onClick={handleLogAndViewBudget}
+                className="w-full py-3.5 rounded-xl bg-[#30D158] hover:bg-[#30D158]/90 transition-colors text-black font-bold shadow-[0_0_20px_rgba(48,209,88,0.3)]"
               >
-                No, just mark Paid
+                Yes, Log & View Budget
               </button>
               <button
                 onClick={confirmLogPaidBill}
-                className="flex-1 py-3.5 rounded-xl bg-[#30D158] hover:bg-[#30D158]/90 transition-colors text-black font-bold shadow-[0_0_20px_rgba(48,209,88,0.3)]"
+                className="w-full py-3.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] transition-colors text-white/90 font-bold"
               >
                 Yes, Log it
               </button>

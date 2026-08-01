@@ -489,7 +489,12 @@ export default function BudgetPage() {
                                   catSubs.reduce((sum, s) => sum + s.amount, 0);
 
                 const catPercent = catTarget > 0 ? (catSpent / catTarget) * 100 : 0;
-                const catHealth = catPercent >= 90 ? '#FF453A' : catPercent >= 60 ? '#E8A33D' : '#30D158';
+                let catHealth = catPercent >= 90 ? '#FF453A' : catPercent >= 60 ? '#E8A33D' : '#30D158';
+                
+                if (cat.isFixedObligation) {
+                    // For fixed bills, reaching 100% is good (paid), so don't show as negative unless it exceeds 100%
+                    catHealth = catPercent <= 100 ? '#30D158' : '#FF453A';
+                }
                 
                 const statusBadge = computeCategoryStatus(catSpent, catTarget, cat.isFixedObligation, cat.id, bills, displayMonth);
                 const memoryLine = computeCategoryMemory(cat, entries, displayMonth, getPrimaryValue, primarySymbol);
@@ -561,15 +566,7 @@ export default function BudgetPage() {
                                             </div>
                                         </div>
                                         
-                                        {committed > 0 && (
-                                            <div className="flex justify-between items-start text-[10px]">
-                                                <span className="text-white/40 tracking-wide uppercase mt-0.5">Bills</span>
-                                                <div className="flex flex-col items-end">
-                                                    <span className="text-white/70 font-medium">{primarySymbol}{getPrimaryValue(committed).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                                                    <span className="text-white/30 text-[8.5px] font-medium tracking-widest mt-0.5">≈ {secondarySymbol}{getSecondaryValue(committed).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                                                </div>
-                                            </div>
-                                        )}
+
                                         
                                         <div className="flex justify-between items-start text-[10px]">
                                             <span className="text-white/50 tracking-wide uppercase mt-0.5">Left</span>

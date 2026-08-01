@@ -232,9 +232,12 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
                   {/* Day Cells */}
                   {calendarDays.map((day, i) => {
                     const isSelected = day.date === selectedDate.getDate() && day.month === selectedDate.getMonth();
-                    const hasCartify = day.eventsForDay?.some(b => b.category === "Cartify");
-                    const hasRegular = day.eventsForDay?.some(b => b.category !== "Cartify");
-                    const firstRegularBill = day.eventsForDay?.find(b => b.category !== "Cartify");
+                    const unpaidEvents = day.eventsForDay?.filter(b => b.eventType !== 'bill' || !b.isPaid) || [];
+                    const hasUnpaid = unpaidEvents.length > 0;
+                    
+                    const hasCartify = unpaidEvents.some(b => b.category === "Cartify");
+                    const hasRegular = unpaidEvents.some(b => b.category !== "Cartify");
+                    const firstRegularBill = unpaidEvents.find(b => b.category !== "Cartify");
                     const customColor = firstRegularBill?.color;
                     // Derive ring color: custom color first, then category default
                     const CATEGORY_HEX: Record<string, string> = {
@@ -245,7 +248,7 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
                     const ringHex = customColor || (firstRegularBill ? CATEGORY_HEX[firstRegularBill.category] || "#FF9F0A" : undefined);
                     
                     let bgClass = "bg-[#E5E5E5] text-black font-bold shadow-[0_0_30px_rgba(255,255,255,0.15)]";
-                    if (day.hasBill) {
+                    if (hasUnpaid) {
                       if (hasCartify && hasRegular) {
                         bgClass = "bg-[#30D158] text-black font-bold shadow-[0_0_24px_rgba(48,209,88,0.25)]";
                       } else if (hasCartify) {
@@ -278,7 +281,7 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
                           }
                         >
                           {/* Premium warning beam pulse for selected bills */}
-                          {isSelected && day.hasBill && (
+                          {isSelected && hasUnpaid && (
                             <div 
                               className={`absolute inset-0 rounded-full animate-[ping_2.5s_cubic-bezier(0,0,0.2,1)_infinite] opacity-40 pointer-events-none -z-10`} 
                               style={{ backgroundColor: hasCartify ? '#30D158' : (ringHex || '#FF9F0A') }}
@@ -297,11 +300,11 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
                             <span className="text-[15px] relative z-10">{day.date}</span>
                           )}
                           
-                          {/* Dot for bill */}
+                          {/* Dot for bill (grey for paid, colored for unpaid) */}
                           {day.hasBill && !isSelected && (
                             <div 
                               className="w-1 h-1 rounded-full absolute bottom-[3px]"
-                              style={{ backgroundColor: hasCartify ? '#30D158' : (ringHex || '#525252') }}
+                              style={{ backgroundColor: hasUnpaid ? (hasCartify ? '#30D158' : (ringHex || '#FF9F0A')) : '#525252' }}
                             />
                           )}
                         </div>
@@ -342,10 +345,25 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
                       <div className="w-full h-full flex flex-col justify-between">
                         <div className="flex items-start justify-between relative z-10">
                           <span 
-                            className="text-[15px] font-bold leading-tight"
+                            className="text-[15px] font-bold leading-tight flex items-center"
                             style={{ color: selectedBills.length === 1 && selectedBills[0].color ? selectedBills[0].color : '#E5E5E5' }}
                           >
-                            {selectedBills.length > 1 ? `${selectedBills.length} Bills Due` : selectedBills[0].name}
+                            {selectedBills.length === 1 ? (
+                              <>
+                                {selectedBills[0].name}
+                                {selectedBills[0].isPaid && <span className="ml-2 text-[10px] uppercase font-bold text-[#30D158] border border-[#30D158]/30 px-1.5 py-0.5 rounded">Paid</span>}
+                              </>
+                            ) : (
+                              <>
+                                {selectedBills.length} Bills Scheduled
+                                {(() => {
+                                  const paidCount = selectedBills.filter(b => b.eventType === 'bill' && b.isPaid).length;
+                                  if (paidCount === selectedBills.length) return <span className="ml-2 text-[10px] uppercase font-bold text-[#30D158] border border-[#30D158]/30 px-1.5 py-0.5 rounded">All Paid</span>;
+                                  if (paidCount > 0) return <span className="ml-2 text-[10px] uppercase font-bold text-[#FF9F0A] border border-[#FF9F0A]/30 px-1.5 py-0.5 rounded">{paidCount} Paid</span>;
+                                  return null;
+                                })()}
+                              </>
+                            )}
                           </span>
                         </div>
                         <div className="flex items-end justify-between relative z-10 mt-auto">

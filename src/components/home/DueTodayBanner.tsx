@@ -17,7 +17,7 @@ export function DueTodayBanner({ onTap }: DueTodayBannerProps) {
 
   useEffect(() => {
     const today = new Date().getDate();
-    const due = bills.filter(b => b.dueDay === today);
+    const due = bills.filter(b => b.dueDay === today && !b.isPaid);
     setDueBills(due);
   }, [bills]);
 
