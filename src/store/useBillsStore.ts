@@ -10,6 +10,7 @@ export interface Bill {
   category: string;
   isRecurring: boolean;
   reminderEnabled: boolean;
+  isPaid: boolean;
   icon?: string;
   color?: string;
 }
@@ -20,6 +21,7 @@ interface BillsState {
   updateBill: (id: string, updates: Partial<Bill>) => void;
   removeBill: (id: string) => void;
   toggleReminder: (id: string) => void;
+  togglePaid: (id: string) => void;
 }
 
 export const useBillsStore = create<BillsState>()(
@@ -29,7 +31,7 @@ export const useBillsStore = create<BillsState>()(
 
       addBill: (bill) =>
         set((state) => ({
-          bills: [...state.bills, { ...bill, id: crypto.randomUUID() }],
+          bills: [...state.bills, { ...bill, id: crypto.randomUUID(), isPaid: bill.isPaid ?? false }],
         })),
 
       updateBill: (id, updates) =>
@@ -46,6 +48,13 @@ export const useBillsStore = create<BillsState>()(
         set((state) => ({
           bills: state.bills.map((b) =>
             b.id === id ? { ...b, reminderEnabled: !b.reminderEnabled } : b
+          ),
+        })),
+        
+      togglePaid: (id) =>
+        set((state) => ({
+          bills: state.bills.map((b) =>
+            b.id === id ? { ...b, isPaid: !b.isPaid } : b
           ),
         })),
     }),

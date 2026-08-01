@@ -83,7 +83,7 @@ interface BillsCalendarProps {
 }
 
 export function BillsCalendar({ onClose }: BillsCalendarProps) {
-  const { bills, addBill, updateBill, removeBill, toggleReminder } = useBillsStore();
+  const { bills, addBill, updateBill, removeBill, toggleReminder, togglePaid } = useBillsStore();
   const { scheduledTrips, deleteScheduledTrip } = useHouseholdStore();
   const { savedTrips, deleteSavedTrip } = useCartifyStore();
   const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
@@ -195,6 +195,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
       category: newCategory,
       isRecurring: newRecurring,
       reminderEnabled: true,
+      isPaid: false,
       color: newColor || undefined
     });
     setNewName("");
@@ -414,9 +415,21 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                                 <span className="text-[10px] text-white/40 uppercase tracking-widest mt-0.5">{bill.category}</span>
                               </div>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex items-center gap-2">
+                              {bill.eventType === 'bill' && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    togglePaid(bill.id);
+                                  }}
+                                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-widest transition-colors ${bill.isPaid ? 'bg-[#30D158]/20 text-[#30D158] border-[#30D158]/30' : 'bg-white/[0.04] text-white/50 hover:bg-white/[0.1] border-white/5'}`}
+                                >
+                                  {bill.isPaid && <Check className="w-3 h-3" />}
+                                  {bill.isPaid ? 'Paid' : 'Mark Paid'}
+                                </button>
+                              )}
                               <button
-                                onClick={() => toggleReminder(bill.id)}
+                                onClick={(e) => { e.stopPropagation(); toggleReminder(bill.id); }}
                                 className="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center hover:bg-white/[0.1] transition-colors border border-white/5"
                               >
                                 {bill.reminderEnabled ? (
@@ -426,7 +439,8 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                                 )}
                               </button>
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   if (bill.eventType === 'trip') {
                                     if (bill.tripType === 'scheduled') {
                                       deleteScheduledTrip(bill.id);

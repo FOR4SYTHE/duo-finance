@@ -21,6 +21,7 @@ import { CategoryMenuSheet } from "@/components/budget/CategoryMenuSheet";
 import { CardSettingsSheet } from "@/components/budget/CardSettingsSheet";
 import * as budgetMath from "@/utils/budgetMath";
 import * as budgetFilters from "@/utils/budgetFilters";
+import { calculateHouseholdPulse } from "@/utils/budgetPulse";
 import { format, addMonths, subMonths, parseISO } from "date-fns";
 
 const PERIODS: { value: BudgetPeriod; label: string }[] = [
@@ -73,6 +74,8 @@ export default function BudgetPage() {
   const monthEntries = budgetFilters.filterEntriesByMonth(entries, displayMonth);
   const totalSpent = monthEntries.reduce((sum, entry) => sum + entry.amount, 0);
   const { displayTarget, displayAllocated, displayUnallocated } = budgetMath.calculateAllocations(config, categories, totalSpent, displayMonth);
+  
+  const pulse = calculateHouseholdPulse(config, categories, monthEntries, bills, displayMonth);
 
   const handleHeroSave = (amount: number) => {
       const canonical = budgetMath.getCanonicalValue(amount, config.period);
@@ -267,7 +270,7 @@ export default function BudgetPage() {
       <div>
         <div 
           onClick={() => !isPastMonth && setIsHeroModalOpen(true)}
-          className={`w-full rounded-[24px] p-6 mb-8 relative z-20 ${!isPastMonth ? 'cursor-pointer' : ''} overflow-hidden border ${skin.border} group shadow-2xl flex flex-col justify-between aspect-[1.58/1] transition-all duration-500`}
+          className={`w-full rounded-[24px] p-6 mb-8 relative z-20 ${!isPastMonth ? 'cursor-pointer' : ''} overflow-hidden border ${skin.border} group shadow-2xl flex flex-col justify-between transition-all duration-500`}
         style={{
             background: customBg ? 'transparent' : skin.background,
             boxShadow: skin.boxShadow
@@ -317,83 +320,94 @@ export default function BudgetPage() {
             </div>
         </div>
 
-        <div className="flex flex-col relative z-10 w-full mt-auto">
-            <div className={`text-[2.75rem] leading-none ${skin.textColor} flex items-baseline gap-1 font-medium tracking-tight mb-2 drop-shadow-md`}>
-                {displayTarget > 0 ? (
-                    <>
-                        <span className={`text-2xl ${skin.textSecondary} font-normal`}>{primarySymbol}</span>
-                        <span>{getPrimaryValue(displayTarget).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
-                    </>
-                ) : (
-                    <span className={`text-[1.75rem] ${skin.textSecondary} font-medium tracking-tight`}>Set target budget</span>
-                )}
-            </div>
+        <div className="flex flex-col relative z-10 w-full mt-4">
             
-            <div className="flex justify-between items-end w-full">
-                <div className="flex flex-col gap-3">
-                    {displayTarget > 0 && (
-                        <span className={`${skin.textSecondary} font-medium tracking-wide text-sm`}>
-                            ≈ {secondarySymbol}{getSecondaryValue(displayTarget).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+            {/* HOUSEHOLD PULSE UI */}
+            <div className="flex flex-col mb-6">
+                <div className="flex items-center gap-2 mb-2">
+                    {pulse.status !== 'Setup' && pulse.status !== 'Archived' && (
+                        <div className={`w-2 h-2 rounded-full ${
+                            pulse.status === 'Excellent' ? 'bg-[#30D158]' :
+                            pulse.status === 'On Track' ? 'bg-[#30D158]' :
+                            pulse.status === 'Tight' ? 'bg-[#E8A33D]' : 'bg-[#FF453A]'
+                        } shadow-[0_0_8px_currentColor]`} />
+                    )}
+                    <span className={`${skin.textSecondary} text-xs uppercase font-bold tracking-widest`}>
+                        {pulse.status}
+                    </span>
+                    {pulse.status !== 'Setup' && pulse.status !== 'Archived' && pulse.unpaidBillsCount > 0 && (
+                        <span className={`${skin.textTertiary} text-[10px] ml-1 tracking-wider`}>
+                            ({pulse.unpaidBillsCount} unpaid bills)
                         </span>
                     )}
+                </div>
 
-                    {(displayTarget > 0 || displayAllocated > 0) && (
-                        <div className="flex items-center gap-5 mt-2">
+                {pulse.status === 'Setup' ? (
+                    <div className={`text-[1.75rem] leading-tight ${skin.textColor} font-medium tracking-tight drop-shadow-md`}>
+                        Set your budget<br/>to see your Pulse
+                    </div>
+                ) : pulse.status === 'Archived' ? (
+                    <div className={`text-[2rem] leading-none ${skin.textColor} font-medium tracking-tight drop-shadow-md`}>
+                        Archived
+                    </div>
+                ) : (
+                    <div className="flex flex-col">
+                        <span className={`${skin.textSecondary} text-[10px] uppercase font-bold tracking-widest mb-1 opacity-70`}>Safe to Spend Today</span>
+                        <div className={`text-[3.25rem] leading-none ${pulse.safeToSpendToday < 0 ? 'text-[#FF453A]' : skin.textColor} flex items-baseline gap-1 font-medium tracking-tight drop-shadow-md`}>
+                            <span className={`text-2xl ${pulse.safeToSpendToday < 0 ? 'text-[#FF453A]/70' : skin.textSecondary} font-normal`}>{primarySymbol}</span>
+                            <span>{getPrimaryValue(pulse.safeToSpendToday).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                        </div>
+                        <span className={`${skin.textSecondary} font-medium tracking-wide text-sm mt-2 opacity-80`}>
+                            ≈ {secondarySymbol}{getSecondaryValue(pulse.safeToSpendToday).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                        </span>
+                    </div>
+                )}
+            </div>
+
+            <div className="flex justify-between items-end w-full">
+                <div className="flex flex-col gap-3 flex-1">
+                    {/* SECONDARY ROW: Target, Allocated, Spent, Left */}
+                    <div className={`flex flex-col gap-3 p-4 rounded-2xl bg-black/10 border border-white/5`}>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Master Plan</span>
+                            <span className={`${skin.textColor} text-sm font-semibold`}>
+                                {primarySymbol}{getPrimaryValue(displayTarget).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                            </span>
+                            <span className={`${skin.textTertiary} text-[10px]`}>
+                                ≈ {secondarySymbol}{getSecondaryValue(displayTarget).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                            </span>
+                        </div>
+
+                        <div className="flex items-center gap-4">
                             {/* Allocated Column */}
-                            <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-1.5">
-                                    <div className={`w-2 h-2 rounded-full ${displayAllocated > displayTarget ? 'bg-[#FF453A]' : 'bg-white/40'} shrink-0`} />
-                                    <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Allocated</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className={`font-semibold ${displayAllocated > displayTarget ? 'text-[#FF453A]' : skin.textColor} text-[15px]`}>
-                                        {primarySymbol}{getPrimaryValue(displayAllocated).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                    </span>
-                                    <span className={`${skin.textTertiary} text-[9px] font-medium tracking-wider leading-none mt-0.5`}>
-                                        ≈ {secondarySymbol}{getSecondaryValue(displayAllocated).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                    </span>
-                                </div>
+                            <div className="flex flex-col gap-0.5">
+                                <span className={`${skin.textTertiary} text-[9px] uppercase tracking-widest font-bold`}>Allocated</span>
+                                <span className={`font-semibold ${displayAllocated > displayTarget ? 'text-[#FF453A]' : skin.textColor} text-xs`}>
+                                    {primarySymbol}{getPrimaryValue(displayAllocated).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                </span>
                             </div>
 
-                            {/* Divider */}
-                            <div className={`w-[1px] h-7 border-l ${skin.border}`} />
+                            <div className={`w-[1px] h-5 border-l ${skin.border} opacity-50`} />
 
                             {/* Spent Column */}
-                            <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-1.5">
-                                    <div className={`w-2 h-2 rounded-full ${totalSpent > displayTarget ? 'bg-[#FF453A]' : 'bg-[#30D158]'} shrink-0 shadow-[0_0_8px_rgba(48,209,88,0.5)]`} />
-                                    <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Spent</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className={`font-semibold text-[15px] ${totalSpent > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
-                                        {primarySymbol}{getPrimaryValue(totalSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                    </span>
-                                    <span className={`${skin.textTertiary} text-[9px] font-medium tracking-wider leading-none mt-0.5`}>
-                                        ≈ {secondarySymbol}{getSecondaryValue(totalSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                    </span>
-                                </div>
+                            <div className="flex flex-col gap-0.5">
+                                <span className={`${skin.textTertiary} text-[9px] uppercase tracking-widest font-bold`}>Spent</span>
+                                <span className={`font-semibold text-xs ${totalSpent > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
+                                    {primarySymbol}{getPrimaryValue(totalSpent).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                </span>
                             </div>
 
-                            {/* Divider */}
-                            <div className={`w-[1px] h-7 border-l ${skin.border}`} />
+                            <div className={`w-[1px] h-5 border-l ${skin.border} opacity-50`} />
 
                             {/* Left Column */}
-                            <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-1.5">
-                                    <div className="w-2 h-2 rounded-full border border-current opacity-40 shrink-0" style={{ color: skin.textSecondary.split('-')[1] || '#fff' }} />
-                                    <span className={`${skin.textSecondary} text-[10px] uppercase tracking-widest font-bold`}>Left</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className={`font-semibold text-[15px] ${totalSpent > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
-                                        {primarySymbol}{getPrimaryValue(Math.max(0, displayTarget - totalSpent)).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                    </span>
-                                    <span className={`${skin.textTertiary} text-[9px] font-medium tracking-wider leading-none mt-0.5`}>
-                                        ≈ {secondarySymbol}{getSecondaryValue(Math.max(0, displayTarget - totalSpent)).toLocaleString(undefined, {maximumFractionDigits: 0})}
-                                    </span>
-                                </div>
+                            <div className="flex flex-col gap-0.5">
+                                <span className={`${skin.textTertiary} text-[9px] uppercase tracking-widest font-bold`}>Left</span>
+                                <span className={`font-semibold text-xs ${totalSpent > displayTarget ? 'text-[#FF453A]' : skin.textColor}`}>
+                                    {primarySymbol}{getPrimaryValue(Math.max(0, displayTarget - totalSpent)).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                </span>
                             </div>
                         </div>
-                    )}
+                    </div>
                     
                     {/* Overall Progress Bar */}
                     {(displayTarget > 0) && (
@@ -417,7 +431,7 @@ export default function BudgetPage() {
                                 const next = current === 0 ? 20 : current === 20 ? 50 : current === 50 ? 100 : 0;
                                 useBudgetStore.getState().setJarPercentage(next);
                             }}
-                            className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md ${skin.jarBg} transition-colors cursor-pointer mt-1 self-start`}
+                            className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md ${skin.jarBg} transition-colors cursor-pointer mt-3 self-start`}
                         >
                             <span className={`${skin.textSecondary} text-[10px] uppercase tracking-wider font-semibold`}>Spend Jar:</span>
                             <span className={`${skin.textColor} font-medium text-xs`}>
