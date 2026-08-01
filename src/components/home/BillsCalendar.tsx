@@ -219,7 +219,6 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
     return map;
   }, [allEvents]);
 
-  const selectedDayBills = selectedDay ? (eventsByDay[selectedDay] || []).filter((b: any) => !b.isPaid) : [];
 
   const handlePrevMonth = () => {
     if (viewMonth === 0) {
@@ -417,139 +416,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
             </div>
           </div>
 
-          {/* Selected Day Bills or Default Art */}
-          <AnimatePresence mode="wait">
-            {!selectedDay && !showAddForm && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="mb-8 text-center py-10 bg-white/[0.02] rounded-[24px] border border-white/[0.04]"
-              >
-                <img 
-                    src="/mascot/dufi-bills-relaxed.webp" 
-                    alt="No bills" 
-                    className="w-20 h-20 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)] mx-auto mb-3"
-                />
-                <p className="text-sm font-semibold text-white/60">No bills scheduled</p>
-                <p className="text-[11px] text-white/30 mt-1">Select a day to view schedule</p>
-              </motion.div>
-            )}
 
-            {selectedDay && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="mb-8"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs font-bold text-white/50 tracking-widest uppercase">
-                    Schedule for {MONTH_NAMES[viewMonth].slice(0, 3)} {selectedDay}
-                  </h3>
-                </div>
-
-                {selectedDayBills.length > 0 ? (
-                  <div className="flex flex-col gap-3">
-                    {selectedDayBills.map((bill) => {
-                      const art = getCategoryArt(bill.category);
-                      return (
-                        <div
-                          key={bill.id}
-                          className="relative overflow-hidden flex flex-col justify-between p-4.5 bg-white/[0.03] rounded-[24px] border border-white/[0.05] min-h-[110px]"
-                        >
-                          <div className={`absolute -right-8 -top-8 w-32 h-32 rounded-full blur-[40px] opacity-20 pointer-events-none ${art.glow}`} />
-                          
-                          <div className="flex items-start justify-between relative z-10">
-                            <div className="flex items-center gap-3.5">
-                              <div 
-                                className={`w-11 h-11 rounded-full flex items-center justify-center text-black shadow-lg ${!bill.color ? art.color : ''}`}
-                                style={bill.color ? { backgroundColor: bill.color } : undefined}
-                              >
-                                <art.icon className="w-5 h-5" />
-                              </div>
-                              <div className="flex flex-col">
-                                <span 
-                                  className="text-[16px] font-bold tracking-wide"
-                                  style={{ color: bill.color || '#FFFFFF' }}
-                                >
-                                  {bill.name}
-                                </span>
-                                <span className="text-[10px] text-white/40 uppercase tracking-widest mt-0.5">{bill.category}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {bill.eventType === 'bill' && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleTogglePaid(bill as Bill);
-                                  }}
-                                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-widest transition-colors ${bill.isPaid ? 'bg-[#30D158]/20 text-[#30D158] border-[#30D158]/30' : 'bg-white/[0.04] text-white/50 hover:bg-white/[0.1] border-white/5'}`}
-                                >
-                                  {bill.isPaid && <Check className="w-3 h-3" />}
-                                  {bill.isPaid ? 'Paid' : 'Mark Paid'}
-                                </button>
-                              )}
-                              <button
-                                onClick={(e) => { e.stopPropagation(); toggleReminder(bill.id); }}
-                                className="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center hover:bg-white/[0.1] transition-colors border border-white/5"
-                              >
-                                {bill.reminderEnabled ? (
-                                  <Bell className={`w-3.5 h-3.5 text-[#0A84FF]`} />
-                                ) : (
-                                  <BellOff className="w-3.5 h-3.5 text-white/30" />
-                                )}
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (bill.eventType === 'trip') {
-                                    if (bill.tripType === 'scheduled') {
-                                      deleteScheduledTrip(bill.id);
-                                    } else {
-                                      deleteSavedTrip(bill.id);
-                                    }
-                                  } else {
-                                    removeBill(bill.id);
-                                  }
-                                }}
-                                className="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center hover:bg-[#FF453A]/20 transition-colors border border-white/5"
-                              >
-                                <Trash2 className="w-3.5 h-3.5 text-white/30 hover:text-[#FF453A]" />
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="flex items-end justify-between mt-5 relative z-10">
-                            <div className="flex flex-col items-start gap-0.5">
-                              <span className="text-3xl font-black text-white tracking-tighter leading-none">{primarySymbol}{formatCurrency(getPrimaryValue(bill.amount))}</span>
-                              <span className="text-[13px] text-white/50 font-bold tracking-tight">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(bill.amount))}</span>
-                            </div>
-                            {bill.isRecurring && (
-                              <div className="px-3 py-1 rounded-full bg-white/5 text-white/50 text-[9px] font-bold uppercase tracking-widest border border-white/10">
-                                Monthly
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-center py-10 bg-white/[0.02] rounded-[24px] border border-white/[0.04]">
-                    <img 
-                        src="/mascot/dufi-bills-relaxed.webp" 
-                        alt="No bills" 
-                        className="w-20 h-20 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)] mx-auto mb-3"
-                    />
-                    <p className="text-sm font-semibold text-white/60">No bills scheduled</p>
-                    <p className="text-[11px] text-white/30 mt-1">Enjoy your free day</p>
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {/* Add Bill Form */}
           <AnimatePresence>
@@ -693,11 +560,11 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
             )}
           </AnimatePresence>
 
-          {/* All Bills Overview */}
+          {/* Recurring Bills Overview */}
           <div className="mb-8 pt-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[11px] font-bold text-white/30 tracking-[0.2em] uppercase mb-0">
-                All Recurring Bills
+                Recurring Bills
               </h3>
               <button
                 onClick={() => {
@@ -715,24 +582,36 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                 New Bill
               </button>
             </div>
-            <div className="flex flex-col gap-3">
-              {allEvents.filter(e => e.isRecurring || e.eventType === 'trip').map((bill) => {
+            
+            {(() => {
+              const recurringBills = allEvents.filter(e => (e.isRecurring || e.eventType === 'trip') && !e.isPaid);
+              const completedBills = allEvents.filter(e => (e.isRecurring || e.eventType === 'trip') && e.isPaid && e.dueDay === now.getDate());
+              
+              const renderBillCard = (bill: any) => {
                 const art = getCategoryArt(bill.category);
                 return (
                   <div
                     key={bill.id}
                     onClick={() => { if (!bill.isPaid) setSelectedDay(bill.dueDay); }}
-                    className={`relative overflow-hidden flex flex-col justify-between p-4 bg-white/[0.03] rounded-[24px] border border-white/[0.04] transition-all min-h-[110px] ${bill.isPaid ? 'opacity-40 grayscale' : 'cursor-pointer hover:bg-white/[0.06] active:scale-[0.98]'}`}
+                    className={`relative overflow-hidden flex flex-col justify-between p-4 bg-white/[0.03] rounded-[24px] border border-white/[0.04] transition-all min-h-[110px] ${bill.isPaid ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:bg-white/[0.06] active:scale-[0.98]'}`}
                   >
-                    <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-[40px] opacity-[0.15] pointer-events-none ${art.glow}`} />
+                    <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-[40px] opacity-[0.15] pointer-events-none ${art.glow} ${bill.isPaid ? 'grayscale' : ''}`} />
                     
                     <div className="flex items-start justify-between relative z-10">
                       <div className="flex items-center gap-3.5">
-                        <div className={`w-11 h-11 rounded-full flex items-center justify-center ${art.color} text-black shadow-lg`}>
+                        <div 
+                          className={`w-11 h-11 rounded-full flex items-center justify-center text-black shadow-lg ${!bill.color ? art.color : ''} ${bill.isPaid ? 'grayscale' : ''}`}
+                          style={bill.color ? { backgroundColor: bill.color } : undefined}
+                        >
                           <art.icon className="w-5 h-5" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-[15px] font-bold text-white tracking-wide">{bill.name}</span>
+                          <span 
+                            className="text-[15px] font-bold tracking-wide"
+                            style={{ color: bill.color || '#FFFFFF' }}
+                          >
+                            {bill.name}
+                          </span>
                           <span className="text-[10px] text-white/40 uppercase tracking-widest mt-0.5">{bill.category}</span>
                         </div>
                       </div>
@@ -780,7 +659,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                             removeBill(bill.id);
                           }
                         }}
-                        className="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center hover:bg-[#FF453A]/20 transition-colors border border-white/5"
+                        className={`w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center hover:bg-[#FF453A]/20 transition-colors border border-white/5 ${bill.isPaid ? 'pointer-events-auto cursor-pointer' : ''}`}
                       >
                         <Trash2 className="w-3.5 h-3.5 text-white/30 hover:text-[#FF453A]" />
                       </button>
@@ -797,8 +676,27 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                     </div>
                   </div>
                 );
-              })}
-            </div>
+              };
+
+              return (
+                <div className="flex flex-col gap-6">
+                  {recurringBills.length > 0 && (
+                    <div className="flex flex-col gap-3">
+                      {recurringBills.map(renderBillCard)}
+                    </div>
+                  )}
+
+                  {completedBills.length > 0 && (
+                    <div className="flex flex-col gap-3">
+                      <h3 className="text-[11px] font-bold text-white/30 tracking-[0.2em] uppercase mb-1 mt-2">
+                        Completed
+                      </h3>
+                      {completedBills.map(renderBillCard)}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
