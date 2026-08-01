@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { BudgetConfig, BudgetPeriod, BudgetCategory, AppNotification } from '@/types/finance';
+import { BudgetConfig, BudgetPeriod, BudgetCategory, AppNotification, ExpenseEntry } from '@/types/finance';
 
 export interface Goal {
     id: string;
@@ -32,6 +32,7 @@ interface BudgetState {
     updateCategory: (id: string, updates: Partial<BudgetCategory>) => void;
     updateCategoriesTarget: (updates: { id: string, targetAmount: number }[]) => void;
     removeCategory: (id: string) => void;
+    syncSnapshots: (entries: ExpenseEntry[], currentMonth: string) => void;
     
     // Sub-category operations
     updateSubCategory: (categoryId: string, subId: string, amount: number) => void;
@@ -126,6 +127,51 @@ export const useBudgetStore = create<BudgetState>()(
                             }
                         }
                     };
+                }),
+            syncSnapshots: (entries, currentMonth) => 
+                set((state) => {
+                    const newCategories = state.categories.map(cat => {
+                        const newSpendHistory = { ...(cat.spendHistory || {}) };
+                        let hasChanges = false;
+                        
+                        // We need to compute total spent per month in this category
+                        const catEntries = entries.filter(e => e.category === cat.name);
+                        const monthlySums: Record<string, number> = {};
+                        
+                        catEntries.forEach(entry => {
+                            const date = new Date(entry.timestamp);
+                            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                            if (monthKey < currentMonth) {
+                                monthlySums[monthKey] = (monthlySums[monthKey] || 0) + entry.amount;
+                            }
+                        });
+                        
+                        // Populate zero for months where there was a target but no entries
+                        if (cat.targetHistory) {
+                            Object.keys(cat.targetHistory).forEach(m => {
+                                if (m < currentMonth && monthlySums[m] === undefined) {
+                                    monthlySums[m] = 0;
+                                }
+                            });
+                        }
+
+                        // Write to newSpendHistory
+                        Object.entries(monthlySums).forEach(([m, sum]) => {
+                            if (newSpendHistory[m] === undefined) {
+                                newSpendHistory[m] = sum;
+                                hasChanges = true;
+                            }
+                        });
+
+                        if (hasChanges) {
+                            return { ...cat, spendHistory: newSpendHistory };
+                        }
+                        return cat;
+                    });
+                    
+                    // Only update if there are actual changes
+                    const changed = newCategories.some((c, i) => c !== state.categories[i]);
+                    return changed ? { categories: newCategories } : {};
                 }),
             setJarPercentage: (percentage: number) => 
                 set((state) => ({ config: { ...state.config, jarAllowedPercentage: percentage } })),

@@ -33,6 +33,7 @@ export interface BudgetCategory {
     color: string; // e.g., '#30D158'
     targetAmount: number; // Stored natively in canonical Monthly PHP
     targetHistory?: Record<string, number>; // Month key (YYYY-MM) -> target amount
+    spendHistory?: Record<string, number>; // Month key (YYYY-MM) -> actual spent amount (Snapshots)
     subCategories?: BudgetSubCategory[];
 }
 

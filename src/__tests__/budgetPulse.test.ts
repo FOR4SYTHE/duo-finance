@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateHouseholdPulse } from '../utils/budgetPulse';
+import { calculateHouseholdPulse, computeCategoryMemory, computeCategoryStatus } from '../utils/budgetPulse';
 import { BudgetConfig, BudgetCategory, ExpenseEntry } from '../types/finance';
 import { Bill } from '../store/useBillsStore';
 
@@ -173,5 +173,57 @@ describe('Household Pulse Logic', () => {
         );
         // Total days = 29. Feb 15 -> days remaining = 29 - 15 + 1 = 15
         expect(resultLeap.daysRemaining).toBe(15);
+    });
+});
+
+describe('Category Status and Memory Logic', () => {
+    it('computes exact category status boundaries', () => {
+        expect(computeCategoryStatus(900, 1000).label).toBe('Over'); // >= 90%
+        expect(computeCategoryStatus(899, 1000).label).toBe('Tight'); // < 90%, >= 60%
+        expect(computeCategoryStatus(600, 1000).label).toBe('Tight'); // >= 60%
+        expect(computeCategoryStatus(599, 1000).label).toBe('On Track'); // < 60%
+        expect(computeCategoryStatus(0, 1000).label).toBe('On Track');
+        expect(computeCategoryStatus(100, 0).label).toBe('Setup');
+    });
+
+    it('computes category memory averaging the last 3 snapshot months', () => {
+        const cat: BudgetCategory = {
+            id: '1',
+            name: 'Groceries',
+            icon: '',
+            color: '',
+            targetAmount: 20000,
+            spendHistory: {
+                '2026-04': 18000,
+                '2026-05': 21000,
+                '2026-06': 19500,
+                '2026-07': 22000 // should be excluded if activeMonth is 2026-07
+            }
+        };
+
+        const activeMonth = '2026-07';
+        const getPrimary = (v: number) => v;
+        const symbol = '₱';
+
+        const memory = computeCategoryMemory(cat, [], activeMonth, getPrimary, symbol);
+        
+        // Avg of April, May, June = (18000 + 21000 + 19500) / 3 = 58500 / 3 = 19500
+        expect(memory).toBe('Usually ₱19,500 / mo');
+    });
+
+    it('returns null if there is no past spendHistory', () => {
+        const cat: BudgetCategory = {
+            id: '1',
+            name: 'Groceries',
+            icon: '',
+            color: '',
+            targetAmount: 20000,
+            spendHistory: {
+                '2026-08': 18000 // same as or future compared to activeMonth
+            }
+        };
+
+        const memory = computeCategoryMemory(cat, [], '2026-08', (v) => v, '₱');
+        expect(memory).toBeNull();
     });
 });

@@ -21,7 +21,7 @@ import { CategoryMenuSheet } from "@/components/budget/CategoryMenuSheet";
 import { CardSettingsSheet } from "@/components/budget/CardSettingsSheet";
 import * as budgetMath from "@/utils/budgetMath";
 import * as budgetFilters from "@/utils/budgetFilters";
-import { calculateHouseholdPulse } from "@/utils/budgetPulse";
+import { calculateHouseholdPulse, computeCategoryStatus, computeCategoryMemory } from "@/utils/budgetPulse";
 import { format, addMonths, subMonths, parseISO } from "date-fns";
 
 const PERIODS: { value: BudgetPeriod; label: string }[] = [
@@ -41,6 +41,7 @@ export default function BudgetPage() {
   const updateCategory = useBudgetStore((state) => state.updateCategory);
   const _hasHydrated = useBudgetStore((state) => state._hasHydrated);
   const setActiveMonth = useBudgetStore((state) => state.setActiveMonth);
+  const syncSnapshots = useBudgetStore((state) => state.syncSnapshots);
   
   const entries = useSpendStore((state) => state.entries);
   
@@ -64,8 +65,12 @@ export default function BudgetPage() {
   const isPastMonth = displayMonth < currentMonth;
 
   useEffect(() => {
-      if (_hasHydrated && config.activeMonth && config.activeMonth < currentMonth) {
-          setActiveMonth(currentMonth);
+      if (_hasHydrated) {
+          if (config.activeMonth && config.activeMonth < currentMonth) {
+              setActiveMonth(currentMonth);
+          }
+          
+          syncSnapshots(entries, currentMonth);
       }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_hasHydrated, currentMonth]);
@@ -453,7 +458,10 @@ export default function BudgetPage() {
       </div>
 
       {!isPastMonth && (
-        <div>
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4 px-1">
+            <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Planning Studio</h2>
+          </div>
           <SmartTools />
         </div>
       )}
@@ -461,7 +469,7 @@ export default function BudgetPage() {
       {/* Category Bento Grid */}
       <div className="flex flex-col relative z-20 flex-1">
         <div className="flex justify-between items-center mb-4 px-1">
-          <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Target Allocations</h2>
+          <h2 className="text-white/50 text-xs font-semibold tracking-widest uppercase">Household Plan</h2>
         </div>
 
         <div className="grid grid-cols-2 gap-4 pb-6">
@@ -480,6 +488,9 @@ export default function BudgetPage() {
 
                 const catPercent = catTarget > 0 ? (catSpent / catTarget) * 100 : 0;
                 const catHealth = catPercent >= 90 ? '#FF453A' : catPercent >= 60 ? '#E8A33D' : '#30D158';
+                
+                const statusBadge = computeCategoryStatus(catSpent, catTarget);
+                const memoryLine = computeCategoryMemory(cat, entries, displayMonth, getPrimaryValue, primarySymbol);
                 
                 return (
                     <div 
@@ -524,7 +535,14 @@ export default function BudgetPage() {
                             </button>
                         </div>
                         <div className="relative z-10 flex flex-col mt-auto">
-                            <span className="text-white/80 font-medium text-[15px] mb-1.5 tracking-wide">{cat.name}</span>
+                            <div className="flex justify-between items-center mb-1.5">
+                                <span className="text-white/80 font-medium text-[15px] tracking-wide">{cat.name}</span>
+                                {catTarget > 0 && (
+                                    <span className={`text-[9px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded-sm border ${statusBadge.color} ${statusBadge.bg}`}>
+                                        {statusBadge.label}
+                                    </span>
+                                )}
+                            </div>
                             {catTarget > 0 ? (
                                 <div className="flex flex-col">
                                     <div className="flex items-baseline gap-1 mb-0.5">
@@ -574,6 +592,12 @@ export default function BudgetPage() {
                                             }}
                                         />
                                     </div>
+                                    
+                                    {memoryLine && (
+                                        <div className="mt-2 text-white/30 text-[9px] font-medium tracking-wide">
+                                            {memoryLine}
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <span className="text-white/30 text-sm font-medium mt-0.5 tracking-wide">Set amount</span>

@@ -803,7 +803,7 @@ export function SmartTools() {
                 <div className="flex justify-between items-start mb-6 relative z-10">
                     <div className="flex flex-col">
                         <span className="text-white font-medium">Smart Tools</span>
-                        <span className="text-white/50 text-xs tracking-wide">Planning & projections</span>
+                        <span className="text-white/50 text-xs tracking-wide">Insights & calculators</span>
                     </div>
                 </div>
 

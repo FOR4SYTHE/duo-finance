@@ -135,3 +135,33 @@ export function calculateHouseholdPulse(
         daysRemaining
     };
 }
+
+export function computeCategoryStatus(spent: number, target: number): { label: string; color: string; bg: string } {
+    if (target <= 0) return { label: 'Setup', color: 'text-white/50', bg: 'bg-white/10' };
+    
+    const ratio = spent / target;
+    if (ratio >= 0.9) return { label: 'Over', color: 'text-[#FF453A]', bg: 'bg-[#FF453A]/20 border-[#FF453A]/30' };
+    if (ratio >= 0.6) return { label: 'Tight', color: 'text-[#E8A33D]', bg: 'bg-[#E8A33D]/20 border-[#E8A33D]/30' };
+    return { label: 'On Track', color: 'text-[#30D158]', bg: 'bg-[#30D158]/20 border-[#30D158]/30' };
+}
+
+export function computeCategoryMemory(cat: BudgetCategory, allEntries: ExpenseEntry[], activeMonth: string, getPrimaryValue: (val: number) => number, primarySymbol: string): string | null {
+    // Collect historical spent values (from snapshot or compute on the fly if not snapshotted)
+    // We only care about months before activeMonth.
+    // For simplicity, we just look at the last 3 months where spendHistory exists.
+    if (!cat.spendHistory || Object.keys(cat.spendHistory).length === 0) return null;
+    
+    const pastMonths = Object.keys(cat.spendHistory)
+        .filter(m => m < activeMonth)
+        .sort((a, b) => b.localeCompare(a)); // descending
+        
+    if (pastMonths.length === 0) return null;
+    
+    // Take up to 3 most recent past months
+    const recent = pastMonths.slice(0, 3);
+    const sum = recent.reduce((acc, m) => acc + cat.spendHistory![m], 0);
+    const avg = sum / recent.length;
+    
+    const displayAvg = getPrimaryValue(avg).toLocaleString(undefined, {maximumFractionDigits: 0});
+    return `Usually ${primarySymbol}${displayAvg} / mo`;
+}
