@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Trash2, History } from "lucide-react";
+import { X, Trash2, History, CalendarClock } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { BudgetCategory } from "@/types/finance";
 import { useState } from "react";
@@ -23,6 +23,12 @@ export function CategoryMenuSheet({ isOpen, onClose, category, onViewHistory }: 
         removeCategory(category.id);
         setIsConfirming(false);
         onClose();
+    };
+
+    const toggleFixedObligation = () => {
+        useBudgetStore.getState().updateCategory(category.id, {
+            isFixedObligation: !category.isFixedObligation
+        });
     };
 
     return (
@@ -67,9 +73,32 @@ export function CategoryMenuSheet({ isOpen, onClose, category, onViewHistory }: 
                                         View History
                                     </button>
                                 )}
+                                
+                                <button 
+                                    onClick={toggleFixedObligation}
+                                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors border border-white/5 font-medium text-white/80"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <CalendarClock className={`w-5 h-5 ${category.isFixedObligation ? 'text-[#30D158]' : 'text-white/50'}`} />
+                                        <div className="flex flex-col items-start">
+                                            <span>Fixed Recurring Bill</span>
+                                            <span className="text-[10px] text-white/40 font-normal">Track by due date instead of budget ratio</span>
+                                        </div>
+                                    </div>
+                                    <div 
+                                        className={`w-11 h-6 shrink-0 rounded-full transition-colors duration-300 flex items-center p-0.5 shadow-inner ${category.isFixedObligation ? 'bg-[#30D158] justify-end' : 'bg-white/15 justify-start'}`}
+                                    >
+                                        <motion.div 
+                                            layout
+                                            className="w-5 h-5 shrink-0 bg-white rounded-full shadow-sm"
+                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                        />
+                                    </div>
+                                </button>
+
                                 <button 
                                     onClick={() => setIsConfirming(true)}
-                                    className="w-full flex items-center gap-3 p-4 rounded-2xl bg-[#FF453A]/10 text-[#FF453A] hover:bg-[#FF453A]/20 transition-colors border border-[#FF453A]/10 font-medium"
+                                    className="w-full flex items-center gap-3 p-4 rounded-2xl bg-[#FF453A]/10 text-[#FF453A] hover:bg-[#FF453A]/20 transition-colors border border-[#FF453A]/10 font-medium mt-2"
                                 >
                                     <Trash2 className="w-5 h-5" />
                                     Remove Category

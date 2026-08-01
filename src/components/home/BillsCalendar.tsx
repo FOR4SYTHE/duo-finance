@@ -25,6 +25,7 @@ import {
 import { useBillsStore, Bill } from "@/store/useBillsStore";
 import { useHouseholdStore } from "@/store/useHouseholdStore";
 import { useCartifyStore } from "@/store/useCartifyStore";
+import { useSpendStore } from "@/store/useSpendStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { formatCurrency } from "@/lib/format";
 
@@ -93,6 +94,11 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
+  // Bridge States
+  const { addExpense, entries } = useSpendStore();
+  const [pendingLogBill, setPendingLogBill] = useState<Bill | null>(null);
+  const [syncDriftNotice, setSyncDriftNotice] = useState<{ amount: number; name: string } | null>(null);
+
   // Add form state
   const formRef = useRef<HTMLDivElement>(null);
   const [newName, setNewName] = useState("");
@@ -100,6 +106,44 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
   const [newCategory, setNewCategory] = useState("Other");
   const [newRecurring, setNewRecurring] = useState(true);
   const [newColor, setNewColor] = useState<string>("");
+
+  const handleTogglePaid = (bill: Bill) => {
+    if (!bill.isPaid) {
+      // Trying to mark as paid -> Ask for confirmation
+      setPendingLogBill(bill);
+    } else {
+      // Trying to unmark as paid -> Check for drift
+      togglePaid(bill.id);
+      
+      const loggedEntry = entries.find(e => e.sourceBillId === bill.id);
+      if (loggedEntry) {
+        setSyncDriftNotice({ amount: loggedEntry.amount, name: bill.name });
+        setTimeout(() => setSyncDriftNotice(null), 5000);
+      }
+    }
+  };
+
+  const confirmLogPaidBill = () => {
+    if (pendingLogBill) {
+      addExpense(
+        pendingLogBill.amount,
+        pendingLogBill.currency,
+        pendingLogBill.budgetCategoryId ? 'Bills' : pendingLogBill.category, // fallback
+        `Paid: ${pendingLogBill.name}`,
+        undefined, // tripId
+        pendingLogBill.id // sourceBillId
+      );
+      togglePaid(pendingLogBill.id);
+      setPendingLogBill(null);
+    }
+  };
+
+  const declineLogPaidBill = () => {
+    if (pendingLogBill) {
+      togglePaid(pendingLogBill.id);
+      setPendingLogBill(null);
+    }
+  };
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
@@ -212,6 +256,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
     viewYear === now.getFullYear();
 
   return (
+    <>
     <motion.div
       initial={{ opacity: 0, y: "100%" }}
       animate={{ opacity: 1, y: 0 }}
@@ -420,7 +465,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    togglePaid(bill.id);
+                                    handleTogglePaid(bill as Bill);
                                   }}
                                   className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-widest transition-colors ${bill.isPaid ? 'bg-[#30D158]/20 text-[#30D158] border-[#30D158]/30' : 'bg-white/[0.04] text-white/50 hover:bg-white/[0.1] border-white/5'}`}
                                 >
@@ -650,5 +695,71 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
         </div>
       </div>
     </motion.div>
+    
+    {/* Sync Drift Notice Toast */}
+    <AnimatePresence>
+      {syncDriftNotice && (
+        <motion.div
+          initial={{ opacity: 0, y: 50, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="fixed bottom-24 left-4 right-4 z-[200] p-4 rounded-2xl bg-[#FF453A]/20 backdrop-blur-xl border border-[#FF453A]/30 flex gap-3 shadow-2xl"
+        >
+          <div className="w-10 h-10 shrink-0 rounded-full bg-[#FF453A]/20 flex items-center justify-center text-[#FF453A]">
+            <X className="w-5 h-5" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-white font-medium text-sm">Notice: Logged Amount Remains</span>
+            <span className="text-white/70 text-xs mt-0.5 leading-relaxed">
+              {syncDriftNotice.name} was marked unpaid, but {primarySymbol}{getPrimaryValue(syncDriftNotice.amount).toLocaleString()} is still logged in the Jar. Remove it manually if that was a mistake.
+            </span>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    {/* Confirmation Modal */}
+    <AnimatePresence>
+      {pendingLogBill && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setPendingLogBill(null)}
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+          />
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="w-full max-w-sm bg-[#1C1C1E] rounded-[32px] p-6 relative z-10 flex flex-col items-center text-center shadow-2xl border border-white/10"
+          >
+            <div className="w-16 h-16 rounded-full bg-[#30D158]/20 flex items-center justify-center mb-4 text-[#30D158]">
+              <Check className="w-8 h-8" />
+            </div>
+            <h3 className="text-white text-xl font-bold mb-2">Mark as Paid</h3>
+            <p className="text-white/60 text-sm mb-8 leading-relaxed">
+              Log {pendingLogBill.currency === 'PHP' ? primarySymbol : secondarySymbol}{pendingLogBill.currency === 'PHP' ? getPrimaryValue(pendingLogBill.amount).toLocaleString() : getSecondaryValue(pendingLogBill.amount).toLocaleString()} to the {pendingLogBill.category} budget in your Spend Jar?
+            </p>
+            <div className="flex w-full gap-3">
+              <button
+                onClick={declineLogPaidBill}
+                className="flex-1 py-3.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] transition-colors text-white/70 font-semibold"
+              >
+                No, just mark Paid
+              </button>
+              <button
+                onClick={confirmLogPaidBill}
+                className="flex-1 py-3.5 rounded-xl bg-[#30D158] hover:bg-[#30D158]/90 transition-colors text-black font-bold shadow-[0_0_20px_rgba(48,209,88,0.3)]"
+              >
+                Yes, Log it
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+    </>
   );
 }

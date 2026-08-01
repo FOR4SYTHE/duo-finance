@@ -7,6 +7,7 @@ import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { computeCategoryStatus } from "@/utils/budgetPulse";
 import { createPortal } from "react-dom";
 import { format, parse } from "date-fns";
+import { useBillsStore } from "@/store/useBillsStore";
 
 interface CategoryHistorySheetProps {
     isOpen: boolean;
@@ -16,6 +17,7 @@ interface CategoryHistorySheetProps {
 
 export function CategoryHistorySheet({ isOpen, onClose, category }: CategoryHistorySheetProps) {
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
+    const { bills } = useBillsStore();
 
     if (!category || !isOpen) return null;
 
@@ -67,7 +69,7 @@ export function CategoryHistorySheet({ isOpen, onClose, category }: CategoryHist
                             ) : (
                                 historyEntries.map(([monthKey, spent]) => {
                                     const target = category.targetHistory?.[monthKey] ?? category.targetAmount;
-                                    const status = computeCategoryStatus(spent, target);
+                                    const status = computeCategoryStatus(spent, target, category.isFixedObligation, category.id, bills, monthKey);
                                     
                                     const diff = spent - target;
                                     const isOver = diff > 0;

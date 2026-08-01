@@ -491,7 +491,7 @@ export default function BudgetPage() {
                 const catPercent = catTarget > 0 ? (catSpent / catTarget) * 100 : 0;
                 const catHealth = catPercent >= 90 ? '#FF453A' : catPercent >= 60 ? '#E8A33D' : '#30D158';
                 
-                const statusBadge = computeCategoryStatus(catSpent, catTarget);
+                const statusBadge = computeCategoryStatus(catSpent, catTarget, cat.isFixedObligation, cat.id, bills, displayMonth);
                 const memoryLine = computeCategoryMemory(cat, entries, displayMonth, getPrimaryValue, primarySymbol);
                 
                 return (
@@ -671,7 +671,7 @@ export default function BudgetPage() {
       <CategoryMenuSheet 
         isOpen={!!menuCategory}
         onClose={() => setMenuCategory(null)}
-        category={menuCategory}
+        category={categories.find(c => c.id === menuCategory?.id) || null}
         onViewHistory={() => {
           if (menuCategory) setHistoryCategory(menuCategory);
         }}

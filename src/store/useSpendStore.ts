@@ -4,7 +4,7 @@ import { ExpenseEntry } from '@/types/finance';
 
 interface SpendState {
     entries: ExpenseEntry[];
-    addExpense: (amount: number, currency: 'PHP' | 'ZAR', category?: string, note?: string, tripId?: string) => void;
+    addExpense: (amount: number, currency: 'PHP' | 'ZAR', category?: string, note?: string, tripId?: string, sourceBillId?: string) => void;
     removeExpense: (id: string) => void;
     clearEntries: () => void;
     injectMockEntries: (entries: ExpenseEntry[]) => void;
@@ -15,7 +15,7 @@ export const useSpendStore = create<SpendState>()(
         (set) => ({
             entries: [],
             
-            addExpense: (amount, currency, category, note, tripId) => set((state) => {
+            addExpense: (amount, currency, category, note, tripId, sourceBillId) => set((state) => {
                 const newEntry: ExpenseEntry = {
                     id: crypto.randomUUID(),
                     amount,
@@ -23,6 +23,7 @@ export const useSpendStore = create<SpendState>()(
                     category,
                     note,
                     trip_id: tripId,
+                    sourceBillId: sourceBillId,
                     timestamp: Date.now()
                 };
                 return { entries: [newEntry, ...state.entries] };

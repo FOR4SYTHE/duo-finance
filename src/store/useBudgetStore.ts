@@ -58,10 +58,10 @@ interface BudgetState {
 }
 
 const DEFAULT_CATEGORIES: BudgetCategory[] = [
-    { id: '1', name: 'Rent', icon: 'Home', color: '#30D158', targetAmount: 0 },
-    { id: '2', name: 'Groceries', icon: 'ShoppingBag', color: '#E8A33D', targetAmount: 0 },
+    { id: '1', name: 'Rent', icon: 'Home', color: '#30D158', targetAmount: 0, isFixedObligation: true },
+    { id: '2', name: 'Groceries', icon: 'ShoppingBag', color: '#E8A33D', targetAmount: 0, isFixedObligation: false },
     { 
-        id: '3', name: 'Utilities', icon: 'Zap', color: '#0A84FF', targetAmount: 0,
+        id: '3', name: 'Utilities', icon: 'Zap', color: '#0A84FF', targetAmount: 0, isFixedObligation: false,
         subCategories: [
             { id: 'util-1', name: 'Electricity', amount: 0 },
             { id: 'util-2', name: 'Water', amount: 0 },
@@ -70,7 +70,7 @@ const DEFAULT_CATEGORIES: BudgetCategory[] = [
         ]
     },
     { 
-        id: '4', name: 'Bills', icon: 'CreditCard', color: '#FF453A', targetAmount: 0,
+        id: '4', name: 'Bills', icon: 'CreditCard', color: '#FF453A', targetAmount: 0, isFixedObligation: true,
         subCategories: [
             { id: 'bill-1', name: 'Credit card', amount: 0 },
             { id: 'bill-2', name: 'Subscriptions', amount: 0 },
@@ -80,7 +80,7 @@ const DEFAULT_CATEGORIES: BudgetCategory[] = [
         ]
     },
     { 
-        id: '5', name: 'Child Care', icon: 'GraduationCap', color: '#BF5AF2', targetAmount: 0,
+        id: '5', name: 'Child Care', icon: 'GraduationCap', color: '#BF5AF2', targetAmount: 0, isFixedObligation: false,
         subCategories: [
             { id: 'child-1', name: 'School Supplies', amount: 0 },
             { id: 'child-2', name: 'Uniforms', amount: 0 },
