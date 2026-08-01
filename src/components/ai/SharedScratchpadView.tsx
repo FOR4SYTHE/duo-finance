@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { Bold, Italic, List, ListOrdered, Underline, Eraser } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered, Underline, Eraser, ArrowLeft } from 'lucide-react';
 import { usePluginsStore } from '@/store/usePluginsStore';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
@@ -31,7 +31,13 @@ export function SharedScratchpadView() {
         <div className="flex flex-col h-full bg-[#050505] relative w-full items-center">
             {/* Header */}
             <div className="w-full max-w-3xl px-6 py-6 flex items-center justify-between border-b border-white/[0.05] shrink-0">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
+                    <button 
+                        onClick={() => setActiveTab('plugins')}
+                        className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors"
+                    >
+                        <ArrowLeft className="w-5 h-5 text-white/70" />
+                    </button>
                     <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
                         <span className="text-emerald-400 text-xl">📝</span>
                     </div>
