@@ -110,7 +110,7 @@ export function QuickLogModal({ isOpen, onClose, onConfirm }: QuickLogModalProps
                         />
 
                         {/* Category Picker */}
-                        <div className="w-full overflow-x-auto no-scrollbar mb-6 flex gap-2 pb-2">
+                        <div className="w-full flex flex-wrap justify-center gap-2 mb-6">
                             <button
                                 onClick={() => setSelectedCategory("Other")}
                                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs whitespace-nowrap transition-colors shrink-0 ${

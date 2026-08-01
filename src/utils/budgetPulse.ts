@@ -65,9 +65,9 @@ export function calculateHouseholdPulse(
     monthEntries.forEach(entry => {
         if (entry.category && categoryNames.has(entry.category.toLowerCase())) {
             totalCategorySpent += entry.amount;
-        } else {
-            spendJarSpent += entry.amount;
         }
+        // Spend Jar total aggregates the entire ledger against the entire period budget
+        spendJarSpent += entry.amount;
     });
 
     // 3. Spend Jar Unallocated Pool

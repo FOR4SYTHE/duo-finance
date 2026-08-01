@@ -64,20 +64,26 @@ export default function SpendJarPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_hasHydrated, currentMonth]);
 
-  // Calculate totals based on allowed percentage of UNALLOCATED budget
+  // The Jar aggregates the ENTIRE ledger against the ENTIRE period budget
+  const currentMonthEntries = filterEntriesByMonth(entries, displayMonth);
+  const recentEntries = currentMonthEntries;
+  
+  const totalSpent = currentMonthEntries.reduce((sum, entry) => sum + entry.amount, 0);
+  const allowedSpend = config.targetAmount;
+  
   const totalAllocated = categories.reduce((sum, cat) => sum + (cat.targetAmount || 0), 0);
   const unallocatedAmount = Math.max(0, config.targetAmount - totalAllocated);
-  const currentMonthEntries = filterEntriesByMonth(entries, displayMonth);
+  const extraDiscretionaryAllowance = unallocatedAmount * ((config.jarAllowedPercentage || 20) / 100);
   
-  // Filter out any entries that perfectly match a defined Budget Category
-  const unallocatedEntries = currentMonthEntries.filter(entry => {
-      if (!entry.category) return true; // Uncategorized = Spend Jar
-      const isAllocated = categories.some(c => c.name.toLowerCase() === entry.category?.toLowerCase());
-      return !isAllocated;
-  });
+  // Extra Available tracks ONLY uncategorized ("Others"-tagged) entries
+  const uncategorizedSpent = currentMonthEntries
+    .filter(entry => !entry.category || !categories.some(c => c.name.toLowerCase() === entry.category?.toLowerCase()))
+    .reduce((sum, entry) => sum + entry.amount, 0);
+    
+  const extraDiscretionaryPercentage = extraDiscretionaryAllowance > 0 
+    ? Math.min((uncategorizedSpent / extraDiscretionaryAllowance) * 100, 100) 
+    : 0;
 
-  const totalSpent = unallocatedEntries.reduce((sum, entry) => sum + entry.amount, 0);
-  const allowedSpend = unallocatedAmount * ((config.jarAllowedPercentage || 20) / 100);
   const isBudgetSet = config.targetAmount > 0;
   
   const remainingAllowed = isBudgetSet ? allowedSpend - totalSpent : 0;
@@ -128,7 +134,7 @@ export default function SpendJarPage() {
   // Compute cumulative color for logs
   // Entries are newest first, so we reverse to process oldest to newest, then reverse back
   let runningTotal = 0;
-  const logsWithColor = [...unallocatedEntries].reverse().map(entry => {
+  const logsWithColor = [...recentEntries].reverse().map(entry => {
       runningTotal += entry.amount;
       const perc = (runningTotal / allowedSpend) * 100;
       let colorClass = "text-[#30D158]"; // Green
@@ -194,7 +200,7 @@ export default function SpendJarPage() {
       />
 
       <div 
-        className="relative flex flex-col w-full min-h-full"
+        className="relative flex flex-col w-full"
       >
 
       {/* Header (Scrolls naturally) */}
@@ -228,7 +234,7 @@ export default function SpendJarPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 relative z-10 pt-10 pb-32">
+      <div className="relative z-10 pt-10 pb-32 flex flex-col w-full">
         
         {/* Massive Arch & Mascot Section */}
         <div className="relative w-full flex flex-col items-center justify-center shrink-0">
@@ -298,8 +304,29 @@ export default function SpendJarPage() {
             </span>
           </div>
           <span className="text-white/30 font-medium tracking-widest text-xs mt-3">
-            ≈ {secondarySymbol}{getSecondaryValue(totalSpent).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+            ≈ {secondarySymbol}{getSecondaryValue(totalSpent).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
           </span>
+          
+          {extraDiscretionaryAllowance > 0 && (
+            <div className="mt-4 flex flex-col items-center gap-2">
+                <div className="px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 flex items-center gap-2 shadow-sm">
+                  <span className="text-white/40 text-[9px] uppercase tracking-widest font-bold">Extra Available:</span>
+                  <span className="text-white/80 text-xs font-semibold tracking-wide">
+                      {primarySymbol}{getPrimaryValue(Math.max(0, extraDiscretionaryAllowance - uncategorizedSpent)).toLocaleString()} left
+                  </span>
+                </div>
+                <div className="w-[120px] h-[3px] bg-white/10 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full rounded-full transition-all duration-700 ease-out"
+                      style={{ 
+                          width: `${extraDiscretionaryPercentage}%`,
+                          backgroundColor: extraDiscretionaryPercentage >= 90 ? '#FF453A' : extraDiscretionaryPercentage >= 75 ? '#E8A33D' : '#30D158'
+                      }}
+                    />
+                </div>
+            </div>
+          )}
+        </div>
           
           {/* Subtle Status Pill */}
           {totalSpent > 0 && (
@@ -308,7 +335,7 @@ export default function SpendJarPage() {
               style={{ backgroundColor: `${ringColor}15`, borderColor: `${ringColor}30` }}
             >
               <span className="text-[10px] uppercase tracking-[0.15em] font-bold" style={{ color: ringColor, textShadow: `0 0 16px ${ringColor}60` }}>
-                {percentage.toFixed(0)}% OF ALLOWED
+                {percentage.toFixed(0)}% OF BUDGET
               </span>
             </div>
           )}
@@ -383,7 +410,7 @@ export default function SpendJarPage() {
         {/* Premium Solid Recent Entries Feed */}
         <div className="w-[85%] mx-auto mt-12 flex flex-col gap-3 relative z-20">
           <div className="flex justify-between items-center mb-3 px-1">
-            <h2 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase">Recent Drops ({unallocatedEntries.length})</h2>
+            <h2 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase">Recent Drops ({recentEntries.length})</h2>
             <button 
                 onClick={() => clearEntries()} 
                 disabled={isPastMonth}
@@ -400,7 +427,14 @@ export default function SpendJarPage() {
                   <PiggyBank className={`w-5 h-5 ${entry.colorClass}`} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-white/90 font-medium tracking-wide mb-1 text-sm">{entry.note || "Quick Log"}</span>
+                  <div className="flex items-center gap-2 mb-1">
+                      <span className="text-white/90 font-medium tracking-wide text-sm">{entry.note || "Quick Log"}</span>
+                      {entry.category && (
+                          <span className="px-1.5 py-0.5 rounded-sm bg-white/10 text-white/50 text-[8px] uppercase tracking-widest font-bold border border-white/5">
+                              {entry.category}
+                          </span>
+                      )}
+                  </div>
                   <span className="text-white/40 text-[10px] tracking-[0.1em] font-mono">
                     {new Date(entry.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                   </span>
@@ -413,7 +447,7 @@ export default function SpendJarPage() {
             </div>
           ))}
 
-          {unallocatedEntries.length === 0 && (
+          {recentEntries.length === 0 && (
             <div className="text-center py-16 opacity-30 flex flex-col items-center">
               <div className="w-16 h-16 rounded-full border border-dashed border-white/20 mb-4 flex items-center justify-center">
                 <PiggyBank className="w-6 h-6 text-white/50" />
@@ -424,6 +458,9 @@ export default function SpendJarPage() {
         </div>
 
       </div>
+      
+      {/* Massive spacer to guarantee scroll clearance over the bottom nav */}
+      <div className="h-40 shrink-0 pointer-events-none" />
 
       <QuickLogModal 
         isOpen={isLogModalOpen}
@@ -448,7 +485,6 @@ export default function SpendJarPage() {
         type={animationType}
         onComplete={() => setAnimationType(null)}
       />
-      </div>
     </>
   );
 }
