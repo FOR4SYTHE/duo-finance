@@ -14,7 +14,7 @@ import { JarLockedModal } from "@/components/jar/JarLockedModal";
 import { JarSettingsModal } from "@/components/jar/JarSettingsModal";
 import { LogAnimationOverlay } from "@/components/jar/LogAnimationOverlay";
 import { AnimatePresence } from "framer-motion";
-import { filterEntriesByMonth } from "@/utils/budgetFilters";
+import { filterEntriesByMonth, getEffectiveCurrentMonth } from "@/utils/budgetFilters";
 
 export default function SpendJarPage() {
   const router = useRouter();
@@ -53,7 +53,7 @@ export default function SpendJarPage() {
     }
   }, [entries.length]);
 
-  const currentMonth = budgetFilters.getEffectiveCurrentMonth();
+  const currentMonth = getEffectiveCurrentMonth();
   const displayMonth = config.activeMonth || currentMonth;
   const isPastMonth = displayMonth < currentMonth;
 
