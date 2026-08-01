@@ -1,74 +1,106 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createClient } from "@/utils/supabase/client";
 
 export type AuthUser = {
   id: string;
   email: string;
   name: string;
   avatar?: string;
+  household_id?: string | null;
 };
 
 type AuthState = {
   isAuthenticated: boolean;
+  isInitializing: boolean;
   user: AuthUser | null;
   householdId: string | null;
   partner: AuthUser | null;
   
   // Actions
-  login: (email: string) => void;
-  logout: () => void;
-  joinHousehold: (inviteCode: string) => void;
+  initialize: () => Promise<void>;
+  logout: () => Promise<void>;
+  joinHousehold: (code: string) => void;
   createHousehold: () => void;
   leaveHousehold: () => void;
   toggleMockPartner: () => void;
   updateUser: (data: Partial<AuthUser>) => void;
 };
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      isAuthenticated: false,
-      user: null,
-      householdId: null,
-      partner: { id: "partner-123", email: "jon@example.com", name: "Jon" },
+export const useAuthStore = create<AuthState>((set, get) => ({
+  isAuthenticated: false,
+  isInitializing: true,
+  user: null,
+  householdId: null,
+  partner: null,
 
-      login: (email: string) => 
-        set({ 
-          isAuthenticated: true, 
-          user: { 
-            id: crypto.randomUUID(), 
-            email, 
-            name: email.split('@')[0] 
-          } 
-        }),
-        
-      logout: () => 
-        set({ 
-          isAuthenticated: false, 
-          user: null, 
-          householdId: null,
-          partner: null
-        }),
-        
-      joinHousehold: (inviteCode: string) => 
-        set({ householdId: `household-${inviteCode}`, partner: { id: "partner-123", email: "jon@example.com", name: "Jon" } }),
-        
-      createHousehold: () => 
-        set({ householdId: `household-${crypto.randomUUID().slice(0, 8)}`, partner: null }),
-        
-      leaveHousehold: () => 
-        set({ householdId: null, partner: null }),
-        
-      toggleMockPartner: () => set((state) => ({
-        partner: state.partner ? null : { id: "partner-123", email: "jon@example.com", name: "Jon" }
-      })),
-      
-      updateUser: (data) => set((state) => ({
-        user: state.user ? { ...state.user, ...data } : null
-      }))
-    }),
-    {
-      name: "duo-auth-storage",
+  initialize: async () => {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      set({ isAuthenticated: false, isInitializing: false, user: null, householdId: null, partner: null });
+      return;
     }
-  )
-);
+
+    const { data: currentProfile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+    
+    if (!currentProfile) {
+      set({ isAuthenticated: false, isInitializing: false });
+      return;
+    }
+
+    const authUser: AuthUser = {
+      id: currentProfile.id,
+      email: session.user.email || '',
+      name: currentProfile.display_name,
+      avatar: currentProfile.avatar_url,
+      household_id: currentProfile.household_id
+    };
+
+    let partner: AuthUser | null = null;
+    if (currentProfile.household_id) {
+      const { data: partners } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('household_id', currentProfile.household_id)
+        .neq('id', currentProfile.id)
+        .limit(1);
+
+      if (partners && partners.length > 0) {
+        partner = {
+          id: partners[0].id,
+          email: '', // Not strictly needed for partner
+          name: partners[0].display_name,
+          avatar: partners[0].avatar_url,
+          household_id: partners[0].household_id
+        };
+      }
+    }
+
+    set({
+      isAuthenticated: true,
+      isInitializing: false,
+      user: authUser,
+      householdId: currentProfile.household_id,
+      partner
+    });
+  },
+
+  logout: async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    set({ 
+      isAuthenticated: false, 
+      user: null, 
+      householdId: null,
+      partner: null
+    });
+  },
+
+  // Stub legacy actions to prevent crashing if called elsewhere
+  joinHousehold: () => {},
+  createHousehold: () => {},
+  leaveHousehold: () => {},
+  toggleMockPartner: () => {},
+  updateUser: () => {}
+}));

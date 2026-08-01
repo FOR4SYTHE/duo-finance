@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { WelcomeShader } from "@/components/auth/WelcomeShader";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/useAuthStore";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const supabase = createClient();
   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -17,11 +17,13 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [authMode, setAuthMode] = useState<"password" | "magic_link" | "magic_link_sent">("password");
   const [otpCode, setOtpCode] = useState("");
 
   const handleInitiateMagicLink = () => {
+    setErrorMsg(null);
     if (email) {
       handleSendMagicLink();
     } else {
@@ -29,37 +31,78 @@ export default function SignupPage() {
     }
   };
 
-  const handleSendMagicLink = (e?: React.FormEvent) => {
+  const handleSendMagicLink = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!email) return;
+    setErrorMsg(null);
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setAuthMode("magic_link_sent");
-    }, 600);
+    
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    setIsLoading(false);
+    
+    if (error) {
+      setErrorMsg(error.message);
+      return;
+    }
+    setAuthMode("magic_link_sent");
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otpCode.length < 6) return;
+    setErrorMsg(null);
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    login(email);
+    
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otpCode,
+      type: 'email'
+    });
+    
     setIsLoading(false);
+    if (error) {
+      setErrorMsg(error.message);
+      return;
+    }
     router.push("/setup");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || password !== confirmPassword) return;
+    if (!email || !password || password !== confirmPassword) {
+      if (password !== confirmPassword) setErrorMsg("Passwords do not match");
+      return;
+    }
     
+    setErrorMsg(null);
     setIsLoading(true);
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    // For now we just use the login function to mock auth
-    login(email);
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: name,
+        }
+      }
+    });
+
     setIsLoading(false);
+    
+    if (error) {
+      setErrorMsg(error.message);
+      return;
+    }
     router.push("/setup");
+  };
+
+  const handleGoogleAuth = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/setup`
+      }
+    });
   };
 
   return (
@@ -111,6 +154,20 @@ export default function SignupPage() {
               ? "Sign up without a password"
               : "Create your shared space"}
         </motion.p>
+
+        <AnimatePresence>
+          {errorMsg && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="w-full max-w-[380px] bg-red-500/10 border border-red-500/20 text-red-400 text-[14px] rounded-[16px] p-3 mb-4 flex items-center justify-center gap-2"
+            >
+              <AlertCircle className="w-4 h-4" />
+              <span>{errorMsg}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* The Auth Card */}
         <motion.div 
@@ -284,7 +341,7 @@ export default function SignupPage() {
               {/* Google Button */}
               <button
                 type="button"
-                onClick={() => { login(email || "google@mock.com"); router.push("/setup"); }}
+                onClick={handleGoogleAuth}
                 className="w-full h-[48px] sm:h-[52px] bg-white/[0.03] border border-white/10 text-[#e4e2e4] rounded-[14px] sm:rounded-[16px] font-medium text-[15px] sm:text-[16px] flex items-center justify-center gap-3 hover:bg-white/[0.06] transition-all active:scale-[0.98]"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

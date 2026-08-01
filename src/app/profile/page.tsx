@@ -6,20 +6,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { ThinkingOrb } from "thinking-orbs";
 import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, Sparkles, AlertTriangle } from "lucide-react";
-import { useAuthStore } from "@/store/useAuthStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
+import { createClient } from "@/utils/supabase/client";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const { user, partner, householdId, logout, toggleMockPartner, joinHousehold, updateUser } = useAuthStore();
   const { primaryCurrency, setPrimaryCurrency, exchangeRate } = useCurrencyStore();
   const { primarySymbol, secondarySymbol } = useDualCurrency();
   const [showSignOutPrompt, setShowSignOutPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const supabase = createClient();
+  const [profile, setProfile] = useState<any>(null);
+  const [partnerProfile, setPartnerProfile] = useState<any>(null);
+  const [household, setHousehold] = useState<any>(null);
 
   const [joinStep, setJoinStep] = useState<'idle' | 'input' | 'verifying' | 'matched' | 'welcome'>('idle');
   const [isEditingAvatar, setIsEditingAvatar] = useState(false);
@@ -47,12 +51,32 @@ export default function ProfilePage() {
 
   useEffect(() => {
     setMounted(true);
-    if (user?.avatar) {
-      setProfileImage(user.avatar);
+    async function loadData() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: currentProfile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      if (currentProfile) {
+        setProfile({ ...currentProfile, email: user.email });
+        if (currentProfile.avatar_url) setProfileImage(currentProfile.avatar_url);
+        
+        if (currentProfile.household_id) {
+          const { data: h } = await supabase.from('households').select('*').eq('id', currentProfile.household_id).single();
+          if (h) setHousehold(h);
+          
+          const { data: partners } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('household_id', currentProfile.household_id)
+            .neq('id', currentProfile.id)
+            .limit(1);
+          if (partners && partners.length > 0) setPartnerProfile(partners[0]);
+        }
+      }
     }
-  }, [user?.avatar]);
+    loadData();
+  }, [supabase]);
 
-  const mockInviteCode = householdId ? householdId.split('-')[1]?.toUpperCase() || "8K9P2X" : "8K9P2X";
+  const mockInviteCode = household?.invite_code || "8K9P2X";
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(mockInviteCode);
@@ -154,12 +178,12 @@ export default function ProfilePage() {
                     style={{ transform: `scale(${imageZoom}) translate(${imagePan.x / imageZoom}px, ${imagePan.y / imageZoom}px)` }}
                   />
                 ) : (
-                  <span className="text-white text-[34px] font-medium tracking-tight drop-shadow-md group-hover:scale-110 transition-transform">{user?.name?.[0]?.toUpperCase() || 'U'}</span>
+                  <span className="text-white text-[34px] font-medium tracking-tight drop-shadow-md group-hover:scale-110 transition-transform">{profile?.display_name?.[0]?.toUpperCase() || 'U'}</span>
                 )}
                 {!isEditingAvatar && <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />}
               </div>
               
-              {partner && !isEditingAvatar && (
+              {partnerProfile && !isEditingAvatar && (
                 <motion.div 
                   className="absolute -top-1 -right-2 z-20 pointer-events-none"
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -168,10 +192,10 @@ export default function ProfilePage() {
                 >
                   <div className="relative">
                     <div className="w-[42px] h-[42px] rounded-full border-[2.5px] border-[#0A0A0C] shadow-[0_8px_16px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden z-10 relative bg-gradient-to-b from-[#1C2C24] to-[#0A1A12]">
-                       {partner?.avatar ? (
-                         <img src={partner.avatar} className="w-full h-full object-cover" />
+                       {partnerProfile?.avatar_url ? (
+                         <img src={partnerProfile.avatar_url} className="w-full h-full object-cover" />
                        ) : (
-                         <span className="text-emerald-400 font-bold text-[16px] select-none">{partner?.name?.[0]?.toUpperCase() || 'P'}</span>
+                         <span className="text-emerald-400 font-bold text-[16px] select-none">{partnerProfile?.display_name?.[0]?.toUpperCase() || 'P'}</span>
                        )}
                     </div>
                     {/* Static positioned dots — no infinite Framer Motion floats */}
@@ -212,7 +236,7 @@ export default function ProfilePage() {
                   <button 
                     onClick={() => {
                       setIsEditingAvatar(false);
-                      if (profileImage) updateUser({ avatar: profileImage });
+                      if (profileImage) supabase.from('profiles').update({ avatar_url: profileImage }).eq('id', profile?.id);
                     }} 
                     className="w-full py-2 bg-white text-black rounded-xl text-[13px] font-bold hover:bg-white/90 active:scale-95 transition-all"
                   >
@@ -224,11 +248,11 @@ export default function ProfilePage() {
           </div>
 
           <h2 className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1">
-            {user?.name || 'You'} {partner ? `& ${partner.name}` : ''}
+            {profile?.display_name || 'You'} {partnerProfile ? `& ${partnerProfile.display_name}` : ''}
           </h2>
-          <p className="text-[14px] text-white/50 mb-7 font-medium">{user?.email || 'user@example.com'}</p>
+          <p className="text-[14px] text-white/50 mb-7 font-medium">{profile?.email || 'user@example.com'}</p>
           
-          {partner ? (
+          {partnerProfile ? (
             <div className="flex flex-col items-center gap-4">
               <div className="px-4 py-2 bg-[#0A0A0C] border border-[#30D158]/20 rounded-full flex items-center gap-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.5)]">
                 <div className="relative flex items-center justify-center">
@@ -444,7 +468,7 @@ export default function ProfilePage() {
               </div>
               <div className="flex flex-col relative z-10">
                 <h4 className="text-white font-medium text-[16px] mb-0.5 tracking-tight">Shared Privacy</h4>
-                <p className="text-white/40 text-[12px] leading-relaxed">Personal budgets remain completely private while household totals combine.</p>
+                <p className="text-white/40 text-[12px] leading-relaxed">Both partners share full visibility of all household totals and logged expenses.</p>
               </div>
             </div>
           </div>
@@ -536,15 +560,7 @@ export default function ProfilePage() {
           </div>
         </motion.div>
 
-        {/* Mock Toggle for Demo - Placed subtly at the bottom */}
-        <div className="flex justify-center pb-8 opacity-50 hover:opacity-100 transition-opacity">
-          <button 
-            onClick={toggleMockPartner} 
-            className="py-3 px-6 bg-transparent border-[0.5px] border-white/10 rounded-full text-white/40 text-[9px] uppercase tracking-[0.2em] font-bold hover:bg-white/5 hover:text-white/70 transition-colors"
-          >
-            Toggle Partner UI (Dev)
-          </button>
-        </div>
+
 
       </div>
       
@@ -703,8 +719,8 @@ export default function ProfilePage() {
                   Cancel
                 </button>
                 <button 
-                  onClick={() => {
-                    logout();
+                  onClick={async () => {
+                    await supabase.auth.signOut();
                     router.push('/welcome');
                   }}
                   className="flex-1 py-4 bg-[#FF453A] hover:bg-[#FF453A]/90 rounded-2xl text-white font-semibold shadow-[0_4px_12px_rgba(255,69,58,0.3)] transition-colors active:scale-[0.98]"

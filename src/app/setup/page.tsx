@@ -2,39 +2,77 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, ArrowRight, CheckCircle2, Loader2, Link2 } from "lucide-react";
-import { useAuthStore } from "@/store/useAuthStore";
+import { Users, ArrowRight, CheckCircle2, Loader2, Link2, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { WelcomeShader } from "@/components/auth/WelcomeShader";
 import { BorderBeam } from "border-beam";
 import { ThinkingOrb } from "thinking-orbs";
+import { createClient } from "@/utils/supabase/client";
 
 export default function SetupPage() {
   const router = useRouter();
-  const { user, partner, createHousehold, joinHousehold, householdId } = useAuthStore();
+  const supabase = createClient();
   
+  const [profile, setProfile] = useState<any>(null);
+  const [partnerProfile, setPartnerProfile] = useState<any>(null);
+
   const [step, setStep] = useState<"choose" | "join">("choose");
   const [inviteCode, setInviteCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   // Join Animation states: 'input' | 'verifying' | 'matched' | 'welcome'
   const [joinStep, setJoinStep] = useState<"input" | "verifying" | "matched" | "welcome">("input");
 
   useEffect(() => {
-    if (householdId) {
-      router.push("/");
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/welcome");
+        return;
+      }
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      if (data) {
+        setProfile(data);
+        if (data.household_id) {
+          router.push("/");
+        }
+      }
     }
-  }, [householdId, router]);
+    loadProfile();
+  }, [router, supabase]);
 
-  if (householdId) {
-    return null;
-  }
+  const generateInviteCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
 
   const handleCreate = async () => {
     setIsLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
-    createHousehold();
+    setErrorMsg(null);
+    
+    let successInsert = false;
+    for (let i = 0; i < 5; i++) {
+      const newCode = generateInviteCode();
+      const { data, error } = await supabase.from('households').insert([{ invite_code: newCode }]).select().single();
+      if (!error && data) {
+        successInsert = true;
+        await supabase.from('profiles').update({ household_id: data.id }).eq('id', profile?.id);
+        break;
+      }
+    }
+
+    setIsLoading(false);
+    if (!successInsert) {
+      setErrorMsg("Failed to generate a unique invite code. Please try again.");
+      return;
+    }
+
     setSuccess(true);
     setTimeout(() => {
       router.push("/");
@@ -44,23 +82,39 @@ export default function SetupPage() {
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteCode || inviteCode.length < 6) return;
+    setErrorMsg(null);
     
-    // Step 1: Thinking Orb state
     setJoinStep("verifying");
     
-    // Step 2: Matched "Partner Found" state
-    setTimeout(() => {
-      setJoinStep("matched");
-    }, 1200);
+    const { data: joined, error } = await supabase.rpc('join_household', { invite_code_input: inviteCode });
+    
+    if (error || !joined) {
+      setJoinStep("input");
+      setErrorMsg("Invalid or missing invite code. Please try again.");
+      return;
+    }
 
-    // Step 3: Fullscreen "You're connected" state
+    const { data: currentProfile } = await supabase.from('profiles').select('household_id').eq('id', profile?.id).single();
+    if (currentProfile?.household_id) {
+       const { data: partners } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('household_id', currentProfile.household_id)
+        .neq('id', profile?.id)
+        .limit(1);
+       if (partners && partners.length > 0) {
+         setPartnerProfile(partners[0]);
+       }
+    }
+
+    setJoinStep("matched");
+
     setTimeout(() => {
       setJoinStep("welcome");
-    }, 2600);
+    }, 1400);
   };
 
   const handleFinishJoin = () => {
-    joinHousehold(inviteCode);
     router.push("/");
   };
 
@@ -108,7 +162,7 @@ export default function SetupPage() {
           className="text-center mb-[5dvh]"
         >
           <h2 className="text-[20px] text-white font-semibold mb-1">
-            Welcome, {user?.name || "Friend"}
+            Welcome, {profile?.display_name || "Friend"}
           </h2>
           <p className="text-[15px] text-[#cfc4c5] font-medium">
             Let's configure your household.
@@ -116,6 +170,20 @@ export default function SetupPage() {
         </motion.div>
 
         {/* The Main Card */}
+        <AnimatePresence>
+          {errorMsg && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="w-full max-w-[380px] bg-red-500/10 border border-red-500/20 text-red-400 text-[14px] rounded-[16px] p-3 mb-4 flex items-center justify-center gap-2"
+            >
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{errorMsg}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="w-full max-w-[380px]">
           <AnimatePresence mode="wait">
             {!success ? (
@@ -369,10 +437,10 @@ export default function SetupPage() {
                         scale: { duration: 1.2, type: "spring", bounce: 0.4 },
                      }}
                    >
-                     {user?.avatar ? (
-                       <img src={user.avatar} className="w-full h-full object-cover" />
+                     {profile?.avatar_url ? (
+                       <img src={profile.avatar_url} className="w-full h-full object-cover" />
                      ) : (
-                       <span className="text-white text-3xl font-bold select-none">{user?.name?.[0]?.toUpperCase() || 'U'}</span>
+                       <span className="text-white text-3xl font-bold select-none">{profile?.display_name?.[0]?.toUpperCase() || 'U'}</span>
                      )}
                    </motion.div>
                    <motion.div 
@@ -384,10 +452,10 @@ export default function SetupPage() {
                         scale: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
                      }}
                    >
-                     {partner?.avatar ? (
-                       <img src={partner.avatar} className="w-full h-full object-cover" />
+                     {partnerProfile?.avatar_url ? (
+                       <img src={partnerProfile.avatar_url} className="w-full h-full object-cover" />
                      ) : (
-                       <span className="text-emerald-400 text-3xl font-bold select-none">{partner?.name?.[0]?.toUpperCase() || 'P'}</span>
+                       <span className="text-emerald-400 text-3xl font-bold select-none">{partnerProfile?.display_name?.[0]?.toUpperCase() || 'P'}</span>
                      )}
                    </motion.div>
                  </div>

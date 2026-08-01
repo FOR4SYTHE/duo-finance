@@ -1,34 +1,25 @@
 # MASTER HANDOFF DOCUMENT — DUO FINANCE
 
-> **Date:** July 29, 2026  
+> **Date:** August 2, 2026  
 > **Target:** AI Agent Handoff & Continuum State  
-> **Status:** Global Settings, App Security Lock, Subscriptions Manager, and Haptic feedback have been fully built, wired to Zustand stores, and polished. The application is now ready for core backend feature work (Spend Jar, Cartify, Monthly Budget).
+> **Status:** DUO AI Architecture, Budget Pulse Engine, and Vision Scanner have been fully wired and refined. The application is now fully synced client-side and mathematically perfect. Ready to build the Partner Profile feature in the next session.
 
 ---
 
 ## 1. Executive Summary & Core Milestones Achieved
 
-### A. Global State & Persistence (`src/store/`)
-- **`useSettingsStore.ts`**: Built a global Zustand store with `persist` middleware to track all App Preferences, Notifications, and Security settings (FaceID, PIN, Lock Timeouts, Start Week on Monday, etc.).
-- **`useSubscriptionsStore.ts`**: Built a persistent Zustand store to replace the mock `MOCK_SUBS` array. Manages adding/removing subscriptions and calculating dynamic monthly totals.
+### A. DUO AI Core & Vision Scanner (`src/store/useAIChatStore.ts`, `src/lib/buildHouseholdContext.ts`)
+- **System Awareness:** Built `buildHouseholdContext.ts` which successfully injects data from ALL Zustand stores (Budget, Spend Jar, Cartify, Bills, Childcare, Vault, Auth) directly into DUO AI's system prompt. DUO AI is now fully aware of the user, their partner, and every peso spent.
+- **Vision Scanner Architecture:** Confirmed the Vision Scanner is deeply integrated into the AI Chat interface (`AIScannerView.tsx`). It uses a `pendingScanContext` to instantly hand off scraped product data and online prices into a new chat session so the LLM is perfectly grounded on the scanned item.
 
-### B. Security & App Lock (`src/components/security/AppLockScreen.tsx`)
-- **Global Inactivity Lock**: Built a top-level overlay (`fixed inset-0 z-[9999]`) injected directly into `src/app/layout.tsx`.
-- **Visibility Listener**: It actively listens to `visibilitychange`. When the user leaves the app/browser and returns, it calculates the time away against their chosen `lockTimeout` (Immediately, 1 min, 5 min).
-- **Security UI**: A premium dark screen featuring a 4-digit PIN pad and a "Use FaceID" button (UI prepped for native WebAuthn). Mock unlock triggers upon successful 4-digit entry.
+### B. Budget Pulse Engine Refinement (`src/utils/budgetPulse.ts`)
+- **Mathematical Perfection:** Fixed a critical bug in the Safe-to-Spend calculation where categories and the Spend Jar were double-charging the ledger. `spendJarSpent` now perfectly segregates unallocated expenses from category-specific expenses.
+- **Spend Jar Capacity:** Verified the UI accurately calculates and allows 100% (or dynamically set %) of the unallocated Master Target.
+- **Hydration & Ghost States (`DueTodayBanner.tsx`):** Eliminated an SSR mismatch/hydration bug where stale state persisted across navigation. The banner now perfectly mounts client-side using a clean hydration check, preventing ghost notifications of paid bills.
 
-### C. Subscriptions Manager (`src/components/profile/AddSubscriptionSheet.tsx`)
-- **Add Subscription Portal**: Built a beautiful Framer Motion bottom-sheet modal using `createPortal` (portalled to `document.body` to avoid nested transform clipping).
-- **Flow**: Users can select a curated preset (Netflix, Gym) or enter a "Custom" name, use the custom Numpad to assign the monthly cost in PHP, and save it to the global store.
-- **Dynamic Updates**: The `SubscriptionsPage` map was refactored to read from the store, and the total monthly cost card now instantly updates (with dual-currency ZAR conversions).
-
-### D. Settings Pages Polish & Fixes (`src/app/profile/*`)
-- **Toggle Fixes**: Completely rebuilt the CSS for toggle switches so the inner circle never overlaps/clips the pill border when active (green).
-- **Removed Glows**: Stripped the ambient screen-wide colored glows from all settings sub-pages for a cleaner, darker aesthetic.
-- **Haptics Utility (`src/lib/haptics.ts`)**: Built a `triggerHaptic('light' | 'medium' | 'heavy')` utility. It reads the global `haptics` state before firing `navigator.vibrate()`. Wired this into every toggle switch and Numpad tap.
-- **Custom Sign Out Modal**: Removed native browser `confirm()` dialogue. Built a sleek, custom red-tinted Framer Motion Sign Out modal at the bottom of the Profile page.
-- **Dark Mode Strategy**: Affirmed that a true Light Mode is deferred to v2 due to the app's reliance on Apple-style spatial dark UI. Tapping the Dark Mode toggle now triggers a haptic bump, snaps back instantly, and displays a toast: *"Duo is optimized for Dark Mode (Light Mode coming soon)"*.
-- **Bug Fix**: Resolved `toggleMockPartner is not defined` ReferenceError in `ProfilePage`.
+### C. Architecture Audit & Insurance Hub Decisions
+- **Audit Completed:** Verified that the entire core engine is unified.
+- **Insurance Hub Decision:** Verified that according to `AGENTS.md`, the Insurance Hub must **NOT** be built in local storage. It is strictly deferred to Phase 6, after the Supabase database migration.
 
 ---
 
@@ -36,37 +27,40 @@
 
 | File Path | Description | Key Changes / State |
 | :--- | :--- | :--- |
-| `src/store/useSettingsStore.ts` | Global Settings | Persistent store for FaceID, PIN, timeouts, notifications, and preferences. |
-| `src/store/useSubscriptionsStore.ts` | Subscriptions | Persistent store tracking user's active recurring subscriptions. |
-| `src/components/security/AppLockScreen.tsx` | Global Lock Overlay | Injected in `layout.tsx`. Listens to `visibilitychange` to trigger PIN/FaceID. |
-| `src/components/profile/AddSubscriptionSheet.tsx` | Add Sub Modal | Portalled Framer Motion sheet with presets and a custom Numpad. |
-| `src/lib/haptics.ts` | Haptics Utility | Checks `useSettingsStore` before firing `navigator.vibrate()`. |
-| `src/app/profile/biometrics/page.tsx` | Biometrics Settings | Wired to `useSettingsStore`. Toggles fixed, glows removed. |
-| `src/app/profile/notifications/page.tsx` | Notifications Settings | Wired to `useSettingsStore`. Toggles fixed, glows removed. |
-| `src/app/profile/preferences/page.tsx` | App Preferences | Handles Dark Mode rejection toast, haptics toggle. |
-| `src/app/profile/subscriptions/page.tsx` | Subscriptions List | Refactored to map global store data. Triggers Add Sub Sheet. |
-| `src/app/profile/page.tsx` | Profile Root | Added custom Sign Out confirmation modal. Fixed `toggleMockPartner` bug. |
+| `src/lib/buildHouseholdContext.ts` | AI Context Builder | Injects live Zustand states directly into the Gemini LLM context. |
+| `src/store/useAIChatStore.ts` | DUO AI Store | Manages chat history, tabs, and the `pendingScanContext` for Vision. |
+| `src/components/ai/AIScannerView.tsx` | Vision Scanner | Handles camera/gallery uploads and scrapes market prices. |
+| `src/utils/budgetPulse.ts` | Math Engine | Segregated unallocated vs. category spending for perfect Safe-to-Spend tracking. |
+| `src/components/home/DueTodayBanner.tsx` | Bills Reminder | Removed derived React state; added strict hydration guards. |
 
 ---
 
 ## 3. Strict Guidelines for Next Agent
 
 1. **Native UI Ban:** NEVER use native browser `alert()`, `confirm()`, or `prompt()`. All alerts and confirmations must be custom built components that match the dark, premium Apple spatial aesthetic.
-2. **Portals for Overlays:** Any full-screen modal or sheet (like `AddSubscriptionSheet`) MUST use `createPortal(..., document.body)` to ensure it breaks out of `framer-motion` layout transforms.
-3. **Performance Audit Rule:** Everything built moving forward MUST undergo a performance audit before completion. The UI must remain buttery smooth, lite, and fast at all times. Avoid excessive `backdrop-blur` on repeated list items.
-4. **Dark Mode Only:** The app is strictly optimized for Dark Mode. Do not attempt to implement Light Mode (white backgrounds) without a massive redesign phase.
-5. **Dual Currency Everywhere:** Every instance of a currency display must show the secondary currency implicitly.
+2. **Portals for Overlays:** Any full-screen modal or sheet MUST use `createPortal(..., document.body)` to ensure it breaks out of `framer-motion` layout transforms.
+3. **Performance Audit Rule:** The UI must remain buttery smooth on low-end tablets. Strictly limit compositor layers (max 5) and avoid infinite Framer Motion loops.
+4. **Follow `AGENTS.md` Exactly:** Do not attempt to build the Insurance Hub locally. It requires the Supabase Phase 5 migration first.
 
 ---
 
-## 4. Immediate Next Task (Start of Next Chat)
+## 4. Immediate Next Task: The Partner Profile Feature
 
-1. **Begin Core Workflow Modules:**
-   - With the foundational settings, navigation, and security complete, the next major focus should be the **Spend Jar** (everyday tracking) or the **Budget Module** (monthly allocations).
-   - Prioritize connecting these to global Zustand stores before worrying about Supabase backend.
+In the next chat session, you will build the new **Partner Profile View**.
+
+**The Plan:**
+- **Trigger:** Tapping the partner's avatar on the Settings/Profile page (`src/app/profile/page.tsx`).
+- **Layout (Reference: screenshot_2.png):** A dark, frosted-glass full-screen sheet or portalled modal.
+- **Header:** Partner's avatar, Name, Email, and a sleek "Partnership Active" or "Household Member" verified badge.
+- **Actions:** "Nudge" (push notification) and "Message" buttons.
+- **Grid Layout (Household Data ONLY):**
+  - **Card 1 (Vertical): "Recent Activity"** – Mini-timeline of their latest Spend Jar entries.
+  - **Card 2 (Square): "Cartify Activity"** – A quick glance at what they just added to the shared grocery list.
+  - **Card 3 (Horizontal): "Dream Board Contributions"** – Progress bar showing their savings towards shared goals.
+- **Privacy Rule:** Under no circumstances should this view expose their private/personal budgets. Only shared household contributions.
 
 ---
 
-🚀 **MISSION STATUS:** Handoff updated & saved to `HANDOFF.md`. Ready to switch chat sessions!  
-⚡️ **NEXT STEP:** [Architect / Builder] - Begin building the Spend Jar or Budget Manager in a new chat session.  
+🚀 **MISSION STATUS:** Handoff updated & saved. Ready to switch chat sessions!  
+⚡️ **NEXT STEP:** [Architect / Builder] - Build the sleek Partner Profile Sheet with the asymmetrical card grid.  
 🔥 **MANTRA:** BEYOND PLUS ULTRA!

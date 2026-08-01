@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { BudgetConfig, BudgetPeriod, BudgetCategory, AppNotification, ExpenseEntry } from '@/types/finance';
+import { createClient } from '@/utils/supabase/client';
 
 export interface Goal {
     id: string;
@@ -55,6 +56,7 @@ interface BudgetState {
 
     _hasHydrated: boolean;
     setHasHydrated: (state: boolean) => void;
+    initialize: () => Promise<void>;
 }
 
 const DEFAULT_CATEGORIES: BudgetCategory[] = [
@@ -96,9 +98,26 @@ const DEFAULT_GOALS: Goal[] = [
 
 export const useBudgetStore = create<BudgetState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             _hasHydrated: false,
             setHasHydrated: (state) => set({ _hasHydrated: state }),
+            initialize: async () => {
+                const supabase = createClient();
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.user) return;
+                
+                const { data: profile } = await supabase.from('profiles').select('household_id').eq('id', session.user.id).single();
+                if (profile?.household_id) {
+                    const { data: budget } = await supabase.from('budgets').select('*').eq('household_id', profile.household_id).single();
+                    if (budget) {
+                        set({
+                            config: (Object.keys(budget.config || {}).length > 0 ? budget.config : get().config) as BudgetConfig,
+                            categories: (budget.categories && budget.categories.length > 0 ? budget.categories : get().categories) as BudgetCategory[],
+                            goals: (budget.goals && budget.goals.length > 0 ? budget.goals : get().goals) as Goal[],
+                        });
+                    }
+                }
+            },
             config: {
                 targetAmount: 0,
                 period: 'monthly',

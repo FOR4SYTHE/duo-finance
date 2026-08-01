@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { fetchExchangeRate } from '@/lib/frankfurter';
+import { createClient } from '@/utils/supabase/client';
 
 export interface HistoryItem {
     expression: string;
@@ -15,14 +16,15 @@ interface CurrencyState {
     lastUpdated: number | null;
     isLoadingRate: boolean;
     history: HistoryItem[];
-    toggleCurrency: () => void;
+    initialize: () => Promise<void>;
+    toggleCurrency: () => Promise<void>;
     appendInput: (char: string) => void;
     clearInput: () => void;
     deleteLast: () => void;
     executeCalculation: () => void;
     clearHistory: () => void;
     syncRates: () => Promise<void>;
-    setPrimaryCurrency: (currency: 'PHP' | 'ZAR') => void;
+    setPrimaryCurrency: (currency: 'PHP' | 'ZAR') => Promise<void>;
 }
 
 export const useCurrencyStore = create<CurrencyState>()(
@@ -35,15 +37,42 @@ export const useCurrencyStore = create<CurrencyState>()(
             isLoadingRate: false,
             history: [],
 
+            initialize: async () => {
+                const supabase = createClient();
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.user) return;
+                
+                const { data: profile } = await supabase.from('profiles').select('household_id').eq('id', session.user.id).single();
+                if (profile?.household_id) {
+                    const { data: settings } = await supabase.from('household_settings').select('primary_currency').eq('household_id', profile.household_id).single();
+                    if (settings?.primary_currency) {
+                        set({ primaryCurrency: settings.primary_currency as 'PHP' | 'ZAR' });
+                    }
+                }
+            },
+
             clearHistory: () => set({ history: [] }),
 
             toggleCurrency: async () => {
                 const nextCurrency = get().primaryCurrency === 'PHP' ? 'ZAR' : 'PHP';
-                set({ primaryCurrency: nextCurrency });
+                await get().setPrimaryCurrency(nextCurrency);
             },
 
-            setPrimaryCurrency: (currency: 'PHP' | 'ZAR') => {
+            setPrimaryCurrency: async (currency: 'PHP' | 'ZAR') => {
                 set({ primaryCurrency: currency });
+                
+                const supabase = createClient();
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.user) return;
+                
+                const { data: profile } = await supabase.from('profiles').select('household_id').eq('id', session.user.id).single();
+                if (profile?.household_id) {
+                    await supabase.from('household_settings').upsert({
+                        household_id: profile.household_id,
+                        primary_currency: currency,
+                        updated_at: new Date().toISOString()
+                    });
+                }
             },
 
             syncRates: async () => {
