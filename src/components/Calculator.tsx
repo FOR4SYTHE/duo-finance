@@ -6,6 +6,7 @@ import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { simplePageVariants } from "@/utils/animations";
 import { ArrowUpDown, Delete, ChevronRight, History } from "lucide-react";
+import { ThinkingOrb } from "thinking-orbs";
 
 export function Calculator() {
     const displayValue = useCurrencyStore((state) => state.displayValue);
@@ -137,25 +138,8 @@ export function Calculator() {
                         </span>
                         <span className="text-[clamp(2.25rem,6vh,3rem)] leading-none text-white font-light tracking-tight flex items-center min-h-[3rem] justify-center">
                             {Number.isNaN(convertedAmount) ? (
-                                <div className="relative w-8 h-8 opacity-60 ml-2">
-                                    {Array.from({ length: 8 }).map((_, i) => (
-                                        <div
-                                            key={i}
-                                            className="absolute inset-0 flex justify-center"
-                                            style={{ transform: `rotate(${i * 45}deg)` }}
-                                        >
-                                            <motion.div
-                                                className="w-1.5 h-1.5 rounded-full bg-white mt-1"
-                                                animate={{ opacity: [1, 0.2] }}
-                                                transition={{
-                                                    duration: 1,
-                                                    repeat: Infinity,
-                                                    delay: (i * 1) / 8,
-                                                    ease: "linear",
-                                                }}
-                                            />
-                                        </div>
-                                    ))}
+                                <div className="ml-1 mt-1 flex items-center justify-center opacity-70">
+                                    <ThinkingOrb state="shaping" size={20} />
                                 </div>
                             ) : (
                                 Array.from(convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})).map((char, index) => (
