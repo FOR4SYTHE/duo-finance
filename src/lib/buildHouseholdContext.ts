@@ -2,6 +2,7 @@ import { useBudgetStore } from '@/store/useBudgetStore';
 import { useSpendStore } from '@/store/useSpendStore';
 import { useCurrencyStore } from '@/store/useCurrencyStore';
 import { usePluginsStore } from '@/store/usePluginsStore';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export function buildHouseholdContext(): string {
     // Read directly from stores
@@ -9,6 +10,7 @@ export function buildHouseholdContext(): string {
     const { entries } = useSpendStore.getState();
     const { exchangeRate } = useCurrencyStore.getState();
     const { scratchpadContent } = usePluginsStore.getState();
+    const { user, partner, householdId } = useAuthStore.getState();
 
     // 1. Budget Summary
     const period = config.period;
@@ -53,7 +55,31 @@ export function buildHouseholdContext(): string {
 
     // Compile the final context string
     return `
-Household Snapshot:
+=== SYSTEM AWARENESS & CAPABILITIES ===
+You are DUO AI, the brain of this household management app. 
+You currently have full READ access to: 
+- User Profile & Authentication (Who is logged in, their partner, and their household ID)
+- Budget System (Targets, allocated funds, and goals)
+- Spend Jar (All logged expenses and categories)
+- Relocation Hub (Master Move Checklist and shipping rates)
+- Dream Board (Savings goals)
+- Shared Scratchpad (Notes)
+- Document Vault (Receipts, warranties, visas)
+- Exchange Alerts (Forex targets)
+
+You DO NOT have access to:
+- Shopping Scanner Plugin (Not wired yet)
+- Cartify (Not wired yet)
+- App Settings
+
+If the user asks about features you don't have access to, acknowledge your limitation and state that you are still being built and connected to those systems.
+
+=== HOUSEHOLD PROFILE ===
+- Primary User: ${user ? `${user.name} (${user.email})` : 'Guest / Not logged in'}
+- Partner: ${partner ? `${partner.name} (${partner.email})` : 'None linked'}
+- Household ID: ${householdId || 'Not connected'}
+
+=== HOUSEHOLD SNAPSHOT ===
 - Budget Period: ${period}
 - Target Budget: ₱${targetBudget.toLocaleString()}
 - Allocated: ₱${allocated.toLocaleString()} | Unallocated: ₱${unallocated.toLocaleString()}
