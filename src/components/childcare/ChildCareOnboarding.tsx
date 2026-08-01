@@ -47,7 +47,7 @@ export function ChildCareOnboarding() {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-start h-[100dvh] overflow-y-auto overflow-x-hidden w-full px-6 pt-12 pb-8 no-scrollbar bg-[#0A0A0A]">
+    <div className="relative flex flex-col items-center justify-start h-[100dvh] overflow-hidden w-full px-6 pt-12 pb-6 no-scrollbar bg-[#0A0A0A]">
       {/* Fixed Background Layer to prevent black overscroll revealing the body background */}
       <div className="fixed inset-0 bg-[#0A0A0A] -z-10 pointer-events-none" />
       
@@ -59,7 +59,7 @@ export function ChildCareOnboarding() {
         <X className="w-5 h-5" />
       </Link>
 
-      <div className="relative z-10 w-full max-w-sm pt-8">
+      <div className="relative z-10 w-full max-w-sm pt-8 flex-1 flex flex-col">
         
         <AnimatePresence mode="wait">
           {/* STEP 1: Welcome */}
@@ -69,7 +69,7 @@ export function ChildCareOnboarding() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              className="flex flex-col items-center text-center w-full relative pt-32"
+              className="flex flex-col items-center text-center w-full relative pt-32 flex-1 pb-2"
             >
               <motion.header 
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -164,7 +164,7 @@ export function ChildCareOnboarding() {
 
               <button 
                 onClick={nextStep}
-                className="w-full bg-[#FF7B54] text-white font-bold text-lg py-4 rounded-[24px] shadow-[0_8px_30px_rgba(255,123,84,0.3)] hover:scale-[0.98] transition-transform"
+                className="w-full bg-[#FF7B54] text-white font-bold text-lg py-4 rounded-[24px] shadow-[0_8px_30px_rgba(255,123,84,0.3)] hover:scale-[0.98] transition-transform mt-auto"
               >
                 Get Started
               </button>
@@ -178,7 +178,7 @@ export function ChildCareOnboarding() {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              className="flex flex-col items-center w-full"
+              className="flex flex-col items-center w-full flex-1 pb-2"
             >
               <h2 className="text-3xl font-black tracking-tight text-white mb-2">
                 Child Info
@@ -306,7 +306,7 @@ export function ChildCareOnboarding() {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              className="flex flex-col items-center w-full"
+              className="flex flex-col items-center w-full flex-1 pb-2"
             >
               <div className="text-white/40 font-bold tracking-widest text-[11px] uppercase mb-4">Step 3 of 3</div>
               <h2 className="text-2xl font-black tracking-tight text-white mb-3 text-center">
@@ -316,7 +316,7 @@ export function ChildCareOnboarding() {
                 We'll tailor schools and hospitals to your area.
               </p>
               
-              <div className="w-full flex flex-col gap-2 mb-8">
+              <div className="w-full flex flex-col gap-2 mb-4 shrink-0">
                 <label className="text-[13px] font-bold text-white/80 ml-1">Current City or Town</label>
                 <div className="relative">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#FF7B54]" />
@@ -331,10 +331,9 @@ export function ChildCareOnboarding() {
               </div>
 
               {/* Premium Detailed Map (Pigeon Maps + CartoDB Dark Matter) */}
-              <div className="w-full aspect-square bg-[#0A0A0A] border border-white/10 rounded-[32px] mb-12 relative overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)]">
+              <div className="w-full flex-1 min-h-[150px] max-h-[350px] bg-[#0A0A0A] border border-white/10 rounded-[32px] mb-6 relative overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)]">
                 
                 <Map 
-                  height={400} 
                   defaultCenter={[14.8433, 120.8114]} 
                   defaultZoom={13}
                   provider={(x, y, z, dpr) => {
