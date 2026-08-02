@@ -210,20 +210,19 @@ The everyday counterpart to a savings piggy bank, but for outgoing spend: instea
 
 ### 4.4 Cartify — Shopping Trip Budget Tracker (Phase 4)
 
-**Start a trip:** one primary button. Ask two things only: budget amount (numeric keypad, same style as the calculator), and a single toggle — Simple or Organized.
+**Start a trip:** one primary button. Ask two things only: budget amount (numeric keypad, same style as the calculator), and a single toggle — Quick Trip or Planned Trip.
 
-**Simple mode (default, "lazy" path):** no categories, no pre-planning, **and no category UI of any kind, ever** — this is the key distinction from Unplanned below. Screen structure, top to bottom: the trip budget/remaining-total header, a persistent large numeric keypad (no modal — the keypad lives directly on this screen, sized to fill the available space with no dead space around it), and a big "Add" (+) button beneath the keypad. The loop is: type an amount, tap Add, it commits to the running list and chips off the budget, keypad resets to 0, ready for the next item immediately. The running list of logged items sits below/behind this, always visible. This is the fastest, lowest-friction path and must never require more taps than type-amount-then-Add.
+**Quick Trip (Simple mode):** the fastest, "lazy" path. No categories, no pre-planning. Screen structure: the trip budget/remaining-total header, a persistent large numeric keypad (no modal — the keypad lives directly on this screen, sized to fill the available space), and a big "Add" (+) button beneath the keypad. The loop is: type an amount, tap Add, it commits to the running list and chips off the budget, keypad resets to 0, ready for the next item. The running list of logged items sits below/behind this, always visible.
 
-**Organized mode** splits into two further sub-modes, chosen at trip start. Both sub-modes of Organized must visibly and functionally differ from Simple — if an Organized mode screen looks identical to Simple, something is wrong; category selection must always be present and required in both Organized sub-modes below:
-
-- **Unplanned (organized-on-the-fly):** no pre-trip list. Pick a top-level category (Groceries, Clothes, Furniture, etc. — large tappable icons, not a dropdown). Inside, a persistent "current subcategory" chip (e.g. "Dairy") tags every price entered until changed. Switching subcategory is a single tap → icon grid → tap — it must never interrupt or gate the act of adding a price.
-
-- **Planned (pre-listed):** before the trip even starts, the user builds a shopping list — categories and/or specific items they intend to buy, no prices yet — plus the trip budget. At the store, this becomes a live list of tappable rows:
-  - Unpriced/"still need" items are visually distinct (e.g. dimmed/outlined) from priced/"in cart" items.
-  - Tapping an unpriced item opens the same price-entry keypad used elsewhere in the app; confirming a price moves that item into the "in cart" state and it starts counting against the budget.
-  - Each priced item gets a **+ / − stepper**: **+** adds another unit at the same price (fast path for buying multiples; tapping the row itself lets you edit the price if it differs). **−** decrements the quantity; if it reaches zero, the item reverts to its unpriced "still need" state rather than disappearing — it stays on the list so it can be logged again without rebuilding it.
-  - **Swipe left** on any item (priced or not) fully removes it from the list entirely — this is the only action that deletes the item outright, distinct from `−` which only decrements/reverts it.
+**Planned Trip (Pre-build list):** before the trip starts, the user builds a shopping list of specific items they intend to buy (no prices yet). At the store, this becomes a live list of tappable rows:
+  - Unpriced/"still need" items are visually distinct from priced/"in cart" items.
+  - Tapping an unpriced item opens the price-entry keypad; confirming a price moves that item into the "in cart" state and it starts counting against the budget.
+  - Each priced item gets a **+ / − stepper**: **+** adds another unit at the same price (fast path for buying multiples; tapping the row itself lets you edit the price if it differs). **−** decrements the quantity; if it reaches zero, the item reverts to its unpriced "still need" state.
+  - **Swipe left** on any item (priced or not) fully removes it from the list entirely.
   - An always-available "+" floating action button lets the user log an item that wasn't on the original pre-trip list, for anything unplanned that comes up mid-trip.
+  - **Templates:** When finishing a Planned Trip, the user is prompted to save their list as a "Template" (e.g. "Weekly Groceries"). They can then load this template for future trips instead of rebuilding the list from scratch.
+
+**Saved Trips & Resuming:** Active trips are saved to the device state automatically. If the user closes the app mid-trip, they can resume it later. If they try to start a new trip while one is saved, they are prompted to resume the saved trip or discard it. The system supports multiple saved trips, accessible via a "Saved Trips Available" drawer on the trip setup screen.
 
 **Budget health display:**
 - Color gradient (green → amber ~80% → red at/over), not a binary indicator.
@@ -231,19 +230,15 @@ The everyday counterpart to a savings piggy bank, but for outgoing spend: instea
 - When over budget: show the itemized list sorted by price descending (most expensive items surfaced first) rather than just a red number.
 
 **Suggestions when over budget** (rule-based, no AI needed for v1):
-- Flag likely-duplicate-ish items within a category (e.g. multiple similarly-priced items in Snacks).
-- In categorized mode, surface which *category* is the biggest contributor to the overage, not just a single item.
-- Optional v2: a single end-of-trip LLM call sending the item list + prices + budget, asking for 2–3 short plain-language suggestions — call this once per trip on request, never per item, to stay cheap.
+- Surface which *category* (if tagged) is the biggest contributor to the overage.
+- Flag the single most expensive item in the trip.
 
-**Preference persistence:** Simple vs. Organized (and Planned vs. Unplanned within Organized) should be a saved per-user preference, not a per-trip prompt — the couple may prefer different modes.
+**VAT breakdown & digital receipt.** PH context that shapes this feature: the standard VAT rate is 12%, and unprocessed/raw agricultural and marine food products (fresh produce, meat, fish, rice, etc.) are VAT-exempt even after simple preparation; processed/packaged goods are taxed at the full 12%. Critically, **PH shelf prices are VAT-inclusive** — the price the user types in already contains the tax, it is not added on top at checkout. This means VAT display here is informational/transparency, not an extra cost that could push the trip over budget by itself.
 
-**VAT breakdown & digital receipt.** PH context that shapes this feature: the standard VAT rate is 12%, and unprocessed/raw agricultural and marine food products (fresh produce, meat, fish, rice, etc.) are VAT-exempt even after simple preparation like freezing or drying; processed/packaged goods are taxed at the full 12%. Critically, **PH shelf prices are VAT-inclusive** — the price the user types in already contains the tax, it is not added on top at checkout. This means VAT display here is informational/transparency, not an extra cost that could push the trip over budget by itself.
-
-- Tag each item VAT-exempt or VATable (12%) — infer a sensible default from category where available (raw produce/meat/fish/rice → exempt, everything else → VATable), with a manual override for edge cases.
+- Tag each item VAT-exempt or VATable (12%).
 - VAT-per-item for VATable items = `price × (12/112)` (backed out of the tax-inclusive price, not added to it).
-- Show a running "Est. VAT included: ₱X / RY" as a quiet secondary figure near the budget total — this must never subtract from or affect the remaining-budget math, since it's already inside the prices entered.
-- **"Done Shopping"** (available per category section, and for the trip as a whole) generates a polished digital receipt: itemized list, VAT-exempt subtotal, VATable subtotal, VAT amount, grand total, always dual currency. Style this as a premium receipt within the existing dark design system — dashed or perforated divider details, generous tabular alignment for the numbers — not a literal skeuomorphic white paper mockup, which would clash with the rest of the app.
-- If the trip is over budget at "Done Shopping," surface the existing rule-based over-budget suggestions (above) on the receipt screen — the warning is about the total exceeding budget, not about VAT causing an overage, since VAT is not an additional charge on top of what was entered.
+- **"Done Shopping"** generates a polished digital receipt: itemized list, VAT-exempt subtotal, VATable subtotal, VAT amount (12%), grand total, always dual currency. Styled as a premium receipt within the existing dark design system.
+- If the trip is over budget at "Done Shopping," surface the rule-based observations (biggest category, most expensive item) on the receipt screen.
 
 ### 4.5 Shopping Scanner & AI Corner (AI Features)
 
