@@ -28,6 +28,7 @@ import { ConjoiningAvatar } from "@/components/home/ConjoiningAvatar";
 import { useNotificationEngine } from "@/hooks/useNotificationEngine";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { useEffect, useState, useMemo } from "react";
@@ -38,6 +39,9 @@ import { filterEntriesByMonth } from "@/utils/budgetFilters";
 
 export default function Home() {
   useNotificationEngine();
+
+  const user = useAuthStore((state) => state.user);
+  const isDevAccount = user?.email?.startsWith('jonathanquidlat') ?? false;
 
   const config = useBudgetStore((state) => state.config);
   const setLastSeenMonth = useBudgetStore((state) => state.setLastSeenMonth);
@@ -242,6 +246,7 @@ export default function Home() {
             </div>
           </div>
         <div className="flex items-center gap-3">
+          {isDevAccount && (
           <div className="flex gap-2">
             <button 
               title="Test Auth Flow"
@@ -313,6 +318,7 @@ export default function Home() {
               className="w-3 h-3 rounded-full bg-[#BF5AF2] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(191,90,242,0.5)]"
             />
           </div>
+          )}
           
           <button 
             onClick={() => setShowNotifCenter(true)}

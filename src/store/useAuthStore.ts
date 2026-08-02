@@ -57,6 +57,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       household_id: currentProfile.household_id
     };
 
+    // Fix Dev State Leakage: Wipe local stores if a different user logs in
+    const lastUserId = localStorage.getItem('duo_last_user_id');
+    if (lastUserId && lastUserId !== session.user.id) {
+        localStorage.removeItem('duo-budget-storage-v2');
+        localStorage.removeItem('duo-spend-storage-v2');
+        localStorage.removeItem('duo-bills-storage-v2');
+        localStorage.removeItem('duo-cartify-storage-v2');
+        localStorage.setItem('duo_last_user_id', session.user.id);
+        window.location.reload();
+        return;
+    }
+    localStorage.setItem('duo_last_user_id', session.user.id);
+
     let partner: AuthUser | null = null;
     if (currentProfile.household_id) {
       const { data: partners } = await supabase
@@ -89,6 +102,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
+
+    // Wipe all local data on logout
+    localStorage.removeItem('duo-budget-storage-v2');
+    localStorage.removeItem('duo-spend-storage-v2');
+    localStorage.removeItem('duo-bills-storage-v2');
+    localStorage.removeItem('duo-cartify-storage-v2');
+    localStorage.removeItem('duo_last_user_id');
+
     set({ 
       isAuthenticated: false, 
       user: null, 

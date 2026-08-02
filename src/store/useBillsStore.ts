@@ -7,6 +7,8 @@ export interface Bill {
   amount: number;
   currency: 'PHP' | 'ZAR';
   dueDay: number; // 1-31
+  dueMonth?: number; // 0-11
+  dueYear?: number;
   category: string;
   budgetCategoryId?: string; // Links this bill explicitly to a budget category
   isRecurring: boolean;

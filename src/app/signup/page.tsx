@@ -19,7 +19,7 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const [authMode, setAuthMode] = useState<"password" | "magic_link" | "magic_link_sent">("password");
+  const [authMode, setAuthMode] = useState<"password" | "magic_link" | "magic_link_sent" | "email_confirmation_sent">("password");
   const [otpCode, setOtpCode] = useState("");
 
   const handleInitiateMagicLink = () => {
@@ -77,13 +77,14 @@ export default function SignupPage() {
     setErrorMsg(null);
     setIsLoading(true);
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           name: name,
-        }
+        },
+        emailRedirectTo: `${window.location.origin}/setup`
       }
     });
 
@@ -93,6 +94,12 @@ export default function SignupPage() {
       setErrorMsg(error.message);
       return;
     }
+
+    if (data.user && !data.session) {
+      setAuthMode("email_confirmation_sent");
+      return;
+    }
+
     router.push("/setup");
   };
 
@@ -150,9 +157,11 @@ export default function SignupPage() {
         >
           {authMode === "magic_link_sent" 
             ? "Check your inbox" 
-            : authMode === "magic_link" 
-              ? "Sign up without a password"
-              : "Create your shared space"}
+            : authMode === "email_confirmation_sent"
+              ? "Verify your email"
+              : authMode === "magic_link" 
+                ? "Sign up without a password"
+                : "Create your shared space"}
         </motion.p>
 
         <AnimatePresence>
@@ -227,6 +236,42 @@ export default function SignupPage() {
                 </button>
               </div>
             </form>
+          ) : authMode === "email_confirmation_sent" ? (
+            <div className="space-y-4 text-center">
+              <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center mx-auto mb-2 text-white">
+                ✉️
+              </div>
+              <div>
+                <p className="text-[14px] text-white/70">
+                  We sent a confirmation link to:
+                </p>
+                <p className="text-[15px] text-white font-semibold mt-0.5">
+                  {email || "your email"}
+                </p>
+                <p className="text-[14px] text-white/70 mt-4 px-4">
+                  Please click the link in that email to confirm your account, then sign in.
+                </p>
+              </div>
+
+              <div className="pt-4">
+                <button
+                  type="button"
+                  onClick={() => router.push("/login")}
+                  className="w-full h-[48px] sm:h-[52px] bg-[#111111] border border-white/10 text-white rounded-[16px] font-semibold text-[15px] sm:text-[16px] flex items-center justify-center gap-2 hover:bg-[#1a1a1a] transition-all shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-[0.98]"
+                >
+                  GO TO SIGN IN
+                </button>
+              </div>
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setAuthMode("password")}
+                  className="text-[13px] text-white/40 hover:text-white transition-colors"
+                >
+                  ← Back to form
+                </button>
+              </div>
+            </div>
           ) : authMode === "magic_link" ? (
             <form onSubmit={handleSendMagicLink} className="space-y-4 text-center">
               <div>

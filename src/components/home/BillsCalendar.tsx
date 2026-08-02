@@ -168,7 +168,9 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
   }, [firstDayOfWeek, daysInMonth]);
 
   const allEvents = useMemo(() => {
-    const events: any[] = [...bills.map(b => ({ ...b, eventType: 'bill' }))];
+    const events: any[] = bills
+      .filter(b => b.isRecurring || (b.dueMonth === viewMonth && b.dueYear === viewYear) || b.dueMonth === undefined)
+      .map(b => ({ ...b, eventType: 'bill' }));
 
     scheduledTrips.forEach(t => {
       const d = new Date(t.date);
@@ -247,6 +249,8 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
       amount: parseFloat(newAmount) || 0,
       currency: "PHP",
       dueDay: newDueDay,
+      dueMonth: newRecurring ? undefined : viewMonth,
+      dueYear: newRecurring ? undefined : viewYear,
       category: newCategory,
       budgetCategoryId: newCategoryId || undefined,
       isRecurring: newRecurring,
@@ -560,11 +564,11 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
             )}
           </AnimatePresence>
 
-          {/* Recurring Bills Overview */}
+          {/* Bills Overview */}
           <div className="mb-8 pt-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[11px] font-bold text-white/30 tracking-[0.2em] uppercase mb-0">
-                Recurring Bills
+                {selectedDay ? 'Selected Day' : 'Upcoming Bills'}
               </h3>
               <button
                 onClick={() => {
@@ -584,8 +588,12 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
             </div>
             
             {(() => {
-              const recurringBills = allEvents.filter(e => (e.isRecurring || e.eventType === 'trip') && !e.isPaid);
-              const completedBills = allEvents.filter(e => (e.isRecurring || e.eventType === 'trip') && e.isPaid && e.dueDay === now.getDate());
+              let displayBills = allEvents;
+              if (selectedDay) {
+                displayBills = allEvents.filter(e => e.dueDay === selectedDay);
+              }
+              const activeList = displayBills.filter(e => !e.isPaid);
+              const completedList = displayBills.filter(e => e.isPaid && (selectedDay ? true : e.dueDay === now.getDate()));
               
               const renderBillCard = (bill: any) => {
                 const art = getCategoryArt(bill.category);
@@ -680,18 +688,27 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
 
               return (
                 <div className="flex flex-col gap-6">
-                  {recurringBills.length > 0 && (
+                  {selectedDay && (
+                    <h3 className="text-[13px] font-bold text-white tracking-widest uppercase mb-[-12px]">
+                      {MONTH_NAMES[viewMonth]} {selectedDay}
+                    </h3>
+                  )}
+                  {activeList.length > 0 && (
                     <div className="flex flex-col gap-3">
-                      {recurringBills.map(renderBillCard)}
+                      {activeList.map(renderBillCard)}
                     </div>
                   )}
-
-                  {completedBills.length > 0 && (
+                  {activeList.length === 0 && completedList.length === 0 && selectedDay && (
+                    <div className="text-center py-6">
+                      <p className="text-white/40 text-sm font-medium">No bills due on this day.</p>
+                    </div>
+                  )}
+                  {completedList.length > 0 && (
                     <div className="flex flex-col gap-3">
                       <h3 className="text-[11px] font-bold text-white/30 tracking-[0.2em] uppercase mb-1 mt-2">
                         Completed
                       </h3>
-                      {completedBills.map(renderBillCard)}
+                      {completedList.map(renderBillCard)}
                     </div>
                   )}
                 </div>

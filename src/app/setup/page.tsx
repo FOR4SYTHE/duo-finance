@@ -59,10 +59,10 @@ export default function SetupPage() {
     let successInsert = false;
     for (let i = 0; i < 5; i++) {
       const newCode = generateInviteCode();
-      const { data, error } = await supabase.from('households').insert([{ invite_code: newCode }]).select().single();
-      if (!error && data) {
+      const { data: newHouseholdId, error } = await supabase.rpc('create_household', { invite_code_input: newCode });
+      
+      if (!error && newHouseholdId) {
         successInsert = true;
-        await supabase.from('profiles').update({ household_id: data.id }).eq('id', profile?.id);
         break;
       }
     }

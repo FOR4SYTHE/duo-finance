@@ -3,7 +3,7 @@ create extension if not exists "uuid-ossp";
 
 -- HOUSEHOLDS
 create table public.households (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   invite_code text unique not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -107,7 +107,7 @@ using (household_id = public.get_user_household_id());
 
 -- BUDGETS
 create table public.budgets (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   household_id uuid references public.households(id) on delete cascade not null,
   period text not null default 'monthly',
   hero_target numeric default 0 not null,
