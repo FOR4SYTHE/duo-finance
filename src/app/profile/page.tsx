@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { ThinkingOrb } from "thinking-orbs";
-import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, Sparkles, AlertTriangle, Trash2, Pencil } from "lucide-react";
+import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, Sparkles, AlertTriangle, Trash2, Pencil, MoreHorizontal } from "lucide-react";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { createClient } from "@/utils/supabase/client";
@@ -23,6 +23,7 @@ export default function ProfilePage() {
   const [copied, setCopied] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
+  const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const supabase = createClient();
@@ -205,34 +206,63 @@ export default function ProfilePage() {
               
               {/* Avatar action buttons — Edit / Change / Delete */}
               {!isEditingAvatar && profileImage && (
-                <div className="absolute bottom-0 right-[-5px] flex gap-1.5 z-20">
-                  {/* Edit (re-open zoom/pan) */}
+                <div className="absolute bottom-0 left-[-5px] z-20">
                   <button 
-                    onClick={() => setIsEditingAvatar(true)}
-                    className="w-8 h-8 bg-[#1C1C1E] rounded-full border-[0.5px] border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors shadow-lg cursor-pointer"
+                    onClick={(e) => { e.stopPropagation(); setShowAvatarMenu(!showAvatarMenu); }}
+                    className="w-8 h-8 bg-[#1C1C1E] rounded-full border-[0.5px] border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors shadow-lg cursor-pointer relative"
                   >
-                    <Pencil className="w-3.5 h-3.5 text-white/80" />
+                    <MoreHorizontal className="w-4 h-4 text-white/80" />
                   </button>
-                  {/* Change photo */}
-                  <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-8 h-8 bg-[#1C1C1E] rounded-full border-[0.5px] border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors shadow-lg cursor-pointer"
-                  >
-                    <Camera className="w-3.5 h-3.5 text-white/80" />
-                  </button>
-                  {/* Delete */}
-                  <button 
-                    onClick={async () => {
-                      setProfileImage(null);
-                      updateUser({ avatar: undefined });
-                      if (authUser?.id) {
-                        await supabase.from('profiles').update({ avatar_url: null }).eq('id', authUser.id);
-                      }
-                    }}
-                    className="w-8 h-8 bg-[#1C1C1E] rounded-full border-[0.5px] border-white/20 flex items-center justify-center hover:bg-red-500/20 transition-colors shadow-lg cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5 text-red-400/80" />
-                  </button>
+                  
+                  <AnimatePresence>
+                    {showAvatarMenu && (
+                      <>
+                        {/* Invisible backdrop to close menu */}
+                        <div 
+                          className="fixed inset-0 z-40" 
+                          onClick={(e) => { e.stopPropagation(); setShowAvatarMenu(false); }} 
+                        />
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute top-10 left-0 w-36 bg-[#1C1C1E] border-[0.5px] border-white/10 rounded-xl p-1.5 shadow-2xl flex flex-col z-50 overflow-hidden"
+                        >
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setShowAvatarMenu(false); setIsEditingAvatar(true); }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-[13px] text-white hover:bg-white/5 rounded-lg transition-colors"
+                          >
+                            <Pencil className="w-4 h-4 text-white/60" />
+                            <span>Adjust</span>
+                          </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setShowAvatarMenu(false); fileInputRef.current?.click(); }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-[13px] text-white hover:bg-white/5 rounded-lg transition-colors"
+                          >
+                            <Camera className="w-4 h-4 text-white/60" />
+                            <span>Change</span>
+                          </button>
+                          <div className="w-full h-px bg-white/5 my-1" />
+                          <button 
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              setShowAvatarMenu(false);
+                              setProfileImage(null);
+                              updateUser({ avatar: undefined });
+                              if (authUser?.id) {
+                                await supabase.from('profiles').update({ avatar_url: null }).eq('id', authUser.id);
+                              }
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-[13px] text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-400/80" />
+                            <span>Remove</span>
+                          </button>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
               
