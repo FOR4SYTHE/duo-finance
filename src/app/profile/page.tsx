@@ -5,22 +5,24 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { ThinkingOrb } from "thinking-orbs";
-import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, Sparkles, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, Sparkles, AlertTriangle, Trash2, Pencil } from "lucide-react";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { createClient } from "@/utils/supabase/client";
 import { useAuthStore } from "@/store/useAuthStore";
+import { processAndCompressImage, getCroppedAvatar } from "@/utils/imageUpload";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const { primaryCurrency, setPrimaryCurrency, exchangeRate } = useCurrencyStore();
   const { primarySymbol, secondarySymbol } = useDualCurrency();
-  const { user: authUser, partner: authPartner, isInitializing, householdId } = useAuthStore();
+  const { user: authUser, partner: authPartner, isInitializing, householdId, updateUser } = useAuthStore();
   
   const [showSignOutPrompt, setShowSignOutPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const supabase = createClient();
@@ -35,18 +37,19 @@ export default function ProfilePage() {
   const dragStart = useRef({ x: 0, y: 0 });
   const imgRef = useRef<HTMLImageElement>(null);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result as string);
+      try {
+        const dataUrl = await processAndCompressImage(file);
+        setProfileImage(dataUrl);
         setImageZoom(1);
         setImagePan({ x: 0, y: 0 });
         panRef.current = { x: 0, y: 0 };
         setIsEditingAvatar(true);
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        console.error("Failed to process image", err);
+      }
     }
   };
 
@@ -200,7 +203,41 @@ export default function ProfilePage() {
                 </motion.div>
               )}
               
-              {!isEditingAvatar && (
+              {/* Avatar action buttons — Edit / Change / Delete */}
+              {!isEditingAvatar && profileImage && (
+                <div className="absolute bottom-0 right-[-5px] flex gap-1.5 z-20">
+                  {/* Edit (re-open zoom/pan) */}
+                  <button 
+                    onClick={() => setIsEditingAvatar(true)}
+                    className="w-8 h-8 bg-[#1C1C1E] rounded-full border-[0.5px] border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors shadow-lg cursor-pointer"
+                  >
+                    <Pencil className="w-3.5 h-3.5 text-white/80" />
+                  </button>
+                  {/* Change photo */}
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-8 h-8 bg-[#1C1C1E] rounded-full border-[0.5px] border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors shadow-lg cursor-pointer"
+                  >
+                    <Camera className="w-3.5 h-3.5 text-white/80" />
+                  </button>
+                  {/* Delete */}
+                  <button 
+                    onClick={async () => {
+                      setProfileImage(null);
+                      updateUser({ avatar: undefined });
+                      if (authUser?.id) {
+                        await supabase.from('profiles').update({ avatar_url: null }).eq('id', authUser.id);
+                      }
+                    }}
+                    className="w-8 h-8 bg-[#1C1C1E] rounded-full border-[0.5px] border-white/20 flex items-center justify-center hover:bg-red-500/20 transition-colors shadow-lg cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-red-400/80" />
+                  </button>
+                </div>
+              )}
+              
+              {/* Upload button when no avatar exists */}
+              {!isEditingAvatar && !profileImage && (
                 <div 
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute bottom-0 right-[-5px] w-8 h-8 bg-[#1C1C1E] rounded-full border-[0.5px] border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors shadow-lg z-20 cursor-pointer"
@@ -227,13 +264,36 @@ export default function ProfilePage() {
                   </div>
                   <div className="text-[9px] text-white/30 text-center -mt-1 mb-1">Drag image to reposition</div>
                   <button 
-                    onClick={() => {
-                      setIsEditingAvatar(false);
-                      if (profileImage && authUser?.id) supabase.from('profiles').update({ avatar_url: profileImage }).eq('id', authUser.id);
+                    disabled={isSavingAvatar}
+                    onClick={async () => {
+                      if (!profileImage || !authUser?.id) return;
+                      setIsSavingAvatar(true);
+                      try {
+                        // Bake the crop/zoom into a new data URL
+                        const finalAvatar = await getCroppedAvatar(profileImage, imageZoom, imagePan);
+                        
+                        // Save to DB FIRST — this is the source of truth
+                        await supabase.from('profiles').update({ avatar_url: finalAvatar }).eq('id', authUser.id);
+                        
+                        // Then update Zustand + local state
+                        updateUser({ avatar: finalAvatar });
+                        setProfileImage(finalAvatar);
+                        
+                        // Reset sliders
+                        setImageZoom(1);
+                        setImagePan({ x: 0, y: 0 });
+                        panRef.current = { x: 0, y: 0 };
+                      } catch (err) {
+                        console.error('Failed to save avatar:', err);
+                      } finally {
+                        setIsSavingAvatar(false);
+                        // Close editor LAST — only after everything succeeded
+                        setIsEditingAvatar(false);
+                      }
                     }} 
-                    className="w-full py-2 bg-white text-black rounded-xl text-[13px] font-bold hover:bg-white/90 active:scale-95 transition-all"
+                    className="w-full py-2 bg-white text-black rounded-xl text-[13px] font-bold hover:bg-white/90 active:scale-95 transition-all disabled:opacity-50"
                   >
-                    Done
+                    {isSavingAvatar ? 'Saving…' : 'Done'}
                   </button>
                 </div>
               )}

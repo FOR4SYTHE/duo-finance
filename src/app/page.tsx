@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Bell,
   Calculator,
@@ -39,8 +40,10 @@ import { filterEntriesByMonth } from "@/utils/budgetFilters";
 
 export default function Home() {
   useNotificationEngine();
+  const router = useRouter();
 
   const user = useAuthStore((state) => state.user);
+  const isInitializing = useAuthStore((state) => state.isInitializing);
   const isDevAccount = user?.email?.startsWith('jonathanquidlat') ?? false;
 
   const config = useBudgetStore((state) => state.config);
@@ -182,6 +185,41 @@ export default function Home() {
     }
   };
 
+  if (!mounted || isInitializing) {
+    return (
+      <div className="flex flex-col w-full min-h-screen px-6 pt-12 bg-[#000000]">
+        {/* Header Skeleton */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-4">
+             <div className="w-[44px] h-[44px] rounded-full bg-white/5 animate-pulse" />
+             <div className="flex flex-col gap-2">
+               <div className="w-16 h-2 bg-white/5 animate-pulse rounded-full" />
+               <div className="w-24 h-4 bg-white/5 animate-pulse rounded-full" />
+             </div>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-white/5 animate-pulse" />
+        </div>
+        
+        {/* Banner Skeleton */}
+        <div className="w-full h-12 bg-white/5 animate-pulse rounded-2xl mb-6" />
+
+        {/* Hero Card Skeleton */}
+        <div className="w-full aspect-[16/10] min-h-[220px] bg-white/5 animate-pulse rounded-[24px] mb-6" />
+        
+        {/* Calendar Card Skeleton */}
+        <div className="w-full h-[140px] bg-white/5 animate-pulse rounded-[28px] mb-8" />
+        
+        {/* Grid Skeletons */}
+        <div className="grid grid-cols-2 gap-4">
+           <div className="aspect-[5/3] bg-white/5 animate-pulse rounded-[28px]" />
+           <div className="aspect-[5/3] bg-white/5 animate-pulse rounded-[28px]" />
+           <div className="aspect-[5/3] bg-white/5 animate-pulse rounded-[28px]" />
+           <div className="aspect-[5/3] bg-white/5 animate-pulse rounded-[28px]" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div suppressHydrationWarning className="flex flex-col w-full min-h-full px-6 pt-12 pb-32">
       {showYearRollover && (
@@ -235,7 +273,7 @@ export default function Home() {
         {/* Header */}
         <motion.div variants={itemVariants} className="flex justify-between items-center mb-8 relative z-20">
           <div className="flex items-center gap-4">
-            <ConjoiningAvatar onTap={() => { window.location.href = '/profile'; }} />
+            <ConjoiningAvatar onTap={() => { router.push('/profile'); }} />
             <div className="flex flex-col justify-center">
               <span className="block text-white/40 text-[9px] font-bold tracking-[0.25em] uppercase mb-1 ml-[2px]">
                 DUO ACTIVE

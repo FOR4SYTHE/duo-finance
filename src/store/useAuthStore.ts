@@ -123,5 +123,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   createHousehold: () => {},
   leaveHousehold: () => {},
   toggleMockPartner: () => {},
-  updateUser: () => {}
+  updateUser: (data) => set((state) => ({
+    user: state.user ? { ...state.user, ...data } : null
+  }))
 }));
