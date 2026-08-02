@@ -9,20 +9,21 @@ import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut,
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { createClient } from "@/utils/supabase/client";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const { primaryCurrency, setPrimaryCurrency, exchangeRate } = useCurrencyStore();
   const { primarySymbol, secondarySymbol } = useDualCurrency();
+  const { user: authUser, partner: authPartner, isInitializing, householdId } = useAuthStore();
+  
   const [showSignOutPrompt, setShowSignOutPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const supabase = createClient();
-  const [profile, setProfile] = useState<any>(null);
-  const [partnerProfile, setPartnerProfile] = useState<any>(null);
   const [household, setHousehold] = useState<any>(null);
 
   const [joinStep, setJoinStep] = useState<'idle' | 'input' | 'verifying' | 'matched' | 'welcome'>('idle');
@@ -51,32 +52,22 @@ export default function ProfilePage() {
 
   useEffect(() => {
     setMounted(true);
-    async function loadData() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data: currentProfile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      if (currentProfile) {
-        setProfile({ ...currentProfile, email: user.email });
-        if (currentProfile.avatar_url) setProfileImage(currentProfile.avatar_url);
-        
-        if (currentProfile.household_id) {
-          const { data: h } = await supabase.from('households').select('*').eq('id', currentProfile.household_id).single();
-          if (h) setHousehold(h);
-          
-          const { data: partners } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('household_id', currentProfile.household_id)
-            .neq('id', currentProfile.id)
-            .limit(1);
-          if (partners && partners.length > 0) setPartnerProfile(partners[0]);
-        }
+    if (authUser?.avatar) {
+      setProfileImage(authUser.avatar);
+    }
+  }, [authUser?.avatar]);
+
+  useEffect(() => {
+    async function loadHousehold() {
+      if (householdId) {
+        const { data: h } = await supabase.from('households').select('*').eq('id', householdId).single();
+        if (h) setHousehold(h);
       }
     }
-    loadData();
-  }, [supabase]);
+    loadHousehold();
+  }, [householdId, supabase]);
 
-  const mockInviteCode = household?.invite_code || "8K9P2X";
+  const mockInviteCode = household?.invite_code || "------";
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(mockInviteCode);
@@ -178,12 +169,14 @@ export default function ProfilePage() {
                     style={{ transform: `scale(${imageZoom}) translate(${imagePan.x / imageZoom}px, ${imagePan.y / imageZoom}px)` }}
                   />
                 ) : (
-                  <span className="text-white text-[34px] font-medium tracking-tight drop-shadow-md group-hover:scale-110 transition-transform">{profile?.display_name?.[0]?.toUpperCase() || 'U'}</span>
+                  <span className="text-white text-[34px] font-medium tracking-tight drop-shadow-md group-hover:scale-110 transition-transform">
+                    {isInitializing ? "" : (authUser?.name?.[0]?.toUpperCase() || 'U')}
+                  </span>
                 )}
                 {!isEditingAvatar && <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />}
               </div>
               
-              {partnerProfile && !isEditingAvatar && (
+              {authPartner && !isEditingAvatar && (
                 <motion.div 
                   className="absolute -top-1 -right-2 z-20 pointer-events-none"
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -192,10 +185,10 @@ export default function ProfilePage() {
                 >
                   <div className="relative">
                     <div className="w-[42px] h-[42px] rounded-full border-[2.5px] border-[#0A0A0C] shadow-[0_8px_16px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden z-10 relative bg-gradient-to-b from-[#1C2C24] to-[#0A1A12]">
-                       {partnerProfile?.avatar_url ? (
-                         <img src={partnerProfile.avatar_url} className="w-full h-full object-cover" />
+                       {authPartner?.avatar ? (
+                         <img src={authPartner.avatar} className="w-full h-full object-cover" />
                        ) : (
-                         <span className="text-emerald-400 font-bold text-[16px] select-none">{partnerProfile?.display_name?.[0]?.toUpperCase() || 'P'}</span>
+                         <span className="text-emerald-400 font-bold text-[16px] select-none">{authPartner?.name?.[0]?.toUpperCase() || 'P'}</span>
                        )}
                     </div>
                     {/* Static positioned dots — no infinite Framer Motion floats */}
@@ -236,7 +229,7 @@ export default function ProfilePage() {
                   <button 
                     onClick={() => {
                       setIsEditingAvatar(false);
-                      if (profileImage) supabase.from('profiles').update({ avatar_url: profileImage }).eq('id', profile?.id);
+                      if (profileImage && authUser?.id) supabase.from('profiles').update({ avatar_url: profileImage }).eq('id', authUser.id);
                     }} 
                     className="w-full py-2 bg-white text-black rounded-xl text-[13px] font-bold hover:bg-white/90 active:scale-95 transition-all"
                   >
@@ -247,12 +240,22 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <h2 className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1">
-            {profile?.display_name || 'You'} {partnerProfile ? `& ${partnerProfile.display_name}` : ''}
+          <h2 className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1 min-h-[32px] flex items-center">
+            {isInitializing ? (
+              <div className="w-32 h-6 bg-white/10 animate-pulse rounded-md" />
+            ) : (
+              <>{authUser?.name || 'You'} {authPartner ? `& ${authPartner.name}` : ''}</>
+            )}
           </h2>
-          <p className="text-[14px] text-white/50 mb-7 font-medium">{profile?.email || 'user@example.com'}</p>
+          <div className="mb-7 min-h-[20px] flex items-center justify-center">
+            {isInitializing ? (
+              <div className="w-48 h-4 bg-white/10 animate-pulse rounded-md" />
+            ) : (
+              <p className="text-[14px] text-white/50 font-medium">{authUser?.email || 'user@example.com'}</p>
+            )}
+          </div>
           
-          {partnerProfile ? (
+          {authPartner ? (
             <div className="flex flex-col items-center gap-4">
               <div className="px-4 py-2 bg-[#0A0A0C] border border-[#30D158]/20 rounded-full flex items-center gap-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.5)]">
                 <div className="relative flex items-center justify-center">
