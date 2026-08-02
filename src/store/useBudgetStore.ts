@@ -56,6 +56,7 @@ interface BudgetState {
 
     _hasHydrated: boolean;
     setHasHydrated: (state: boolean) => void;
+    lastSyncedAt: number;
     initialize: () => Promise<void>;
 }
 
@@ -101,6 +102,7 @@ export const useBudgetStore = create<BudgetState>()(
         (set, get) => ({
             _hasHydrated: false,
             setHasHydrated: (state) => set({ _hasHydrated: state }),
+            lastSyncedAt: 0,
             initialize: async () => {
                 const supabase = createClient();
                 const { data: { session } } = await supabase.auth.getSession();
@@ -110,10 +112,12 @@ export const useBudgetStore = create<BudgetState>()(
                 if (profile?.household_id) {
                     const { data: budget } = await supabase.from('budgets').select('*').eq('household_id', profile.household_id).single();
                     if (budget) {
+                        // Accept server data as truth — empty arrays are valid (partner may have removed all categories)
                         set({
                             config: (Object.keys(budget.config || {}).length > 0 ? budget.config : get().config) as BudgetConfig,
-                            categories: (budget.categories && budget.categories.length > 0 ? budget.categories : get().categories) as BudgetCategory[],
-                            goals: (budget.goals && budget.goals.length > 0 ? budget.goals : get().goals) as Goal[],
+                            categories: (Array.isArray(budget.categories) ? budget.categories : get().categories) as BudgetCategory[],
+                            goals: (Array.isArray(budget.goals) ? budget.goals : get().goals) as Goal[],
+                            lastSyncedAt: budget.updated_at ? new Date(budget.updated_at).getTime() : Date.now(),
                         });
                     }
                 }
