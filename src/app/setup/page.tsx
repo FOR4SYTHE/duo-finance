@@ -8,6 +8,7 @@ import { WelcomeShader } from "@/components/auth/WelcomeShader";
 import { BorderBeam } from "border-beam";
 import { ThinkingOrb } from "thinking-orbs";
 import { createClient } from "@/utils/supabase/client";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function SetupPage() {
   const router = useRouter();
@@ -114,7 +115,8 @@ export default function SetupPage() {
     }, 1400);
   };
 
-  const handleFinishJoin = () => {
+  const handleFinishJoin = async () => {
+    await useAuthStore.getState().initialize();
     router.push("/");
   };
 

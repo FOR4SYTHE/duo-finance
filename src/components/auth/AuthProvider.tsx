@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { createClient } from "@/utils/supabase/client";
+
+const SYNC_COOLDOWN_MS = 30_000; // 30 seconds between background syncs
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const initializeAuth = useAuthStore(state => state.initialize);
@@ -14,31 +17,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const initializeBudget = useBudgetStore(state => state.initialize);
   
   const initializingRef = useRef(false);
+  const lastSyncRef = useRef(0);
+  const pathname = usePathname();
 
+  // Core sync function with optional throttle bypass
+  const syncAll = useCallback(async (force = false) => {
+    const now = Date.now();
+    if (!force && now - lastSyncRef.current < SYNC_COOLDOWN_MS) return;
+    if (initializingRef.current) return; // Already running
+
+    lastSyncRef.current = now;
+    initializingRef.current = true;
+    await initializeAuth();
+    await initializeCurrency();
+    await initializeSettings();
+    await initializeBudget();
+    setTimeout(() => { initializingRef.current = false; }, 100);
+  }, [initializeAuth, initializeCurrency, initializeSettings, initializeBudget]);
+
+  // 1. Initial load + auth state changes (force = true, always immediate)
   useEffect(() => {
     const supabase = createClient();
-    
-    // Initial fetch
-    const initAll = async () => {
-      initializingRef.current = true;
-      await initializeAuth();
-      await initializeCurrency();
-      await initializeSettings();
-      await initializeBudget();
-      // Give stores a tiny bit of time to settle after state updates
-      setTimeout(() => { initializingRef.current = false; }, 100);
-    };
-    initAll();
 
-    // Subscribe to auth changes (e.g. login, logout)
+    syncAll(true); // First load — always fetch
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      initAll();
+      syncAll(true); // Auth events (login/logout) bypass throttle
     });
 
-    return () => {
-      subscription.unsubscribe();
+    return () => { subscription.unsubscribe(); };
+  }, [syncAll]);
+
+  // 2. Route navigation sync (throttled — respects 30s cooldown)
+  useEffect(() => {
+    syncAll();
+  }, [pathname, syncAll]);
+
+  // 3. Tab focus / app unlock sync (throttled)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        syncAll();
+      }
     };
-  }, [initializeAuth, initializeCurrency, initializeSettings, initializeBudget]);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => { document.removeEventListener("visibilitychange", handleVisibilityChange); };
+  }, [syncAll]);
 
   // Sync Budget Store to Supabase automatically when it changes
   useEffect(() => {
