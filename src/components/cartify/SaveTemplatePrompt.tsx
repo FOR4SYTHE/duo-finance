@@ -18,8 +18,7 @@ export function SaveTemplatePrompt({ isOpen, onClose, onConfirmFinish }: SaveTem
     const [templateName, setTemplateName] = useState("");
     const [isSaved, setIsSaved] = useState(false);
     
-    const { items } = useCartifyStore();
-    const { saveTemplate } = useHouseholdStore();
+    const { items, saveTemplate } = useCartifyStore();
 
     useEffect(() => {
         setMounted(true);
@@ -38,11 +37,7 @@ export function SaveTemplatePrompt({ isOpen, onClose, onConfirmFinish }: SaveTem
         e.preventDefault();
         const finalName = templateName.trim() || "My Saved Trip";
         
-        saveTemplate({
-            id: `template-${Date.now()}`,
-            name: finalName,
-            items: items.map(i => i.name)
-        });
+        saveTemplate(finalName);
         
         setIsSaved(true);
         

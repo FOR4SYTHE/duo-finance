@@ -7,6 +7,7 @@ import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
+import { useCartifyStore } from "@/store/useCartifyStore";
 import { createClient } from "@/utils/supabase/client";
 
 const SYNC_COOLDOWN_MS = 30_000; // 30 seconds between background syncs
@@ -17,6 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const initializeSettings = useSettingsStore(state => state.initialize);
   const initializeBudget = useBudgetStore(state => state.initialize);
   const initializeSpend = useSpendStore(state => state.initialize);
+  const initializeCartify = useCartifyStore(state => state.initializeCartify);
   
   const initializingRef = useRef(false);
   const lastSyncRef = useRef(0);
@@ -35,8 +37,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await initializeSettings();
     await initializeBudget();
     await initializeSpend();
+    await initializeCartify();
     setTimeout(() => { initializingRef.current = false; }, 100);
-  }, [initializeAuth, initializeCurrency, initializeSettings, initializeBudget, initializeSpend]);
+  }, [initializeAuth, initializeCurrency, initializeSettings, initializeBudget, initializeSpend, initializeCartify]);
 
   // 1. Initial load + auth state changes (force = true, always immediate)
   useEffect(() => {

@@ -14,8 +14,7 @@ interface TemplatePickerSheetProps {
 
 export function TemplatePickerSheet({ isOpen, onClose }: TemplatePickerSheetProps) {
     const [mounted, setMounted] = useState(false);
-    const { tripTemplates } = useHouseholdStore();
-    const { addPlannedItem } = useCartifyStore();
+    const { templates, loadTemplate } = useCartifyStore();
 
     useEffect(() => {
         setMounted(true);
@@ -27,11 +26,8 @@ export function TemplatePickerSheet({ isOpen, onClose }: TemplatePickerSheetProp
         };
     }, [isOpen]);
 
-    const handleSelectTemplate = (items: string[]) => {
-        // Add all items from the template to the current planned trip
-        items.forEach(item => {
-            addPlannedItem(item);
-        });
+    const handleSelectTemplate = (id: string) => {
+        loadTemplate(id);
         onClose();
     };
 
@@ -71,7 +67,7 @@ export function TemplatePickerSheet({ isOpen, onClose }: TemplatePickerSheetProp
                         
                         {/* List */}
                         <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-3">
-                            {tripTemplates.length === 0 ? (
+                            {templates.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
                                     <div className="w-16 h-16 rounded-full bg-white/[0.03] border border-white/[0.05] flex items-center justify-center mb-4">
                                         <FileText className="w-8 h-8 text-white/20" />
@@ -82,10 +78,10 @@ export function TemplatePickerSheet({ isOpen, onClose }: TemplatePickerSheetProp
                                     </p>
                                 </div>
                             ) : (
-                                tripTemplates.map((template) => (
+                                templates.map((template) => (
                                     <button 
                                         key={template.id}
-                                        onClick={() => handleSelectTemplate(template.items)}
+                                        onClick={() => handleSelectTemplate(template.id)}
                                         className="group w-full bg-white/[0.03] border border-white/[0.06] rounded-[24px] p-4 flex items-center gap-4 hover:bg-white/[0.06] active:scale-[0.98] transition-all text-left"
                                     >
                                         <div className="w-10 h-10 rounded-full bg-[#30D158]/10 flex items-center justify-center border border-[#30D158]/20 shrink-0">

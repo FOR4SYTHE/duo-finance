@@ -43,7 +43,7 @@ export function ScheduleTripModal({ isOpen, onClose, onSaveComplete }: ScheduleT
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
         
-        const scheduledId = `scheduled-${Date.now()}`;
+        const scheduledId = crypto.randomUUID();
         scheduleTrip({
             id: scheduledId,
             date: selectedDate.toISOString(),
