@@ -81,3 +81,28 @@ export interface AppNotification {
         };
     };
 }
+
+export interface InsurancePolicy {
+    id: string;
+    household_id?: string;
+    provider: string; // Maps to provider_name
+    policyName: string; // Maps to plan_name
+    type: string; // Maps to plan_type
+    status: string;
+    policyNumber: string; // Maps to policy_number
+    coveredMembers: string[]; // Maps to covered_members
+    premium: number; // Maps to premium_amount
+    paymentFrequency: string; // Maps to premium_frequency
+    coverage: number; // Maps to coverage_limit
+    startDate: string; // Maps to start_date
+    expiryDate: string; // Maps to expiry_date
+    dueDate: string; // Maps to renewal_date
+    roomCategory?: string;
+    outpatientLimit?: number;
+    deductible?: number;
+    hotline?: string;
+    agentName?: string;
+    agentNumber?: string;
+    notes?: string;
+    updated_at?: string;
+}

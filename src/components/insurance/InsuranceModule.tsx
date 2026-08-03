@@ -12,6 +12,7 @@ import { MedicalLogTab } from "./MedicalLogTab";
 import { AddPlanSheet } from "./AddPlanSheet";
 import { ManualInputSheet } from "./ManualInputSheet";
 import { LogVisitSheet } from "./LogVisitSheet";
+import { useInsuranceStore } from "@/store/useInsuranceStore";
 
 interface TabItem {
     id: string;
@@ -48,14 +49,17 @@ const TABS: TabItem[] = [
 ];
 
 export function InsuranceModule() {
+    const { policies, addPolicy, updatePolicy } = useInsuranceStore();
     const [activeTab, setActiveTab] = useState<string>('my-plans');
-    const [hasPolicies, setHasPolicies] = useState(false);
+    const hasPolicies = policies.length > 0;
     
     // Modal states
     const [isAddPlanOpen, setIsAddPlanOpen] = useState(false);
     const [isManualInputOpen, setIsManualInputOpen] = useState(false);
     const [isLogVisitOpen, setIsLogVisitOpen] = useState(false);
     const [successPolicy, setSuccessPolicy] = useState<{ provider: string, name: string } | null>(null);
+    const [scannedData, setScannedData] = useState<any>(null);
+    const [editingPolicyId, setEditingPolicyId] = useState<string | null>(null);
 
     // Only hide nav if we're on the default tab AND have no policies (the true onboarding state)
     const showNav = hasPolicies || activeTab !== 'my-plans';
@@ -70,6 +74,14 @@ export function InsuranceModule() {
                                 hasPolicies={hasPolicies} 
                                 onAddPlan={() => setIsAddPlanOpen(true)} 
                                 onExplore={() => setActiveTab('explore')} 
+                                onEditPlan={(id) => {
+                                    const p = policies.find(x => x.id === id);
+                                    if (p) {
+                                        setScannedData(p);
+                                        setEditingPolicyId(p.id);
+                                        setIsManualInputOpen(true);
+                                    }
+                                }}
                             />
                         </motion.div>
                     )}
@@ -148,20 +160,33 @@ export function InsuranceModule() {
             <AddPlanSheet 
                 isOpen={isAddPlanOpen}
                 onClose={() => setIsAddPlanOpen(false)}
-                onSelectManual={() => setIsManualInputOpen(true)}
-                onSelectScan={() => {
+                onSelectManual={() => {
+                    setScannedData(null);
+                    setIsManualInputOpen(true);
+                }}
+                onSelectScan={(data) => {
                     setIsAddPlanOpen(false);
-                    // In a real flow, this would open camera. For now, mock success:
-                    setTimeout(() => setHasPolicies(true), 500);
+                    setScannedData(data);
+                    setIsManualInputOpen(true);
                 }}
             />
 
             <ManualInputSheet 
                 isOpen={isManualInputOpen}
-                onClose={() => setIsManualInputOpen(false)}
+                onClose={() => {
+                    setIsManualInputOpen(false);
+                    setScannedData(null);
+                    setEditingPolicyId(null);
+                }}
+                initialData={scannedData}
                 onSave={(data) => {
-                    console.log("Saved Policy:", data);
+                    if (editingPolicyId) {
+                        updatePolicy(editingPolicyId, data);
+                    } else {
+                        addPolicy(data);
+                    }
                     setSuccessPolicy({ provider: data.provider, name: data.policyName || 'New Policy' });
+                    setEditingPolicyId(null);
                 }}
             />
 
@@ -207,7 +232,6 @@ export function InsuranceModule() {
                                     onClick={() => {
                                         setSuccessPolicy(null);
                                         setActiveTab('benefits');
-                                        setHasPolicies(true);
                                     }}
                                     className="w-full py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[15px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)]"
                                 >
@@ -216,7 +240,6 @@ export function InsuranceModule() {
                                 <button 
                                     onClick={() => {
                                         setSuccessPolicy(null);
-                                        setHasPolicies(true);
                                     }}
                                     className="w-full py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[15px] transition-all active:scale-[0.98] border border-white/5"
                                 >

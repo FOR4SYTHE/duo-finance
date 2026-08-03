@@ -28,6 +28,7 @@ import { useHouseholdStore } from "@/store/useHouseholdStore";
 import { useCartifyStore } from "@/store/useCartifyStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useBudgetStore } from "@/store/useBudgetStore";
+import { useInsuranceStore } from "@/store/useInsuranceStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { formatCurrency } from "@/lib/format";
 
@@ -89,6 +90,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
   const { bills, addBill, updateBill, removeBill, toggleReminder, togglePaid } = useBillsStore();
   const { scheduledTrips, deleteScheduledTrip } = useHouseholdStore();
   const { savedTrips, deleteSavedTrip } = useCartifyStore();
+  const { policies } = useInsuranceStore();
   const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
   const now = new Date();
   const [viewMonth, setViewMonth] = useState(now.getMonth());
@@ -209,8 +211,26 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
       }
     });
 
+    policies.forEach(p => {
+      if (!p.dueDate) return;
+      const d = new Date(p.dueDate);
+      if (d.getMonth() === viewMonth && d.getFullYear() === viewYear) {
+        events.push({
+          id: p.id,
+          name: `${p.provider} Renewal`,
+          amount: p.premium || 0,
+          dueDay: d.getDate(),
+          category: "Insurance",
+          isRecurring: p.paymentFrequency === 'Monthly',
+          eventType: 'insurance',
+          reminderEnabled: true,
+          isPaid: false
+        });
+      }
+    });
+
     return events;
-  }, [bills, scheduledTrips, savedTrips, viewMonth, viewYear]);
+  }, [bills, scheduledTrips, savedTrips, policies, viewMonth, viewYear]);
 
   const eventsByDay = useMemo(() => {
     const map: Record<number, any[]> = {};
@@ -686,7 +706,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                         <span className="text-[12px] font-bold text-white/40 tracking-tight">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(bill.amount))}</span>
                       </div>
                       <div className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${bill.isPaid ? 'bg-[#30D158]/10 text-[#30D158] border border-[#30D158]/20' : 'bg-white/10 text-white/90 border border-white/5'}`}>
-                        {bill.isPaid ? 'Paid' : (bill.eventType === 'trip' ? (bill.tripType === 'scheduled' ? 'Scheduled Trip' : 'Saved Trip') : 'Scheduled')}
+                        {bill.isPaid ? 'Paid' : (bill.eventType === 'trip' ? (bill.tripType === 'scheduled' ? 'Scheduled Trip' : 'Saved Trip') : bill.eventType === 'insurance' ? 'Renewal' : 'Scheduled')}
                       </div>
                     </div>
                   </div>

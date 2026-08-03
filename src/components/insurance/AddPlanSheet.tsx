@@ -10,16 +10,72 @@ interface AddPlanSheetProps {
     isOpen: boolean;
     onClose: () => void;
     onSelectManual: () => void;
-    onSelectScan?: () => void;
+    onSelectScan: (scannedData: any) => void;
 }
 
 export function AddPlanSheet({ isOpen, onClose, onSelectManual, onSelectScan }: AddPlanSheetProps) {
     const [mounted, setMounted] = useState(false);
+    const [isScanning, setIsScanning] = useState(false);
+    const [scanError, setScanError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsScanning(true);
+        setScanError(null);
+        try {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                try {
+                    const base64Data = (reader.result as string).split(',')[1];
+                    const response = await fetch('/api/ai/scan-insurance', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            image: base64Data,
+                            mimeType: file.type
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.error || 'Failed to scan document');
+                    }
+
+                    const data = await response.json();
+                    setIsScanning(false);
+                    onSelectScan(data);
+                } catch (error: any) {
+                    setIsScanning(false);
+                    setScanError(error.message || 'Could not read the policy document.');
+                    const { useBudgetStore } = await import('@/store/useBudgetStore');
+                    useBudgetStore.getState().addNotification({
+                        title: 'Scan Failed',
+                        message: error.message || 'Could not read the policy document.',
+                        read: false,
+                        type: 'alert'
+                    });
+                }
+            };
+        } catch (error: any) {
+            setIsScanning(false);
+            setScanError('Failed to process image.');
+            const { useBudgetStore } = await import('@/store/useBudgetStore');
+            useBudgetStore.getState().addNotification({
+                title: 'Scan Error',
+                message: 'Failed to process image.',
+                read: false,
+                type: 'alert'
+            });
+        }
+    };
 
     if (!mounted) return null;
 
@@ -52,6 +108,18 @@ export function AddPlanSheet({ isOpen, onClose, onSelectManual, onSelectScan }: 
                             </button>
                         </div>
 
+                        {scanError && (
+                            <div className="mb-6 p-4 rounded-[16px] bg-[#FF453A]/10 border border-[#FF453A]/20 flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-[#FF453A]/20 flex items-center justify-center flex-shrink-0">
+                                    <X className="w-4 h-4 text-[#FF453A]" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[#FF453A] font-bold text-[14px]">Scan Failed</span>
+                                    <span className="text-white/60 text-[12px] font-medium leading-snug">{scanError}</span>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex flex-col gap-4 mb-4">
                             {/* Hidden Native Camera/File Input */}
                             <input 
@@ -60,15 +128,7 @@ export function AddPlanSheet({ isOpen, onClose, onSelectManual, onSelectScan }: 
                                 accept="image/*,application/pdf" 
                                 capture="environment" 
                                 className="hidden" 
-                                onChange={(e) => {
-                                    if (e.target.files && e.target.files.length > 0) {
-                                        if (onSelectScan) {
-                                            onSelectScan();
-                                        } else {
-                                            onClose();
-                                        }
-                                    }
-                                }} 
+                                onChange={handleFileSelect} 
                             />
 
                             {/* AI Scan Option (Primary) */}
@@ -83,17 +143,21 @@ export function AddPlanSheet({ isOpen, onClose, onSelectManual, onSelectScan }: 
                                 
                                 <div className="relative z-10 flex gap-5 items-center">
                                     <div className="w-14 h-14 rounded-full bg-[#D4AF37]/20 flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.3)]">
-                                        <ScanLine className="w-7 h-7 text-[#D4AF37]" />
+                                        <ScanLine className={`w-7 h-7 text-[#D4AF37] ${isScanning ? 'animate-pulse' : ''}`} />
                                     </div>
                                     <div className="flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-bold text-[17px] text-white">Scan Insurance Policy</span>
-                                            <div className="px-1.5 py-0.5 rounded bg-white/10 border border-white/5 flex items-center justify-center">
-                                                <span className="text-[9px] font-black uppercase tracking-wider bg-[linear-gradient(110deg,#D4AF37,#E5E4E2,#D4AF37)] text-transparent bg-clip-text">AI</span>
-                                            </div>
+                                            <span className="font-bold text-[17px] text-white">
+                                                {isScanning ? 'Scanning...' : 'Scan Insurance Policy'}
+                                            </span>
+                                            {!isScanning && (
+                                                <div className="px-1.5 py-0.5 rounded bg-white/10 border border-white/5 flex items-center justify-center">
+                                                    <span className="text-[9px] font-black uppercase tracking-wider bg-[linear-gradient(110deg,#D4AF37,#E5E4E2,#D4AF37)] text-transparent bg-clip-text">AI</span>
+                                                </div>
+                                            )}
                                         </div>
                                         <span className="text-white/50 text-[13px] font-medium leading-relaxed max-w-[200px]">
-                                            Take a photo of your policy. We'll extract the details instantly.
+                                            {isScanning ? 'Extracting policy details. This takes a moment.' : 'Take a photo of your policy. We\'ll extract the details instantly.'}
                                         </span>
                                     </div>
                                 </div>

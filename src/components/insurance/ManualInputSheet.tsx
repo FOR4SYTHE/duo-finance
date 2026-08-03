@@ -7,11 +7,13 @@ import { X, ChevronDown, Check, ChevronRight, Phone, Calendar } from "lucide-rea
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { formatCurrency } from "@/lib/format";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
+import { NumericEntryModal } from "./NumericEntryModal";
 
 interface ManualInputSheetProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (policyData: any) => void;
+    initialData?: any;
 }
 
 const POLICY_TYPES = ['HMO', 'Medical Insurance', 'Life Insurance', 'Critical Illness', 'Accident', 'Dental'];
@@ -89,7 +91,7 @@ const SelectDropdown = ({ label, value, options, onChange }: any) => {
     );
 };
 
-export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetProps) {
+export function ManualInputSheet({ isOpen, onClose, onSave, initialData }: ManualInputSheetProps) {
     const [mounted, setMounted] = useState(false);
     const { exchangeRate } = useCurrencyStore();
     const { primarySymbol } = useDualCurrency();
@@ -120,8 +122,52 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
     const [agentName, setAgentName] = useState('');
     const [agentNumber, setAgentNumber] = useState('');
     const [notes, setNotes] = useState('');
+    
+    useEffect(() => {
+        if (isOpen && initialData) {
+            setProvider(initialData.provider || '');
+            setPolicyName(initialData.policyName || '');
+            if (initialData.type && POLICY_TYPES.includes(initialData.type)) setPolicyType(initialData.type);
+            setPolicyNumber(initialData.policyNumber || '');
+            if (initialData.status && STATUS_OPTIONS.includes(initialData.status)) setStatus(initialData.status);
+            
+            setPremiumStr(initialData.premium ? formatNumberInput(initialData.premium) : '');
+            if (initialData.paymentFrequency && PAYMENT_FREQUENCIES.includes(initialData.paymentFrequency)) setPaymentFreq(initialData.paymentFrequency);
+            
+            // Reformat YYYY-MM-DD to MM/DD/YYYY
+            const toUSDate = (d: string) => {
+                if (!d || !d.includes('-')) return d || '';
+                const parts = d.split('-');
+                if (parts.length === 3) return `${parts[1]}/${parts[2]}/${parts[0]}`;
+                return d;
+            };
 
-    const formatNumberInput = (value: string) => {
+            setDueDate(toUSDate(initialData.dueDate));
+            setCoverageStr(initialData.coverage ? formatNumberInput(initialData.coverage) : '');
+            setStartDate(toUSDate(initialData.startDate));
+            setExpiryDate(toUSDate(initialData.expiryDate));
+            
+            if (initialData.roomCategory && ROOM_CATEGORIES.includes(initialData.roomCategory)) setRoomCategory(initialData.roomCategory);
+            setOutpatientLimit(initialData.outpatientLimit ? formatNumberInput(initialData.outpatientLimit) : '');
+            setDeductible(initialData.deductible ? formatNumberInput(initialData.deductible) : '');
+            setHotline(initialData.hotline || '');
+            setAgentName(initialData.agentName || '');
+            setAgentNumber(initialData.agentNumber || '');
+            
+            // If they provided advanced details, auto-expand
+            if (initialData.roomCategory || initialData.outpatientLimit || initialData.deductible || initialData.hotline || initialData.agentName) {
+                setShowMore(true);
+            }
+        }
+    }, [isOpen, initialData]);
+
+    // Numeric Pad State
+    const [activeNumericField, setActiveNumericField] = useState<{ id: string, title: string, value: number } | null>(null);
+
+    const formatNumberInput = (value: string | number) => {
+        if (typeof value === 'number') {
+            return value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        }
         const numbers = value.replace(/[^0-9.]/g, '');
         if (!numbers) return '';
         const parts = numbers.split('.');
@@ -132,8 +178,15 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
     const handleDateMask = (val: string) => {
         let v = val.replace(/\D/g, '');
         if (v.length >= 3 && v.length <= 4) v = v.slice(0, 2) + '/' + v.slice(2);
-        else if (v.length >= 5) v = v.slice(0, 2) + '/' + v.slice(2, 4) + '/' + v.slice(4, 8);
+        else if (v.length > 4) v = v.slice(0, 2) + '/' + v.slice(2, 4) + '/' + v.slice(4, 8);
         return v;
+    };
+
+    const usToISO = (dateStr: string) => {
+        if (!dateStr || dateStr.length !== 10) return '';
+        const parts = dateStr.split('/');
+        if (parts.length === 3) return `${parts[2]}-${parts[0]}-${parts[1]}`;
+        return dateStr;
     };
 
     const toggleMember = (member: string) => {
@@ -156,10 +209,10 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
             status,
             premium: parseFloat(premiumStr.replace(/,/g, '') || '0'),
             paymentFrequency: paymentFreq,
-            dueDate,
+            dueDate: usToISO(dueDate),
             coverage: parseFloat(coverageStr.replace(/,/g, '') || '0'),
-            startDate,
-            expiryDate,
+            startDate: usToISO(startDate),
+            expiryDate: usToISO(expiryDate),
             roomCategory,
             outpatientLimit: parseFloat(outpatientLimit.replace(/,/g, '') || '0'),
             deductible: parseFloat(deductible.replace(/,/g, '') || '0'),
@@ -168,6 +221,8 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
             agentNumber,
             notes
         });
+        
+        // Don't reset state here. The parent removes the initialData when closed.
         onClose();
     };
 
@@ -175,6 +230,18 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
     const coverageLabel = policyType === 'HMO' ? 'Maximum Benefit Limit (MBL)' : 
                           policyType === 'Medical Insurance' ? 'Annual Benefit Limit (ABL)' : 
                           'Face Amount / Coverage Limit';
+
+    const handleNumericConfirm = (val: number) => {
+        if (!activeNumericField) return;
+        const strVal = formatNumberInput(val);
+        switch (activeNumericField.id) {
+            case 'coverage': setCoverageStr(strVal); break;
+            case 'premium': setPremiumStr(strVal); break;
+            case 'outpatient': setOutpatientLimit(strVal); break;
+            case 'deductible': setDeductible(strVal); break;
+        }
+        setActiveNumericField(null);
+    };
 
     // Summary Card Theme
     const getThemeColor = () => {
@@ -282,10 +349,14 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
                             <div className="flex flex-col gap-4 mb-8">
                                 <h4 className="text-white/40 text-[13px] font-bold uppercase tracking-wider mb-2">Coverage & Premium</h4>
                                 
-                                <FloatingInput label={coverageLabel} value={coverageStr} onChange={(e: any) => setCoverageStr(formatNumberInput(e.target.value))} prefix={primarySymbol} inputMode="decimal" />
+                                <div onClick={() => setActiveNumericField({ id: 'coverage', title: coverageLabel, value: parseFloat(coverageStr.replace(/,/g, '') || '0') })}>
+                                    <FloatingInput label={coverageLabel} value={coverageStr} readOnly prefix={primarySymbol} />
+                                </div>
                                 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <FloatingInput label="Premium Amount" value={premiumStr} onChange={(e: any) => setPremiumStr(formatNumberInput(e.target.value))} prefix={primarySymbol} inputMode="decimal" />
+                                    <div onClick={() => setActiveNumericField({ id: 'premium', title: 'Premium Amount', value: parseFloat(premiumStr.replace(/,/g, '') || '0') })}>
+                                        <FloatingInput label="Premium Amount" value={premiumStr} readOnly prefix={primarySymbol} />
+                                    </div>
                                     <SelectDropdown label="Frequency" value={paymentFreq} options={PAYMENT_FREQUENCIES} onChange={setPaymentFreq} />
                                 </div>
 
@@ -324,10 +395,14 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
                                             {policyType === 'HMO' && (
                                                 <>
                                                     <SelectDropdown label="Room Category" value={roomCategory} options={ROOM_CATEGORIES} onChange={setRoomCategory} />
-                                                    <FloatingInput label="Outpatient Limit" value={outpatientLimit} onChange={(e: any) => setOutpatientLimit(formatNumberInput(e.target.value))} prefix={primarySymbol} />
+                                                    <div onClick={() => setActiveNumericField({ id: 'outpatient', title: 'Outpatient Limit', value: parseFloat(outpatientLimit.replace(/,/g, '') || '0') })}>
+                                                        <FloatingInput label="Outpatient Limit" value={outpatientLimit} readOnly prefix={primarySymbol} />
+                                                    </div>
                                                 </>
                                             )}
-                                            <FloatingInput label="Deductible / Co-pay" value={deductible} onChange={(e: any) => setDeductible(formatNumberInput(e.target.value))} prefix={primarySymbol} />
+                                            <div onClick={() => setActiveNumericField({ id: 'deductible', title: 'Deductible / Co-pay', value: parseFloat(deductible.replace(/,/g, '') || '0') })}>
+                                                <FloatingInput label="Deductible / Co-pay" value={deductible} readOnly prefix={primarySymbol} />
+                                            </div>
                                             
                                             <div className="w-full h-px bg-white/5 my-2" />
                                             
@@ -365,6 +440,15 @@ export function ManualInputSheet({ isOpen, onClose, onSave }: ManualInputSheetPr
                                 </button>
                             </div>
                         </div>
+
+                        {/* Numeric Entry Modal */}
+                        <NumericEntryModal
+                            isOpen={activeNumericField !== null}
+                            onClose={() => setActiveNumericField(null)}
+                            title={activeNumericField?.title || ''}
+                            initialValue={activeNumericField?.value || 0}
+                            onConfirm={handleNumericConfirm}
+                        />
                     </motion.div>
                 </div>
             )}

@@ -8,16 +8,19 @@ import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/format";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
+import { useInsuranceStore } from "@/store/useInsuranceStore";
 
 interface MyPlansTabProps {
     hasPolicies?: boolean;
     onAddPlan?: () => void;
     onExplore?: () => void;
+    onEditPlan?: (id: string) => void;
 }
 
-export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlansTabProps) {
+export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPlan }: MyPlansTabProps) {
     const { exchangeRate } = useCurrencyStore();
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
+    const { policies, removePolicy } = useInsuranceStore();
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
 
@@ -181,138 +184,93 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore }: MyPlan
 
     return (
         <div className="flex flex-col gap-4">
-            {/* Populated state (Mock data matching Stitch UI design + Dual currency) */}
-            
-            {/* Silver Care HMO */}
-            <div className="bg-[#1A1A1A] rounded-[24px] p-5 border border-white/5 shadow-[0_8px_16px_rgba(0,0,0,0.2)]">
-                <div className="flex justify-between items-start mb-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
-                            <Shield className="w-6 h-6 text-blue-400" />
-                        </div>
-                        <div>
-                            <h3 className="text-white font-bold text-[17px] tracking-tight">{`Silver Care HMO`}</h3>
-                            <p className="text-white/50 text-[13px] font-medium mt-0.5">MediTrust</p>
-                        </div>
-                    </div>
-                    <div className="px-2.5 py-1 rounded-full bg-[#30D158]/10 border border-[#30D158]/20 flex items-center gap-1.5 h-fit mt-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#30D158]" />
-                        <span className="text-[#30D158] text-[10px] font-bold uppercase tracking-widest">Active</span>
-                    </div>
-                </div>
+            {policies.map(policy => {
+                let badgeColor = "bg-[#30D158]";
+                let badgeText = policy.status;
                 
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1">
-                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Premium</span>
-                        <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(1200))}</span>
-                            <span className="text-white/50 text-[13px] font-medium">/yr</span>
-                        </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(1200))}/yr</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">MBL</span>
-                        <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(50000))}</span>
-                        </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(50000))}</span>
-                    </div>
-                    <div className="flex flex-col gap-1 mt-3">
-                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">OPD Limit</span>
-                        <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(500))}</span>
-                        </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(500))}</span>
-                    </div>
-                </div>
-            </div>
+                if (policy.status === 'Expiring Soon') {
+                    badgeColor = "bg-[#E8A33D]";
+                } else if (policy.status === 'Expired' || policy.status === 'Cancelled') {
+                    badgeColor = "bg-[#FF453A]";
+                }
+                
+                let iconColor = "text-blue-400";
+                if (policy.type === 'Life Insurance') iconColor = "text-[#D4AF37]";
+                else if (policy.type === 'Medical Insurance') iconColor = "text-green-400";
+                else if (policy.type === 'Critical Illness') iconColor = "text-red-400";
 
-            {/* Infinity Life */}
-            <div className="bg-[#1A1A1A] rounded-[24px] p-5 border border-white/5 shadow-[0_8px_16px_rgba(0,0,0,0.2)]">
-                <div className="flex justify-between items-start mb-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
-                            <Shield className="w-6 h-6 text-[#D4AF37]" />
+                return (
+                    <div 
+                        key={policy.id} 
+                        onClick={() => onEditPlan?.(policy.id)}
+                        role="button"
+                        className="bg-[#1A1A1A] rounded-[24px] p-5 border border-white/5 shadow-[0_8px_16px_rgba(0,0,0,0.2)] hover:border-white/10 transition-colors cursor-pointer active:scale-[0.98]"
+                    >
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
+                                    <Shield className={`w-6 h-6 ${iconColor}`} />
+                                </div>
+                                <div>
+                                    <h3 className="text-white font-bold text-[17px] tracking-tight">{policy.policyName}</h3>
+                                    <p className="text-white/50 text-[13px] font-medium mt-0.5">{policy.provider}</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                                <div className={`px-2.5 py-1 rounded-full ${badgeColor}/10 border border-${badgeColor}/20 flex items-center gap-1.5 h-fit mt-1`}>
+                                    <div className={`w-1.5 h-1.5 rounded-full ${badgeColor}`} />
+                                    <span className={`${badgeColor.replace('bg-', 'text-')} text-[10px] font-bold uppercase tracking-widest`}>{badgeText}</span>
+                                </div>
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        removePolicy(policy.id);
+                                    }} 
+                                    className="text-white/30 text-xs hover:text-red-400 transition-colors z-10"
+                                >
+                                    Remove
+                                </button>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="text-white font-bold text-[17px] tracking-tight">{`Infinity Life`}</h3>
-                            <p className="text-white/50 text-[13px] font-medium mt-0.5">SafeGuard</p>
-                        </div>
-                    </div>
-                    <div className="px-2.5 py-1 rounded-full bg-[#E8A33D]/10 border border-[#E8A33D]/20 flex items-center gap-1.5 h-fit mt-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#E8A33D]" />
-                        <span className="text-[#E8A33D] text-[10px] font-bold uppercase tracking-widest">Renewal in 12 days</span>
-                    </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1">
-                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Premium</span>
-                        <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(2500))}</span>
-                            <span className="text-white/50 text-[13px] font-medium">/yr</span>
-                        </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(2500))}/yr</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Fund Value</span>
-                        <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-[#D4AF37] font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(12450))}</span>
-                        </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(12450))}</span>
-                    </div>
-                    <div className="flex flex-col gap-1 mt-3">
-                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Life Cover</span>
-                        <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(500000))}</span>
-                        </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(500000))}</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Public Health Plus */}
-            <div className="bg-[#1A1A1A] rounded-[24px] p-5 border border-white/5 shadow-[0_8px_16px_rgba(0,0,0,0.2)]">
-                <div className="flex justify-between items-start mb-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
-                            <Shield className="w-6 h-6 text-green-400" />
-                        </div>
-                        <div>
-                            <h3 className="text-white font-bold text-[17px] tracking-tight">{`Public Health Plus`}</h3>
-                            <p className="text-white/50 text-[13px] font-medium mt-0.5">GovHealth</p>
-                        </div>
-                    </div>
-                    <div className="px-2.5 py-1 rounded-full bg-[#30D158]/10 border border-[#30D158]/20 flex items-center gap-1.5 h-fit mt-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#30D158]" />
-                        <span className="text-[#30D158] text-[10px] font-bold uppercase tracking-widest">Active</span>
-                    </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1">
-                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Premium</span>
-                        <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(300))}</span>
-                            <span className="text-white/50 text-[13px] font-medium">/yr</span>
-                        </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(300))}/yr</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Coverage</span>
-                        <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">100%</span>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="flex flex-col gap-1">
+                                <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Premium</span>
+                                <div className="flex items-baseline gap-1 mt-0.5">
+                                    <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(policy.premium))}</span>
+                                    <span className="text-white/50 text-[13px] font-medium">/{policy.paymentFrequency === 'Monthly' ? 'mo' : policy.paymentFrequency === 'Quarterly' ? 'qtr' : policy.paymentFrequency === 'Semi-Annual' ? 'half' : 'yr'}</span>
+                                </div>
+                                <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(policy.premium))}</span>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Coverage</span>
+                                <div className="flex items-baseline gap-1 mt-0.5">
+                                    <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(policy.coverage))}</span>
+                                </div>
+                                <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(policy.coverage))}</span>
+                            </div>
+                            {(policy.outpatientLimit || 0) > 0 && (
+                                <div className="flex flex-col gap-1 mt-3">
+                                    <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">OPD Limit</span>
+                                    <div className="flex items-baseline gap-1 mt-0.5">
+                                        <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(policy.outpatientLimit || 0))}</span>
+                                    </div>
+                                    <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(policy.outpatientLimit || 0))}</span>
+                                </div>
+                            )}
+                            {(policy.deductible || 0) > 0 && (
+                                <div className="flex flex-col gap-1 mt-3">
+                                    <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Deductible</span>
+                                    <div className="flex items-baseline gap-1 mt-0.5">
+                                        <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(policy.deductible || 0))}</span>
+                                    </div>
+                                    <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}{formatCurrency(getSecondaryValue(policy.deductible || 0))}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
-                    <div className="flex flex-col gap-1 mt-3">
-                        <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest">Deductible</span>
-                        <div className="flex items-baseline gap-1 mt-0.5">
-                            <span className="text-white font-black text-[22px] tracking-tight">{primarySymbol}0</span>
-                        </div>
-                        <span className="text-white/50 text-[11px] font-bold">≈{secondarySymbol}0</span>
-                    </div>
-                </div>
-            </div>
+                );
+            })}
 
             {/* Actions */}
             <div className="flex flex-col gap-3 mt-4">

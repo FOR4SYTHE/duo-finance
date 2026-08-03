@@ -335,11 +335,11 @@ The generated UI mockups (Stitch designs) are visual references only. Apply thes
 5. **Design System Tokens:** Rebuild the UI using our actual design tokens (`@theme` in globals.css), not Stitch's auto-generated colors. Reuse existing components (pill row, keypad sheet, category badges).
 
 #### 5. Build Order for Insurance Tracker
-1. Wait for Supabase + household migration to be fully complete.
-2. `insurance_policies` table + RLS + My Plans tab (CRUD, empty state onboarding).
+1. (Skipped mock phase since Supabase is live)
+2. ✅ `insurance_policies` table + RLS + My Plans tab (CRUD, empty state onboarding).
+   - *Included AI Scanner via Gemini Vision for parsing documents into JSON structure and pre-filling the Manual Input Sheet.*
 3. `insurance_plan_templates` table + seeding + Benefits Reader tab.
-4. Explore & Compare tab.
-5. `medical_events` table + Medical Log tab (must wire to `expense_entries`).
+4. Medical Log tab + `medical_events`. table + Medical Log tab (must wire to `expense_entries`).
 6. What to Get gap-analyzer tab.
 7. Wire `renewal_date` into the Home Bills/Due-Date Calendar.
 8. (Later) Scan policy document via Anthropic API.
