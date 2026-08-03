@@ -63,7 +63,7 @@ export default function LoginPage() {
       setErrorMsg(error.message);
       return;
     }
-    router.push("/setup");
+    window.location.href = "/";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,7 +84,7 @@ export default function LoginPage() {
       setErrorMsg(error.message);
       return;
     }
-    router.push("/setup");
+    window.location.href = "/";
   };
 
   const handleGoogleAuth = async () => {

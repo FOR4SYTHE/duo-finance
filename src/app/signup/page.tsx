@@ -64,7 +64,7 @@ export default function SignupPage() {
       setErrorMsg(error.message);
       return;
     }
-    router.push("/setup");
+    window.location.href = "/";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -100,7 +100,7 @@ export default function SignupPage() {
       return;
     }
 
-    router.push("/setup");
+    window.location.href = "/";
   };
 
   const handleGoogleAuth = async () => {

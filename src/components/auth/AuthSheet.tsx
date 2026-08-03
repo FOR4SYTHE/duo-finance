@@ -62,7 +62,7 @@ export function AuthSheet({ isOpen, onClose, mode }: AuthSheetProps) {
       // Email/Password login
       login(email);
       setIsLoading(false);
-      router.push("/setup");
+      window.location.href = "/";
       onClose();
     }
   };
@@ -98,7 +98,7 @@ export function AuthSheet({ isOpen, onClose, mode }: AuthSheetProps) {
     await new Promise(r => setTimeout(r, 1200));
     login(email);
     setIsLoading(false);
-    router.push("/setup");
+    window.location.href = "/";
     onClose();
   };
 
