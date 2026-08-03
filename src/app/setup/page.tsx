@@ -37,7 +37,7 @@ export default function SetupPage() {
       if (data) {
         setProfile(data);
         if (data.household_id) {
-          router.push("/");
+          window.location.href = "/";
         }
       }
     }
@@ -76,7 +76,7 @@ export default function SetupPage() {
 
     setSuccess(true);
     setTimeout(() => {
-      router.push("/");
+      window.location.href = "/";
     }, 1000);
   };
 
@@ -117,7 +117,7 @@ export default function SetupPage() {
 
   const handleFinishJoin = async () => {
     await useAuthStore.getState().initialize();
-    router.push("/");
+    window.location.href = "/";
   };
 
   return (
