@@ -9,22 +9,31 @@ import { formatCurrency } from "@/lib/format";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 import { useInsuranceStore } from "@/store/useInsuranceStore";
+import { CoverageStatus } from "@/types/insurance";
+import { MedicalEvent } from "@/types/medical";
 
 interface LogVisitSheetProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (visitData: any) => void;
+    onSave: (visitData: Omit<MedicalEvent, 'id' | 'household_id' | 'created_at'>) => void;
+    initialPolicyId?: string;
 }
 
 const VISIT_TYPES = ['Checkup', 'Dental', 'Specialist', 'ER / Hospital'];
 const STATUS_OPTIONS = ['Covered', 'Partial', 'Out-of-Pocket', 'Claim Pending'];
 
-export function LogVisitSheet({ isOpen, onClose, onSave }: LogVisitSheetProps) {
+export function LogVisitSheet({ isOpen, onClose, onSave, initialPolicyId }: LogVisitSheetProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    useEffect(() => {
+        if (isOpen) {
+            setPolicyId(initialPolicyId);
+        }
+    }, [isOpen, initialPolicyId]);
 
     const { exchangeRate } = useCurrencyStore();
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
@@ -32,8 +41,8 @@ export function LogVisitSheet({ isOpen, onClose, onSave }: LogVisitSheetProps) {
     const activePolicies = allPolicies.filter(p => p.status !== 'Bookmarked');
     
     const [visitType, setVisitType] = useState('Checkup');
-    const [policyId, setPolicyId] = useState<string | undefined>(undefined);
-    const [status, setStatus] = useState('Covered');
+    const [policyId, setPolicyId] = useState<string | undefined>(initialPolicyId);
+    const [status, setStatus] = useState<CoverageStatus>('Covered');
     const [isInfoOpen, setIsInfoOpen] = useState(false);
     
     const [billStr, setBillStr] = useState('');

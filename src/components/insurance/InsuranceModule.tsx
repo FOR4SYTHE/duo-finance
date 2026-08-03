@@ -58,6 +58,7 @@ export function InsuranceModule() {
     const [isAddPlanOpen, setIsAddPlanOpen] = useState(false);
     const [isManualInputOpen, setIsManualInputOpen] = useState(false);
     const [isLogVisitOpen, setIsLogVisitOpen] = useState(false);
+    const [activeLogVisitPolicyId, setActiveLogVisitPolicyId] = useState<string | undefined>(undefined);
     const [successPolicy, setSuccessPolicy] = useState<{ provider: string, name: string } | null>(null);
     const [scannedData, setScannedData] = useState<any>(null);
     const [editingPolicyId, setEditingPolicyId] = useState<string | null>(null);
@@ -83,7 +84,10 @@ export function InsuranceModule() {
                                         setIsManualInputOpen(true);
                                     }
                                 }}
-                                onLogVisit={() => setIsLogVisitOpen(true)}
+                                onLogVisit={(id) => {
+                                    setActiveLogVisitPolicyId(id);
+                                    setIsLogVisitOpen(true);
+                                }}
                             />
                         </motion.div>
                     )}
@@ -207,7 +211,11 @@ export function InsuranceModule() {
 
             <LogVisitSheet 
                 isOpen={isLogVisitOpen}
-                onClose={() => setIsLogVisitOpen(false)}
+                initialPolicyId={activeLogVisitPolicyId}
+                onClose={() => {
+                    setIsLogVisitOpen(false);
+                    setTimeout(() => setActiveLogVisitPolicyId(undefined), 300);
+                }}
                 onSave={async (data) => {
                     try {
                         await addMedicalEvent(data);
