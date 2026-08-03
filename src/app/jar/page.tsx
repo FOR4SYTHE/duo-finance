@@ -421,19 +421,28 @@ export default function SpendJarPage() {
           </div>
           
           {logsWithColor.map((entry) => (
-            <div key={entry.id} className="w-full bg-[#111111] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-white/[0.04] rounded-[24px] p-5 flex items-center justify-between group transition-colors">
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center transition-colors ${entry.bgClass}`}>
+            <div key={entry.id} className="w-full bg-[#111111] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-white/[0.04] rounded-[24px] p-5 flex items-center justify-between gap-2 group transition-colors">
+              <div className="flex items-center gap-4 flex-1 min-w-0">
+                <div className={`w-12 h-12 rounded-[18px] shrink-0 flex items-center justify-center transition-colors ${entry.bgClass}`}>
                   <PiggyBank className={`w-5 h-5 ${entry.colorClass}`} />
                 </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2 mb-1">
-                      <span className="text-white/90 font-medium tracking-wide text-sm">{entry.note || "Quick Log"}</span>
-                      {entry.category && (
-                          <span className="px-1.5 py-0.5 rounded-sm bg-white/10 text-white/50 text-[8px] uppercase tracking-widest font-bold border border-white/5">
-                              {entry.category}
-                          </span>
-                      )}
+                <div className="flex flex-col flex-1 min-w-0 pr-2">
+                  <div className="flex items-start justify-between gap-3 mb-1 w-full">
+                      <span className="text-white/90 font-medium tracking-wide text-sm line-clamp-2 leading-snug flex-1">
+                        {entry.note || "Quick Log"}
+                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                          {entry.note?.startsWith('Claim Refund:') && (
+                              <span className="px-2 py-1 rounded-md bg-[#32ADE6]/10 text-[#32ADE6] text-[8px] uppercase tracking-widest font-bold border border-[#32ADE6]/20 text-center leading-[1.3]">
+                                  CLAIMED
+                              </span>
+                          )}
+                          {entry.category && (
+                              <span className="px-2 py-1 rounded-md bg-white/5 text-white/50 text-[8px] uppercase tracking-widest font-bold border border-white/10 text-center max-w-[70px] whitespace-normal leading-[1.3]">
+                                  {entry.category}
+                              </span>
+                          )}
+                      </div>
                   </div>
                   <span className="text-white/40 text-[10px] tracking-[0.1em] font-mono">
                     {new Date(entry.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}

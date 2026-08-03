@@ -75,6 +75,11 @@ const DEFAULT_CATEGORIES: BudgetCategory[] = [
             { id: 'child-4', name: 'Extracurricular', amount: 0 },
         ]
     },
+    { id: '6', name: 'Health & Medical', icon: 'Activity', color: '#FF2D55', targetAmount: 0, isFixedObligation: false },
+    { id: '7', name: 'Transportation', icon: 'Car', color: '#5E5CE6', targetAmount: 0, isFixedObligation: false },
+    { id: '8', name: 'Insurance', icon: 'Shield', color: '#FF9F0A', targetAmount: 0, isFixedObligation: true },
+    { id: '9', name: 'Entertainment', icon: 'Film', color: '#FF375F', targetAmount: 0, isFixedObligation: false },
+    { id: '10', name: 'Savings', icon: 'PiggyBank', color: '#30D158', targetAmount: 0, isFixedObligation: true },
 ];
 
 export const useBudgetStore = create<BudgetState>()(
@@ -334,6 +339,14 @@ export const useBudgetStore = create<BudgetState>()(
                             return { ...cat, subCategories: defaultCat.subCategories };
                         }
                         return cat;
+                    });
+                    
+                    // Add any newly introduced default categories that the user doesn't have yet
+                    const persistedNames = new Set(merged.categories.map((c: any) => c.name));
+                    DEFAULT_CATEGORIES.forEach(defaultCat => {
+                        if (!persistedNames.has(defaultCat.name)) {
+                            merged.categories.push({ ...defaultCat });
+                        }
                     });
                 }
                 if (!merged.config) {

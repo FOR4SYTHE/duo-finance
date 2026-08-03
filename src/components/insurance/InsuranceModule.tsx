@@ -49,7 +49,7 @@ const TABS: TabItem[] = [
 ];
 
 export function InsuranceModule() {
-    const { policies: allPolicies, addPolicy, updatePolicy } = useInsuranceStore();
+    const { policies: allPolicies, addPolicy, updatePolicy, addMedicalEvent } = useInsuranceStore();
     const policies = allPolicies.filter(p => p.status !== 'Bookmarked');
     const [activeTab, setActiveTab] = useState<string>('my-plans');
     const hasPolicies = policies.length > 0;
@@ -113,7 +113,7 @@ export function InsuranceModule() {
                     )}
                     {activeTab === 'what-to-get' && (
                         <motion.div key="what-to-get" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                            <WhatToGetTab />
+                            <WhatToGetTab onExplore={() => setActiveTab('explore')} />
                         </motion.div>
                     )}
                     {activeTab === 'medical-log' && (
@@ -207,8 +207,12 @@ export function InsuranceModule() {
             <LogVisitSheet 
                 isOpen={isLogVisitOpen}
                 onClose={() => setIsLogVisitOpen(false)}
-                onSave={(data) => {
-                    console.log("Logged Visit:", data);
+                onSave={async (data) => {
+                    try {
+                        await addMedicalEvent(data);
+                    } catch (err) {
+                        console.error(err);
+                    }
                 }}
             />
 

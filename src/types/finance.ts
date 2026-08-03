@@ -106,3 +106,18 @@ export interface InsurancePolicy {
     notes?: string;
     updated_at?: string;
 }
+
+export interface MedicalEvent {
+    id: string;
+    household_id?: string;
+    visitDate: string; // YYYY-MM-DD
+    providerName: string;
+    reason?: string;
+    totalCost: number;
+    policyId?: string; // Optional reference to the insurance policy used
+    coveredAmount: number;
+    uncoveredAmount: number;
+    spendEntryId?: string; // Optional reference to the created expense entry
+    status?: 'Resolved' | 'Pending Claim' | 'Claimed';
+    created_at?: string;
+}
