@@ -13,6 +13,7 @@ import {
   Receipt,
 } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
+import { useGoalsStore } from "@/store/useGoalsStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCartifyStore } from "@/store/useCartifyStore";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
@@ -161,7 +162,8 @@ function GoalBar({
 }
 
 export function MonthlySummary({ monthKey, onClose }: MonthlySummaryProps) {
-  const { config, categories, goals } = useBudgetStore();
+  const { config, categories } = useBudgetStore();
+  const { goals } = useGoalsStore();
   const { entries: spendEntries } = useSpendStore();
   const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 

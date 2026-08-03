@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useBudgetStore } from '@/store/useBudgetStore';
+import { useGoalsStore } from '@/store/useGoalsStore';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { ArrowLeft, Target, Plus, ShieldAlert, Plane, Home, Car, Coins } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function DreamBoardView() {
-    const { goals, addGoal, addMoneyToGoal } = useBudgetStore();
+    const { goals, addGoal, addMoneyToGoal } = useGoalsStore();
     const { setActiveTab } = useAIChatStore();
     
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
