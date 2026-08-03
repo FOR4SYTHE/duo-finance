@@ -4,7 +4,7 @@ import { useState } from "react";
 import { formatCurrency } from "@/lib/format";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
-import { BriefcaseMedical, TrendingUp, Sun, Sparkles, Plus, X, ArrowRight, Activity, Users } from "lucide-react";
+import { BriefcaseMedical, TrendingUp, Sun, Sparkles, Plus, X, ArrowRight, Activity, Users, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 
@@ -138,7 +138,7 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                         <div>
                             <h2 className="text-2xl text-white font-black tracking-tight mb-2">Explore & Compare</h2>
                             <p className="text-white/50 text-[13px] font-medium leading-relaxed">
-                                Let our AI broker find the exact policies available for you in the Philippines today.
+                                Let DUO AI find the exact policies available for you in the Philippines today.
                             </p>
                         </div>
 
@@ -291,7 +291,7 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                                 className="w-full mt-4 py-4 rounded-2xl bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[15px] transition-all active:scale-[0.98] shadow-[0_8px_24px_rgba(212,175,55,0.25)] flex items-center justify-center gap-2 relative overflow-hidden group"
                             >
                                 <div className="px-1.5 py-0.5 rounded bg-black/10 flex items-center justify-center mr-1">
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-black/80">AI</span>
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-black/80">DUO AI</span>
                                 </div>
                                 Find Best Plans
                             </button>
@@ -310,7 +310,7 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                             <div className="absolute inset-0 rounded-3xl bg-[#D4AF37]/5" />
                             <BorderBeam size="md" colorVariant="sunset" strength={1} />
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-[13px] font-black uppercase tracking-wider bg-[linear-gradient(110deg,#D4AF37,#E5E4E2,#D4AF37)] text-transparent bg-clip-text animate-pulse">AI</span>
+                                <span className="text-[13px] font-black uppercase tracking-wider bg-[linear-gradient(110deg,#D4AF37,#E5E4E2,#D4AF37)] text-transparent bg-clip-text animate-pulse">DUO AI</span>
                             </div>
                         </div>
                         <h3 className="text-white font-bold text-[22px] tracking-tight mb-3">Analyzing Market...</h3>
@@ -330,7 +330,7 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                         <div className="flex justify-between items-end">
                             <div>
                                 <div className="px-2 py-1 rounded bg-[#D4AF37]/10 inline-flex items-center gap-1.5 mb-3 border border-[#D4AF37]/20">
-                                    <span className="text-[9px] font-black uppercase tracking-wider text-[#D4AF37]">AI Suggestions</span>
+                                    <span className="text-[9px] font-black uppercase tracking-wider text-[#D4AF37]">DUO AI Suggestions</span>
                                 </div>
                                 <h2 className="text-2xl text-white font-black tracking-tight mb-1">Your Top Matches</h2>
                             </div>
@@ -395,12 +395,24 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                                             </div>
                                         </div>
                                         
-                                        <button 
-                                            onClick={onLogPlan}
-                                            className="w-full py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/5"
-                                        >
-                                            Add to My Plans
-                                        </button>
+                                        <div className="flex gap-3">
+                                            <button 
+                                                onClick={onLogPlan}
+                                                className="flex-1 py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/5"
+                                            >
+                                                Add to My Plans
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    const query = encodeURIComponent(`${result.provider} ${result.name} official ph`);
+                                                    window.open(`https://www.google.com/search?q=${query}`, '_blank', 'noopener,noreferrer');
+                                                }}
+                                                className="flex-1 py-4 rounded-full bg-transparent hover:bg-white/5 text-white/70 hover:text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/10 flex justify-center items-center gap-1.5"
+                                            >
+                                                Learn More
+                                                <ExternalLink className="w-3.5 h-3.5 opacity-50" />
+                                            </button>
+                                        </div>
                                     </div>
                                 );
                             })}
