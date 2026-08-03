@@ -30,11 +30,15 @@ export async function POST(req: Request) {
 
     try {
         const body = await req.json();
-        const { profile } = body;
+        const { profile, bookmarkedNames } = body;
 
         if (!profile) {
             return NextResponse.json({ error: 'Profile data missing.' }, { status: 400 });
         }
+
+        const exclusionRule = Array.isArray(bookmarkedNames) && bookmarkedNames.length > 0 
+            ? `\nCRITICAL RULE: The user has already bookmarked the following plans. DO NOT suggest them again under any circumstances: ${bookmarkedNames.join(', ')}`
+            : '';
 
         let lastRateLimitError = '';
 
@@ -44,6 +48,7 @@ export async function POST(req: Request) {
 
                 const systemPrompt = `
 You are an expert Philippine insurance broker. Based on the user's profile, recommend exactly 3 real-world insurance products currently available in the Philippines (e.g., from AXA, SunLife, Pacific Cross, Pru Life UK, AIA, Philam, etc.) that best fit their needs.
+${exclusionRule}
 
 USER PROFILE:
 ${JSON.stringify(profile, null, 2)}

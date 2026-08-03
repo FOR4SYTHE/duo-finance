@@ -271,7 +271,7 @@ Group these two AI-powered features together in the UI as an "AI Corner" — a d
 Five tabs inside the Insurance card (already scaffolded on Home), utilizing the horizontal-scroll pill-row component already built for Smart Tools:
 - **My Plans:** a log of the household's active insurance policies.
 - **Benefits Reader:** shows what each logged plan actually covers, using pre-written templates per insurer/plan — not a live insurer API.
-- **Explore / Compare:** Browse `insurance_plan_templates` directly, with no policy logged first. Allows a user to compare options and "Log this as mine".
+- **Explore / Compare (DUO AI Engine):** Live, dynamic policy discovery powered by Gemini. Users input their profile (age, family, location, goal) and DUO AI generates customized, real-world options on the fly. Includes short-term memory (Zustand) and a synced Bookmarking system (via Supabase `status: 'Bookmarked'`) limited to 3 saved VIP plans.
 - **What to Get (gap analyzer):** simple rule-based suggestions for what the household hasn't covered yet, based only on what's in the household's own log.
 - **Medical Log:** Out-of-pocket tracking and medical events (doctor's visits, uncovered spending) sharing the same `expense_entries` model used in Spend Jar/Cartify.
 
@@ -321,7 +321,7 @@ Two new tables, following the `household_id` pattern:
 #### 3. How the Tabs Actually Work
 - **My Plans:** Standard CRUD form reusing the keypad-entry pattern. For new users with zero policies, the empty state serves as onboarding ("You haven't logged any insurance yet" with "+ Add a plan" and "Explore & Compare" actions).
 - **Benefits Reader:** Attempts to match logged plans against `insurance_plan_templates`. Shows read-only breakdown with an option to override specific fields (stored back in the policy's `custom_fields`).
-- **Explore & Compare:** Browse templates grouped by `plan_type`. Each has a "Log this as mine" action.
+- **Explore & Compare:** Uses DUO AI (Gemini) to dynamically suggest policies based on user profile. Includes a short-term memory (Zustand cache) to survive tab switches and a synced Bookmark system (saves directly to `insurance_policies` table with `status: 'Bookmarked'`). The Bookmarked section renders outside and below the main AI form. Bookmark limit is strict at max 3.
 - **What to Get (Gap Analyzer):** Pure client-side logic against the household's `insurance_policies` and `medical_events`. Use simple if/else rules (e.g. no 'Life' logged -> suggest life insurance).
 - **Medical Log:** Logs medical visits. The UNCOVERED portion of any visit becomes a real expense entry in the shared `expense_entries` model, tagged to Health. This data feeds into the Gap Analyzer.
 - **Renewal Reminders:** Do NOT build a separate reminder system. Feed `renewal_date` into the shared Bills/Due-Date Calendar on Home.

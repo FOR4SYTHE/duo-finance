@@ -11,7 +11,8 @@ interface BenefitsReaderTabProps {
 }
 
 export function BenefitsReaderTab({ onAddPlan }: BenefitsReaderTabProps) {
-    const { policies } = useInsuranceStore();
+    const { policies: allPolicies } = useInsuranceStore();
+    const policies = allPolicies.filter(p => p.status !== 'Bookmarked');
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 
     if (policies.length === 0) {

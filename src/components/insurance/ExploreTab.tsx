@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useExploreStore } from "@/store/useExploreStore";
+import { useInsuranceStore } from "@/store/useInsuranceStore";
 import { formatCurrency } from "@/lib/format";
-import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
-import { BriefcaseMedical, TrendingUp, Sun, Sparkles, Plus, X, ArrowRight, Activity, Users, ExternalLink } from "lucide-react";
+import { BriefcaseMedical, TrendingUp, Sun, Plus, X, Activity, Users, ExternalLink, Bookmark, BookmarkCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 
@@ -12,39 +12,23 @@ interface ExploreTabProps {
     onLogPlan?: () => void;
 }
 
-type AIResult = {
-    provider: string;
-    name: string;
-    type: string;
-    description: string;
-    coverage: number;
-    premiumEst: number;
-};
-
 export function ExploreTab({ onLogPlan }: ExploreTabProps) {
-    const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
+    const { primarySymbol, getPrimaryValue } = useDualCurrency();
     
-    // UI States
-    const [step, setStep] = useState<'form' | 'loading' | 'results'>('form');
-    const [results, setResults] = useState<AIResult[]>([]);
-    
-    // Form States
-    const [coverageType, setCoverageType] = useState<'Individual' | 'Family'>('Individual');
-    const [myAge, setMyAge] = useState('');
-    const [location, setLocation] = useState('');
-    const [goal, setGoal] = useState('Everyday Health (HMO)');
+    // Global Store State
+    const { 
+        step, setStep, results, setResults,
+        coverageType, setCoverageType, myAge, setMyAge, location, setLocation, goal, setGoal,
+        hasPartner, setHasPartner, partnerAge, setPartnerAge,
+        children, setChildren,
+        hasMother, setHasMother, motherAge, setMotherAge,
+        hasFather, setHasFather, fatherAge, setFatherAge,
+        resetSearch
+    } = useExploreStore();
 
-    // Family States
-    const [hasPartner, setHasPartner] = useState(false);
-    const [partnerAge, setPartnerAge] = useState('');
-    
-    const [children, setChildren] = useState<{id: string, type: 'Son' | 'Daughter', age: string}[]>([]);
-    
-    const [hasMother, setHasMother] = useState(false);
-    const [motherAge, setMotherAge] = useState('');
-    
-    const [hasFather, setHasFather] = useState(false);
-    const [fatherAge, setFatherAge] = useState('');
+    // Insurance Store for Bookmarks
+    const policies = useInsuranceStore(state => state.policies);
+    const bookmarkedPlans = policies.filter(p => p.status === 'Bookmarked');
 
     const handleGenerate = async () => {
         if (!myAge || !location) {
@@ -74,11 +58,13 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
             } : undefined
         };
 
+        const bookmarkedNames = bookmarkedPlans.map(b => b.policyName);
+
         try {
             const res = await fetch('/api/ai/explore', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ profile })
+                body: JSON.stringify({ profile, bookmarkedNames })
             });
 
             if (!res.ok) throw new Error('Failed to generate recommendations');
@@ -109,6 +95,54 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
 
     const removeChild = (id: string) => {
         setChildren(children.filter(c => c.id !== id));
+    };
+
+    const handleBookmark = (plan: any) => {
+        const existingBookmark = bookmarkedPlans.find(b => b.policyName === plan.name);
+        
+        if (existingBookmark) {
+            useInsuranceStore.getState().removePolicy(existingBookmark.id);
+        } else {
+            if (bookmarkedPlans.length >= 3) {
+                import('@/store/useBudgetStore').then(({ useBudgetStore }) => {
+                    useBudgetStore.getState().addNotification({
+                        title: 'Bookmark Limit Reached',
+                        message: 'You can only save up to 3 AI suggestions at a time.',
+                        read: false,
+                        type: 'alert'
+                    });
+                });
+                return;
+            }
+
+            useInsuranceStore.getState().addPolicy({
+                household_id: '', // Supabase handles this via RLS / backend
+                provider: plan.provider,
+                policyName: plan.name,
+                type: plan.type,
+                status: 'Bookmarked',
+                policyNumber: '',
+                coveredMembers: [],
+                premium: plan.premiumEst,
+                paymentFrequency: 'Monthly',
+                coverage: plan.coverage,
+                startDate: '',
+                expiryDate: '',
+                dueDate: '',
+                roomCategory: '',
+                outpatientLimit: 0,
+                deductible: 0,
+                hotline: '',
+                agentName: '',
+                agentNumber: '',
+                notes: plan.description,
+                updated_at: new Date().toISOString()
+            });
+        }
+    };
+
+    const handleRemoveBookmark = (id: string) => {
+        useInsuranceStore.getState().removePolicy(id);
     };
 
     const GOALS = ['Everyday Health (HMO)', 'Premium Medical / Catastrophic', 'Critical Illness (Lump Sum)', 'Life Insurance + Savings (VUL)', 'Pure Term Life'];
@@ -172,6 +206,8 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                                     <span className="text-white/40 text-[11px] font-bold uppercase tracking-widest pl-1">Your Age</span>
                                     <input 
                                         type="number" 
+                                        inputMode="numeric" 
+                                        pattern="[0-9]*"
                                         value={myAge}
                                         onChange={(e) => setMyAge(e.target.value)}
                                         placeholder="e.g. 30"
@@ -213,6 +249,8 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                                             {hasPartner && (
                                                 <input 
                                                     type="number" 
+                                                    inputMode="numeric" 
+                                                    pattern="[0-9]*"
                                                     value={partnerAge}
                                                     onChange={(e) => setPartnerAge(e.target.value)}
                                                     placeholder="Age"
@@ -230,6 +268,8 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                                                 </div>
                                                 <input 
                                                     type="number" 
+                                                    inputMode="numeric" 
+                                                    pattern="[0-9]*"
                                                     value={child.age}
                                                     onChange={(e) => updateChildAge(child.id, e.target.value)}
                                                     placeholder="Age"
@@ -252,13 +292,13 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                                             <button onClick={() => setHasMother(!hasMother)} className={`flex-1 py-3 px-4 rounded-xl border flex items-center justify-between transition-all ${hasMother ? 'bg-white/10 border-white/20 text-white' : 'bg-white/5 border-white/5 text-white/50'}`}>
                                                 <span className="text-[13px] font-bold">Mother</span>
                                             </button>
-                                            {hasMother && <input type="number" value={motherAge} onChange={(e) => setMotherAge(e.target.value)} placeholder="Age" className="w-24 bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white text-[15px] text-center outline-none" />}
+                                            {hasMother && <input type="number" inputMode="numeric" pattern="[0-9]*" value={motherAge} onChange={(e) => setMotherAge(e.target.value)} placeholder="Age" className="w-24 bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white text-[15px] text-center outline-none" />}
                                         </div>
                                         <div className="flex items-center justify-between gap-4">
                                             <button onClick={() => setHasFather(!hasFather)} className={`flex-1 py-3 px-4 rounded-xl border flex items-center justify-between transition-all ${hasFather ? 'bg-white/10 border-white/20 text-white' : 'bg-white/5 border-white/5 text-white/50'}`}>
                                                 <span className="text-[13px] font-bold">Father</span>
                                             </button>
-                                            {hasFather && <input type="number" value={fatherAge} onChange={(e) => setFatherAge(e.target.value)} placeholder="Age" className="w-24 bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white text-[15px] text-center outline-none" />}
+                                            {hasFather && <input type="number" inputMode="numeric" pattern="[0-9]*" value={fatherAge} onChange={(e) => setFatherAge(e.target.value)} placeholder="Age" className="w-24 bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white text-[15px] text-center outline-none" />}
                                         </div>
                                     </motion.div>
                                 )}
@@ -288,7 +328,7 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                             {/* Submit Button */}
                             <button 
                                 onClick={handleGenerate}
-                                className="w-full mt-4 py-4 rounded-2xl bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[15px] transition-all active:scale-[0.98] shadow-[0_8px_24px_rgba(212,175,55,0.25)] flex items-center justify-center gap-2 relative overflow-hidden group"
+                                className="w-full mt-2 py-4 rounded-2xl bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[15px] transition-all active:scale-[0.98] shadow-[0_8px_24px_rgba(212,175,55,0.25)] flex items-center justify-center gap-2 relative overflow-hidden group"
                             >
                                 <div className="px-1.5 py-0.5 rounded bg-black/10 flex items-center justify-center mr-1">
                                     <span className="text-[10px] font-black uppercase tracking-wider text-black/80">DUO AI</span>
@@ -296,6 +336,94 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                                 Find Best Plans
                             </button>
                         </div>
+                        
+                        {/* Bookmarked Plans outside form */}
+                        {bookmarkedPlans.length > 0 && (
+                            <div className="flex flex-col gap-4 mt-2">
+                                <div className="flex items-center justify-between px-1">
+                                    <span className="text-[#D4AF37] text-[13px] font-black uppercase tracking-[0.15em] flex items-center gap-2">
+                                        <BookmarkCheck className="w-4 h-4" /> BOOKMARKED PLANS
+                                    </span>
+                                    <span className="text-white/40 text-[10px] font-bold uppercase tracking-widest">{bookmarkedPlans.length}/3</span>
+                                </div>
+                                
+                                <div className="flex flex-col gap-3">
+                                    {bookmarkedPlans.map((bp) => {
+                                        let iconColor = "text-[#D4AF37]";
+                                        let bgIcon = "bg-[#D4AF37]/10";
+                                        let borderIcon = "border-[#D4AF37]/20";
+                                        let badgeColor = "bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20";
+                                        let Icon = BriefcaseMedical;
+
+                                        if (bp.type.includes('Life')) { Icon = Sun; } 
+                                        else if (bp.type.includes('VUL') || bp.type.includes('Investment')) { Icon = TrendingUp; }
+
+                                        return (
+                                            <div key={bp.id} className="bg-[#D4AF37]/5 rounded-[24px] p-5 border border-[#D4AF37]/30 shadow-[0_4px_12px_rgba(212,175,55,0.05)]">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className={`w-10 h-10 rounded-xl ${bgIcon} flex items-center justify-center border ${borderIcon}`}>
+                                                        <Icon className={`w-5 h-5 ${iconColor}`} />
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`px-2.5 py-1 rounded-full border ${badgeColor} text-[10px] font-bold uppercase tracking-widest`}>
+                                                            {bp.type}
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => handleRemoveBookmark(bp.id)}
+                                                            className="p-1.5 rounded-lg bg-[#D4AF37]/20 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/30 transition-all"
+                                                        >
+                                                            <BookmarkCheck className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <h3 className="text-white font-bold text-[17px] tracking-tight mb-0.5">{bp.policyName}</h3>
+                                                <span className="text-[#D4AF37]/70 text-[12px] font-bold uppercase tracking-widest block mb-3">{bp.provider}</span>
+                                                
+                                                <p className="text-white/60 text-[13px] font-medium leading-relaxed mb-5">
+                                                    {bp.notes}
+                                                </p>
+                                                
+                                                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#D4AF37]/20">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-[#D4AF37]/50 text-[10px] font-bold uppercase tracking-widest">Est. Coverage</span>
+                                                        <div className="flex items-baseline gap-1 mt-0.5">
+                                                            <span className="text-white font-black text-[18px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(bp.coverage))}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-[#D4AF37]/50 text-[10px] font-bold uppercase tracking-widest">Est. Premium</span>
+                                                        <div className="flex items-baseline gap-1 mt-0.5">
+                                                            <span className="text-white font-black text-[18px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(bp.premium))}</span>
+                                                            <span className="text-white/40 text-[12px] font-medium">/mo</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex gap-3 mt-6">
+                                                    <button 
+                                                        onClick={onLogPlan}
+                                                        className="flex-1 py-4 rounded-full bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] font-bold text-[13px] transition-all active:scale-[0.98] border border-[#D4AF37]/20"
+                                                    >
+                                                        Add to My Plans
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => {
+                                                            const query = encodeURIComponent(`${bp.provider} ${bp.policyName} official ph`);
+                                                            window.open(`https://www.google.com/search?q=${query}`, '_blank', 'noopener,noreferrer');
+                                                        }}
+                                                        className="flex-1 py-4 rounded-full bg-transparent hover:bg-white/5 text-white/70 hover:text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/10 flex justify-center items-center gap-1.5"
+                                                    >
+                                                        Learn More
+                                                        <ExternalLink className="w-3.5 h-3.5 opacity-50" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                     </motion.div>
                 )}
 
@@ -334,9 +462,14 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                                 </div>
                                 <h2 className="text-2xl text-white font-black tracking-tight mb-1">Your Top Matches</h2>
                             </div>
-                            <button onClick={() => setStep('form')} className="text-white/40 hover:text-white text-[13px] font-bold transition-colors pb-1 border-b border-white/20 hover:border-white">
-                                Edit Profile
-                            </button>
+                            <div className="flex items-center gap-4">
+                                <button onClick={() => { setResults([]); resetSearch(); }} className="text-white/40 hover:text-white text-[13px] font-bold transition-colors pb-1 border-b border-white/20 hover:border-white">
+                                    New Search
+                                </button>
+                                <button onClick={() => setStep('form')} className="text-white/40 hover:text-white text-[13px] font-bold transition-colors pb-1 border-b border-white/20 hover:border-white">
+                                    Edit Profile
+                                </button>
+                            </div>
                         </div>
 
                         <div className="flex flex-col gap-4">
@@ -361,14 +494,24 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                                     Icon = TrendingUp;
                                 }
 
+                                const existingBookmark = bookmarkedPlans.find(b => b.policyName === result.name);
+
                                 return (
                                     <div key={i} className="bg-[#1A1A1A] rounded-[24px] p-5 border border-white/5 shadow-[0_8px_16px_rgba(0,0,0,0.2)]">
                                         <div className="flex justify-between items-start mb-4">
                                             <div className={`w-10 h-10 rounded-xl ${bgIcon} flex items-center justify-center border ${borderIcon}`}>
                                                 <Icon className={`w-5 h-5 ${iconColor}`} />
                                             </div>
-                                            <div className={`px-2.5 py-1 rounded-full border ${badgeColor} text-[10px] font-bold uppercase tracking-widest`}>
-                                                {result.type}
+                                            <div className="flex items-center gap-3">
+                                                <div className={`px-2.5 py-1 rounded-full border ${badgeColor} text-[10px] font-bold uppercase tracking-widest`}>
+                                                    {result.type}
+                                                </div>
+                                                <button 
+                                                    onClick={() => handleBookmark(result)}
+                                                    className={`p-1.5 rounded-lg border transition-all ${existingBookmark ? 'bg-[#D4AF37]/20 border-[#D4AF37]/30 text-[#D4AF37]' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white'}`}
+                                                >
+                                                    {existingBookmark ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+                                                </button>
                                             </div>
                                         </div>
                                         

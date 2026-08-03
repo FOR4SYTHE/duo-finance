@@ -49,7 +49,8 @@ const TABS: TabItem[] = [
 ];
 
 export function InsuranceModule() {
-    const { policies, addPolicy, updatePolicy } = useInsuranceStore();
+    const { policies: allPolicies, addPolicy, updatePolicy } = useInsuranceStore();
+    const policies = allPolicies.filter(p => p.status !== 'Bookmarked');
     const [activeTab, setActiveTab] = useState<string>('my-plans');
     const hasPolicies = policies.length > 0;
     

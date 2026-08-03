@@ -20,7 +20,8 @@ interface MyPlansTabProps {
 export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPlan }: MyPlansTabProps) {
     const { exchangeRate } = useCurrencyStore();
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
-    const { policies, removePolicy } = useInsuranceStore();
+    const { policies: allPolicies, removePolicy } = useInsuranceStore();
+    const policies = allPolicies.filter(p => p.status !== 'Bookmarked');
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
 
