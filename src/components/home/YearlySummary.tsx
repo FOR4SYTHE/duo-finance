@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useBudgetStore } from "@/store/useBudgetStore";
+import { useGoalsStore } from "@/store/useGoalsStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { formatCurrency } from "@/lib/format";
@@ -156,7 +157,7 @@ function GoalBar({
 export function YearlySummary({ year, onClose }: YearlySummaryProps) {
   const config = useBudgetStore((state) => state.config);
   const categories = useBudgetStore((state) => state.categories);
-  const goals = useBudgetStore((state) => state.goals);
+  const goals = useGoalsStore((state) => state.goals);
   const spendEntries = useSpendStore((state) => state.entries);
   const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
 

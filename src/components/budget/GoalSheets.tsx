@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Edit3, Target, Calendar, HelpCircle } from "lucide-react";
 import * as Icons from "lucide-react";
 import confetti from "canvas-confetti";
-import { useBudgetStore, Goal } from "@/store/useBudgetStore";
+import { useBudgetStore } from "@/store/useBudgetStore";
+import { useGoalsStore } from "@/store/useGoalsStore";
+import { Goal } from "@/types/finance";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { AmountInputModal } from "./AmountInputModal";
 
@@ -17,7 +19,7 @@ interface AddGoalSheetProps {
 const GOAL_ICONS = ['Target', 'Car', 'Plane', 'Home', 'GraduationCap', 'Heart', 'ShieldAlert', 'ShoppingBag', 'Laptop'];
 
 export function AddGoalSheet({ isOpen, onClose }: AddGoalSheetProps) {
-    const { addGoal } = useBudgetStore();
+    const { addGoal } = useGoalsStore();
     const [name, setName] = useState("");
     const [icon, setIcon] = useState("Target");
     const [date, setDate] = useState("");
@@ -133,7 +135,7 @@ export function AddGoalSheet({ isOpen, onClose }: AddGoalSheetProps) {
 }
 
 export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, onClose: () => void, goalId: string | null }) {
-    const { goals, updateGoal } = useBudgetStore();
+    const { goals, updateGoal } = useGoalsStore();
     const goal = goals.find(g => g.id === goalId);
 
     const [name, setName] = useState("");
@@ -309,7 +311,7 @@ export function EditGoalSheet({ isOpen, onClose, goalId }: { isOpen: boolean, on
 }
 
 export function GoalMenuSheet({ isOpen, onClose, goalId, onEdit }: { isOpen: boolean, onClose: () => void, goalId: string | null, onEdit: () => void }) {
-    const { goals, removeGoal } = useBudgetStore();
+    const { goals, removeGoal } = useGoalsStore();
     const goal = goals.find(g => g.id === goalId);
     const [confirmDelete, setConfirmDelete] = useState(false);
 

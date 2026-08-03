@@ -9,6 +9,7 @@ import { useBudgetStore } from "@/store/useBudgetStore";
 import { useSpendStore } from "@/store/useSpendStore";
 import { useCartifyStore } from "@/store/useCartifyStore";
 import { useBillsStore } from "@/store/useBillsStore";
+import { useGoalsStore } from "@/store/useGoalsStore";
 import { createClient } from "@/utils/supabase/client";
 
 const SYNC_COOLDOWN_MS = 30_000; // 30 seconds between background syncs
@@ -21,6 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const initializeSpend = useSpendStore(state => state.initialize);
   const initializeCartify = useCartifyStore(state => state.initializeCartify);
   const initializeBills = useBillsStore(state => state.initialize);
+  const initializeGoals = useGoalsStore(state => state.initialize);
   
   const initializingRef = useRef(false);
   const lastSyncRef = useRef(0);
@@ -41,8 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await initializeSpend();
     await initializeCartify();
     await initializeBills();
+    await initializeGoals();
     setTimeout(() => { initializingRef.current = false; }, 100);
-  }, [initializeAuth, initializeCurrency, initializeSettings, initializeBudget, initializeSpend, initializeCartify, initializeBills]);
+  }, [initializeAuth, initializeCurrency, initializeSettings, initializeBudget, initializeSpend, initializeCartify, initializeBills, initializeGoals]);
 
   // 1. Initial load + auth state changes (force = true, always immediate)
   useEffect(() => {
@@ -92,8 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Exclude lastSyncedAt and notifications from change detection to avoid feedback loops
       if (
         state.config === prevState.config && 
-        state.categories === prevState.categories && 
-        state.goals === prevState.goals
+        state.categories === prevState.categories
       ) {
         return;
       }
@@ -144,7 +146,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           period: currentState.config.period || 'monthly',
           hero_target: currentState.config.targetAmount || 0,
           categories: currentState.categories,
-          goals: currentState.goals,
           config: currentState.config,
           updated_at: now
         }, { onConflict: 'household_id' });

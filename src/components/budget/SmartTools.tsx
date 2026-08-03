@@ -11,6 +11,7 @@ import { AddGoalSheet, EditGoalSheet, GoalMenuSheet } from "./GoalSheets";
 import { AmountInputModal } from "./AmountInputModal";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useGoalsStore } from "@/store/useGoalsStore";
 
 // ==========================================
 // STATIC CONSTANTS
@@ -57,10 +58,10 @@ function ToolCardShell({ children, isLoading, error, onRetry, title }: { childre
 function EmergencyRunwayContent() {
     const [isLogging, setIsLogging] = useState(false);
     const categories = useBudgetStore((state) => state.categories);
-    const goals = useBudgetStore((state) => state.goals);
     const config = useBudgetStore((state) => state.config);
     const setRunwayMultiplier = useBudgetStore((state) => state.setRunwayMultiplier);
-    const updateGoal = useBudgetStore((state) => state.updateGoal);
+    const goals = useGoalsStore((state) => state.goals);
+    const addMoneyToGoal = useGoalsStore((state) => state.addMoneyToGoal);
     const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     
@@ -158,12 +159,12 @@ function EmergencyRunwayContent() {
                     </div>
                 )}
             </div>
-            <AmountInputModal 
-                isOpen={isLogging}
-                onClose={() => setIsLogging(false)}
-                onConfirm={(amount) => {
-                    if (emergencyGoal) {
-                        updateGoal(emergencyGoal.id, { savedAmount: savedSoFar + amount });
+            {emergencyGoal && (
+                <AmountInputModal 
+                    isOpen={isLogging}
+                    onClose={() => setIsLogging(false)}
+                    onConfirm={(amount) => {
+                        addMoneyToGoal(emergencyGoal.id, amount);
                         if (targetRunway > 0) {
                             const newTotal = savedSoFar + amount;
                             if (newTotal >= targetRunway && savedSoFar < targetRunway) {
@@ -175,22 +176,28 @@ function EmergencyRunwayContent() {
                                 });
                             }
                         }
-                    }
-                    setIsLogging(false);
-                }}
-                title="Add to Emergency Fund"
-                initialAmount={0}
-            />
+                        setIsLogging(false);
+                    }}
+                    title="Add to Emergency Fund"
+                    initialAmount={0}
+                />
+            )}
         </ToolCardShell>
     );
 }
 
 // 2. Goals Component (Replaces Inflation Outlook)
 function GoalsContent() {
-    const goals = useBudgetStore((state) => state.goals);
-    const addMoneyToGoal = useBudgetStore((state) => state.addMoneyToGoal);
-    const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
-    const primaryCurrency = useCurrencyStore((state) => state.primaryCurrency);
+    const updateGoal = useGoalsStore((state) => state.updateGoal);
+    const addMoneyToGoal = useGoalsStore((state) => state.addMoneyToGoal);
+    const goals = useGoalsStore((state) => state.goals);
+    
+    // Compute target runway for Emergency Fund
+    const categories = useBudgetStore((state) => state.categories);
+    const multiplier = useBudgetStore((state) => state.config?.runwayMultiplier) || 3;
+    const monthlyBaseline = categories.reduce((sum, cat) => sum + cat.targetAmount, 0);
+    const targetRunway = monthlyBaseline * multiplier;
+    
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     const user = useAuthStore((state) => state.user);
     
@@ -220,7 +227,8 @@ function GoalsContent() {
                     </button>
                 )}
                 {goals.map(goal => {
-                    const progress = goal.targetAmount > 0 ? Math.min(100, (goal.savedAmount / goal.targetAmount) * 100) : 0;
+                    const actualTarget = goal.is_emergency_fund ? targetRunway : goal.targetAmount;
+                    const progress = actualTarget > 0 ? Math.min(100, (goal.savedAmount / actualTarget) * 100) : 0;
                     const Icon = (Icons as any)[goal.icon] || HelpCircle;
 
                     return (
@@ -247,11 +255,8 @@ function GoalsContent() {
                                     <div className="text-white/40 text-xs">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(goal.savedAmount))}</div>
                                 </div>
                                 <div className="text-right">
-                                    {goal.targetAmount > 0 ? (
-                                        <>
-                                            <div className="text-white/50 text-xs mb-1">Target: {primarySymbol}{formatCurrency(getPrimaryValue(goal.targetAmount))}</div>
-                                            <div className="text-[#30D158] text-sm font-medium">{progress.toFixed(0)}%</div>
-                                        </>
+                                    {actualTarget > 0 ? (
+                                        <div className="text-white/70 text-xs">Target: {primarySymbol}{formatCurrency(getPrimaryValue(actualTarget))}</div>
                                     ) : (
                                         <button onClick={() => setEditGoalId(goal.id)} className="text-white/40 hover:text-white transition-colors text-[10px] mb-1 underline underline-offset-2">Set target to track</button>
                                     )}
@@ -259,13 +264,19 @@ function GoalsContent() {
                             </div>
                             
                             <div className="w-full bg-white/10 h-1.5 rounded-full mt-2 relative mb-4">
-                                {goal.targetAmount > 0 && (
+                                {actualTarget > 0 && (
                                     <div 
                                         className="bg-white h-full rounded-full transition-all duration-500 shadow-[0_0_15px_rgba(255,255,255,0.8)]" 
                                         style={{ width: `${progress}%` }} 
                                     />
                                 )}
                             </div>
+
+                            {actualTarget > 0 && goal.savedAmount >= actualTarget && (
+                                <div className="text-[#30D158] text-[10px] font-medium text-center bg-[#30D158]/10 py-1 rounded-md">
+                                    Goal Reached! 🎉
+                                </div>
+                            )}
 
                             <button 
                                 onClick={() => setAddMoneyGoalId(goal.id)}
@@ -432,7 +443,7 @@ function InflationGuardContent() {
 // 4. Salary Auto-Allocation Component
 function SalaryAllocationContent() {
     const categories = useBudgetStore((state) => state.categories);
-    const goals = useBudgetStore((state) => state.goals);
+    const goals = useGoalsStore((state) => state.goals);
     const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     

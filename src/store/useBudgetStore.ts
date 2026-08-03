@@ -1,21 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { BudgetConfig, BudgetPeriod, BudgetCategory, AppNotification, ExpenseEntry } from '@/types/finance';
+import { BudgetConfig, BudgetPeriod, BudgetCategory, AppNotification, ExpenseEntry, Goal } from '@/types/finance';
 import { createClient } from '@/utils/supabase/client';
-
-export interface Goal {
-    id: string;
-    name: string;
-    icon: string;
-    targetAmount: number;
-    targetDate?: string;
-    savedAmount: number;
-}
 
 interface BudgetState {
     config: BudgetConfig;
     categories: BudgetCategory[];
-    goals: Goal[];
     notifications: AppNotification[];
     setBudget: (targetAmount: number, period: BudgetPeriod) => void;
     
@@ -40,12 +30,6 @@ interface BudgetState {
     updateSubCategory: (categoryId: string, subId: string, amount: number) => void;
     addSubCategory: (categoryId: string, name: string) => void;
     removeSubCategory: (categoryId: string, subId: string) => void;
-
-    // Goals operations
-    addGoal: (goal: Omit<Goal, 'id'>) => void;
-    updateGoal: (id: string, updates: Partial<Goal>) => void;
-    removeGoal: (id: string) => void;
-    addMoneyToGoal: (id: string, amount: number) => void;
 
     // Notifications Operations
     addNotification: (notification: Omit<AppNotification, 'id' | 'timestamp'>) => void;
@@ -93,10 +77,6 @@ const DEFAULT_CATEGORIES: BudgetCategory[] = [
     },
 ];
 
-const DEFAULT_GOALS: Goal[] = [
-    { id: 'goal-1', name: 'Emergency Fund', icon: 'ShieldAlert', targetAmount: 0, savedAmount: 0 }
-];
-
 export const useBudgetStore = create<BudgetState>()(
     persist(
         (set, get) => ({
@@ -114,12 +94,10 @@ export const useBudgetStore = create<BudgetState>()(
                     if (budget) {
                         const hasServerConfig = Object.keys(budget.config || {}).length > 0;
                         const hasServerCategories = Array.isArray(budget.categories) && budget.categories.length > 0;
-                        const hasServerGoals = Array.isArray(budget.goals) && budget.goals.length > 0;
 
                         set({
                             config: (hasServerConfig ? budget.config : { ...get().config }) as BudgetConfig,
                             categories: (hasServerCategories ? budget.categories : [...get().categories]) as BudgetCategory[],
-                            goals: (hasServerGoals ? budget.goals : [...get().goals]) as Goal[],
                             lastSyncedAt: budget.updated_at ? new Date(budget.updated_at).getTime() : Date.now(),
                         });
                     }
@@ -134,11 +112,10 @@ export const useBudgetStore = create<BudgetState>()(
                 cardName: 'BL',
                 customPhotos: {},
                 customPhotoPositions: {},
-                activeMonth: new Date().toISOString().slice(0, 7), // "YYYY-MM" format
+                activeMonth: new Date().toISOString().slice(0, 7),
                 lastSeenMonth: new Date().toISOString().slice(0, 7)
             },
             categories: DEFAULT_CATEGORIES,
-            goals: DEFAULT_GOALS,
             notifications: [],
             setBudget: (targetAmount: number, period: BudgetPeriod) => 
                 set((state) => {
@@ -161,7 +138,6 @@ export const useBudgetStore = create<BudgetState>()(
                         const newSpendHistory = { ...(cat.spendHistory || {}) };
                         let hasChanges = false;
                         
-                        // We need to compute total spent per month in this category
                         const catEntries = entries.filter(e => e.category === cat.name);
                         const monthlySums: Record<string, number> = {};
                         
@@ -173,7 +149,6 @@ export const useBudgetStore = create<BudgetState>()(
                             }
                         });
                         
-                        // Populate zero for months where there was a target but no entries
                         if (cat.targetHistory) {
                             Object.keys(cat.targetHistory).forEach(m => {
                                 if (m < currentMonth && monthlySums[m] === undefined) {
@@ -182,7 +157,6 @@ export const useBudgetStore = create<BudgetState>()(
                             });
                         }
 
-                        // Write to newSpendHistory
                         const newTargetHistory = { ...(cat.targetHistory || {}) };
                         Object.entries(monthlySums).forEach(([m, sum]) => {
                             if (newSpendHistory[m] === undefined) {
@@ -200,20 +174,13 @@ export const useBudgetStore = create<BudgetState>()(
                         return cat;
                     });
                     
-                    // Only update if there are actual changes
                     const changed = newCategories.some((c, i) => c !== state.categories[i]);
                     return changed ? { categories: newCategories } : {};
                 }),
             setJarPercentage: (percentage: number) => 
                 set((state) => ({ config: { ...state.config, jarAllowedPercentage: percentage } })),
             setRunwayMultiplier: (multiplier: number) =>
-                set((state) => {
-                    const newConfig = { ...state.config, runwayMultiplier: multiplier };
-                    const monthlyBaseline = state.categories.reduce((sum, cat) => sum + cat.targetAmount, 0);
-                    const targetRunway = monthlyBaseline * multiplier;
-                    const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
-                    return { config: newConfig, goals };
-                }),
+                set((state) => ({ config: { ...state.config, runwayMultiplier: multiplier } })),
             setCardSkin: (skin: string) =>
                 set((state) => ({ config: { ...state.config, cardSkin: skin } })),
             setCardName: (name: string) =>
@@ -267,10 +234,7 @@ export const useBudgetStore = create<BudgetState>()(
                         }
                         return newCat;
                     });
-                    const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
-                    const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
-                    const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
-                    return { categories: newCats, goals };
+                    return { categories: newCats };
                 }),
             updateCategoriesTarget: (updates) =>
                 set((state) => {
@@ -289,19 +253,10 @@ export const useBudgetStore = create<BudgetState>()(
                         }
                         return c;
                     });
-                    const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
-                    const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
-                    const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
-                    return { categories: newCats, goals };
+                    return { categories: newCats };
                 }),
             removeCategory: (id) => 
-                set((state) => {
-                    const newCats = state.categories.filter(c => c.id !== id);
-                    const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
-                    const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
-                    const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
-                    return { categories: newCats, goals };
-                }),
+                set((state) => ({ categories: state.categories.filter(c => c.id !== id) })),
 
             // Sub-category operations
             updateSubCategory: (categoryId, subId, amount) => 
@@ -312,10 +267,7 @@ export const useBudgetStore = create<BudgetState>()(
                         const newTargetAmount = newSub.reduce((acc, curr) => acc + curr.amount, 0);
                         return { ...c, subCategories: newSub, targetAmount: newTargetAmount };
                     });
-                    const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
-                    const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
-                    const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
-                    return { categories: newCats, goals };
+                    return { categories: newCats };
                 }),
             addSubCategory: (categoryId, name) => 
                 set((state) => ({
@@ -333,37 +285,15 @@ export const useBudgetStore = create<BudgetState>()(
                         const newTargetAmount = newSub.reduce((acc, curr) => acc + curr.amount, 0);
                         return { ...c, subCategories: newSub, targetAmount: newTargetAmount };
                     });
-                    const monthlyBaseline = newCats.reduce((sum, cat) => sum + cat.targetAmount, 0);
-                    const targetRunway = monthlyBaseline * (state.config.runwayMultiplier || 3);
-                    const goals = state.goals.map(g => g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g);
-                    return { categories: newCats, goals };
+                    return { categories: newCats };
                 }),
 
-            // Goals operations
-            addGoal: (goal) => 
-                set((state) => ({ 
-                    goals: [...state.goals, { ...goal, id: Math.random().toString(36).substring(7), savedAmount: 0 }] 
-                })),
-            updateGoal: (id, updates) => 
-                set((state) => ({
-                    goals: state.goals.map(g => g.id === id ? { ...g, ...updates } : g)
-                })),
-            removeGoal: (id) => 
-                set((state) => {
-                    if (id === 'goal-1') return state; // Protect Emergency Fund from deletion
-                    return { goals: state.goals.filter(g => g.id !== id) };
-                }),
             reset: () =>
                 set(() => ({
                     config: { targetAmount: 0, period: 'monthly', jarAllowedPercentage: 20 },
                     categories: DEFAULT_CATEGORIES,
-                    goals: DEFAULT_GOALS,
                     notifications: [],
                     _hasHydrated: true
-                })),
-            addMoneyToGoal: (id, amount) =>
-                set((state) => ({
-                    goals: state.goals.map(g => g.id === id ? { ...g, savedAmount: g.savedAmount + amount } : g)
                 })),
                 
             // Notifications operations
@@ -396,11 +326,9 @@ export const useBudgetStore = create<BudgetState>()(
                 const merged = { ...currentState, ...persistedState };
                 if (persistedState.categories) {
                     merged.categories = persistedState.categories.map((cat: any) => {
-                        // Migration for Kids Tuition -> Child Care
                         if (cat.name === 'Kids Tuition') {
                             cat.name = 'Child Care';
                         }
-                        
                         const defaultCat = DEFAULT_CATEGORIES.find(d => d.name === cat.name);
                         if (defaultCat?.subCategories && (!cat.subCategories || cat.subCategories.length === 0)) {
                             return { ...cat, subCategories: defaultCat.subCategories };
@@ -408,8 +336,6 @@ export const useBudgetStore = create<BudgetState>()(
                         return cat;
                     });
                 }
-                
-                // Ensure config has all required fields, including activeMonth
                 if (!merged.config) {
                     merged.config = currentState.config;
                 }
@@ -423,30 +349,10 @@ export const useBudgetStore = create<BudgetState>()(
                 if (!merged.config.customPhotoPositions) merged.config.customPhotoPositions = {};
                 if (!merged.config.cardSkin) merged.config.cardSkin = 'default-dark';
                 if (!merged.config.cardName) merged.config.cardName = 'BL';
-                if (!persistedState.goals) {
-                    merged.goals = DEFAULT_GOALS;
-                } else {
-                    const hasEmergency = persistedState.goals.some((g: any) => g.id === 'goal-1');
-                    if (!hasEmergency) {
-                        merged.goals = [DEFAULT_GOALS[0], ...persistedState.goals];
-                    }
-                }
-                
-                // Recalculate targetAmount for the emergency goal based on the loaded categories
-                if (merged.categories && merged.goals) {
-                    const monthlyBaseline = merged.categories.reduce((sum: any, cat: any) => sum + (cat.targetAmount || 0), 0);
-                    const multiplier = merged.config?.runwayMultiplier || 3;
-                    const targetRunway = monthlyBaseline * multiplier;
-                    
-                    merged.goals = merged.goals.map((g: any) => 
-                        g.id === 'goal-1' ? { ...g, targetAmount: targetRunway } : g
-                    );
-                }
-                
                 if (!merged.notifications) {
                     merged.notifications = [];
                 }
-
+                delete merged.goals;
                 return merged;
             },
             onRehydrateStorage: () => (state) => {
