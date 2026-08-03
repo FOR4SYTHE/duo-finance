@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { Shield, Plus, ChevronLeft, Bell } from "lucide-react";
+import { Shield, Plus, ChevronLeft, Bell, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/format";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
@@ -226,9 +226,9 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPl
                                         e.stopPropagation();
                                         removePolicy(policy.id);
                                     }} 
-                                    className="text-white/30 text-xs hover:text-red-400 transition-colors z-10"
+                                    className="w-8 h-8 mt-2 rounded-full bg-white/5 flex items-center justify-center border border-white/5 text-white/40 hover:bg-[#FF453A]/10 hover:text-[#FF453A] hover:border-[#FF453A]/20 transition-all z-10 active:scale-95"
                                 >
-                                    Remove
+                                    <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                             </div>
                         </div>
