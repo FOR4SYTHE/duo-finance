@@ -429,6 +429,7 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPl
                                         <span className="text-white font-bold text-[18px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(policy.premium))}</span>
                                         <span className="text-white/40 text-[11px] font-medium font-mono">/{policy.paymentFrequency === 'Monthly' ? 'mo' : policy.paymentFrequency === 'Quarterly' ? 'qtr' : policy.paymentFrequency === 'Semi-Annual' ? 'half' : 'yr'}</span>
                                     </div>
+                                    <span className="text-[#D4AF37]/50 text-[10px] font-bold tracking-wide">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(policy.premium))}</span>
                                 </div>
                                 
                                 <div className="flex flex-col gap-0.5">
@@ -436,6 +437,7 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPl
                                     <div className="flex items-baseline gap-1 mt-0.5">
                                         <span className="text-white font-bold text-[18px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(policy.coverage))}</span>
                                     </div>
+                                    <span className="text-[#D4AF37]/50 text-[10px] font-bold tracking-wide">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(policy.coverage))}</span>
                                 </div>
                                 
                                 {(policy.outpatientLimit || 0) > 0 && (
@@ -444,6 +446,7 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPl
                                         <div className="flex items-baseline gap-1 mt-0.5">
                                             <span className="text-white font-bold text-[14px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(policy.outpatientLimit || 0))}</span>
                                         </div>
+                                        <span className="text-[#D4AF37]/50 text-[10px] font-bold tracking-wide">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(policy.outpatientLimit || 0))}</span>
                                     </div>
                                 )}
                                 {(policy.deductible || 0) > 0 && (
@@ -452,6 +455,7 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPl
                                         <div className="flex items-baseline gap-1 mt-0.5">
                                             <span className="text-white font-bold text-[14px] tracking-tight">{primarySymbol}{formatCurrency(getPrimaryValue(policy.deductible || 0))}</span>
                                         </div>
+                                        <span className="text-[#D4AF37]/50 text-[10px] font-bold tracking-wide">≈ {secondarySymbol}{formatCurrency(getSecondaryValue(policy.deductible || 0))}</span>
                                     </div>
                                 )}
                             </div>
@@ -460,14 +464,23 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPl
                             {policy.coverage > 0 && (
                                 <div className="mt-5 mb-2 px-1">
                                     <div className="flex justify-between items-end mb-1.5">
-                                        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Utilization</span>
-                                        <span className="text-white/60 text-[10px] font-mono">
-                                            {(() => {
-                                                const policyEvents = medicalEvents.filter(e => e.policyId === policy.id && e.status !== 'Rejected');
-                                                const utilizedAmount = policyEvents.reduce((sum, e) => sum + e.amount, 0);
-                                                return `${primarySymbol}${formatCurrency(getPrimaryValue(utilizedAmount))} / ${primarySymbol}${formatCurrency(getPrimaryValue(policy.coverage))}`;
-                                            })()}
-                                        </span>
+                                        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Utilization</span>
+                                        <div className="flex flex-col items-end gap-0.5">
+                                            <span className="text-white/60 text-[10px] font-mono">
+                                                {(() => {
+                                                    const policyEvents = medicalEvents.filter(e => e.policyId === policy.id && e.status !== 'Rejected');
+                                                    const utilizedAmount = policyEvents.reduce((sum, e) => sum + (e.coveredAmount || 0), 0);
+                                                    return `${primarySymbol}${formatCurrency(getPrimaryValue(utilizedAmount))} / ${primarySymbol}${formatCurrency(getPrimaryValue(policy.coverage))}`;
+                                                })()}
+                                            </span>
+                                            <span className="text-[#D4AF37]/50 text-[9px] font-mono tracking-wide">
+                                                {(() => {
+                                                    const policyEvents = medicalEvents.filter(e => e.policyId === policy.id && e.status !== 'Rejected');
+                                                    const utilizedAmount = policyEvents.reduce((sum, e) => sum + (e.coveredAmount || 0), 0);
+                                                    return `≈ ${secondarySymbol}${formatCurrency(getSecondaryValue(utilizedAmount))} / ${secondarySymbol}${formatCurrency(getSecondaryValue(policy.coverage))}`;
+                                                })()}
+                                            </span>
+                                        </div>
                                     </div>
                                     <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                                         <div 
@@ -475,7 +488,7 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPl
                                             style={{ 
                                                 width: `${(() => {
                                                     const policyEvents = medicalEvents.filter(e => e.policyId === policy.id && e.status !== 'Rejected');
-                                                    const utilizedAmount = policyEvents.reduce((sum, e) => sum + e.amount, 0);
+                                                    const utilizedAmount = policyEvents.reduce((sum, e) => sum + (e.coveredAmount || 0), 0);
                                                     return Math.min((utilizedAmount / policy.coverage) * 100, 100);
                                                 })()}%` 
                                             }} 
