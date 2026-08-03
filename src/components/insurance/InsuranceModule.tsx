@@ -83,6 +83,7 @@ export function InsuranceModule() {
                                         setIsManualInputOpen(true);
                                     }
                                 }}
+                                onLogVisit={() => setIsLogVisitOpen(true)}
                             />
                         </motion.div>
                     )}

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
-import { Shield, Plus, ChevronLeft, Bell, Trash2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Shield, Plus, ChevronLeft, Bell, Trash2, ChevronDown, Phone, Activity, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/format";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
@@ -15,15 +15,22 @@ interface MyPlansTabProps {
     onAddPlan?: () => void;
     onExplore?: () => void;
     onEditPlan?: (id: string) => void;
+    onLogVisit?: (id: string) => void;
 }
 
-export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPlan }: MyPlansTabProps) {
+export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPlan, onLogVisit }: MyPlansTabProps) {
     const { exchangeRate } = useCurrencyStore();
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
-    const { policies: allPolicies, removePolicy } = useInsuranceStore();
+    const { policies: allPolicies, removePolicy, medicalEvents } = useInsuranceStore();
     const policies = allPolicies.filter(p => p.status !== 'Bookmarked');
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
+    const [expandedPanels, setExpandedPanels] = useState<Record<string, boolean>>({});
+
+    const togglePanel = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        setExpandedPanels(prev => ({ ...prev, [id]: !prev[id] }));
+    };
 
     useEffect(() => {
         setMounted(true);
@@ -447,6 +454,83 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPl
                                         </div>
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Utilization Progress Bar */}
+                            {policy.coverage > 0 && (
+                                <div className="mt-5 mb-2 px-1">
+                                    <div className="flex justify-between items-end mb-1.5">
+                                        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Utilization</span>
+                                        <span className="text-white/60 text-[10px] font-mono">
+                                            {(() => {
+                                                const policyEvents = medicalEvents.filter(e => e.policyId === policy.id && e.status !== 'Rejected');
+                                                const utilizedAmount = policyEvents.reduce((sum, e) => sum + e.amount, 0);
+                                                return `${primarySymbol}${formatCurrency(getPrimaryValue(utilizedAmount))} / ${primarySymbol}${formatCurrency(getPrimaryValue(policy.coverage))}`;
+                                            })()}
+                                        </span>
+                                    </div>
+                                    <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                        <div 
+                                            className="h-full bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] rounded-full transition-all duration-1000" 
+                                            style={{ 
+                                                width: `${(() => {
+                                                    const policyEvents = medicalEvents.filter(e => e.policyId === policy.id && e.status !== 'Rejected');
+                                                    const utilizedAmount = policyEvents.reduce((sum, e) => sum + e.amount, 0);
+                                                    return Math.min((utilizedAmount / policy.coverage) * 100, 100);
+                                                })()}%` 
+                                            }} 
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Expandable Options */}
+                            <div className="mt-4 pt-3 border-t border-white/5 flex flex-col gap-3">
+                                <button 
+                                    onClick={(e) => togglePanel(e, policy.id)}
+                                    className="w-full flex items-center justify-center gap-2 py-1"
+                                >
+                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{expandedPanels[policy.id] ? 'Hide Options' : 'More Options'}</span>
+                                    <ChevronDown className={`w-3 h-3 text-white/40 transition-transform ${expandedPanels[policy.id] ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                <AnimatePresence>
+                                    {expandedPanels[policy.id] && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="overflow-hidden flex flex-col gap-3"
+                                        >
+                                            {/* Advisor Pill */}
+                                            {(policy.agentName || policy.agentNumber) && (
+                                                <div className="flex items-center justify-between p-3 rounded-[12px] bg-white/5 border border-white/10 mt-1">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[9px] uppercase tracking-wider text-white/40 font-bold mb-0.5">Financial Advisor</span>
+                                                        <span className="text-[13px] font-bold text-white">{policy.agentName || 'Agent'}</span>
+                                                    </div>
+                                                    {policy.agentNumber && (
+                                                        <a href={`tel:${policy.agentNumber}`} onClick={(e) => e.stopPropagation()} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                                                            <Phone className="w-4 h-4 text-white" />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Quick Actions */}
+                                            <div className="flex gap-2">
+                                                <button onClick={(e) => { e.stopPropagation(); onLogVisit?.(policy.id); }} className="flex-1 py-3 rounded-[12px] bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center gap-2 hover:bg-[#D4AF37]/20 transition-colors active:scale-95">
+                                                    <Activity className="w-4 h-4 text-[#D4AF37]" />
+                                                    <span className="text-[12px] font-bold text-[#D4AF37]">Log Visit</span>
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); /* route to claim */ }} className="flex-1 py-3 rounded-[12px] bg-white/5 border border-white/5 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors active:scale-95">
+                                                    <FileText className="w-4 h-4 text-white/70" />
+                                                    <span className="text-[12px] font-bold text-white/90">File Claim</span>
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
                     </div>
