@@ -87,7 +87,7 @@ export function InsuranceModule() {
                     )}
                     {activeTab === 'benefits' && (
                         <motion.div key="benefits" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                            <BenefitsReaderTab />
+                            <BenefitsReaderTab onAddPlan={() => setIsAddPlanOpen(true)} />
                         </motion.div>
                     )}
                     {activeTab === 'explore' && (
