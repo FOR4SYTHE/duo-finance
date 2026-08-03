@@ -77,7 +77,7 @@ export function BillsCalendarCard({ forceOpenFullCalendar, onCalendarClose }: Bi
   };
 
   const allEvents = useMemo(() => {
-    const events: any[] = [...bills.map(b => ({ ...b, eventType: 'bill' }))];
+    const events: any[] = [...bills.map(b => ({ ...b, eventType: 'bill', dueDay: Math.min(b.dueDay, daysInMonth) }))];
 
     scheduledTrips.forEach(t => {
       const d = new Date(t.date);

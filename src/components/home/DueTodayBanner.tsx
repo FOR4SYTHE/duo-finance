@@ -19,8 +19,16 @@ export function DueTodayBanner({ onTap }: DueTodayBannerProps) {
     setMounted(true);
   }, []);
 
-  const today = new Date().getDate();
-  const dueBills = bills.filter(b => b.dueDay === today && !b.isPaid);
+  const currentDate = new Date();
+  const currentDay = currentDate.getDate();
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+  
+  const dueBills = bills.filter(b => {
+    if (b.isPaid) return false;
+    if (!b.reminderEnabled) return false;
+    const clampedDueDay = Math.min(b.dueDay, daysInMonth);
+    return clampedDueDay <= currentDay;
+  });
 
   if (!mounted || !isVisible || dueBills.length === 0) return null;
 

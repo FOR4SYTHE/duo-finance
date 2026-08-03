@@ -10,6 +10,7 @@ import confetti from "canvas-confetti";
 import { AddGoalSheet, EditGoalSheet, GoalMenuSheet } from "./GoalSheets";
 import { AmountInputModal } from "./AmountInputModal";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
+import { useAuthStore } from "@/store/useAuthStore";
 
 // ==========================================
 // STATIC CONSTANTS
@@ -191,6 +192,7 @@ function GoalsContent() {
     const exchangeRate = useCurrencyStore((state) => state.exchangeRate);
     const primaryCurrency = useCurrencyStore((state) => state.primaryCurrency);
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
+    const user = useAuthStore((state) => state.user);
     
     const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
     const [menuGoalId, setMenuGoalId] = useState<string | null>(null);
@@ -201,20 +203,22 @@ function GoalsContent() {
     return (
         <ToolCardShell title="Savings Goals">
             <div className="flex flex-col gap-4">
-                <button 
-                    onClick={() => {
-                        confetti({
-                            particleCount: 150,
-                            spread: 80,
-                            origin: { y: 0.6 },
-                            colors: ['#BF5AF2', '#64D2FF', '#FFFFFF']
-                        });
-                        setCelebrationGoal({ name: "Dream Vacation", target: 50000 });
-                    }}
-                    className="p-3 bg-[#BF5AF2]/10 hover:bg-[#BF5AF2]/20 text-[#BF5AF2] text-xs font-bold rounded-xl uppercase tracking-wider text-center w-full border border-[#BF5AF2]/20 transition-colors"
-                >
-                    [TEST] Trigger Goal Celebration
-                </button>
+                {user?.email?.includes('jonathanquidlat') && (
+                    <button 
+                        onClick={() => {
+                            confetti({
+                                particleCount: 150,
+                                spread: 80,
+                                origin: { y: 0.6 },
+                                colors: ['#BF5AF2', '#64D2FF', '#FFFFFF']
+                            });
+                            setCelebrationGoal({ name: "Dream Vacation", target: 50000 });
+                        }}
+                        className="p-3 bg-[#BF5AF2]/10 hover:bg-[#BF5AF2]/20 text-[#BF5AF2] text-xs font-bold rounded-xl uppercase tracking-wider text-center w-full border border-[#BF5AF2]/20 transition-colors"
+                    >
+                        [TEST] Trigger Goal Celebration
+                    </button>
+                )}
                 {goals.map(goal => {
                     const progress = goal.targetAmount > 0 ? Math.min(100, (goal.savedAmount / goal.targetAmount) * 100) : 0;
                     const Icon = (Icons as any)[goal.icon] || HelpCircle;

@@ -170,7 +170,7 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
   const allEvents = useMemo(() => {
     const events: any[] = bills
       .filter(b => b.isRecurring || (b.dueMonth === viewMonth && b.dueYear === viewYear) || b.dueMonth === undefined)
-      .map(b => ({ ...b, eventType: 'bill' }));
+      .map(b => ({ ...b, eventType: 'bill', dueDay: Math.min(b.dueDay, daysInMonth) }));
 
     scheduledTrips.forEach(t => {
       const d = new Date(t.date);
@@ -453,15 +453,20 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
                         onChange={(e) => setNewAmount(e.target.value)}
                         className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-colors"
                       />
-                      <input
-                        type="number"
-                        min="1"
-                        max="31"
-                        placeholder="Day (1-31)"
-                        value={newDueDay || ''}
-                        onChange={(e) => setNewDueDay(parseInt(e.target.value) || 1)}
-                        className="w-28 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-colors"
-                      />
+                      <div className="relative w-28 shrink-0">
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 text-[10px] font-bold uppercase tracking-wider pointer-events-none">
+                          Day
+                        </span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="31"
+                          placeholder="1-31"
+                          value={newDueDay || ''}
+                          onChange={(e) => setNewDueDay(parseInt(e.target.value) || 1)}
+                          className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-11 pr-3 py-3.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-white/30 transition-colors"
+                        />
+                      </div>
                     </div>
 
                     {/* Category selector */}
@@ -572,7 +577,9 @@ export function BillsCalendar({ onClose }: BillsCalendarProps) {
               </h3>
               <button
                 onClick={() => {
-                  setSelectedDay(null);
+                  if (selectedDay) {
+                    setNewDueDay(selectedDay);
+                  }
                   setShowAddForm(true);
                   requestAnimationFrame(() => {
                     setTimeout(() => {

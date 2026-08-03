@@ -147,30 +147,41 @@ export function computeCategoryStatus(
     currentDate: Date = new Date()
 ): { label: string; color: string; bg: string } {
     if (isFixedObligation) {
-        // We look for a bill linked to this category ID
-        const bill = bills.find(b => b.budgetCategoryId === categoryId);
+        const linkedBills = bills.filter(b => b.budgetCategoryId === categoryId);
         
-        if (spent >= target && target > 0) {
-            return { label: 'PAID', color: 'text-[#30D158]', bg: 'bg-[#30D158]/20 border-[#30D158]/30' };
-        }
+        if (linkedBills.length > 0) {
+            const allPaid = linkedBills.every(b => b.isPaid);
+            if (allPaid) {
+                return { label: 'PAID', color: 'text-[#30D158]', bg: 'bg-[#30D158]/20 border-[#30D158]/30' };
+            }
+            
+            if (!activeMonth) {
+                return { label: 'DUE', color: 'text-white/50', bg: 'bg-white/10 border-white/5' };
+            }
 
-        if (!bill || !activeMonth) {
-            return { label: 'DUE', color: 'text-white/50', bg: 'bg-white/10 border-white/5' };
-        }
+            const [yearStr, monthStr] = activeMonth.split('-');
+            const year = parseInt(yearStr, 10);
+            const month = parseInt(monthStr, 10) - 1;
+            const activeMonthStart = new Date(year, month, 1).getTime();
+            const currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getTime();
+            const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
 
-        const [yearStr, monthStr] = activeMonth.split('-');
-        const year = parseInt(yearStr, 10);
-        const month = parseInt(monthStr, 10) - 1;
-        const activeMonthStart = new Date(year, month, 1).getTime();
-        const currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getTime();
+            const isOverdue = linkedBills.some(b => {
+                if (b.isPaid) return false;
+                const cappedDueDay = Math.min(b.dueDay, lastDayOfMonth);
+                if (activeMonthStart < currentMonthStart) return true;
+                if (activeMonthStart === currentMonthStart && currentDate.getDate() > cappedDueDay) return true;
+                return false;
+            });
 
-        const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
-        const cappedDueDay = Math.min(bill.dueDay, lastDayOfMonth);
-
-        if (activeMonthStart < currentMonthStart) {
-            return { label: 'OVERDUE', color: 'text-[#FF453A]', bg: 'bg-[#FF453A]/20 border-[#FF453A]/30' };
-        } else if (activeMonthStart === currentMonthStart && currentDate.getDate() > cappedDueDay) {
-            return { label: 'OVERDUE', color: 'text-[#FF453A]', bg: 'bg-[#FF453A]/20 border-[#FF453A]/30' };
+            if (isOverdue) {
+                return { label: 'OVERDUE', color: 'text-[#FF453A]', bg: 'bg-[#FF453A]/20 border-[#FF453A]/30' };
+            }
+        } else {
+            // Fallback to spent >= target if no specific bills are linked yet, but it's marked as fixed
+            if (spent >= target && target > 0) {
+                return { label: 'PAID', color: 'text-[#30D158]', bg: 'bg-[#30D158]/20 border-[#30D158]/30' };
+            }
         }
 
         return { label: 'DUE', color: 'text-white/50', bg: 'bg-white/10 border-white/5' };
