@@ -199,59 +199,112 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPl
                 const providerLower = (policy.provider || '').toLowerCase();
                 let cardTheme = {
                     bg: "bg-gradient-to-br from-[#2c3e50] to-[#1a252f]",
-                    textPrimary: "text-white",
+                    textTop: "text-white",
+                    textBottom: "text-white",
                     textSecondary: "text-white/70",
-                    accent: "bg-white/10",
                     logoFont: "font-sans",
-                    pattern: null as React.ReactNode
+                    pattern: null as React.ReactNode,
+                    customLogo: null as React.ReactNode,
+                    customFooter: null as React.ReactNode
                 };
 
                 if (providerLower.includes('axa')) {
                     cardTheme = {
-                        bg: "bg-gradient-to-br from-[#008F9B] to-[#005B63]", // AXA Teal
-                        textPrimary: "text-white",
+                        bg: "bg-gradient-to-br from-[#008F9B] to-[#005B63]",
+                        textTop: "text-white",
+                        textBottom: "text-white",
                         textSecondary: "text-white/80",
-                        accent: "bg-[#E62828]", // Red slash accent
                         logoFont: "font-serif font-bold italic tracking-tighter",
                         pattern: (
                             <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
                                 <polygon points="30,0 80,0 50,100 0,100" fill="currentColor" />
                                 <polygon points="70,0 100,0 100,100 85,100" fill="currentColor" opacity="0.5" />
                             </svg>
-                        )
+                        ),
+                        customLogo: (
+                            <div className="flex items-center gap-1.5">
+                                <div className="text-xl font-serif font-bold italic tracking-tighter text-white leading-none">
+                                    {policy.provider}
+                                </div>
+                                <div className="w-0.5 h-4 bg-[#E62828] transform skew-x-[-15deg] ml-0.5" />
+                            </div>
+                        ),
+                        customFooter: null
                     };
                 } else if (providerLower.includes('maxicare')) {
                     cardTheme = {
-                        bg: "bg-gradient-to-br from-[#003B71] to-[#001D38]",
-                        textPrimary: "text-white",
-                        textSecondary: "text-white/70",
-                        accent: "bg-[#FFD100]",
+                        bg: "bg-[#1F5C9E]",
+                        textTop: "text-white",
+                        textBottom: "text-white",
+                        textSecondary: "text-white/80",
                         logoFont: "font-sans font-black tracking-tight",
                         pattern: (
-                            <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#FFD100]/10 rounded-full blur-2xl pointer-events-none" />
-                        )
+                            <>
+                                {/* Diamond cluster top right */}
+                                <svg className="absolute top-0 right-0 w-48 h-48 opacity-60 pointer-events-none translate-x-4 -translate-y-8" viewBox="0 0 200 200" fill="none">
+                                    <rect x="120" y="20" width="40" height="40" transform="rotate(45 120 20)" fill="white" fillOpacity="0.1" />
+                                    <rect x="160" y="40" width="50" height="50" transform="rotate(45 160 40)" fill="white" fillOpacity="0.2" />
+                                    <rect x="100" y="70" width="45" height="45" transform="rotate(45 100 70)" fill="#00A2D9" fillOpacity="0.8" />
+                                    <rect x="150" y="100" width="35" height="35" transform="rotate(45 150 100)" fill="#00C4CC" />
+                                    <rect x="190" y="10" width="30" height="30" transform="rotate(45 190 10)" fill="white" fillOpacity="0.1" />
+                                </svg>
+                                {/* Contactless wave right side */}
+                                <svg className="absolute bottom-16 right-6 w-8 h-8 opacity-80" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                                    <path d="M12 4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20" opacity="0.3"/>
+                                    <path d="M15 7C17.7614 7 20 9.23858 20 12C20 14.7614 17.7614 17 15 17" opacity="0.6"/>
+                                    <path d="M18 10C19.1046 10 20 10.8954 20 12C20 13.1046 19.1046 14 18 14"/>
+                                </svg>
+                            </>
+                        ),
+                        customLogo: <div className="text-2xl font-black text-white tracking-tight">Maxicare</div>,
+                        customFooter: null
                     };
                 } else if (providerLower.includes('sun life') || providerLower.includes('sunlife')) {
                     cardTheme = {
-                        bg: "bg-gradient-to-br from-[#FFD100] to-[#E6B800]",
-                        textPrimary: "text-[#003B71]",
-                        textSecondary: "text-[#003B71]/70",
-                        accent: "bg-white",
-                        logoFont: "font-serif font-black tracking-tighter",
+                        bg: "bg-gradient-to-b from-[#002D62] from-35% via-[#FFD100] via-35% to-[#F5C200]", // Split background
+                        textTop: "text-white",
+                        textBottom: "text-black", // Sun Life numbers/names are black on yellow
+                        textSecondary: "text-black/60",
+                        logoFont: "font-serif",
                         pattern: (
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-xl pointer-events-none -translate-y-1/2 translate-x-1/2" />
-                        )
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none -translate-y-1/2 translate-x-1/2" />
+                        ),
+                        customLogo: (
+                            <div className="flex items-center gap-2">
+                                {/* Simple globe icon representation */}
+                                <div className="w-5 h-5 rounded-full border-2 border-[#FFD100] flex items-center justify-center relative overflow-hidden">
+                                    <div className="w-full h-[1px] bg-[#FFD100] absolute" />
+                                    <div className="w-[1px] h-full bg-[#FFD100] absolute" />
+                                    <div className="w-6 h-6 border-[1px] border-[#FFD100] rounded-full absolute" style={{ transform: 'scaleX(0.4)' }} />
+                                </div>
+                                <div className="text-xl font-serif text-white tracking-wide">Sun Life</div>
+                            </div>
+                        ),
+                        customFooter: <span className="absolute bottom-4 right-5 text-[14px] font-sans text-black/60 tracking-tight lowercase">assure</span>
                     };
                 } else if (providerLower.includes('pru')) {
                     cardTheme = {
-                        bg: "bg-gradient-to-br from-[#ED1B2E] to-[#B3000F]",
-                        textPrimary: "text-white",
-                        textSecondary: "text-white/80",
-                        accent: "bg-white",
-                        logoFont: "font-serif font-bold tracking-tight",
+                        bg: "bg-[#2B2B2B]", // Dark grey background
+                        textTop: "text-white",
+                        textBottom: "text-white",
+                        textSecondary: "text-white/70",
+                        logoFont: "font-sans font-bold uppercase",
                         pattern: (
-                            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay pointer-events-none" />
-                        )
+                            <>
+                                {/* Red swoosh pattern */}
+                                <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
+                                    <path d="M0,0 L100,0 L100,30 C70,50 30,10 0,40 Z" fill="#E61A2D" opacity="0.9" />
+                                    <path d="M0,0 L100,0 L100,25 C70,45 30,5 0,35 Z" fill="#2B2B2B" />
+                                </svg>
+                                <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay pointer-events-none" />
+                            </>
+                        ),
+                        customLogo: (
+                            <div className="flex items-center gap-1">
+                                <div className="text-lg font-bold text-white tracking-wide uppercase">PRU LIFE U.K.</div>
+                            </div>
+                        ),
+                        customFooter: null
                     };
                 }
 
@@ -279,46 +332,55 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPl
                         {/* Physical Card */}
                         <div className={`relative w-full aspect-[1.586/1] rounded-[16px] overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.4)] ${cardTheme.bg} p-5 flex flex-col justify-between border border-white/10`}>
                             {/* Card Pattern/Texture */}
-                            <div className={`absolute inset-0 ${cardTheme.textPrimary} mix-blend-overlay`}>
+                            <div className="absolute inset-0 mix-blend-overlay">
                                 {cardTheme.pattern}
                             </div>
                             
                             {/* Top row: Logo and Name */}
                             <div className="relative z-10 flex justify-between items-start">
-                                <div className="flex items-center gap-1.5">
-                                    <div className={`text-xl ${cardTheme.logoFont} ${cardTheme.textPrimary} leading-none`}>
+                                {cardTheme.customLogo ? cardTheme.customLogo : (
+                                    <div className={`text-xl ${cardTheme.logoFont} ${cardTheme.textTop} leading-none`}>
                                         {policy.provider}
                                     </div>
-                                    {providerLower.includes('axa') && (
-                                        <div className="w-0.5 h-4 bg-[#E62828] transform skew-x-[-15deg] ml-0.5" />
-                                    )}
-                                </div>
-                                <div className={`text-[13px] font-bold tracking-tight uppercase max-w-[140px] text-right ${cardTheme.textPrimary}`}>
+                                )}
+                                <div className={`text-[11px] font-bold tracking-tight uppercase max-w-[120px] text-right ${cardTheme.textTop}`}>
                                     {policy.policyName}
                                 </div>
                             </div>
 
                             {/* Middle: Chip and Number */}
                             <div className="relative z-10 flex flex-col gap-3 mt-auto mb-2">
-                                <SmartChip />
-                                <div className={`font-mono text-lg tracking-widest ${cardTheme.textPrimary} drop-shadow-sm`}>
-                                    {policy.policyNumber ? policy.policyNumber.toUpperCase() : '•••• •••• •••• ••••'}
+                                {(!providerLower.includes('sun life') && !providerLower.includes('sunlife')) && (
+                                    <SmartChip />
+                                )}
+                                <div className="flex flex-col -mb-1">
+                                    {providerLower.includes('sun life') && (
+                                        <div className="flex gap-4">
+                                            <span className="text-[10px] text-[#E61A2D] font-bold uppercase tracking-wider -mb-1">Policy</span>
+                                            <span className="text-[10px] text-[#E61A2D] font-bold uppercase tracking-wider -mb-1">Member ID</span>
+                                        </div>
+                                    )}
+                                    <div className={`font-mono text-lg tracking-widest ${cardTheme.textBottom} drop-shadow-sm`}>
+                                        {policy.policyNumber ? policy.policyNumber.toUpperCase() : '•••• •••• •••• ••••'}
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Bottom: Dates & Member */}
                             <div className={`relative z-10 flex justify-between items-end ${cardTheme.textSecondary}`}>
                                 <div className="flex flex-col">
-                                    <span className="text-[7px] uppercase tracking-wider font-bold opacity-80 mb-0.5">Policyholder</span>
-                                    <span className={`text-[12px] font-bold tracking-widest uppercase ${cardTheme.textPrimary} line-clamp-1 max-w-[150px]`}>
+                                    {providerLower.includes('sun life') ? null : (
+                                        <span className={`text-[7px] uppercase tracking-wider font-bold mb-0.5 ${cardTheme.textSecondary}`}>Policyholder</span>
+                                    )}
+                                    <span className={`text-[12px] font-bold tracking-widest uppercase ${cardTheme.textBottom} line-clamp-1 max-w-[150px]`}>
                                         {policy.coveredMembers?.length > 0 ? policy.coveredMembers.join(', ') : 'MEMBER'}
                                     </span>
                                 </div>
                                 {policy.renewalDate && (
                                     <div className="flex gap-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-[7px] uppercase tracking-wider font-bold opacity-80 mb-0.5">Valid Thru</span>
-                                            <span className={`text-[10px] font-mono font-bold ${cardTheme.textPrimary}`}>
+                                        <div className="flex flex-col text-right">
+                                            <span className={`text-[7px] uppercase tracking-wider font-bold mb-0.5 ${cardTheme.textSecondary}`}>Valid Thru</span>
+                                            <span className={`text-[10px] font-mono font-bold ${cardTheme.textBottom}`}>
                                                 {new Date(policy.renewalDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' })}
                                             </span>
                                         </div>
@@ -326,6 +388,9 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPl
                                 )}
                             </div>
                             
+                            {/* Optional Custom Footer Branding */}
+                            {cardTheme.customFooter}
+
                             {/* Status Badge overlaying the card top right edge slightly */}
                             <div className="absolute top-4 right-4 z-20">
                                 {/* Invisible delete button area to catch clicks if needed, but handled below */}
