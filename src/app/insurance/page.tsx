@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ChevronLeft, Bell } from "lucide-react";
 import { InsuranceModule } from "@/components/insurance/InsuranceModule";
+import { InsuranceNotifications } from "@/components/insurance/InsuranceNotifications";
 
 export default function InsurancePage() {
     return (
@@ -21,9 +22,7 @@ export default function InsurancePage() {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                    <button className="w-10 h-10 rounded-full bg-white/[0.08] flex items-center justify-center border border-white/[0.05] hover:bg-white/[0.12] transition-colors relative">
-                        <Bell className="w-5 h-5 text-white/70" />
-                    </button>
+                    <InsuranceNotifications />
                 </div>
             </div>
 
