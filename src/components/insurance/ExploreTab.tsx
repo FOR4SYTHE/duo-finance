@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 
 interface ExploreTabProps {
-    onLogPlan?: () => void;
+    onLogPlan?: (plan?: any) => void;
 }
 
 export function ExploreTab({ onLogPlan }: ExploreTabProps) {
@@ -402,7 +402,7 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                                                 
                                                 <div className="flex gap-3 mt-6">
                                                     <button 
-                                                        onClick={onLogPlan}
+                                                        onClick={() => onLogPlan && onLogPlan(bp)}
                                                         className="flex-1 py-4 rounded-full bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] font-bold text-[13px] transition-all active:scale-[0.98] border border-[#D4AF37]/20"
                                                     >
                                                         Add to My Plans
@@ -540,7 +540,7 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                                         
                                         <div className="flex gap-3">
                                             <button 
-                                                onClick={onLogPlan}
+                                                onClick={() => onLogPlan && onLogPlan(result)}
                                                 className="flex-1 py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-[13px] transition-all active:scale-[0.98] border border-white/5"
                                             >
                                                 Add to My Plans

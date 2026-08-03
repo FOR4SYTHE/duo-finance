@@ -94,7 +94,20 @@ export function InsuranceModule() {
                     {activeTab === 'explore' && (
                         <motion.div key="explore" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
                             <ExploreTab 
-                                onLogPlan={() => setIsAddPlanOpen(true)}
+                                onLogPlan={(plan) => {
+                                    if (plan) {
+                                        setScannedData({
+                                            provider: plan.provider,
+                                            policyName: plan.name || plan.policyName,
+                                            type: plan.type,
+                                            premium: plan.premiumEst || plan.premium,
+                                            coverage: plan.coverage,
+                                        });
+                                        setIsManualInputOpen(true);
+                                    } else {
+                                        setIsAddPlanOpen(true);
+                                    }
+                                }}
                             />
                         </motion.div>
                     )}
