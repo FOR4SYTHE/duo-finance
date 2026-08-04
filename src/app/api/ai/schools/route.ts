@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30; // Vercel free tier limit
@@ -45,17 +46,16 @@ export async function POST(req: Request) {
 
     try {
         const body = await req.json();
-        const { profile, bookmarkedNames } = body;
+        const { location } = body;
 
-        if (!profile) {
-            return NextResponse.json({ error: 'Profile data missing.' }, { status: 400 });
+        if (!location) {
+            return NextResponse.json({ error: 'Location missing.' }, { status: 400 });
         }
 
-        const exclusionRule = Array.isArray(bookmarkedNames) && bookmarkedNames.length > 0 
-            ? `\nCRITICAL RULE: The user has already bookmarked the following plans. DO NOT suggest them again under any circumstances: ${bookmarkedNames.join(', ')}`
-            : '';
+        const normalizedLocation = location.trim().toLowerCase();
 
         let lastRateLimitError = '';
+        let extractedData = null;
 
         // Filter out keys already known to be exhausted today
         const availableKeys = apiKeys.filter(k => !isKeyExhausted(k));
@@ -72,21 +72,20 @@ export async function POST(req: Request) {
                 const ai = new GoogleGenAI({ apiKey });
 
                 const systemPrompt = `
-You are an expert Philippine insurance broker. Based on the user's profile, recommend exactly 3 real-world insurance products currently available in the Philippines (e.g., from AXA, SunLife, Pacific Cross, Pru Life UK, AIA, Philam, etc.) that best fit their needs.
-${exclusionRule}
-
-USER PROFILE:
-${JSON.stringify(profile, null, 2)}
+You are an expert local education consultant. Find 3 real-world schools (primary, secondary, or prep) located near or in ${location}.
+Provide realistic estimates for the upcoming 2026-2027 school year based on available public data.
 
 Return ONLY a valid JSON array of 3 objects with EXACTLY these keys:
 [
   {
-    "provider": "Provider Name (e.g., AXA Philippines)",
-    "name": "Plan Name (e.g., Health Care Access)",
-    "type": "HMO" | "Medical Insurance" | "Life Insurance" | "Critical Illness" | "VUL",
-    "description": "A punchy, 1-2 sentence pitch on why this fits them perfectly.",
-    "coverage": numeric_value_of_estimated_coverage (e.g. 1500000),
-    "premiumEst": numeric_value_of_estimated_monthly_premium (e.g. 4500)
+    "id": "A unique string ID based on the school name",
+    "name": "School Name (e.g. Centro Escolar University Malolos)",
+    "type": "School Type (e.g. Private University Prep, Private Catholic)",
+    "monthlyTuition": numeric_value_of_estimated_monthly_tuition_in_PHP (e.g. 6000),
+    "suppliesPerTerm": numeric_value_of_estimated_supplies_cost_in_PHP (e.g. 3000),
+    "chips": ["array", "of", "3_tags"],
+    "distance": "distance string if available, omit this key if not"
+  }
 ]
 
 CRITICAL: You are configured with Google Search grounding. You MUST return ONLY the raw JSON array. DO NOT append any markdown formatting, explanation text, or citation footnotes (e.g. [1]) outside of the JSON array, as it will break the application's JSON parser.
@@ -104,12 +103,20 @@ CRITICAL: You are configured with Google Search grounding. You MUST return ONLY 
                     }
                 });
 
-                const text = response.text;
+                let text = response.text;
                 if (!text) throw new Error("No response from AI");
 
-                const extractedData = JSON.parse(text);
-                return NextResponse.json(extractedData);
-
+                // Aggressively clean any markdown formatting that Gemini might sneak in
+                text = text.replace(/```json/i, '').replace(/```/g, '').trim();
+                
+                try {
+                    extractedData = JSON.parse(text);
+                } catch (parseError) {
+                    console.error("Failed to parse Gemini output:", text);
+                    throw new Error("AI returned malformed data. Please try again.");
+                }
+                
+                break; // success, exit the api keys loop
             } catch (error: any) {
                 const isRateLimit = 
                     error.status === 429 || 
@@ -129,10 +136,32 @@ CRITICAL: You are configured with Google Search grounding. You MUST return ONLY 
             }
         }
 
-        throw new Error(lastRateLimitError || 'All API keys exhausted or rate limited.');
+        if (!extractedData) {
+            throw new Error(lastRateLimitError || 'All API keys exhausted or rate limited.');
+        }
+
+        // Cache the result in Supabase server-side using service_role to bypass RLS
+        if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            const supabase = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL,
+                process.env.SUPABASE_SERVICE_ROLE_KEY
+            );
+            
+            await supabase
+                .from('ai_schools_cache')
+                .upsert({
+                    location_query: normalizedLocation,
+                    data: extractedData,
+                    updated_at: new Date().toISOString()
+                });
+        } else {
+            console.warn("Supabase credentials missing, skipping cache save.");
+        }
+
+        return NextResponse.json({ data: extractedData });
 
     } catch (error: any) {
-        console.error("Explore AI error:", error);
-        return NextResponse.json({ error: error.message || 'Failed to generate recommendations' }, { status: 500 });
+        console.error("Schools AI error:", error);
+        return NextResponse.json({ error: error.message || 'Failed to fetch schools' }, { status: 500 });
     }
 }

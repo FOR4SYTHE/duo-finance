@@ -1,6 +1,8 @@
 "use client";
 
 import { useChildCareStore } from "@/store/useChildCareStore";
+import { useInsuranceStore } from "@/store/useInsuranceStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { ChildProfileHeader } from "@/components/childcare/ChildProfileHeader";
 import { ChildCareTabs } from "@/components/childcare/ChildCareTabs";
 import { GrowthCostForecast } from "@/components/childcare/GrowthCostForecast";
@@ -11,6 +13,9 @@ import { X, CheckCircle2, CircleDashed } from "lucide-react";
 
 export function ChildCareDashboard() {
   const { isUpdatingAI, hasCompletedOnboarding, configuration } = useChildCareStore();
+  const hasActiveInsurance = useInsuranceStore((state) => state.policies.some(p => p.status !== 'Bookmarked'));
+  const { user } = useAuthStore();
+  const isDevAccount = user?.email?.includes('jonathanquidlat');
 
   const handleEditProfile = () => {
     // Restart the onboarding flow to edit data
@@ -22,12 +27,14 @@ export function ChildCareDashboard() {
       
       {/* Header Actions */}
       <div className="absolute top-0 right-0 flex items-center gap-3 z-50">
-        <button
-          onClick={() => useChildCareStore.getState().reset()}
-          className="px-3 py-1.5 h-10 bg-[#FF453A]/10 border border-[#FF453A]/20 rounded-full flex items-center justify-center text-[#FF453A] hover:bg-[#FF453A]/20 transition-colors text-xs font-bold tracking-widest uppercase"
-        >
-          Reset Setup
-        </button>
+        {isDevAccount && (
+          <button
+            onClick={() => useChildCareStore.getState().reset()}
+            className="px-3 py-1.5 h-10 bg-[#FF453A]/10 border border-[#FF453A]/20 rounded-full flex items-center justify-center text-[#FF453A] hover:bg-[#FF453A]/20 transition-colors text-xs font-bold tracking-widest uppercase"
+          >
+            Reset Setup
+          </button>
+        )}
         <Link 
           href="/"
           className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors"
@@ -94,11 +101,15 @@ export function ChildCareDashboard() {
 
             {/* Insurance */}
             <div className="flex items-center gap-2">
-              <CircleDashed className="w-4 h-4 text-white/30 flex-shrink-0" />
+              {hasActiveInsurance ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              ) : (
+                <CircleDashed className="w-4 h-4 text-white/30 flex-shrink-0" />
+              )}
               <div className="flex flex-col">
-                <span className="text-[12px] font-bold text-white/50 leading-tight">Insurance</span>
-                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                  Not Connected
+                <span className={`text-[12px] font-bold leading-tight ${hasActiveInsurance ? 'text-white' : 'text-white/50'}`}>Insurance</span>
+                <span className={`text-[10px] font-bold uppercase tracking-widest ${hasActiveInsurance ? 'text-emerald-400/80' : 'text-white/30'}`}>
+                  {hasActiveInsurance ? 'Connected' : 'Not Connected'}
                 </span>
               </div>
             </div>

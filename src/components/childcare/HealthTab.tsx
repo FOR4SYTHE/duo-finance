@@ -2,11 +2,15 @@
 
 import { useState } from "react";
 import { useChildCareStore } from "@/store/useChildCareStore";
+import { useInsuranceStore } from "@/store/useInsuranceStore";
 import { ArrowRight, HeartPulse, ShieldPlus, MapPin, Clock, CheckCircle2, Info, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function HealthTab() {
   const { cachedData, configuration, toggleHealthcareProvider } = useChildCareStore();
+  const policies = useInsuranceStore((state) => state.policies);
+  const activeInsurers = policies.filter(p => p.status !== 'Bookmarked').map(p => p.provider);
+
   const [activeCategory, setActiveCategory] = useState<string>("All");
 
   const categories = ["All", "Hospital", "Pediatrician", "Dentist"];
@@ -87,12 +91,34 @@ export function HealthTab() {
                 )}
                 {hospital.acceptedInsurances && (
                   <div className="flex flex-wrap gap-2 mt-1">
-                    {hospital.acceptedInsurances.map((ins, i) => (
-                      <span key={i} className="flex items-center gap-1 text-[10px] font-bold text-emerald-400/90 bg-emerald-400/10 px-2 py-1 rounded-md border border-emerald-400/20">
-                        <CheckCircle2 className="w-3 h-3" />
-                        {ins}
-                      </span>
-                    ))}
+                    {hospital.acceptedInsurances.map((ins, i) => {
+                      const hasActivePolicies = activeInsurers.length > 0;
+                      const isMatch = activeInsurers.includes(ins);
+                      
+                      if (!hasActivePolicies) {
+                        return (
+                          <span key={i} className="flex items-center gap-1 text-[10px] font-bold text-emerald-400/90 bg-emerald-400/10 px-2 py-1 rounded-md border border-emerald-400/20">
+                            <CheckCircle2 className="w-3 h-3" />
+                            {ins}
+                          </span>
+                        );
+                      }
+                      
+                      if (isMatch) {
+                        return (
+                          <span key={i} className="flex items-center gap-1 text-[10px] font-bold text-emerald-400/90 bg-emerald-400/10 px-2 py-1 rounded-md border border-emerald-400/20">
+                            <CheckCircle2 className="w-3 h-3" />
+                            {ins} (In-Network)
+                          </span>
+                        );
+                      }
+                      
+                      return (
+                        <span key={i} className="flex items-center gap-1 text-[10px] font-bold text-white/50 bg-white/5 px-2 py-1 rounded-md border border-white/10">
+                          {ins}
+                        </span>
+                      );
+                    })}
                   </div>
                 )}
               </div>

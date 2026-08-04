@@ -9,7 +9,7 @@ import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { formatCurrency } from "@/lib/format";
 
 export function EducationTab() {
-  const { cachedData, configuration, selectSchool, addCustomSchool } = useChildCareStore();
+  const { cachedData, configuration, selectSchool, addCustomSchool, isAiDataLoaded, aiUpdatedAt, aiError } = useChildCareStore();
   const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -82,6 +82,15 @@ export function EducationTab() {
           <h4 className="font-bold text-white text-[15px]">Schools & Institutions</h4>
           <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Sort: Relevance</span>
         </div>
+
+        {aiError && (
+          <div className="bg-[#FF7B54]/10 border border-[#FF7B54]/20 rounded-2xl p-4 flex gap-3 items-start">
+            <Info className="w-5 h-5 text-[#FF7B54] flex-shrink-0 mt-0.5" />
+            <div className="flex flex-col justify-center min-h-[20px]">
+              <span className="text-[13px] font-bold text-[#FF7B54] leading-tight">{aiError}</span>
+            </div>
+          </div>
+        )}
 
         {!configuration.selectedSchoolId && (
           <div className="bg-[#FF7B54]/10 border border-[#FF7B54]/20 rounded-2xl p-4 flex gap-3 items-start">
@@ -177,6 +186,20 @@ export function EducationTab() {
             </div>
           );
         })}
+
+        {isAiDataLoaded && (
+          <div className="flex items-start gap-2 bg-white/[0.03] border border-white/5 p-4 rounded-xl mt-2">
+            <Info className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5" />
+            <p className="text-white/50 text-[11px] font-medium leading-relaxed">
+              AI-estimated from public sources, not verified — confirm current tuition directly with the school.
+              {aiUpdatedAt && (
+                <span className="block mt-1 opacity-70">
+                  Last updated: {new Date(aiUpdatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                </span>
+              )}
+            </p>
+          </div>
+        )}
 
         {/* Add Custom Button */}
         <button 

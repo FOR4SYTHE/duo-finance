@@ -1,7 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { createClient } from '@/utils/supabase/client';
+import { useBudgetStore } from '@/store/useBudgetStore';
 
 export interface ChildProfile {
+  id?: string;
   nickname: string;
   age: number | null;
   gender: 'boy' | 'girl' | 'other' | null;
@@ -66,6 +69,9 @@ interface ChildCareState {
   configuration: ChildConfiguration;
   isUpdatingAI: boolean;
   hasCompletedOnboarding: boolean;
+  isAiDataLoaded: boolean;
+  aiUpdatedAt: string | null;
+  aiError: string | null;
   updateProfile: (profile: Partial<ChildProfile>) => void;
   selectSchool: (id: string | null) => void;
   addCustomSchool: (school: Omit<School, 'id'>) => void;
@@ -74,6 +80,7 @@ interface ChildCareState {
   completeOnboarding: () => void;
   mockTriggerAIUpdate: () => Promise<void>;
   reset: () => void;
+  loadHouseholdChildCare: () => Promise<void>;
 }
 
 // Baseline mock data for Malolos, Bulacan
@@ -94,13 +101,13 @@ const INITIAL_DATA: ChildCareData = {
     { id: '2', title: "Summer Art Workshop (Barasoain)", category: "Arts", cost: 2000, duration: "4 Weeks", distance: "1.8 km", ageRange: "7-15 yrs" },
     { id: '3', title: "Junior Coding Bootcamp", category: "Learning", cost: 3500, duration: "6 Weeks", distance: "2.5 km", ageRange: "8-14 yrs" }
   ],
-  monthlyEssentialsCost: 3500 // Base for diapers, milk, vitamins
+  monthlyEssentialsCost: 3500
 };
 
 export const useChildCareStore = create<ChildCareState>()(
   persist(
-    (set) => ({
-      profile: { nickname: '', age: null, gender: null, location: 'Malolos, Bulacan' },
+    (set, get) => ({
+      profile: { id: undefined, nickname: '', age: null, gender: null, location: 'Malolos, Bulacan' },
       cachedData: INITIAL_DATA,
       configuration: {
         selectedSchoolId: null,
@@ -109,84 +116,316 @@ export const useChildCareStore = create<ChildCareState>()(
       },
       isUpdatingAI: false,
       hasCompletedOnboarding: false,
+      isAiDataLoaded: false,
+      aiUpdatedAt: null,
       
       updateProfile: (profileUpdate) => set((state) => ({
         profile: { ...state.profile, ...profileUpdate }
       })),
 
-      selectSchool: (id) => set((state) => ({
-        configuration: { ...state.configuration, selectedSchoolId: id }
-      })),
+      selectSchool: async (id) => {
+        set((state) => ({
+          configuration: { ...state.configuration, selectedSchoolId: id }
+        }));
+        
+        const state = get();
+        const childId = state.profile.id;
+        if (!childId) return;
+        
+        const supabase = createClient();
+        
+        // Remove previous school selections
+        await supabase
+          .from('child_selections')
+          .delete()
+          .eq('child_id', childId)
+          .eq('category', 'school');
+          
+        if (id) {
+          const school = state.cachedData.schools.find(s => s.id === id);
+          if (school) {
+            // Note: RLS requires household_id. We fetch it via RPC if needed, but RLS on child_profiles
+            // ensures we can just let a trigger or postgres function handle it, OR we can fetch it.
+            // Wait, RLS on insert requires household_id.
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return;
+            const { data: householdId } = await supabase.rpc('get_user_household_id');
+            if (!householdId) return;
+
+            await supabase
+              .from('child_selections')
+              .insert({
+                household_id: householdId,
+                child_id: childId,
+                category: 'school',
+                item_id: school.id,
+                item_name: school.name,
+                item_data: school,
+                mode: 'Configured'
+              });
+          }
+        }
+      },
 
       addCustomSchool: (newSchool) => set((state) => {
         const id = `custom-${Date.now()}`;
         const schoolWithId = { ...newSchool, id, isCustom: true };
+        
+        // Let selectSchool handle the DB sync next time they explicitly select it,
+        // or we can call selectSchool immediately. But selectSchool is an action.
+        // We'll just update state here. Calling selectSchool right after handles sync.
+        setTimeout(() => {
+          get().selectSchool(id);
+        }, 0);
+
         return {
           cachedData: {
             ...state.cachedData,
             schools: [...state.cachedData.schools, schoolWithId]
-          },
-          configuration: {
-            ...state.configuration,
-            selectedSchoolId: id
           }
         };
       }),
 
-      toggleActivity: (id) => set((state) => {
+      toggleActivity: async (id) => {
+        const state = get();
         const activities = state.configuration.selectedActivities;
         const exists = activities.includes(id);
-        return {
-          configuration: {
-            ...state.configuration,
-            selectedActivities: exists ? activities.filter(a => a !== id) : [...activities, id]
-          }
-        };
-      }),
-
-      toggleHealthcareProvider: (id) => set((state) => {
-        const providers = state.configuration.selectedHealthcareProviders;
-        const exists = providers.includes(id);
-        return {
-          configuration: {
-            ...state.configuration,
-            selectedHealthcareProviders: exists ? providers.filter(p => p !== id) : [...providers, id]
-          }
-        };
-      }),
-
-      completeOnboarding: () => set({ hasCompletedOnboarding: true }),
-
-      mockTriggerAIUpdate: async () => {
-        set({ isUpdatingAI: true });
+        const newActivities = exists ? activities.filter(a => a !== id) : [...activities, id];
         
-        // Simulate a 2.5s AI fetch
-        await new Promise(resolve => setTimeout(resolve, 2500));
-        
-        // Slightly update the data to prove the "refresh" worked
         set((state) => ({
-          isUpdatingAI: false,
-          cachedData: {
-            ...state.cachedData,
-            schools: state.cachedData.schools.map(s => ({ ...s, monthlyTuition: s.monthlyTuition + 150 })), // simulate 2026 inflation
-            summerActivities: [
-              ...state.cachedData.summerActivities.filter(a => a.title !== "Robotics Camp 2026 (Malolos City Hall)"), // Prevent infinite appending
-              { id: Date.now().toString(), title: "Robotics Camp 2026 (Malolos City Hall)", cost: 4500, duration: "5 Weeks", category: "Learning" }
-            ]
+          configuration: {
+            ...state.configuration,
+            selectedActivities: newActivities
           }
         }));
+
+        const childId = state.profile.id;
+        if (!childId) return;
+        
+        const supabase = createClient();
+        const { data: householdId } = await supabase.rpc('get_user_household_id');
+        if (!householdId) return;
+
+        if (exists) {
+          // Remove it
+          await supabase
+            .from('child_selections')
+            .delete()
+            .eq('child_id', childId)
+            .eq('category', 'activity')
+            .eq('item_id', id);
+        } else {
+          // Add it
+          const activity = state.cachedData.summerActivities.find(a => a.id === id);
+          if (activity) {
+            await supabase
+              .from('child_selections')
+              .insert({
+                household_id: householdId,
+                child_id: childId,
+                category: 'activity',
+                item_id: activity.id,
+                item_name: activity.title,
+                item_data: activity,
+                mode: 'Configured'
+              });
+          }
+        }
       },
 
-      reset: () => set({
-        profile: { nickname: '', age: null, gender: null, location: 'Malolos, Bulacan' },
-        hasCompletedOnboarding: false,
-        configuration: {
-          selectedSchoolId: null,
-          selectedActivities: [],
-          selectedHealthcareProviders: []
-        },
-        cachedData: INITIAL_DATA
-      })
+      toggleHealthcareProvider: async (id) => {
+        const state = get();
+        const providers = state.configuration.selectedHealthcareProviders;
+        const exists = providers.includes(id);
+        const newProviders = exists ? providers.filter(p => p !== id) : [...providers, id];
+        
+        set((state) => ({
+          configuration: {
+            ...state.configuration,
+            selectedHealthcareProviders: newProviders
+          }
+        }));
+
+        const childId = state.profile.id;
+        if (!childId) return;
+        
+        const supabase = createClient();
+        const { data: householdId } = await supabase.rpc('get_user_household_id');
+        if (!householdId) return;
+
+        if (exists) {
+          await supabase
+            .from('child_selections')
+            .delete()
+            .eq('child_id', childId)
+            .eq('category', 'hospital')
+            .eq('item_id', id);
+        } else {
+          const provider = state.cachedData.hospitals.find(p => p.id === id);
+          if (provider) {
+            await supabase
+              .from('child_selections')
+              .insert({
+                household_id: householdId,
+                child_id: childId,
+                category: 'hospital',
+                item_id: provider.id,
+                item_name: provider.name,
+                item_data: provider,
+                mode: 'Configured'
+              });
+          }
+        }
+      },
+
+      completeOnboarding: async () => {
+        set({ hasCompletedOnboarding: true });
+        
+        const state = get();
+        let childId = state.profile.id;
+        const supabase = createClient();
+        
+        const { data: householdId } = await supabase.rpc('get_user_household_id');
+        if (!householdId) return;
+
+        if (!childId) {
+          childId = crypto.randomUUID();
+          set((s) => ({ profile: { ...s.profile, id: childId } }));
+        }
+
+        await supabase
+          .from('child_profiles')
+          .upsert({
+            id: childId,
+            household_id: householdId,
+            nickname: state.profile.nickname,
+            age: state.profile.age,
+            gender: state.profile.gender,
+            location: state.profile.location
+          });
+      },
+
+      mockTriggerAIUpdate: async () => {
+        set({ isUpdatingAI: true, aiError: null });
+        
+        try {
+          const location = get().profile.location || 'Malolos, Bulacan';
+          const response = await fetch('/api/ai/schools', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ location })
+          });
+          
+          if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error || 'Failed to fetch schools');
+          }
+          
+          const { data } = await response.json();
+          if (data) {
+            set((state) => ({
+              cachedData: {
+                ...state.cachedData,
+                schools: data
+              },
+              isAiDataLoaded: true,
+              aiUpdatedAt: new Date().toISOString()
+            }));
+          }
+        } catch (error: any) {
+          console.error(error);
+          set({ aiError: 'Couldn\'t reach DUO AI right now — please try again later.' });
+        } finally {
+          set({ isUpdatingAI: false });
+        }
+      },
+
+      reset: async () => {
+        const state = get();
+        if (state.profile.id) {
+          const supabase = createClient();
+          await supabase
+            .from('child_profiles')
+            .delete()
+            .eq('id', state.profile.id);
+        }
+
+        set({
+          profile: { id: undefined, nickname: '', age: null, gender: null, location: 'Malolos, Bulacan' },
+          hasCompletedOnboarding: false,
+          isAiDataLoaded: false,
+          aiUpdatedAt: null,
+          aiError: null,
+          configuration: {
+            selectedSchoolId: null,
+            selectedActivities: [],
+            selectedHealthcareProviders: []
+          },
+          cachedData: INITIAL_DATA
+        });
+      },
+
+      loadHouseholdChildCare: async () => {
+        const supabase = createClient();
+        const { data: householdId } = await supabase.rpc('get_user_household_id');
+        if (!householdId) return;
+
+        // Fetch first child profile
+        const { data: profiles } = await supabase
+          .from('child_profiles')
+          .select('*')
+          .eq('household_id', householdId)
+          .limit(1);
+
+        if (profiles && profiles.length > 0) {
+          const profile = profiles[0];
+          
+          // Fetch selections
+          const { data: selections } = await supabase
+            .from('child_selections')
+            .select('*')
+            .eq('child_id', profile.id);
+
+          const schools = selections?.filter(s => s.category === 'school').map(s => s.item_id) || [];
+          const activities = selections?.filter(s => s.category === 'activity').map(s => s.item_id) || [];
+          const hospitals = selections?.filter(s => s.category === 'hospital').map(s => s.item_id) || [];
+
+          set({
+            profile: {
+              id: profile.id,
+              nickname: profile.nickname,
+              age: profile.age,
+              gender: profile.gender,
+              location: profile.location
+            },
+            hasCompletedOnboarding: true,
+            configuration: {
+              selectedSchoolId: schools.length > 0 ? schools[0] : null,
+              selectedActivities: activities,
+              selectedHealthcareProviders: hospitals
+            }
+          });
+        }
+
+        const currentLocation = get().profile.location || 'Malolos, Bulacan';
+        const normalizedLocation = currentLocation.trim().toLowerCase();
+        const { data: cacheResult } = await supabase
+          .from('ai_schools_cache')
+          .select('data, updated_at')
+          .eq('location_query', normalizedLocation)
+          .maybeSingle();
+          
+        if (cacheResult && cacheResult.data) {
+          set((state) => ({
+            cachedData: {
+              ...state.cachedData,
+              schools: cacheResult.data
+            },
+            isAiDataLoaded: true,
+            aiUpdatedAt: cacheResult.updated_at
+          }));
+        }
+      }
     }),
     {
       name: 'child-care-storage',

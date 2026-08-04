@@ -2,11 +2,16 @@
 
 import { motion } from "framer-motion";
 import { useChildCareStore } from "@/store/useChildCareStore";
+import { useEffect } from "react";
 import { ChildCareOnboarding } from "@/components/childcare/ChildCareOnboarding";
 import { ChildCareDashboard } from "@/components/childcare/ChildCareDashboard";
 
 export default function ChildCarePage() {
-  const { hasCompletedOnboarding } = useChildCareStore();
+  const { hasCompletedOnboarding, loadHouseholdChildCare } = useChildCareStore();
+
+  useEffect(() => {
+    loadHouseholdChildCare();
+  }, [loadHouseholdChildCare]);
 
   if (!hasCompletedOnboarding) {
     return <ChildCareOnboarding />;

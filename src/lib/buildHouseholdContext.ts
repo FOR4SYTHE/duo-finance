@@ -12,14 +12,21 @@ import { calculateAllocations } from '@/utils/budgetMath';
 
 export function buildHouseholdContext(): string {
     // Read directly from stores
-    const { config, categories, goals } = useBudgetStore.getState();
-    const { entries } = useSpendStore.getState();
+    const { config, categories, goals: _goals } = useBudgetStore.getState();
+    const { entries: _entries } = useSpendStore.getState();
     const { exchangeRate } = useCurrencyStore.getState();
     const { scratchpadContent, documents, relocationTasks, shippingRateZarPerKg, targetExchangeRate } = usePluginsStore.getState();
     const { user, partner, householdId } = useAuthStore.getState();
-    const { bills } = useBillsStore.getState();
-    const { currentTrip, trips } = useCartifyStore.getState();
-    const { subscriptions } = useSubscriptionsStore.getState();
+    const { bills: _bills } = useBillsStore.getState();
+    const { currentTrip, trips: _trips } = useCartifyStore.getState();
+    const { subscriptions: _subscriptions } = useSubscriptionsStore.getState();
+
+    // Safe defaults — stores may not be hydrated yet
+    const goals = _goals || [];
+    const entries = _entries || [];
+    const bills = _bills || [];
+    const trips = _trips || [];
+    const subscriptions = _subscriptions || [];
     const { profile: childProfile, cachedData: childData, configuration: childConfig } = useChildCareStore.getState();
     const settings = useSettingsStore.getState();
 

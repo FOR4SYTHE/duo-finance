@@ -62,6 +62,8 @@ If a UI change can't honestly clear all four, it goes back for another pass befo
 
 **STRICT EDIT SCOPE & ISOLATION RULE:** When performing UI modifications or bug fixes, NEVER touch, alter, or refactor anything outside of the specific target component/task requested by the user. Do not make collateral visual adjustments to adjacent cards, headers, or global styles. Unrequested modifications introduce small breaks and unnecessary regression loops.
 
+**DUO AI ISOLATION RULE:** NEVER touch or modify the DUO AI implementation (including the Chat UI, context builders, and API routes) unless the user's prompt specifically requests changes or upgrades to DUO AI itself. Unrelated changes must completely ignore the AI systems.
+
 **Performance & Rendering Guardrails (Mobile/Tablet Optimization) — MANDATORY:**
 
 > **Target device baseline:** Huawei MatePad SE (Unisoc T770, Mali-G57 MP2 — budget GPU, 2 shader cores). If it runs at 60 fps on this device, it will run everywhere. Every rule below exists because a specific violation was found during a full audit that caused real, measurable lag on this hardware.

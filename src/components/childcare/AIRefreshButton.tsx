@@ -1,31 +1,22 @@
 "use client";
 
-import { useChildCareStore } from "@/store/useChildCareStore";
-import { motion } from "framer-motion";
+// NOTE: The AI grounding/caching logic in useChildCareStore.mockTriggerAIUpdate
+// and /api/ai/schools/route.ts is fully intact. To re-enable this button,
+// restore the onClick={mockTriggerAIUpdate} handler and remove the disabled state.
 
 export function AIRefreshButton() {
-  const { mockTriggerAIUpdate, isUpdatingAI } = useChildCareStore();
-
   return (
-    <motion.button
-      whileTap={{ scale: 0.98 }}
-      onClick={mockTriggerAIUpdate}
-      disabled={isUpdatingAI}
-      className={`w-full py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all relative overflow-hidden group shadow-[0_8px_30px_rgba(255,123,84,0.3)]
-        ${isUpdatingAI 
-          ? 'bg-[#1A1A1A] text-white/30 cursor-not-allowed border border-white/5' 
-          : 'bg-[#FF7B54] text-white'
-        }`}
+    <div
+      className="w-full py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 
+        bg-white/[0.02] border border-white/[0.02] opacity-40 select-none cursor-not-allowed"
     >
-      {!isUpdatingAI && (
-        <div className="flex items-center justify-center bg-white/20 px-2 py-0.5 rounded-[6px] backdrop-blur-sm shadow-sm border border-white/30 mr-1">
-          <span className="text-[10px] font-black tracking-widest text-white">AI</span>
-        </div>
-      )}
-      
-      <span className="relative z-10">
-        {isUpdatingAI ? "Scanning..." : "Generate Family Planning Report"}
-      </span>
-    </motion.button>
+      <div className="px-1.5 py-0.5 rounded bg-white/10 flex items-center justify-center">
+        <span className="text-[9px] font-black uppercase tracking-wider text-white/50">AI</span>
+      </div>
+      <span className="text-white/50">AI Reports</span>
+      <div className="px-1.5 py-0.5 rounded bg-white/10 flex items-center justify-center">
+        <span className="text-[9px] font-bold text-white/50 uppercase tracking-wider">Coming Soon</span>
+      </div>
+    </div>
   );
 }
