@@ -8,8 +8,8 @@ export async function processAndCompressImage(file: File): Promise<string> {
             img.src = event.target?.result as string;
             
             img.onload = () => {
-                const MAX_WIDTH = 800;
-                const MAX_HEIGHT = 800;
+                const MAX_WIDTH = 1600;
+                const MAX_HEIGHT = 1600;
                 let width = img.width;
                 let height = img.height;
                 
@@ -35,10 +35,14 @@ export async function processAndCompressImage(file: File): Promise<string> {
                     return;
                 }
                 
+                // Use better image smoothing
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                // Compress to WebP with 0.75 quality for smaller payload size
-                const dataUrl = canvas.toDataURL('image/webp', 0.75);
+                // Compress to WebP with 0.9 quality for sharper profile pictures
+                const dataUrl = canvas.toDataURL('image/webp', 0.9);
                 resolve(dataUrl);
             };
             

@@ -1,0 +1,12 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e5]:
+      - heading "DUO" [level=1] [ref=e11]
+      - main [ref=e12]:
+        - generic [ref=e13]:
+          - heading "Budgeting, together." [level=2] [ref=e14]
+          - paragraph [ref=e15]: Build better money habits with the person who matters most.
+        - generic [ref=e16]:
+          - button "Get Started" [ref=e18]
+          - button "Sign In" [ref=e22]
+  - button "Open Next.js Dev Tools" [ref=e28] [cursor=pointer]
