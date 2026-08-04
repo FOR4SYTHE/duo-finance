@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { ThinkingOrb } from "thinking-orbs";
-import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, Sparkles, AlertTriangle, Trash2, Pencil, MoreHorizontal } from "lucide-react";
+import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, Sparkles, AlertTriangle, Trash2, Pencil, MoreHorizontal, Activity } from "lucide-react";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { createClient } from "@/utils/supabase/client";
@@ -402,64 +402,111 @@ export default function ProfilePage() {
           <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Household & Partner</h3>
           
           <div className="flex overflow-x-auto gap-3 pb-4 px-2 -mx-2 snap-x hide-scrollbar mb-4">
-            
             {/* 1. Partner Card */}
             <div 
               onClick={() => authPartner ? alert("Partner Profile (Placeholder) coming soon.") : null}
-              className="w-[110px] h-[120px] shrink-0 bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-3xl flex flex-col items-center justify-center p-3 relative overflow-hidden group shadow-[0_8px_16px_rgba(0,0,0,0.4)] cursor-pointer hover:bg-white/[0.03] transition-colors snap-start"
+              className="w-[140px] h-[155px] shrink-0 bg-[#1C1C1E] rounded-[32px] flex flex-col justify-between p-2 shadow-xl snap-start cursor-pointer hover:bg-[#2C2C2E] transition-colors"
             >
-               {authPartner ? (
-                 <>
-                   <div className="absolute inset-0">
-                      {authPartner.avatar ? (
-                         <img src={authPartner.avatar} className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" />
-                      ) : (
-                         <div className="w-full h-full bg-gradient-to-br from-[#1C2C24] to-[#0A1A12] flex items-center justify-center opacity-60">
-                            <span className="text-emerald-400/30 text-3xl font-bold">{authPartner.name?.[0]?.toUpperCase() || 'P'}</span>
-                         </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0C] via-[#0A0A0C]/60 to-transparent" />
-                   </div>
-                   <div className="w-12 h-12 rounded-full overflow-hidden border-[0.5px] border-white/20 mb-2 relative z-10 shadow-sm">
-                      {authPartner.avatar ? (
-                        <img src={authPartner.avatar} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-b from-[#1C2C24] to-[#0A1A12] flex items-center justify-center">
-                          <span className="text-emerald-400 font-bold text-[14px]">{authPartner.name?.[0]?.toUpperCase()}</span>
-                        </div>
-                      )}
-                   </div>
-                   <span className="text-white text-[13px] font-bold tracking-tight mb-0.5 relative z-10 truncate w-full px-1 text-center drop-shadow-md">{authPartner.name?.split(' ')[0] || 'Partner'}</span>
-                   <span className="text-white/60 text-[9px] uppercase tracking-[0.1em] font-bold relative z-10 drop-shadow-md">Household</span>
-                 </>
-               ) : (
-                 <>
-                   <span className="text-white text-[32px] font-bold tracking-tight mb-1 drop-shadow-md">{householdId ? '1' : '0'}</span>
-                   <span className="text-white/50 text-[9px] uppercase tracking-[0.1em] font-bold drop-shadow-md text-center">Household<br/>Members</span>
-                 </>
-               )}
+               <div className="w-full bg-white rounded-[24px] p-3 flex flex-col items-start justify-between h-[80px]">
+                 {authPartner ? (
+                   <>
+                     <div className="flex -space-x-2.5">
+                       <div className="w-8 h-8 rounded-full border-[1.5px] border-white overflow-hidden bg-black/10 z-10 relative">
+                         {profileImage ? (
+                           <img src={profileImage} className="w-full h-full object-cover" />
+                         ) : (
+                           <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                             <span className="text-white font-bold text-[12px]">{authUser?.name?.[0]?.toUpperCase() || 'U'}</span>
+                           </div>
+                         )}
+                       </div>
+                       <div className="w-8 h-8 rounded-full border-[1.5px] border-white overflow-hidden bg-black/10 z-20 relative">
+                         {authPartner.avatar ? (
+                           <img src={authPartner.avatar} className="w-full h-full object-cover" />
+                         ) : (
+                           <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                             <span className="text-white font-bold text-[12px]">{authPartner.name?.[0]?.toUpperCase() || 'P'}</span>
+                           </div>
+                         )}
+                       </div>
+                     </div>
+                     <div className="flex flex-col">
+                       <span className="text-black font-bold text-[15px] leading-none truncate max-w-[100px] mb-0.5">{authPartner.name?.split(' ')[0] || 'Partner'}</span>
+                       <span className="text-black/50 text-[9px] font-bold uppercase tracking-wider leading-none">Partner</span>
+                     </div>
+                   </>
+                 ) : (
+                   <>
+                     <span className="text-black font-bold text-[24px] leading-tight mt-0.5">{householdId ? '1' : '0'}</span>
+                     <span className="text-black/50 text-[10px] font-bold uppercase tracking-wider">Members</span>
+                   </>
+                 )}
+               </div>
+               
+               <div className="px-2 pb-2 pt-1 flex justify-between items-end">
+                 <span className="text-white/50 text-[10px] font-semibold leading-tight">Shared<br/>Account</span>
+                 <div className="w-8 h-8 rounded-full bg-[#0A84FF] flex items-center justify-center shadow-[0_0_12px_rgba(10,132,255,0.4)]">
+                   <Users className="text-white w-4 h-4" />
+                 </div>
+               </div>
             </div>
 
             {/* 2. Logs Card */}
-            <div className="w-[110px] h-[120px] shrink-0 bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-3xl flex flex-col items-center justify-center p-3 shadow-[0_8px_16px_rgba(0,0,0,0.4)] snap-start">
-              <span className="text-white text-[32px] font-bold tracking-tight mb-1 drop-shadow-md">{spendEntries.length}</span>
-              <span className="text-white/50 text-[10px] uppercase tracking-[0.1em] font-bold drop-shadow-md">Logs</span>
+            <div className="w-[140px] h-[155px] shrink-0 bg-[#1C1C1E] rounded-[32px] flex flex-col justify-between p-2 shadow-xl snap-start">
+               <div className="w-full bg-[#2C2C2E] rounded-[24px] p-3 flex flex-col items-start justify-between h-[80px]">
+                 <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
+                    <Activity className="w-3 h-3 text-white" />
+                 </div>
+                 <div className="flex flex-col">
+                   <span className="text-white font-bold text-[20px] leading-none mb-1">{spendEntries.length}</span>
+                   <span className="text-white/50 text-[10px] font-bold uppercase tracking-wider">Logs</span>
+                 </div>
+               </div>
+               
+               <div className="px-2 pb-2 pt-1 flex justify-between items-end">
+                 <span className="text-white/50 text-[10px] font-semibold leading-tight">Monthly<br/>Entries</span>
+                 <div className="w-8 h-8 rounded-full bg-[#FF9F0A] flex items-center justify-center shadow-[0_0_12px_rgba(255,159,10,0.4)]">
+                   <ChevronRight className="text-black w-4 h-4" />
+                 </div>
+               </div>
             </div>
 
             {/* 3. Status Card */}
-            <div className="w-[110px] h-[120px] shrink-0 bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-3xl flex flex-col items-center justify-center p-3 shadow-[0_8px_16px_rgba(0,0,0,0.4)] snap-start relative">
-              <span className="text-white text-[18px] font-bold tracking-tight mb-1 drop-shadow-md">Active</span>
-              <span className="text-white/50 text-[10px] uppercase tracking-[0.1em] font-bold drop-shadow-md">Status</span>
-              <div className="mt-4 px-3 py-1.5 bg-gradient-to-r from-[#30D158]/10 to-transparent border-[0.5px] border-[#30D158]/30 rounded-full flex items-center gap-1.5 absolute bottom-4">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#30D158] shadow-[0_0_8px_rgba(48,209,88,0.8)]" />
-                <span className="text-[#30D158]/90 text-[9px] font-bold uppercase tracking-wider">Admin</span>
-              </div>
+            <div className="w-[140px] h-[155px] shrink-0 bg-[#1C1C1E] rounded-[32px] flex flex-col justify-between p-2 shadow-xl snap-start">
+               <div className="w-full bg-white rounded-[24px] p-3 flex flex-col items-start justify-between h-[80px]">
+                 <div className="flex items-center gap-1.5 mt-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#30D158] shadow-[0_0_8px_rgba(48,209,88,0.8)]" />
+                    <span className="text-black font-bold text-[15px] leading-none tracking-tight">Active</span>
+                 </div>
+                 <span className="text-black/50 text-[10px] font-bold uppercase tracking-wider">Status</span>
+               </div>
+               
+               <div className="px-2 pb-2 pt-1 flex justify-between items-end">
+                 <span className="text-white/50 text-[10px] font-semibold leading-tight">Household<br/>Admin</span>
+                 <div className="w-8 h-8 rounded-full bg-[#30D158] flex items-center justify-center shadow-[0_0_12px_rgba(48,209,88,0.4)]">
+                   <ShieldCheck className="text-black w-4 h-4" />
+                 </div>
+               </div>
             </div>
 
             {/* 4. Joined Card */}
-            <div className="w-[110px] h-[120px] shrink-0 bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-3xl flex flex-col items-center justify-center p-3 shadow-[0_8px_16px_rgba(0,0,0,0.4)] snap-start">
-              <span className="text-white text-[18px] font-bold tracking-tight mb-1 drop-shadow-md">2026</span>
-              <span className="text-white/50 text-[10px] uppercase tracking-[0.1em] font-bold drop-shadow-md">Joined</span>
+            <div className="w-[140px] h-[155px] shrink-0 bg-[#1C1C1E] rounded-[32px] flex flex-col justify-between p-2 shadow-xl snap-start">
+               <div className="w-full bg-[#2C2C2E] rounded-[24px] p-3 flex flex-col items-start justify-between h-[80px]">
+                 <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
+                    <Sparkles className="w-3 h-3 text-white" />
+                 </div>
+                 <div className="flex flex-col">
+                   <span className="text-white font-bold text-[20px] leading-none mb-1">2026</span>
+                   <span className="text-white/50 text-[10px] font-bold uppercase tracking-wider">Joined</span>
+                 </div>
+               </div>
+               
+               <div className="px-2 pb-2 pt-1 flex justify-between items-end">
+                 <span className="text-white/50 text-[10px] font-semibold leading-tight">Member<br/>Since</span>
+                 <div className="w-8 h-8 rounded-full bg-[#BF5AF2] flex items-center justify-center shadow-[0_0_12px_rgba(191,90,242,0.4)]">
+                   <CheckCircle2 className="text-white w-4 h-4" />
+                 </div>
+               </div>
             </div>
 
           </div>
