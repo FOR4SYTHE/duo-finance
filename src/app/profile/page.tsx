@@ -14,6 +14,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { processAndCompressImage, getCroppedAvatar } from "@/utils/imageUpload";
 import { useSpendStore } from "@/store/useSpendStore";
 import { PartnerProfileSheet } from "@/components/profile/PartnerProfileSheet";
+import { useDevStore } from "@/store/useDevStore";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -22,6 +23,9 @@ export default function ProfilePage() {
   const { primarySymbol, secondarySymbol } = useDualCurrency();
   const { user: authUser, partner: authPartner, isInitializing, householdId, updateUser } = useAuthStore();
   const spendEntries = useSpendStore(state => state.entries);
+  const { showDevTools, setShowDevTools } = useDevStore();
+  
+  const isDevAccount = authUser?.email?.includes('jonathanquidlat') ?? false;
   
   const [showSignOutPrompt, setShowSignOutPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -715,6 +719,52 @@ export default function ProfilePage() {
               <ChevronRight className="w-5 h-5 text-white/10" />
             </button>
           </div>
+
+          <AnimatePresence>
+            {isDevAccount && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                className="overflow-hidden"
+              >
+                <h3 className="text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Dev Controls</h3>
+                <div className="bg-[#111111] border-[0.5px] border-white/20 rounded-[32px] overflow-hidden mb-8 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_16px_32px_rgba(0,0,0,0.4)] relative">
+                  {/* Subtle chrome highlight line at the top edge */}
+                  <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-50" />
+                  
+                  <div className="w-full p-5 flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-b from-white/10 to-transparent flex items-center justify-center border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
+                        <Settings className="w-4 h-4 text-white/80 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-white/90 font-medium text-[16px] tracking-tight">Show Test & Mock UI</span>
+                        <span className="text-white/40 text-[12px]">Hides all dummy data buttons</span>
+                      </div>
+                    </div>
+                    
+                    {/* Perfect iOS style toggle */}
+                    <button
+                      onClick={() => setShowDevTools(!showDevTools)}
+                      className={`relative w-[51px] h-[31px] rounded-full transition-colors duration-300 ease-in-out border border-white/5 flex items-center px-[2px] shrink-0 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] ${
+                        showDevTools ? "bg-[#30D158]" : "bg-[#39393D]"
+                      }`}
+                    >
+                      <motion.div
+                        initial={false}
+                        animate={{
+                          x: showDevTools ? 20 : 0,
+                        }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        className="w-[27px] h-[27px] bg-white rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.15),0_3px_1px_rgba(0,0,0,0.06)] flex shrink-0"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Onboarding</h3>
           <div className="bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[32px] overflow-hidden mb-12 shadow-[0_16px_32px_rgba(0,0,0,0.4)]">

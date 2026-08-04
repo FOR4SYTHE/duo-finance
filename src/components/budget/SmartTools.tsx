@@ -12,6 +12,7 @@ import { AmountInputModal } from "./AmountInputModal";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useGoalsStore } from "@/store/useGoalsStore";
+import { useDevStore } from "@/store/useDevStore";
 
 // ==========================================
 // STATIC CONSTANTS
@@ -200,6 +201,7 @@ function GoalsContent() {
     
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
     const user = useAuthStore((state) => state.user);
+    const showDevTools = useDevStore((state) => state.showDevTools);
     
     const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
     const [menuGoalId, setMenuGoalId] = useState<string | null>(null);
@@ -210,7 +212,7 @@ function GoalsContent() {
     return (
         <ToolCardShell title="Savings Goals">
             <div className="flex flex-col gap-4">
-                {user?.email?.includes('jonathanquidlat') && (
+                {(user?.email?.includes('jonathanquidlat') ?? false) && showDevTools && (
                     <button 
                         onClick={() => {
                             confetti({

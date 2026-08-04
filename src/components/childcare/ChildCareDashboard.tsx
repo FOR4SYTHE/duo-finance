@@ -3,6 +3,7 @@
 import { useChildCareStore } from "@/store/useChildCareStore";
 import { useInsuranceStore } from "@/store/useInsuranceStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useDevStore } from "@/store/useDevStore";
 import { ChildProfileHeader } from "@/components/childcare/ChildProfileHeader";
 import { ChildCareTabs } from "@/components/childcare/ChildCareTabs";
 import { GrowthCostForecast } from "@/components/childcare/GrowthCostForecast";
@@ -15,7 +16,8 @@ export function ChildCareDashboard() {
   const { isUpdatingAI, hasCompletedOnboarding, configuration } = useChildCareStore();
   const hasActiveInsurance = useInsuranceStore((state) => state.policies.some(p => p.status !== 'Bookmarked'));
   const { user } = useAuthStore();
-  const isDevAccount = user?.email?.includes('jonathanquidlat');
+  const showDevTools = useDevStore((state) => state.showDevTools);
+  const isDevAccount = (user?.email?.includes('jonathanquidlat') ?? false) && showDevTools;
 
   const handleEditProfile = () => {
     // Restart the onboarding flow to edit data

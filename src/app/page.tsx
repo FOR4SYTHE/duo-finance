@@ -37,6 +37,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { containerVariants, itemVariants } from "@/utils/animations";
 import { filterEntriesByMonth } from "@/utils/budgetFilters";
+import { useDevStore } from "@/store/useDevStore";
 
 export default function Home() {
   useNotificationEngine();
@@ -44,7 +45,8 @@ export default function Home() {
 
   const user = useAuthStore((state) => state.user);
   const isInitializing = useAuthStore((state) => state.isInitializing);
-  const isDevAccount = user?.email?.startsWith('jonathanquidlat') ?? false;
+  const showDevTools = useDevStore((state) => state.showDevTools);
+  const isDevAccount = (user?.email?.startsWith('jonathanquidlat') ?? false) && showDevTools;
 
   const config = useBudgetStore((state) => state.config);
   const setLastSeenMonth = useBudgetStore((state) => state.setLastSeenMonth);
