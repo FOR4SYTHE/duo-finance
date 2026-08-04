@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import { X, Copy, Check, Radar, Clock, Flame, Navigation, Database } from "lucide-react";
+import { X, Copy, Check, Compass, Clock, Flame, Navigation, Database } from "lucide-react";
 import { ThinkingOrb } from "thinking-orbs";
 import { BorderBeam } from 'border-beam';
 import { useDualCurrency } from "@/hooks/useDualCurrency";
@@ -261,8 +261,8 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-4 relative z-10 pt-12">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#0A84FF]/20 flex items-center justify-center border border-[#0A84FF]/30 shadow-[0_0_15px_rgba(10,132,255,0.2)]">
-            <Radar className="w-5 h-5 text-[#0A84FF]" />
+          <div className="w-10 h-10 rounded-full bg-gradient-to-b from-[#2C2C2E] to-[#1C1C1E] flex items-center justify-center border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_10px_rgba(0,0,0,0.3)]">
+            <Compass className="w-5 h-5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col">
             <h2 className="text-white text-xl font-medium tracking-tight">Deals Radar</h2>
@@ -352,7 +352,7 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                               className="w-full relative group overflow-hidden rounded-[24px] bg-[#111]"
                           >
                               <div className="relative px-6 py-5 flex items-center justify-center gap-3 z-10">
-                                  <Radar className="w-5 h-5 text-white drop-shadow-md" />
+                                  <Compass className="w-5 h-5 text-white drop-shadow-md" />
                                   <span className="text-white font-bold tracking-[0.15em] uppercase text-[15px] drop-shadow-md">
                                       Initialize Scan
                                   </span>
