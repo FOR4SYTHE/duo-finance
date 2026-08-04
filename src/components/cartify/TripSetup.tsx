@@ -167,125 +167,99 @@ export function TripSetup() {
             </AnimatePresence>
 
             {/* Premium Top Island */}
-            <div className="relative z-20 shrink-0 bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.08] rounded-[40px] p-6 mx-4 mb-6 shadow-[0_16px_40px_rgba(0,0,0,0.3)] overflow-hidden">
-                {/* Elegant glow inside the card */}
-                <div className="absolute -top-24 -left-24 w-56 h-56 bg-[#30D158]/20 rounded-full blur-[60px] pointer-events-none" />
-                <div className="absolute -bottom-24 -right-24 w-56 h-56 bg-[#30D158]/10 rounded-full blur-[60px] pointer-events-none" />
-                
+            <div 
+                className="relative z-20 shrink-0 bg-[#356544] rounded-[48px] p-8 mx-2 mb-8 overflow-hidden"
+                style={{
+                    boxShadow: "0 24px 48px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2)"
+                }}
+            >
                 <div className="relative z-10">
-                    <div className="flex justify-between items-center mb-8">
-                        <span className="text-white/50 text-[11px] font-semibold tracking-[0.2em] uppercase">Trip Budget</span>
+                    <div className="flex justify-between items-center mb-10">
+                        <span className="text-white/90 text-[16px] font-semibold tracking-wide">Trip Budget</span>
                         <button 
                             onClick={toggleCurrency} 
-                            className="flex items-center gap-1.5 bg-black/20 hover:bg-black/40 border border-white/10 px-3 py-1.5 rounded-full transition-all group"
+                            className="flex items-center gap-1.5 bg-[#1C1C1E] px-3 py-1.5 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.05)] hover:bg-[#2C2C2E] transition-all group active:scale-95"
                         >
-                            <ArrowUpDown className="w-3 h-3 text-white/60 group-hover:text-white transition-colors" />
-                            <span className="text-white/80 text-[10px] uppercase font-bold tracking-widest">
+                            <ArrowUpDown className="w-3 h-3 text-[#888] group-hover:text-white transition-colors" />
+                            <span className="text-white/80 group-hover:text-white text-[10px] uppercase font-bold tracking-widest transition-colors">
                                 {primaryCurrency} ⇌ {targetCurrency}
                             </span>
                         </button>
                     </div>
                     
-                    <div className="flex flex-col items-center justify-center mb-10">
-                        <div className="flex flex-col items-center">
-                            <div className="text-[4rem] leading-none text-white flex items-baseline justify-center gap-1.5 font-light tracking-tight drop-shadow-lg">
-                                <span className="text-3xl text-white/40 font-medium">{primarySymbol}</span>
-                                <span>{displayValue || "0"}</span>
-                            </div>
-                            <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full bg-black/20 border border-white/5">
-                                <span className="text-white/50 font-medium tracking-wide text-sm">
-                                    ≈ {secondarySymbol}{convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                                </span>
-                            </div>
+                    <div className="flex flex-col items-start justify-center mb-14">
+                        <div className="flex items-start">
+                            <span className="text-white/70 text-[40px] font-medium mt-3 mr-1">{primarySymbol}</span>
+                            <span className="text-[88px] leading-none text-white font-medium tracking-tighter drop-shadow-sm">
+                                {displayValue || "0"}
+                            </span>
+                        </div>
+                        <div className="inline-flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full bg-black/10 border border-black/5">
+                            <span className="text-white/80 font-medium tracking-wide text-xs">
+                                ≈ {secondarySymbol}{convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                            </span>
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-3 mt-4">
-                        <div className="flex justify-between items-center px-1">
-                            <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-[#30D158] shadow-[0_0_8px_#30D158]" />
-                                <span className="text-white/50 text-[10px] font-bold tracking-[0.2em] uppercase">Shopping Mode</span>
-                            </div>
+                    <div className="flex flex-col items-center justify-center mt-6">
+                        <div className="flex items-center justify-center mb-3">
+                            <span className="text-white/50 text-[10px] font-bold tracking-[0.25em] uppercase">Shopping Mode</span>
                         </div>
-                        
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="relative flex bg-[#1C1C1E] p-1.5 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.05)] mx-auto w-fit">
+                            {/* Buttery smooth Apple-style sliding background */}
+                            <motion.div
+                                className="absolute top-1.5 bottom-1.5 left-1.5 w-14 bg-white rounded-full shadow-sm z-0"
+                                initial={false}
+                                animate={{ x: selectedMode === 'simple' ? 0 : '100%' }}
+                                transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+                            />
+                            
                             {(['simple', 'planned'] as CartifyMode[]).map(mode => (
                                 <button 
                                     key={mode}
                                     onClick={() => setSelectedMode(mode)}
-                                    className="relative p-3 rounded-[24px] flex flex-col items-center justify-center overflow-hidden group active:scale-[0.95] transition-transform duration-200"
+                                    className="relative w-14 h-14 flex items-center justify-center rounded-full overflow-hidden group active:scale-[0.97] transition-transform duration-200 z-10"
                                     style={{ WebkitTapHighlightColor: 'transparent' }}
                                 >
-                                    {/* Active Background - Framer Motion slide */}
-                                    {selectedMode === mode && (
-                                        <motion.div 
-                                            layoutId="activeModeBackgroundCartify"
-                                            className="absolute inset-0 bg-gradient-to-b from-[#30D158]/10 to-transparent border-[1.5px] border-[#30D158]/50 shadow-[0_8px_32px_rgba(48,209,88,0.15),inset_0_1px_1px_rgba(255,255,255,0.2)] rounded-[24px]"
-                                            initial={false}
-                                            transition={{ type: "spring", stiffness: 500, damping: 35, mass: 1 }}
-                                        />
-                                    )}
-                                    
-                                    {/* Active Green Glow */}
-                                    {selectedMode === mode && (
-                                        <motion.div 
-                                            layoutId="activeModeGlowCartify"
-                                            className="absolute inset-0 bg-[#30D158]/20 blur-2xl pointer-events-none rounded-[24px]"
-                                            initial={false}
-                                            transition={{ type: "spring", stiffness: 500, damping: 35, mass: 1 }}
-                                        />
-                                    )}
-                                    
-                                    {/* Base background for unselected (to give it shape) */}
-                                    {selectedMode !== mode && (
-                                        <div className="absolute inset-0 bg-white/[0.02] border border-white/[0.04] rounded-[24px] transition-colors duration-200 group-hover:bg-white/[0.04] shadow-sm" />
-                                    )}
-
-                                    {/* Icon (No circle, just icon, with micro-animations) */}
-                                    <div className={`relative z-10 transition-colors duration-200 mt-2 mb-1 origin-center ${
-                                        selectedMode === mode 
-                                            ? 'text-[#30D158] drop-shadow-[0_0_12px_rgba(48,209,88,0.8)]' 
-                                            : 'text-white/40 group-hover:text-white/60'
-                                    }`}>
-                                        {mode === 'simple' && (
-                                            <motion.div
-                                                animate={selectedMode === 'simple' ? { 
-                                                    scale: [1, 1.3, 0.85, 1],
-                                                    rotate: [0, -15, 15, 0] 
-                                                } : { scale: 1, rotate: 0 }}
-                                                transition={{ duration: 0.4, times: [0, 0.3, 0.6, 1], ease: "easeInOut" }}
-                                            >
-                                                <Zap className="w-6 h-6" strokeWidth={1.5} />
-                                            </motion.div>
+                                    {/* Icon */}
+                                    <motion.div 
+                                        initial={false}
+                                        animate={selectedMode === mode ? {
+                                            scale: [0.8, 1.15, 1],
+                                            rotate: mode === 'simple' ? [0, -15, 15, 0] : [0, -5, 5, 0]
+                                        } : {
+                                            scale: 1,
+                                            rotate: 0
+                                        }}
+                                        transition={{ duration: 0.4, ease: "easeOut" }}
+                                        className={`relative transition-colors duration-300 ${
+                                            selectedMode === mode 
+                                                ? 'text-black' 
+                                                : 'text-[#666] group-hover:text-[#888]'
+                                        }`}
+                                    >
+                                        {mode === 'simple' ? (
+                                            <Zap className="w-6 h-6" strokeWidth={2.5} />
+                                        ) : (
+                                            <ListTodo className="w-6 h-6" strokeWidth={2.5} />
                                         )}
-
-                                        {mode === 'planned' && (
-                                            <motion.div
-                                                animate={selectedMode === 'planned' ? { 
-                                                    scale: [1, 0.8, 1.15, 1],
-                                                    rotate: [0, 10, -5, 0]
-                                                } : { scale: 1, rotate: 0 }}
-                                                transition={{ duration: 0.4, times: [0, 0.3, 0.7, 1], ease: "backOut" }}
-                                            >
-                                                <ListTodo className="w-6 h-6" strokeWidth={1.5} />
-                                            </motion.div>
-                                        )}
-                                    </div>
-
-                                    <div className="flex flex-col items-center text-center relative z-10 w-full mb-1">
-                                        <span className={`text-[11px] font-bold uppercase tracking-wider transition-colors duration-200 mb-0.5 ${selectedMode === mode ? 'text-white' : 'text-white/60 group-hover:text-white/90'}`}>
-                                            {mode === 'planned' ? 'Planned Trip' : 'Quick Trip'}
-                                        </span>
-                                        <span className={`text-[9px] leading-tight transition-colors duration-200 ${selectedMode === mode ? 'text-white/70' : 'text-white/30'}`}>
-                                            {mode === 'simple' && "Prices only"}
-                                            {mode === 'planned' && "Pre-build list"}
-                                        </span>
-                                    </div>
-                                    
-                                    {/* Subtle gloss effect on the glass card */}
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                                    </motion.div>
                                 </button>
                             ))}
+                        </div>
+                        
+                        <div className="h-4 mt-5 flex items-center justify-center">
+                            <AnimatePresence mode="wait">
+                                <motion.span 
+                                    key={selectedMode}
+                                    initial={{ opacity: 0, y: 4 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -4 }}
+                                    className="text-white/60 text-[10px] font-bold tracking-[0.2em] uppercase"
+                                >
+                                    {selectedMode === 'simple' ? 'Quick Trip (Prices Only)' : 'Planned Trip (List)'}
+                                </motion.span>
+                            </AnimatePresence>
                         </div>
                     </div>
                 </div>
