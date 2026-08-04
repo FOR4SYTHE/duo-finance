@@ -40,13 +40,64 @@ import { filterEntriesByMonth } from "@/utils/budgetFilters";
 import { useDevStore } from "@/store/useDevStore";
 
 export default function Home() {
-  useNotificationEngine();
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  
+  // Calculate day of year for daily insight
+  const today = new Date();
+  const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
+  
+  const DAILY_INSIGHTS = [
+    { prefix: "Seneca said:", text: "It is not the man who has too little, but the man who craves more, that is poor." },
+    { prefix: "Prioritize your", text: "emergency fund first this month. Peace of mind is priceless." },
+    { prefix: "Warren Buffett:", text: "Do not save what is left after spending, but spend what is left after saving." },
+    { prefix: "Ben Franklin:", text: "Beware of little expenses. A small leak will sink a great ship." },
+    { prefix: "Review your", text: "shared subscriptions to find duplicates. Small cuts build massive wealth." },
+    { prefix: "Morgan Housel:", text: "Wealth is just the accumulated leftovers after you spend less than you earn." },
+    { prefix: "Try cooking", text: "at home twice more this week. Protect your health and your wallet." },
+    { prefix: "Epictetus noted:", text: "Wealth consists not in having great possessions, but in having few wants." },
+    { prefix: "Wait 48 hours", text: "before making any large impulse buys. Give your future self a chance." },
+    { prefix: "Automate your", text: "monthly savings transfers. Willpower fades, automation doesn't." },
+    { prefix: "Charlie Munger:", text: "The first rule of compounding: Never interrupt it unnecessarily." },
+    { prefix: "Naval Ravikant:", text: "Status games are multiplayer zero-sum. Wealth is positive-sum." },
+    { prefix: "Track every", text: "expense to find hidden cash leaks. What gets measured gets managed." },
+    { prefix: "Plan your meals", text: "around what's on sale this week. Smart planning yields quiet luxury." },
+    { prefix: "Consolidate your", text: "high-interest debt when possible. Stop paying for yesterday." },
+    { prefix: "Set a clear limit", text: "for discretionary spending. Freedom is found in discipline." },
+    { prefix: "Marcus Aurelius:", text: "Very little is needed to make a happy life; it is all within yourself." },
+    { prefix: "Thomas Jefferson:", text: "Never spend your money before you have earned it." },
+    { prefix: "Check Deals Radar", text: "before grocery shopping today. Don't leave money on the table." },
+    { prefix: "Socrates said:", text: "He is richest who is content with the least, for content is the wealth of nature." },
+    { prefix: "Albert Einstein:", text: "Compound interest is the 8th wonder of the world. He who understands it, earns it." },
+    { prefix: "Keep your", text: "shared budget updated every Sunday. Synchronization prevents stress." },
+    { prefix: "George S. Clason:", text: "A part of all you earn is yours to keep. Pay yourself first." },
+    { prefix: "Discuss your", text: "financial goals together this weekend. Alignment accelerates progress." },
+    { prefix: "Review your", text: "insurance policies annually together. Protection is the foundation of wealth." },
+    { prefix: "Lao Tzu said:", text: "He who knows that enough is enough will always have enough." },
+    { prefix: "J.D. Rockefeller:", text: "Don't be afraid to give up the good to go for the great." },
+    { prefix: "Celebrate your", text: "small financial wins as a team! Momentum is your best asset." },
+    { prefix: "Henry D. Thoreau:", text: "Wealth is the ability to fully experience life." },
+    { prefix: "Jim Rohn advised:", text: "If you don't design your own life plan, chances are you'll fall into someone else's." },
+    { prefix: "Remember:", text: "A budget is telling your money where to go instead of wondering where it went." }
+  ];
+  
+  const todayInsight = DAILY_INSIGHTS[dayOfYear % DAILY_INSIGHTS.length];
+
+  const textLength = todayInsight.prefix.length + todayInsight.text.length;
+  const insightTextClass = textLength > 85 
+    ? "text-[10.5px] leading-[1.2]" 
+    : textLength > 65 
+      ? "text-[11px] leading-[1.2]" 
+      : textLength > 45 
+        ? "text-[12.5px] leading-[1.25]" 
+        : "text-[15px] leading-[1.3]";
 
   const user = useAuthStore((state) => state.user);
   const isInitializing = useAuthStore((state) => state.isInitializing);
   const showDevTools = useDevStore((state) => state.showDevTools);
   const isDevAccount = (user?.email?.startsWith('jonathanquidlat') ?? false) && showDevTools;
+
+  useNotificationEngine();
 
   const config = useBudgetStore((state) => state.config);
   const setLastSeenMonth = useBudgetStore((state) => state.setLastSeenMonth);
@@ -84,7 +135,6 @@ export default function Home() {
   }
 
   const [isInitialLoad, setIsInitialLoad] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -105,12 +155,8 @@ export default function Home() {
   const [lastSeen, setLastSeen] = useState("");
   const [currentMonth, setCurrentMonth] = useState("");
   const [recapYear, setRecapYear] = useState(new Date().getFullYear());
-  const [showInsuranceFamily, setShowInsuranceFamily] = useState(false);
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
-
-  // setInterval removed — it was re-rendering the entire Home component tree every 4.5s.
-  // showInsuranceFamily toggle is not visually used anywhere currently.
 
   useEffect(() => {
     if (_hasHydrated && config.lastSeenMonth) {
@@ -120,14 +166,12 @@ export default function Home() {
       const lastYear = parseInt(config.lastSeenMonth.split("-")[0]);
       const currentYear = now.getFullYear();
 
-      // Yearly Rollover takes precedence
       if (currentYear > lastYear) {
         setRecapYear(lastYear);
         setLastSeen(config.lastSeenMonth);
         setCurrentMonth(currentMonthKey);
         setShowYearRollover(true);
       } 
-      // Monthly Rollover
       else if (currentMonthKey > config.lastSeenMonth) {
         setLastSeen(config.lastSeenMonth);
         setCurrentMonth(currentMonthKey);
@@ -177,7 +221,7 @@ export default function Home() {
       setShowYearSummaryModal(true);
     } else if (action?.payload?.actionType === 'view_calendar') {
       setShowNotifCenter(false);
-      setShowCalendar(true); // Assuming this triggers a calendar modal or scrolls to it
+      setShowCalendar(true); 
     } else if (action?.payload?.actionType === 'view_cartify') {
       setShowNotifCenter(false);
       window.location.href = '/cartify';
@@ -190,7 +234,6 @@ export default function Home() {
   if (!mounted || isInitializing) {
     return (
       <div className="flex flex-col w-full min-h-screen px-6 pt-12 bg-[#000000]">
-        {/* Header Skeleton */}
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-4">
              <div className="w-[44px] h-[44px] rounded-full bg-white/5 animate-pulse" />
@@ -202,16 +245,12 @@ export default function Home() {
           <div className="w-10 h-10 rounded-full bg-white/5 animate-pulse" />
         </div>
         
-        {/* Banner Skeleton */}
         <div className="w-full h-12 bg-white/5 animate-pulse rounded-2xl mb-6" />
 
-        {/* Hero Card Skeleton */}
         <div className="w-full aspect-[16/10] min-h-[220px] bg-white/5 animate-pulse rounded-[24px] mb-6" />
         
-        {/* Calendar Card Skeleton */}
         <div className="w-full h-[140px] bg-white/5 animate-pulse rounded-[28px] mb-8" />
         
-        {/* Grid Skeletons */}
         <div className="grid grid-cols-2 gap-4">
            <div className="aspect-[5/3] bg-white/5 animate-pulse rounded-[28px]" />
            <div className="aspect-[5/3] bg-white/5 animate-pulse rounded-[28px]" />
@@ -272,7 +311,6 @@ export default function Home() {
         animate="visible"
         className="flex flex-col w-full font-sans"
       >
-        {/* Header */}
         <motion.div variants={itemVariants} className="flex justify-between items-center mb-8 relative z-20">
           <div className="flex items-center gap-4">
             <ConjoiningAvatar onTap={() => { router.push('/profile'); }} />
@@ -372,17 +410,14 @@ export default function Home() {
         </div>
       </motion.div>
 
-      {/* V1 Due Today Banner */}
       <motion.div variants={itemVariants}>
         <DueTodayBanner onTap={() => setShowCalendar(true)} />
       </motion.div>
 
-      {/* Monthly Report Hero Card (photo-backed, budget overlaid) */}
       <motion.div variants={itemVariants}>
         <MonthlyReportCard />
       </motion.div>
 
-      {/* Bills & Calendar Overview */}
       <motion.div variants={itemVariants} className="mb-8" id="calendar-section">
         <BillsCalendarCard 
           forceOpenFullCalendar={showCalendar}
@@ -390,22 +425,16 @@ export default function Home() {
         />
       </motion.div>
 
-      {/* Apple Watch Style Bento UI */}
       <motion.div variants={itemVariants} className="flex flex-col gap-4 relative z-20 flex-1">
         <h2 className="text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase mb-1 px-2">
           Lifestyle & Integrations
         </h2>
         <div className="grid grid-cols-2 gap-4">
-          {/* Insurance Tracker */}
           <Link href="/insurance" className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-4 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
-            
-            {/* Title moved to top left */}
             <div className="relative z-20 flex flex-col items-start w-full">
               <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-0.5">Life & Health</span>
               <span className="text-white text-[17px] font-black tracking-tight leading-none">Insurance</span>
             </div>
-            
-            {/* Art Asset in the background/right */}
             <div className="absolute top-0 right-[-10px] bottom-0 w-[65%] z-10 opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500">
               <img 
                 src="/InsuranceCard-Art.webp" 
@@ -415,15 +444,11 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Child Care Card */}
           <Link href="/childcare" className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] p-4 relative overflow-hidden group hover:scale-[0.97] transition-transform flex flex-col justify-between shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5">
-            {/* Title moved to top left */}
             <div className="relative z-20 flex flex-col items-start w-full">
               <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-0.5">Kids & School</span>
               <span className="text-white text-[17px] font-black tracking-tight leading-none">Child Care</span>
             </div>
-            
-            {/* Art Asset in the background/right */}
             <div className="absolute top-0 right-[-10px] bottom-0 w-[65%] z-10 opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500">
               <img 
                 src="/ChildCare-CardArt.webp" 
@@ -432,35 +457,34 @@ export default function Home() {
               />
             </div>
           </Link>
+        </div>
 
-          {/* Spend Jar */}
+        {/* Row 2: Spend Jar & Daily Insights */}
+        <div className="grid grid-cols-2 gap-4 relative z-10">
+          {/* Spend Jar Widget */}
           <div 
             className="aspect-[5/3] bg-[#1A1A1A] rounded-[28px] relative overflow-hidden group hover:scale-[0.97] transition-transform shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_12px_24px_rgba(0,0,0,0.4)] border border-white/5 cursor-pointer [-webkit-tap-highlight-color:transparent] select-none"
             onClick={(e) => {
-              // Trigger the spew coins explosion from the ATM's position (left side)
               const event = new CustomEvent('spew-coins', {
                 detail: {
-                  x: 60, // approximate center of the ATM image
+                  x: 60,
                   y: 60
                 }
               });
               window.dispatchEvent(event);
             }}
           >
-            {/* Animated Piggy Background (now shoots coins from center-left) */}
             <AnimatedPiggyBank />
             
             <div className="flex flex-row items-center justify-between w-full h-full relative z-20 px-5 pointer-events-none">
-              {/* ATM Hero Image (Left side) */}
-              <div className="w-[45%] h-full flex items-center justify-center relative">
+              <div className="w-[45%] h-full flex items-center justify-center relative scale-[1.4] translate-x-2 translate-y-1">
                 <img 
-                  src="/images/spend-machine.webp" 
-                  alt="Spend Machine" 
-                  className="w-[120%] h-auto object-contain drop-shadow-[0_12px_32px_rgba(0,0,0,0.9)] translate-y-1 -translate-x-3 group-hover:scale-[1.08] group-active:scale-[0.92] transition-transform duration-300 ease-out" 
+                  src="/images/spend-jar.webp" 
+                  alt="Spend Jar" 
+                  className="w-full h-auto object-contain drop-shadow-[0_12px_32px_rgba(0,0,0,0.9)] group-hover:scale-[1.08] group-active:scale-[0.92] transition-transform duration-300 ease-out" 
                 />
               </div>
               
-              {/* Text Area (Right side) */}
               <div className="flex flex-col items-end text-right w-[55%] pt-1">
                 <span className="text-white/50 text-[9px] font-bold tracking-widest uppercase mb-1">Spend Jar</span>
                 <span className={`${phpColor} text-[22px] font-black tracking-tighter leading-none mb-0.5 transition-colors duration-300`}>
@@ -475,9 +499,7 @@ export default function Home() {
 
           {/* Daily Insight Card */}
           <div className="aspect-[5/3] rounded-[32px] p-1.5 relative bg-gradient-to-b from-white/10 to-white/5 shadow-[0_12px_32px_rgba(0,0,0,0.5)] flex">
-            <div className="flex-1 bg-gradient-to-b from-[#1C1C1E] to-[#151516] rounded-[26px] p-5 relative flex flex-col items-center justify-center border border-black/50 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)]">
-              {/* Top Center Mini Icon */}
-              {/* CSS keyframe float — runs on compositor thread, not main JS thread */}
+            <div className="flex-1 bg-gradient-to-b from-[#1C1C1E] to-[#151516] rounded-[26px] p-3 relative flex flex-col items-center justify-center border border-black/50 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)]">
               <div 
                 className="mb-2 relative z-10"
                 style={{ animation: 'gentle-float 5s ease-in-out infinite' }}
@@ -487,8 +509,8 @@ export default function Home() {
                 </div>
               </div>
 
-              <p className="text-[#E5E5E5] text-[15px] font-medium leading-[1.3] text-center tracking-tight relative z-10 px-1">
-                <span className="text-white/40">Prioritize your</span><br/>emergency fund first this month.
+              <p className={`text-[#E5E5E5] font-medium text-center tracking-tight relative z-10 px-1 ${insightTextClass}`}>
+                <span className="text-white/40">{todayInsight.prefix}</span><br/>{todayInsight.text}
               </p>
 
               {/* Floating Right Mini Squircle — CSS keyframe, not Framer Motion */}
