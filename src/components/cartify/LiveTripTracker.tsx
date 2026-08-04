@@ -224,7 +224,7 @@ export function LiveTripTracker() {
                             </div>
                                 
                             {/* Right Fishtail Flare */}
-                            <div className="absolute right-[0px] w-[110px] h-[56px] blur-[10px] opacity-60">
+                            <div className="absolute right-[0px] w-[110px] h-[48px] blur-[8px] opacity-60">
                                 <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'safe' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, transparent -10%, rgba(20, 230, 90, 1) 100%)`, clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)' }} />
                                 <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'warning' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, transparent -10%, rgba(255, 140, 0, 1) 100%)`, clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)' }} />
                                 <div className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${status === 'danger' ? 'opacity-100' : 'opacity-0'}`} style={{ background: `linear-gradient(to right, transparent -10%, rgba(255, 30, 30, 1) 100%)`, clipPath: 'polygon(100% 0, 0 15%, 55% 50%, 0 85%, 100% 100%)' }} />
@@ -271,19 +271,19 @@ export function LiveTripTracker() {
                     >
                         {/* Controlled diffuse aura */}
                         <div 
-                            className="absolute w-[56px] h-[44px] rounded-[100px] blur-[8px] opacity-80 transition-colors duration-1000 ease-in-out"
+                            className="absolute w-[56px] h-[36px] rounded-[100px] blur-[6px] opacity-80 transition-colors duration-1000 ease-in-out"
                             style={{ backgroundColor: getOrbColor() }}
                         />
                         {/* Subtle atmospheric spill */}
                         <div 
-                            className="absolute w-[76px] h-[54px] rounded-[100px] blur-[12px] opacity-40 -translate-x-[4px] transition-colors duration-1000 ease-in-out"
+                            className="absolute w-[76px] h-[46px] rounded-[100px] blur-[8px] opacity-40 -translate-x-[4px] transition-colors duration-1000 ease-in-out"
                             style={{ backgroundColor: getOrbColor() }}
                         />
                         
                         {/* Orb Core — single element, no mix-blend-screen stack */}
                         <div className="w-[32px] h-[32px] rounded-full relative z-20">
                             <div 
-                                className="w-full h-full rounded-full blur-[12px] opacity-90 transition-colors duration-1000 ease-in-out"
+                                className="w-full h-full rounded-full blur-[8px] opacity-90 transition-colors duration-1000 ease-in-out"
                                 style={{ backgroundColor: getOrbColor() }}
                             />
                         </div>
@@ -291,24 +291,24 @@ export function LiveTripTracker() {
                         {/* Simplified Atom Rings — CSS keyframe, 2 elements max (not 6) */}
                         <div
                             className="absolute inset-0 m-auto flex items-center justify-center pointer-events-none"
-                            style={{ animation: 'orb-rotate 24s linear infinite', willChange: 'transform' }}
+                            style={{ animation: 'orb-rotate 20s linear infinite', willChange: 'transform' }}
                         >
-                            {/* Ring 1 — single element with box-shadow for soft glow, no mix-blend */}
+                            {/* Ring 1 — softened with a subtle blur and inset shadow */}
                             <div 
-                                className="absolute w-[56px] h-[16px] rounded-[50%] border-[4px] opacity-70 transition-colors duration-1000 ease-in-out" 
+                                className="absolute w-[44px] h-[16px] rounded-[50%] border-[3px] opacity-90 blur-[1.5px] transition-colors duration-1000 ease-in-out" 
                                 style={{ 
                                     borderColor: getOrbColor(), 
                                     transform: 'rotate(25deg)',
-                                    boxShadow: `0 0 8px ${getOrbColor()}`
+                                    boxShadow: `0 0 16px ${getOrbColor()}, inset 0 0 8px ${getOrbColor()}`
                                 }} 
                             />
                             {/* Ring 2 */}
                             <div 
-                                className="absolute w-[56px] h-[16px] rounded-[50%] border-[4px] opacity-70 transition-colors duration-1000 ease-in-out" 
+                                className="absolute w-[44px] h-[16px] rounded-[50%] border-[3px] opacity-90 blur-[1.5px] transition-colors duration-1000 ease-in-out" 
                                 style={{ 
                                     borderColor: getOrbColor(), 
                                     transform: 'rotate(155deg)',
-                                    boxShadow: `0 0 8px ${getOrbColor()}`
+                                    boxShadow: `0 0 16px ${getOrbColor()}, inset 0 0 8px ${getOrbColor()}`
                                 }} 
                             />
                         </div>
