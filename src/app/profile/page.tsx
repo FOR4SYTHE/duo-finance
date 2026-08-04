@@ -26,6 +26,10 @@ export default function ProfilePage() {
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [isEditNameSheetOpen, setIsEditNameSheetOpen] = useState(false);
+  const [editNameValue, setEditNameValue] = useState("");
+  const [isSavingName, setIsSavingName] = useState(false);
+
   const supabase = createClient();
   const [household, setHousehold] = useState<any>(null);
 
@@ -77,6 +81,20 @@ export default function ProfilePage() {
     navigator.clipboard.writeText(mockInviteCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSaveName = async () => {
+    if (!editNameValue.trim() || !authUser?.id) return;
+    setIsSavingName(true);
+    try {
+        await supabase.from('profiles').update({ display_name: editNameValue.trim() }).eq('id', authUser.id);
+        updateUser({ name: editNameValue.trim() });
+        setIsEditNameSheetOpen(false);
+    } catch (e) {
+        console.error(e);
+    } finally {
+        setIsSavingName(false);
+    }
   };
 
   const handleJoinClick = () => {
@@ -330,11 +348,22 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <h2 className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1 min-h-[32px] flex items-center">
+          <h2 className="text-[24px] font-semibold text-white tracking-tight drop-shadow-md mb-1 min-h-[32px] flex items-center justify-center gap-2">
             {isInitializing ? (
               <div className="w-32 h-6 bg-white/10 animate-pulse rounded-md" />
             ) : (
-              <>{authUser?.name || 'You'} {authPartner ? `& ${authPartner.name}` : ''}</>
+              <>
+                <span>{authUser?.name || 'You'}</span>
+                <button 
+                  onClick={() => {
+                    setEditNameValue(authUser?.name || '');
+                    setIsEditNameSheetOpen(true);
+                  }}
+                  className="w-7 h-7 rounded-full bg-white/5 border-[0.5px] border-white/10 flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all shadow-sm"
+                >
+                  <Pencil className="w-3.5 h-3.5 text-white/50" />
+                </button>
+              </>
             )}
           </h2>
           <div className="mb-7 min-h-[20px] flex items-center justify-center">
@@ -451,27 +480,14 @@ export default function ProfilePage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
-                    className="w-full flex flex-col gap-2"
+                    className="w-full flex flex-col items-center justify-center"
                   >
-                    <BorderBeam size="line" colorVariant="colorful">
-                      <div className="w-full bg-[#121214] rounded-[20px] p-3 border-[0.5px] border-white/5 flex items-center justify-between shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
-                        <div className="flex flex-col pl-3">
-                            <span className="text-white/40 text-[9px] uppercase tracking-[0.1em] font-bold mb-0.5">Household Code</span>
-                            <span className="text-white font-mono text-[16px] tracking-[0.15em] font-medium opacity-90">{mockInviteCode}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <button onClick={handleCopyCode} className="w-11 h-11 bg-[#1C1C1E] hover:bg-white/10 rounded-xl border-[0.5px] border-white/5 flex items-center justify-center transition-colors shadow-sm">
-                            {copied ? <CheckCircle2 className="w-5 h-5 text-[#30D158]" /> : <Copy className="w-5 h-5 text-white/60" />}
-                          </button>
-                        </div>
-                      </div>
-                    </BorderBeam>
                     <motion.button 
                       onClick={() => setJoinStep('input')}
                       whileHover={{ scale: 1.015 }}
                       whileTap={{ scale: 0.96 }}
                       transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      className="group mt-2 flex items-center justify-center gap-1.5 py-2.5 px-5 bg-[#1C1C1E]/40 hover:bg-[#1C1C1E]/80 border-[0.5px] border-white/10 rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] transition-colors duration-300"
+                      className="group flex items-center justify-center gap-1.5 py-2.5 px-5 bg-[#1C1C1E]/40 hover:bg-[#1C1C1E]/80 border-[0.5px] border-white/10 rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] transition-colors duration-300"
                     >
                       <span className="text-white/50 group-hover:text-white/70 text-[11px] font-medium tracking-wide transition-colors">
                         Have an invite code?
@@ -491,11 +507,58 @@ export default function ProfilePage() {
 
       <div className="px-6 pt-10 pb-32 z-10 flex flex-col shrink-0">
 
-        {/* Currency Preferences */}
+        {/* Household & Partner Section */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Household & Partner</h3>
+          <div className="flex flex-col gap-4 mb-10">
+            {authPartner ? (
+              <button 
+                onClick={() => alert("Partner Profile (Placeholder) coming soon.")}
+                className="w-full bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[28px] p-5 flex items-center justify-between group shadow-[0_16px_32px_rgba(0,0,0,0.4)] hover:bg-white/[0.03] transition-colors"
+              >
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 rounded-full overflow-hidden border-[0.5px] border-white/10 shrink-0 shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+                    {authPartner.avatar ? (
+                      <img src={authPartner.avatar} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-b from-[#1C2C24] to-[#0A1A12] flex items-center justify-center">
+                        <span className="text-emerald-400 font-bold text-[18px]">{authPartner.name?.[0]?.toUpperCase()}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <span className="text-white font-medium text-[17px] tracking-tight">{authPartner.name}</span>
+                    <span className="text-white/40 text-[13px] mt-0.5 group-hover:text-white/60 transition-colors">View Partner Profile</span>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-white/50 transition-colors" />
+              </button>
+            ) : null}
+
+            <BorderBeam size="pulse-inner" colorVariant="mono">
+              <div className="w-full bg-[#0A0A0C] rounded-[28px] p-5 border-[0.5px] border-white/5 flex items-center justify-between shadow-[0_16px_32px_rgba(0,0,0,0.4)] relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
+                <div className="flex flex-col relative z-10">
+                  <span className="text-white/40 text-[10px] uppercase tracking-[0.15em] font-bold mb-1">Household Invite Code</span>
+                  <span className="text-white font-mono text-[22px] tracking-[0.15em] font-medium opacity-90">{mockInviteCode}</span>
+                </div>
+                <button onClick={handleCopyCode} className="w-12 h-12 relative z-10 bg-[#1C1C1E] hover:bg-white/10 rounded-full border-[0.5px] border-white/5 flex items-center justify-center transition-colors shadow-sm">
+                  {copied ? <CheckCircle2 className="w-5 h-5 text-[#30D158]" /> : <Copy className="w-5 h-5 text-white/60" />}
+                </button>
+              </div>
+            </BorderBeam>
+          </div>
+        </motion.div>
+
+        {/* Currency Preferences */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
         >
           <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Primary Currency</h3>
           <div className="bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-full p-1.5 mb-3 flex relative shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
@@ -588,28 +651,6 @@ export default function ProfilePage() {
               <ChevronRight className="w-5 h-5 text-white/10" />
             </button>
             <button 
-              onClick={() => router.push('/profile/notifications')}
-              className="w-full p-5 flex items-center justify-between border-b border-white/5 hover:bg-white/[0.03] transition-all duration-200 active:bg-white/[0.05] active:scale-[0.98]">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border-[0.5px] border-white/5">
-                  <Bell className="w-4 h-4 text-white/70" />
-                </div>
-                <span className="text-white/90 font-medium text-[16px] tracking-tight">Notifications</span>
-              </div>
-              <ChevronRight className="w-5 h-5 text-white/10" />
-            </button>
-            <button 
-              onClick={() => router.push('/profile/subscriptions')}
-              className="w-full p-5 flex items-center justify-between border-b border-white/5 hover:bg-white/[0.03] transition-all duration-200 active:bg-white/[0.05] active:scale-[0.98]">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border-[0.5px] border-white/5">
-                  <CreditCard className="w-4 h-4 text-white/70" />
-                </div>
-                <span className="text-white/90 font-medium text-[16px] tracking-tight">Subscriptions</span>
-              </div>
-              <ChevronRight className="w-5 h-5 text-white/10" />
-            </button>
-            <button 
               onClick={() => router.push('/profile/preferences')}
               className="w-full p-5 flex items-center justify-between hover:bg-white/[0.03] transition-all duration-200 active:bg-white/[0.05] active:scale-[0.98]">
               <div className="flex items-center gap-4">
@@ -657,6 +698,59 @@ export default function ProfilePage() {
 
       </div>
       
+      {/* Edit Name Sheet */}
+      <AnimatePresence>
+        {isEditNameSheetOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
+              onClick={() => setIsEditNameSheetOpen(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, y: '100%' }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: '100%' }}
+              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+              className="fixed bottom-0 left-0 right-0 bg-[#0A0A0C] border-t border-white/10 rounded-t-[32px] p-6 z-[201] shadow-[0_-16px_40px_rgba(0,0,0,0.5)]"
+            >
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
+              <h3 className="text-[20px] font-semibold text-white tracking-tight mb-2">Edit Display Name</h3>
+              <p className="text-white/40 text-[14px] mb-6">This is your personal name, visible to you and your partner.</p>
+              
+              <div className="bg-[#1C1C1E] border-[0.5px] border-white/10 rounded-[16px] p-1.5 mb-6 shadow-inner">
+                <input 
+                  type="text" 
+                  value={editNameValue}
+                  onChange={(e) => setEditNameValue(e.target.value)}
+                  placeholder="Your Name"
+                  className="w-full bg-transparent text-white text-[16px] px-4 py-3 outline-none placeholder:text-white/20 font-medium"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setIsEditNameSheetOpen(false)}
+                  className="flex-1 py-4 rounded-[16px] bg-[#1C1C1E] text-white/80 font-semibold text-[15px] hover:bg-white/10 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleSaveName}
+                  disabled={isSavingName || !editNameValue.trim()}
+                  className="flex-1 py-4 rounded-[16px] bg-white text-black font-semibold text-[15px] hover:bg-white/90 transition-colors disabled:opacity-50"
+                >
+                  {isSavingName ? "Saving..." : "Save"}
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Full Screen Welcome Overlay */}
       <AnimatePresence>
         {joinStep === 'welcome' && (

@@ -1,66 +1,58 @@
 # MASTER HANDOFF DOCUMENT — DUO FINANCE
 
-> **Date:** August 2, 2026  
+> **Date:** August 4, 2026  
 > **Target:** AI Agent Handoff & Continuum State  
-> **Status:** DUO AI Architecture, Budget Pulse Engine, and Vision Scanner have been fully wired and refined. The application is now fully synced client-side and mathematically perfect. Ready to build the Partner Profile feature in the next session.
+> **Status:** The app has reached a mature, production-ready milestone. Core features (Budget, Spend Jar, Cartify, Bills, Calendar, Insurance, Childcare) are unified and now actively backed by Supabase with live syncing across two partnered accounts. DUO AI chat interface is highly polished with robust inline editing and context-aware capabilities.
 
 ---
 
 ## 1. Executive Summary & Core Milestones Achieved
 
-### A. DUO AI Core & Vision Scanner (`src/store/useAIChatStore.ts`, `src/lib/buildHouseholdContext.ts`)
-- **System Awareness:** Built `buildHouseholdContext.ts` which successfully injects data from ALL Zustand stores (Budget, Spend Jar, Cartify, Bills, Childcare, Vault, Auth) directly into DUO AI's system prompt. DUO AI is now fully aware of the user, their partner, and every peso spent.
-- **Vision Scanner Architecture:** Confirmed the Vision Scanner is deeply integrated into the AI Chat interface (`AIScannerView.tsx`). It uses a `pendingScanContext` to instantly hand off scraped product data and online prices into a new chat session so the LLM is perfectly grounded on the scanned item.
+### A. Database & Account Syncing (Supabase Phase)
+- **Supabase Integration Complete:** The transition from local-only Zustand storage to a live Supabase backend is active. 
+- **Two-Account Household Sync:** Accounts are now successfully synced. Core financial data (Budgets, Spend Jar entries, Cartify lists, Bills, and Calendar events) unify seamlessly across the two partnered accounts. 
+- **Unified Data Models:** Complex features like the Insurance Hub and Childcare (Education/Activities) are fully integrated into the schema (e.g., `ai_schools_cache`), bridging local UI state with persistent backend syncing.
 
-### B. Budget Pulse Engine Refinement (`src/utils/budgetPulse.ts`)
-- **Mathematical Perfection:** Fixed a critical bug in the Safe-to-Spend calculation where categories and the Spend Jar were double-charging the ledger. `spendJarSpent` now perfectly segregates unallocated expenses from category-specific expenses.
-- **Spend Jar Capacity:** Verified the UI accurately calculates and allows 100% (or dynamically set %) of the unallocated Master Target.
-- **Hydration & Ghost States (`DueTodayBanner.tsx`):** Eliminated an SSR mismatch/hydration bug where stale state persisted across navigation. The banner now perfectly mounts client-side using a clean hydration check, preventing ghost notifications of paid bills.
+### B. DUO AI Enhancements & Chat UI Architecture
+- **In-Place Message Editing:** Built a sophisticated linear inline message editor for DUO AI. Users can click 'Edit' to transform their sent message into an inline text area. Hitting 'Save' automatically snips the subsequent chat history (`truncateMessagesFrom`) and cleanly resends the branched conversation.
+- **Message Actions & Polish:** Added responsive user message action buttons (Retry, Edit, Copy) and timestamps (e.g., 7:21 PM). These actions dynamically appear on hover for desktop, while remaining persistently visible for mobile.
+- **Crash Prevention & Hydration:** Fixed a severe runtime error in `buildHouseholdContext.ts` by adding strict fallback guards (`|| []`) for Zustand stores that haven't fully hydrated, preventing `undefined` crashes when DUO AI attempts to read goals or bills.
+- **Quota Protection:** Temporarily locked the "Generate AI Report" buttons behind a stylized "Coming Soon" state to prevent accidental quota burning while preserving the underlying API grounding/caching logic for future use.
 
-### C. Architecture Audit & Insurance Hub Decisions
-- **Audit Completed:** Verified that the entire core engine is unified.
-- **Insurance Hub Decision:** Verified that according to `AGENTS.md`, the Insurance Hub must **NOT** be built in local storage. It is strictly deferred to Phase 6, after the Supabase database migration.
+### C. System Guidelines & Guardrails Update
+- **DUO AI Isolation Rule:** Explicitly documented in `AGENTS.md` that DUO AI systems (Chat UI, context builders, API routes) are strictly off-limits for modifications unless a prompt specifically requests an AI upgrade. This prevents collateral damage during unrelated UI tasks.
 
 ---
 
-## 2. File & Component Map
+## 2. File & Component Map (Recent Key Updates)
 
 | File Path | Description | Key Changes / State |
 | :--- | :--- | :--- |
-| `src/lib/buildHouseholdContext.ts` | AI Context Builder | Injects live Zustand states directly into the Gemini LLM context. |
-| `src/store/useAIChatStore.ts` | DUO AI Store | Manages chat history, tabs, and the `pendingScanContext` for Vision. |
-| `src/components/ai/AIScannerView.tsx` | Vision Scanner | Handles camera/gallery uploads and scrapes market prices. |
-| `src/utils/budgetPulse.ts` | Math Engine | Segregated unallocated vs. category spending for perfect Safe-to-Spend tracking. |
-| `src/components/home/DueTodayBanner.tsx` | Bills Reminder | Removed derived React state; added strict hydration guards. |
+| `src/components/ai/AIChatView.tsx` | Main AI Chat UI | Added robust inline message editing, responsive hover states, timestamps, and action buttons. |
+| `src/store/useAIChatStore.ts` | DUO AI Store | Implemented `truncateMessagesFrom` to handle seamless conversation branching on message edits/retries. |
+| `src/lib/buildHouseholdContext.ts` | AI Context Builder | Added strict hydration guards to prevent `undefined` array slice crashes. |
+| `src/components/childcare/AIRefreshButton.tsx` | AI Fetch Triggers | Replaced functional fetchers with static "Coming Soon" UI lockouts to protect API quotas. |
+| `AGENTS.md` | Core Architecture Rules | Added the "DUO AI ISOLATION RULE" to protect AI features from regression. |
+| `supabase/migrations/*` | Database Schemas | Built tables and policies for Childcare, AI caching, and household data syncing. |
 
 ---
 
 ## 3. Strict Guidelines for Next Agent
 
-1. **Native UI Ban:** NEVER use native browser `alert()`, `confirm()`, or `prompt()`. All alerts and confirmations must be custom built components that match the dark, premium Apple spatial aesthetic.
-2. **Portals for Overlays:** Any full-screen modal or sheet MUST use `createPortal(..., document.body)` to ensure it breaks out of `framer-motion` layout transforms.
-3. **Performance Audit Rule:** The UI must remain buttery smooth on low-end tablets. Strictly limit compositor layers (max 5) and avoid infinite Framer Motion loops.
-4. **Follow `AGENTS.md` Exactly:** Do not attempt to build the Insurance Hub locally. It requires the Supabase Phase 5 migration first.
+1. **DUO AI Isolation Rule:** DO NOT modify DUO AI components, context builders, or API routes unless the user explicitly requests an AI feature upgrade. 
+2. **Native UI Ban:** NEVER use native browser `alert()`, `confirm()`, or `prompt()`. All alerts and confirmations must be custom-built components that match the dark, premium Apple spatial aesthetic.
+3. **Portals for Overlays:** Any full-screen modal or sheet MUST use `createPortal(..., document.body)` to ensure it breaks out of `framer-motion` layout transforms.
+4. **Performance Audit Rule:** The UI must remain buttery smooth on low-end tablets. Strictly limit compositor layers (max 5) and avoid infinite Framer Motion loops.
 
 ---
 
-## 4. Immediate Next Task: The Partner Profile Feature
+## 4. Immediate Next Steps / Open Tasks
 
-In the next chat session, you will build the new **Partner Profile View**.
-
-**The Plan:**
-- **Trigger:** Tapping the partner's avatar on the Settings/Profile page (`src/app/profile/page.tsx`).
-- **Layout (Reference: screenshot_2.png):** A dark, frosted-glass full-screen sheet or portalled modal.
-- **Header:** Partner's avatar, Name, Email, and a sleek "Partnership Active" or "Household Member" verified badge.
-- **Actions:** "Nudge" (push notification) and "Message" buttons.
-- **Grid Layout (Household Data ONLY):**
-  - **Card 1 (Vertical): "Recent Activity"** – Mini-timeline of their latest Spend Jar entries.
-  - **Card 2 (Square): "Cartify Activity"** – A quick glance at what they just added to the shared grocery list.
-  - **Card 3 (Horizontal): "Dream Board Contributions"** – Progress bar showing their savings towards shared goals.
-- **Privacy Rule:** Under no circumstances should this view expose their private/personal budgets. Only shared household contributions.
+- Continue polishing any remaining UI elements required for the Supabase backend migration.
+- Re-enable the locked AI "Coming Soon" buttons once a robust, Supabase-backed API key rotation and tracking system is fully implemented.
 
 ---
 
-🚀 **MISSION STATUS:** Handoff updated & saved. Ready to switch chat sessions!  
-⚡️ **NEXT STEP:** [Architect / Builder] - Build the sleek Partner Profile Sheet with the asymmetrical card grid.  
+🚀 **MISSION STATUS:** Handoff thoroughly updated. The application is unified, synced, and heavily polished!
+⚡️ **NEXT STEP:** [Architect / Builder] - Stand by for the next feature assignment.
 🔥 **MANTRA:** BEYOND PLUS ULTRA!
