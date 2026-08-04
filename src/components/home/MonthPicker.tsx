@@ -99,15 +99,15 @@ function MonthCard({
           </div>
         </div>
 
-        <div className="flex flex-col items-center w-full mt-auto relative -mb-8" style={{ containerType: 'inline-size' }}>
+        <div className="flex flex-col items-center w-full mt-auto relative" style={{ containerType: 'inline-size' }}>
           <h3 
-            className="font-black tracking-[-0.04em] w-full text-center leading-[0.75] select-none translate-y-0 capitalize whitespace-nowrap"
+            className="font-black tracking-[-0.04em] w-max max-w-none text-center leading-[0.75] select-none translate-y-[22%] capitalize whitespace-nowrap px-4"
             style={{
-              fontSize: `clamp(50px, ${monthName.toLowerCase() === 'january' ? 25 : monthName.toLowerCase() === 'february' ? 22.5 : 145 / monthName.length}cqw, 150px)`,
+              fontSize: "36cqw",
               background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.3) 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              textShadow: "0px 8px 24px rgba(0,0,0,0.5)", // Smooth text shadow, no glitchy stroke
+              textShadow: "0px 8px 24px rgba(0,0,0,0.5)",
             }}
           >
             {monthName}

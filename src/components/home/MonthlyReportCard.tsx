@@ -356,11 +356,11 @@ export function MonthlyReportCard() {
           </div>
 
           {/* Bottom: Giant Liquid Glass month text */}
-          <div className={`flex flex-col items-center w-full mt-auto relative pb-2 transition-opacity duration-300 ${isAdjusting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ containerType: 'inline-size' }}>
+          <div className={`flex flex-col items-center w-full mt-auto relative transition-opacity duration-300 ${isAdjusting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ containerType: 'inline-size' }}>
             <h2 
-              className="font-black tracking-[-0.04em] w-full text-center leading-none select-none translate-y-14 capitalize whitespace-nowrap"
+              className="font-black tracking-[-0.04em] w-max max-w-none text-center leading-[0.75] select-none translate-y-[22%] capitalize whitespace-nowrap px-4"
               style={{
-                fontSize: `clamp(50px, ${currentMonthName.toLowerCase() === 'january' ? 25 : currentMonthName.toLowerCase() === 'february' ? 22.5 : 145 / currentMonthName.length}cqw, 150px)`,
+                fontSize: "36cqw",
                 background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.3) 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
