@@ -4,7 +4,7 @@ import { useExploreStore } from "@/store/useExploreStore";
 import { useInsuranceStore } from "@/store/useInsuranceStore";
 import { formatCurrency } from "@/lib/format";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
-import { BriefcaseMedical, TrendingUp, Sun, Plus, X, Activity, Users, ExternalLink, Bookmark, BookmarkCheck } from "lucide-react";
+import { BriefcaseMedical, TrendingUp, Sun, Plus, X, Activity, Users, ExternalLink, Bookmark, BookmarkCheck, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 
@@ -559,6 +559,13 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                                     </div>
                                 );
                             })}
+                            
+                            <div className="flex items-start gap-2 bg-white/[0.03] border border-white/5 p-4 rounded-xl mt-2">
+                                <Info className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5" />
+                                <p className="text-white/50 text-[11px] font-medium leading-relaxed">
+                                    AI-estimated, not verified — confirm details directly with the insurer.
+                                </p>
+                            </div>
                         </div>
                     </motion.div>
                 )}

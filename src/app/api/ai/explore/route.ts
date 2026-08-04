@@ -62,8 +62,9 @@ Return ONLY a valid JSON array of 3 objects with EXACTLY these keys:
     "description": "A punchy, 1-2 sentence pitch on why this fits them perfectly.",
     "coverage": numeric_value_of_estimated_coverage (e.g. 1500000),
     "premiumEst": numeric_value_of_estimated_monthly_premium (e.g. 4500)
-  }
 ]
+
+CRITICAL: You are configured with Google Search grounding. You MUST return ONLY the raw JSON array. DO NOT append any markdown formatting, explanation text, or citation footnotes (e.g. [1]) outside of the JSON array, as it will break the application's JSON parser.
 `;
 
                 const response = await ai.models.generateContent({
@@ -74,6 +75,7 @@ Return ONLY a valid JSON array of 3 objects with EXACTLY these keys:
                     config: {
                         temperature: 0.3,
                         responseMimeType: "application/json",
+                        tools: [{ googleSearch: {} }],
                     }
                 });
 
