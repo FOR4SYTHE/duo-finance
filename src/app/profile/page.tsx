@@ -13,6 +13,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useAuthStore } from "@/store/useAuthStore";
 import { processAndCompressImage, getCroppedAvatar } from "@/utils/imageUpload";
 import { useSpendStore } from "@/store/useSpendStore";
+import { PartnerProfileSheet } from "@/components/profile/PartnerProfileSheet";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -32,6 +33,8 @@ export default function ProfilePage() {
   const [isEditNameSheetOpen, setIsEditNameSheetOpen] = useState(false);
   const [editNameValue, setEditNameValue] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
+
+  const [isPartnerSheetOpen, setIsPartnerSheetOpen] = useState(false);
 
   const supabase = createClient();
   const [household, setHousehold] = useState<any>(null);
@@ -352,7 +355,7 @@ export default function ProfilePage() {
         )}
 
         <div 
-          onClick={() => { if (authPartner) alert("Partner Profile (Placeholder) coming soon.") }}
+          onClick={() => { if (authPartner) setIsPartnerSheetOpen(true) }}
           className={`relative z-10 flex items-center justify-between mt-auto w-[calc(100%+20px)] -ml-[10px] p-2.5 rounded-[22px] transition-all duration-300 cursor-pointer group ${authPartner ? 'hover:bg-white/[0.06] border border-transparent hover:border-white/[0.08] shadow-sm hover:shadow-[0_4px_16px_rgba(0,0,0,0.2)]' : ''}`}
         >
           {authPartner ? (
@@ -405,7 +408,7 @@ export default function ProfilePage() {
           <div className="flex overflow-x-auto gap-3 pb-4 px-2 -mx-2 snap-x hide-scrollbar mb-4">
             {/* 1. Partner Card */}
             <div 
-              onClick={() => authPartner ? alert("Partner Profile (Placeholder) coming soon.") : null}
+              onClick={() => authPartner ? setIsPartnerSheetOpen(true) : null}
               className="w-[140px] h-[155px] shrink-0 bg-[#1C1C1E] rounded-[32px] flex flex-col justify-between p-2 shadow-xl snap-start cursor-pointer hover:bg-[#2C2C2E] transition-colors"
             >
                <div className="w-full bg-white rounded-[24px] p-3 flex flex-col items-start justify-between h-[80px]">
@@ -800,6 +803,14 @@ export default function ProfilePage() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Partner Profile Sheet Overlay */}
+      <PartnerProfileSheet 
+        isOpen={isPartnerSheetOpen}
+        onClose={() => setIsPartnerSheetOpen(false)}
+        partner={authPartner}
+        householdId={householdId}
+      />
 
       {/* Full Screen Welcome Overlay */}
       <AnimatePresence>

@@ -3,6 +3,7 @@ import { Navigation } from "@/components/Navigation";
 import "./globals.css";
 import { Hanken_Grotesk } from "next/font/google";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { GlobalToaster } from "@/components/ui/GlobalToaster";
 
 const geistSans = {
   variable: "font-sans",
@@ -54,6 +55,9 @@ export default function RootLayout({
 
               {/* Global Bottom Navigation */}
               <Navigation />
+              
+              {/* Global Realtime Toaster */}
+              <GlobalToaster />
             </div>
           </main>
         </AuthProvider>
