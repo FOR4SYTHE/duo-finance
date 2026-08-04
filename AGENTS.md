@@ -34,6 +34,7 @@ A personal finance app for a couple relocating together in the Philippines — o
 - Motion should be functional, not ambient: number count-ups, a subtle shift when a budget crosses a threshold, a smooth transition when swapping currencies. Avoid gratuitous animation — it should never get in the way of a one-tap action.
 - Do not default to generic AI-generated design tropes (cream background + terracotta accent, near-black + neon accent, or a broadsheet/newspaper layout with numbered sections). Pick a palette and type pairing deliberately suited to this brief — a real financial/calm app, not a marketing landing page.
 - Respect accessibility basics: visible focus states, sufficient contrast, reduced-motion support, large tap targets (this app will be used by an older, less tech-fluent user).
+- **Iconography Rule:** Never use the generic `Sparkles` icon from lucide-react. Always use the custom `PremiumStarIcon` (which resembles the Apple Intelligence / premium star logo) to maintain the high-end aesthetic.
 
 **Copy voice:** plain, direct, active. "You're over budget by ₱300 / R21" not "Budget threshold exceeded." Errors and warnings explain what happened and what to do next — never vague, never apologetic filler.
 

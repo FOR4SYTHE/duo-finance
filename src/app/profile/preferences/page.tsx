@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Vibrate, Calendar, Moon, Sparkles, Settings2 } from "lucide-react";
+import { ChevronLeft, Vibrate, Calendar, Settings2 } from "lucide-react";
+import { PremiumIcon } from "@/components/ui/PremiumStarIcon";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { triggerHaptic } from "@/lib/haptics";
 
 export default function PreferencesPage() {
   const router = useRouter();
-  const { darkMode, setDarkMode, haptics, setHaptics, startMonday, setStartMonday } = useSettingsStore();
-  const [showDarkModeToast, setShowDarkModeToast] = useState(false);
+  const { haptics, setHaptics, startMonday, setStartMonday } = useSettingsStore();
 
   return (
     <div className="w-full h-[100dvh] overflow-hidden bg-[#000000] text-white font-sans selection:bg-white/10 flex flex-col relative pb-4">
@@ -28,17 +28,6 @@ export default function PreferencesPage() {
         </button>
       </div>
 
-      {/* Dark Mode Toast */}
-      <AnimatePresence>
-        {showDarkModeToast && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-            className="absolute top-28 left-1/2 -translate-x-1/2 w-max bg-[#1C1C1E] text-white/90 border border-white/10 px-4 py-2.5 rounded-full text-[13px] font-medium shadow-2xl z-50"
-          >
-            Duo is optimized for Dark Mode
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <div className="px-6 pt-2 pb-32 z-10 flex flex-col flex-1 overflow-y-auto">
         
@@ -65,28 +54,7 @@ export default function PreferencesPage() {
           <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-4">Experience</h3>
           <div className="bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[32px] overflow-hidden shadow-[0_16px_32px_rgba(0,0,0,0.4)] mb-8">
             
-            {/* Dark Mode */}
-            <div className="w-full p-5 flex items-center justify-between border-b border-white/5 relative overflow-hidden">
-              <div className="flex items-center gap-4 relative z-10">
-                <div className="w-11 h-11 rounded-full bg-[#1C1C1E] flex items-center justify-center border-[0.5px] border-white/5 shadow-sm">
-                  <Moon className="w-5 h-5 text-white/80" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-white font-medium text-[16px] tracking-tight">Dark Mode</span>
-                  <span className="text-white/40 text-[12px]">Default for Duo</span>
-                </div>
-              </div>
-              <button 
-                onClick={() => {
-                  triggerHaptic('medium');
-                  setShowDarkModeToast(true);
-                  setTimeout(() => setShowDarkModeToast(false), 2500);
-                }}
-                className={`relative z-10 w-[50px] h-[30px] rounded-full transition-colors duration-300 ease-in-out ${darkMode ? 'bg-[#30D158]' : 'bg-white/10'}`}
-              >
-                <div className={`absolute top-[2px] left-0 w-[26px] h-[26px] bg-white rounded-full shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${darkMode ? 'translate-x-[22px]' : 'translate-x-[2px]'}`} />
-              </button>
-            </div>
+
 
             {/* Haptics */}
             <div className="w-full p-5 flex items-center justify-between border-b border-white/5 relative overflow-hidden">
@@ -151,7 +119,7 @@ export default function PreferencesPage() {
             >
               <div className="flex items-center gap-4">
                 <div className="w-11 h-11 rounded-full bg-[#1C1C1E] flex items-center justify-center border-[0.5px] border-white/5">
-                  <Sparkles className="w-5 h-5 text-white/80" />
+                  <PremiumIcon className="w-5 h-5 text-white/80" />
                 </div>
                 <div className="flex flex-col items-start">
                   <span className="text-white font-medium text-[16px] tracking-tight">Take a Tour</span>

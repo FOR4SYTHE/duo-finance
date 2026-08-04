@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { ThinkingOrb } from "thinking-orbs";
-import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, Sparkles, AlertTriangle, Trash2, Pencil, MoreHorizontal, Activity } from "lucide-react";
+import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, AlertTriangle, Trash2, Pencil, MoreHorizontal, Activity } from "lucide-react";
+import { PremiumIcon } from "@/components/ui/PremiumStarIcon";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 import { createClient } from "@/utils/supabase/client";
@@ -415,18 +416,18 @@ export default function ProfilePage() {
                          {profileImage ? (
                            <img src={profileImage} className="w-full h-full object-cover" />
                          ) : (
-                           <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                             <span className="text-white font-bold text-[12px]">{authUser?.name?.[0]?.toUpperCase() || 'U'}</span>
-                           </div>
+                            <div className="w-full h-full bg-[#1C1C1E] flex items-center justify-center">
+                              <span className="text-white/70 font-bold text-[12px]">{authUser?.name?.[0]?.toUpperCase() || 'U'}</span>
+                            </div>
                          )}
                        </div>
                        <div className="w-8 h-8 rounded-full border-[1.5px] border-white overflow-hidden bg-black/10 z-20 relative">
                          {authPartner.avatar ? (
                            <img src={authPartner.avatar} className="w-full h-full object-cover" />
                          ) : (
-                           <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-                             <span className="text-white font-bold text-[12px]">{authPartner.name?.[0]?.toUpperCase() || 'P'}</span>
-                           </div>
+                            <div className="w-full h-full bg-[#1C1C1E] flex items-center justify-center">
+                              <span className="text-[#30D158] font-bold text-[12px]">{authPartner.name?.[0]?.toUpperCase() || 'P'}</span>
+                            </div>
                          )}
                        </div>
                      </div>
@@ -445,7 +446,7 @@ export default function ProfilePage() {
                
                <div className="px-2 pb-2 pt-1 flex justify-between items-end">
                  <span className="text-white/50 text-[10px] font-semibold leading-tight">Shared<br/>Account</span>
-                 <div className="w-8 h-8 rounded-full bg-[#0A84FF] flex items-center justify-center shadow-[0_0_12px_rgba(10,132,255,0.4)]">
+                 <div className="w-8 h-8 rounded-full bg-[#0A84FF] flex items-center justify-center shadow-none">
                    <Users className="text-white w-4 h-4" />
                  </div>
                </div>
@@ -465,7 +466,7 @@ export default function ProfilePage() {
                
                <div className="px-2 pb-2 pt-1 flex justify-between items-end">
                  <span className="text-white/50 text-[10px] font-semibold leading-tight">Monthly<br/>Entries</span>
-                 <div className="w-8 h-8 rounded-full bg-[#FF9F0A] flex items-center justify-center shadow-[0_0_12px_rgba(255,159,10,0.4)]">
+                 <div className="w-8 h-8 rounded-full bg-[#FF9F0A] flex items-center justify-center shadow-none">
                    <ChevronRight className="text-black w-4 h-4" />
                  </div>
                </div>
@@ -475,7 +476,7 @@ export default function ProfilePage() {
             <div className="w-[140px] h-[155px] shrink-0 bg-[#1C1C1E] rounded-[32px] flex flex-col justify-between p-2 shadow-xl snap-start">
                <div className="w-full bg-white rounded-[24px] p-3 flex flex-col items-start justify-between h-[80px]">
                  <div className="flex items-center gap-1.5 mt-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#30D158] shadow-[0_0_8px_rgba(48,209,88,0.8)]" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#30D158] shadow-none" />
                     <span className="text-black font-bold text-[15px] leading-none tracking-tight">Active</span>
                  </div>
                  <span className="text-black/50 text-[10px] font-bold uppercase tracking-wider">Status</span>
@@ -483,7 +484,7 @@ export default function ProfilePage() {
                
                <div className="px-2 pb-2 pt-1 flex justify-between items-end">
                  <span className="text-white/50 text-[10px] font-semibold leading-tight">Household<br/>Admin</span>
-                 <div className="w-8 h-8 rounded-full bg-[#30D158] flex items-center justify-center shadow-[0_0_12px_rgba(48,209,88,0.4)]">
+                 <div className="w-8 h-8 rounded-full bg-[#30D158] flex items-center justify-center shadow-none">
                    <ShieldCheck className="text-black w-4 h-4" />
                  </div>
                </div>
@@ -493,7 +494,7 @@ export default function ProfilePage() {
             <div className="w-[140px] h-[155px] shrink-0 bg-[#1C1C1E] rounded-[32px] flex flex-col justify-between p-2 shadow-xl snap-start">
                <div className="w-full bg-[#2C2C2E] rounded-[24px] p-3 flex flex-col items-start justify-between h-[80px]">
                  <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
-                    <Sparkles className="w-3 h-3 text-white" />
+                    <PremiumIcon className="w-3 h-3 text-white" />
                  </div>
                  <div className="flex flex-col">
                    <span className="text-white font-bold text-[20px] leading-none mb-1">2026</span>
@@ -503,7 +504,7 @@ export default function ProfilePage() {
                
                <div className="px-2 pb-2 pt-1 flex justify-between items-end">
                  <span className="text-white/50 text-[10px] font-semibold leading-tight">Member<br/>Since</span>
-                 <div className="w-8 h-8 rounded-full bg-[#BF5AF2] flex items-center justify-center shadow-[0_0_12px_rgba(191,90,242,0.4)]">
+                 <div className="w-8 h-8 rounded-full bg-[#BF5AF2] flex items-center justify-center shadow-none">
                    <CheckCircle2 className="text-white w-4 h-4" />
                  </div>
                </div>
@@ -677,50 +678,7 @@ export default function ProfilePage() {
         </motion.div>
 
         {/* Household Sharing Guide */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
-        >
-          <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Household Guide</h3>
-          <div className="flex flex-col gap-3 mb-10">
-            {/* Guide Item 1 */}
-            <div className="w-full bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[24px] p-5 flex items-center gap-5 relative overflow-hidden group shadow-[0_8px_16px_rgba(0,0,0,0.4)]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-[40px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-blue-500/20 transition-colors duration-500" />
-              <div className="w-12 h-12 rounded-full bg-white/5 border-[0.5px] border-white/5 flex items-center justify-center relative z-10 shrink-0">
-                 <Users className="w-5 h-5 text-white/70" />
-              </div>
-              <div className="flex flex-col relative z-10">
-                <h4 className="text-white font-medium text-[16px] mb-0.5 tracking-tight">Everything in Sync</h4>
-                <p className="text-white/40 text-[12px] leading-relaxed">Spend Jar entries stream to both devices in real-time, instantly.</p>
-              </div>
-            </div>
-            
-            {/* Guide Item 2 */}
-            <div className="w-full bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[24px] p-5 flex items-center gap-5 relative overflow-hidden group shadow-[0_8px_16px_rgba(0,0,0,0.4)]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[40px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-emerald-500/20 transition-colors duration-500" />
-              <div className="w-12 h-12 rounded-full bg-white/5 border-[0.5px] border-white/5 flex items-center justify-center relative z-10 shrink-0">
-                 <ShoppingCart className="w-5 h-5 text-white/70" />
-              </div>
-              <div className="flex flex-col relative z-10">
-                <h4 className="text-white font-medium text-[16px] mb-0.5 tracking-tight">Cartify Together</h4>
-                <p className="text-white/40 text-[12px] leading-relaxed">Build a list at home, and watch it update as items are checked off in the store.</p>
-              </div>
-            </div>
 
-            {/* Guide Item 3 */}
-            <div className="w-full bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[24px] p-5 flex items-center gap-5 relative overflow-hidden group shadow-[0_8px_16px_rgba(0,0,0,0.4)]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-[40px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-purple-500/20 transition-colors duration-500" />
-              <div className="w-12 h-12 rounded-full bg-white/5 border-[0.5px] border-white/5 flex items-center justify-center relative z-10 shrink-0">
-                 <ShieldCheck className="w-5 h-5 text-white/70" />
-              </div>
-              <div className="flex flex-col relative z-10">
-                <h4 className="text-white font-medium text-[16px] mb-0.5 tracking-tight">Shared Privacy</h4>
-                <p className="text-white/40 text-[12px] leading-relaxed">Both partners share full visibility of all household totals and logged expenses.</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
 
         {/* App Settings */}
         <motion.div 
@@ -761,8 +719,8 @@ export default function ProfilePage() {
               onClick={() => alert("Tour coming soon!")}
               className="w-full p-5 flex items-center justify-between hover:bg-white/[0.03] transition-all duration-200 active:bg-white/[0.05] active:scale-[0.98]">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center border-[0.5px] border-emerald-500/20">
-                  <Sparkles className="w-4 h-4 text-emerald-400" />
+                <div className="w-10 h-10 rounded-full bg-[#1C1C1E] flex items-center justify-center border-[0.5px] border-white/5">
+                  <PremiumIcon className="w-4 h-4 text-white/70" />
                 </div>
                 <span className="text-white/90 font-medium text-[16px] tracking-tight">Take a Tour</span>
               </div>
@@ -775,12 +733,12 @@ export default function ProfilePage() {
           <div className="bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[32px] overflow-hidden mb-32 shadow-[0_16px_32px_rgba(0,0,0,0.4)]">
             <button 
             onClick={() => setShowSignOutPrompt(true)}
-            className="w-full p-5 flex items-center justify-between hover:bg-[#FF453A]/5 transition-colors group active:bg-[#FF453A]/10">
+            className="w-full p-5 flex items-center justify-between hover:bg-white/[0.03] transition-colors group active:bg-white/[0.05]">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-white/5 group-hover:bg-[#FF453A]/10 flex items-center justify-center transition-colors border-[0.5px] border-white/5 group-hover:border-[#FF453A]/20">
-                  <LogOut className="w-4 h-4 text-[#FF453A]/70 group-hover:text-[#FF453A]" />
+                <div className="w-10 h-10 rounded-full bg-[#1C1C1E] flex items-center justify-center transition-colors border-[0.5px] border-white/5">
+                  <LogOut className="w-4 h-4 text-[#FF453A]" />
                 </div>
-                <span className="text-[#FF453A]/90 font-medium text-[16px] tracking-tight">Sign Out</span>
+                <span className="text-[#FF453A] font-medium text-[16px] tracking-tight">Sign Out</span>
               </div>
             </button>
           </div>
