@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { ThinkingOrb } from "thinking-orbs";
-import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, AlertTriangle, Trash2, Pencil, MoreHorizontal, Activity } from "lucide-react";
+import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, Crown, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, AlertTriangle, Trash2, Pencil, MoreHorizontal, Activity } from "lucide-react";
 import { PremiumIcon } from "@/components/ui/PremiumStarIcon";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
@@ -736,7 +736,7 @@ export default function ProfilePage() {
                   <div className="w-full p-5 flex items-center justify-between relative z-10">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-b from-white/10 to-transparent flex items-center justify-center border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
-                        <Settings className="w-4 h-4 text-white/80 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+                        <Crown className="w-4 h-4 text-white/80 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
                       </div>
                       <div className="flex flex-col">
                         <span className="text-white/90 font-medium text-[16px] tracking-tight">Show Test & Mock UI</span>
