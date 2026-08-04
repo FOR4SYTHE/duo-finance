@@ -7,6 +7,8 @@ import { X, Copy, Check, Radar, Clock, Flame, Navigation, Database } from "lucid
 import { ThinkingOrb } from "thinking-orbs";
 import { BorderBeam } from 'border-beam';
 import { useDualCurrency } from "@/hooks/useDualCurrency";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useDevStore } from "@/store/useDevStore";
 
 interface Deal {
   id: string;
@@ -150,6 +152,9 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
   const [activeFilter, setActiveFilter] = useState("All");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const { primarySymbol } = useDualCurrency();
+  const user = useAuthStore((state) => state.user);
+  const showDevTools = useDevStore((state) => state.showDevTools);
+  const isDevAccount = (user?.email?.includes('jonathanquidlat') ?? false) && showDevTools;
 
   // Reference for the scroll container to enable Framer Motion scroll effects if needed,
   // though we will achieve the core stacking effect using high-performance CSS sticky.
@@ -357,11 +362,12 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                   </div>
 
                   {/* MOCK DATA BUTTON */}
+                  {isDevAccount && (
                   <motion.button 
                       onClick={loadMockData}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="relative w-full group overflow-hidden rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+                      className="relative w-full group overflow-hidden rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-colors mt-4"
                   >
                       <div className="relative px-6 py-3 flex items-center justify-center gap-2 z-10">
                           <Database className="w-4 h-4 text-white/50 group-hover:text-white/80 transition-colors" />
@@ -370,6 +376,7 @@ export function CashbackDealsRadar({ onClose }: CashbackDealsRadarProps) {
                           </span>
                       </div>
                   </motion.button>
+                  )}
               </motion.div>
           </div>
       )}
