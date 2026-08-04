@@ -46,6 +46,7 @@ interface AIChatState {
     errorMessage: (id: string, error: string) => void;
     setStreaming: (streaming: boolean) => void;
     setActiveTab: (tab: 'chat' | 'scanner' | 'scratchpad' | 'plugins' | 'receipt-vault' | 'relocation-hub' | 'exchange-alerts' | 'dream-board') => void;
+    truncateMessagesFrom: (messageId: string) => void;
     
     // Chat History Actions
     startNewChat: () => void;
@@ -194,6 +195,17 @@ export const useAIChatStore = create<AIChatState>()(
 
             setStreaming: (streaming: boolean) => set({ isStreaming: streaming }),
             setActiveTab: (tab: 'chat' | 'scanner' | 'scratchpad' | 'plugins' | 'receipt-vault' | 'relocation-hub' | 'exchange-alerts' | 'dream-board') => set({ activeTab: tab }),
+            truncateMessagesFrom: (messageId: string) => set((state) => {
+                if (!state.currentChatId) return state;
+                return {
+                    chats: state.chats.map(c => {
+                        if (c.id !== state.currentChatId) return c;
+                        const idx = c.messages.findIndex(m => m.id === messageId);
+                        if (idx === -1) return c;
+                        return { ...c, messages: c.messages.slice(0, idx) };
+                    })
+                };
+            }),
             
             startNewChat: () => set({ currentChatId: null, isStreaming: false }),
             loadChat: (id: string) => set({ currentChatId: id, isStreaming: false }),

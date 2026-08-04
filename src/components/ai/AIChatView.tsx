@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowUp, Loader2, Copy, Share2, Check, Plus, Mic, Volume2, FileText, Square, ScanBarcode, Sparkles, ChevronDown } from 'lucide-react';
+import { Send, ArrowUp, Loader2, Copy, Share2, Check, Plus, Mic, Volume2, FileText, Square, ScanBarcode, Sparkles, ChevronDown, RotateCcw, Pencil, Info } from 'lucide-react';
 import { useAIChatStore } from '@/store/useAIChatStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { buildHouseholdContext } from '@/lib/buildHouseholdContext';
@@ -11,10 +11,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 export function AIChatView() {
-    const { chats, currentChatId, isStreaming, addUserMessage, startAssistantMessage, appendToMessage, completeMessage, errorMessage, setStreaming, startNewChat, isFirstVisit, userName: defaultUserName, pendingScanContext, setPendingScanContext } = useAIChatStore();
+    const { chats, currentChatId, isStreaming, addUserMessage, startAssistantMessage, appendToMessage, completeMessage, errorMessage, setStreaming, startNewChat, isFirstVisit, userName: defaultUserName, pendingScanContext, setPendingScanContext, truncateMessagesFrom } = useAIChatStore();
     const { user } = useAuthStore();
     const userName = user?.name || defaultUserName;
     const [inputValue, setInputValue] = useState('');
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const [editValue, setEditValue] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const prevLength = useRef(0);
@@ -258,83 +260,157 @@ export function AIChatView() {
                                     key={msg.id}
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    className={`flex flex-col w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                                    className={`flex flex-col w-full group ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
                                 >
                                     <div className={`flex flex-col gap-1 w-full`}>
-                                        <div 
-                                            className={`text-[15px] leading-[1.7] ${
-                                                msg.role === 'user' 
-                                                    ? 'px-5 py-3.5 bg-[#2C2C2E] text-white rounded-[24px] rounded-br-[6px] self-end max-w-[85%] whitespace-pre-wrap' 
-                                                    : 'text-white/90 w-full self-start [&>p]:mb-5 [&>ul]:mb-5 [&>ul]:list-disc [&>ul]:pl-5 [&>li]:mb-2 [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-3 [&>h2]:text-lg [&>h2]:font-bold [&>h2]:mb-3 [&>h3]:text-base [&>h3]:font-bold [&>h3]:mb-2 [&>strong]:font-semibold [&>strong]:text-white last:[&>*]:mb-0'
-                                            } ${msg.status === 'error' ? 'text-red-400' : ''}`}
-                                        >
-                                            {msg.role === 'assistant' ? (
-                                                msg.status === 'streaming' && !msg.content ? (
-                                                    <div className="py-2">
-                                                        <DuoAIIcon className="w-6 h-6 animate-spin text-white/70" forceState="star-idle" />
+                                        {editingMessageId === msg.id ? (
+                                            <div className="flex flex-col w-full max-w-[85%] self-end bg-[#1C1C1E] border border-white/[0.05] rounded-xl overflow-hidden shadow-lg mt-2 mb-2">
+                                                <textarea
+                                                    value={editValue}
+                                                    onChange={(e) => setEditValue(e.target.value)}
+                                                    className="w-full bg-transparent text-white p-4 min-h-[100px] focus:outline-none resize-none text-[15px] leading-[1.7] no-scrollbar"
+                                                />
+                                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#151515] p-3 border-t border-white/[0.05]">
+                                                    <div className="flex items-center gap-1.5 text-white/40 text-[11px]">
+                                                        <Info className="w-3.5 h-3.5 shrink-0" />
+                                                        <span className="leading-tight">Editing this message will branch the conversation.</span>
                                                     </div>
-                                                ) : (
-                                                    <>
-                                                        <ReactMarkdown 
-                                                            remarkPlugins={[remarkGfm]}
-                                                            components={{
-                                                                hr: () => <div className="h-6" />
-                                                            }}
+                                                    <div className="flex items-center gap-2 self-end sm:self-auto">
+                                                        <button 
+                                                            onClick={() => setEditingMessageId(null)}
+                                                            className="px-4 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/70 text-[13px] font-medium transition-colors"
                                                         >
-                                                            {msg.content}
-                                                        </ReactMarkdown>
-                                                        {msg.status === 'streaming' && (
-                                                            <span className="inline-block w-1.5 h-4 ml-1 bg-white/40 animate-pulse align-middle" />
-                                                        )}
-                                                    </>
-                                                )
-                                            ) : (
-                                                <>
-                                                    {msg.scanContext && (
-                                                        <div className="mb-3 p-3 bg-black/40 rounded-xl border border-white/[0.05] flex flex-col gap-2 shadow-inner">
-                                                            <div className="flex items-center gap-2">
-                                                                <ScanBarcode className="w-[14px] h-[14px] text-emerald-400" />
-                                                                <span className="text-[10px] font-bold text-white/50 tracking-wider uppercase">Scanned Item</span>
+                                                            Cancel
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => {
+                                                                const newText = editValue.trim();
+                                                                if (!newText) return;
+                                                                truncateMessagesFrom(msg.id);
+                                                                setEditingMessageId(null);
+                                                                // Small delay to let React update the UI before sending
+                                                                setTimeout(() => handleSend(newText), 50);
+                                                            }}
+                                                            className="px-4 py-1.5 rounded-full bg-white text-black text-[13px] font-bold transition-colors hover:bg-white/90"
+                                                        >
+                                                            Save
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div 
+                                                    className={`text-[15px] leading-[1.7] ${
+                                                        msg.role === 'user' 
+                                                            ? 'px-5 py-3.5 bg-[#2C2C2E] text-white rounded-[24px] rounded-br-[6px] self-end max-w-[85%] whitespace-pre-wrap' 
+                                                            : 'text-white/90 w-full self-start [&>p]:mb-5 [&>ul]:mb-5 [&>ul]:list-disc [&>ul]:pl-5 [&>li]:mb-2 [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-3 [&>h2]:text-lg [&>h2]:font-bold [&>h2]:mb-3 [&>h3]:text-base [&>h3]:font-bold [&>h3]:mb-2 [&>strong]:font-semibold [&>strong]:text-white last:[&>*]:mb-0'
+                                                    } ${msg.status === 'error' ? 'text-red-400' : ''}`}
+                                                >
+                                                    {msg.role === 'assistant' ? (
+                                                        msg.status === 'streaming' && !msg.content ? (
+                                                            <div className="py-2">
+                                                                <DuoAIIcon className="w-6 h-6 animate-spin text-white/70" forceState="star-idle" />
                                                             </div>
-                                                            <div className="text-[15px] leading-snug font-medium text-white/90">
-                                                                {msg.scanContext.brand && <span className="text-white/50 font-normal mr-1">{msg.scanContext.brand}</span>}
-                                                                {msg.scanContext.itemName}
-                                                            </div>
-                                                            <div className="text-[11px] text-emerald-400/80 font-medium tracking-wide">
-                                                                {msg.scanContext.listings?.length || 0} online listings found
-                                                            </div>
-                                                            {msg.scanContext.listings && msg.scanContext.listings.length > 0 && (
-                                                                <div className="mt-2 flex flex-col gap-1.5 pt-2 border-t border-white/[0.05]">
-                                                                    {msg.scanContext.listings.map((l, i) => {
-                                                                        const numericPrice = typeof l.price_php === 'number' 
-                                                                            ? l.price_php 
-                                                                            : (parseFloat(String(l.price_php || '0').replace(/,/g, '')) || 0);
-                                                                        return (
-                                                                            <a 
-                                                                                key={i} 
-                                                                                href={l.url} 
-                                                                                target="_blank" 
-                                                                                rel="noreferrer"
-                                                                                className="flex items-center justify-between text-[11px] bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] p-2 rounded-lg transition-colors group"
-                                                                            >
-                                                                                <div className="flex flex-col gap-0.5 overflow-hidden">
-                                                                                    <span className="text-white/60 font-bold uppercase tracking-wider text-[9px]">{l.source}</span>
-                                                                                    <span className="text-white/80 line-clamp-1 truncate pr-2">{l.name}</span>
-                                                                                </div>
-                                                                                <span className="text-emerald-400 font-bold shrink-0 ml-2 group-hover:text-emerald-300 transition-colors">
-                                                                                    ₱{numericPrice.toLocaleString()}
-                                                                                </span>
-                                                                            </a>
-                                                                        );
-                                                                    })}
+                                                        ) : (
+                                                            <>
+                                                                <ReactMarkdown 
+                                                                    remarkPlugins={[remarkGfm]}
+                                                                    components={{
+                                                                        hr: () => <div className="h-6" />
+                                                                    }}
+                                                                >
+                                                                    {msg.content}
+                                                                </ReactMarkdown>
+                                                                {msg.status === 'streaming' && (
+                                                                    <span className="inline-block w-1.5 h-4 ml-1 bg-white/40 animate-pulse align-middle" />
+                                                                )}
+                                                            </>
+                                                        )
+                                                    ) : (
+                                                        <>
+                                                            {msg.scanContext && (
+                                                                <div className="mb-3 p-3 bg-black/40 rounded-xl border border-white/[0.05] flex flex-col gap-2 shadow-inner">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <ScanBarcode className="w-[14px] h-[14px] text-emerald-400" />
+                                                                        <span className="text-[10px] font-bold text-white/50 tracking-wider uppercase">Scanned Item</span>
+                                                                    </div>
+                                                                    <div className="text-[15px] leading-snug font-medium text-white/90">
+                                                                        {msg.scanContext.brand && <span className="text-white/50 font-normal mr-1">{msg.scanContext.brand}</span>}
+                                                                        {msg.scanContext.itemName}
+                                                                    </div>
+                                                                    <div className="text-[11px] text-emerald-400/80 font-medium tracking-wide">
+                                                                        {msg.scanContext.listings?.length || 0} online listings found
+                                                                    </div>
+                                                                    {msg.scanContext.listings && msg.scanContext.listings.length > 0 && (
+                                                                        <div className="mt-2 flex flex-col gap-1.5 pt-2 border-t border-white/[0.05]">
+                                                                            {msg.scanContext.listings.map((l, i) => {
+                                                                                const numericPrice = typeof l.price_php === 'number' 
+                                                                                    ? l.price_php 
+                                                                                    : (parseFloat(String(l.price_php || '0').replace(/,/g, '')) || 0);
+                                                                                return (
+                                                                                    <a 
+                                                                                        key={i} 
+                                                                                        href={l.url} 
+                                                                                        target="_blank" 
+                                                                                        rel="noreferrer"
+                                                                                        className="flex items-center justify-between text-[11px] bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] p-2 rounded-lg transition-colors group"
+                                                                                    >
+                                                                                        <div className="flex flex-col gap-0.5 overflow-hidden">
+                                                                                            <span className="text-white/60 font-bold uppercase tracking-wider text-[9px]">{l.source}</span>
+                                                                                            <span className="text-white/80 line-clamp-1 truncate pr-2">{l.name}</span>
+                                                                                        </div>
+                                                                                        <span className="text-emerald-400 font-bold shrink-0 ml-2 group-hover:text-emerald-300 transition-colors">
+                                                                                            ₱{numericPrice.toLocaleString()}
+                                                                                        </span>
+                                                                                    </a>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             )}
-                                                        </div>
+                                                            {msg.content}
+                                                        </>
                                                     )}
-                                                    {msg.content}
-                                                </>
-                                            )}
-                                        </div>
+                                                </div>
+
+                                                {msg.role === 'user' && (
+                                                    <div className="flex items-center gap-1 mt-1 mr-2 self-end text-white/40 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+                                                        <span className="text-[11px] font-medium mr-2 text-white/30 tracking-wide">
+                                                            {new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                        </span>
+                                                        <button 
+                                                            onClick={() => {
+                                                                truncateMessagesFrom(msg.id);
+                                                                setTimeout(() => handleSend(msg.content), 50);
+                                                            }}
+                                                            className="p-2 hover:text-white/80 hover:bg-white/5 rounded-lg transition-colors"
+                                                            title="Retry"
+                                                        >
+                                                            <RotateCcw className="w-[18px] h-[18px]" />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => {
+                                                                setEditingMessageId(msg.id);
+                                                                setEditValue(msg.content);
+                                                            }}
+                                                            className="p-2 hover:text-white/80 hover:bg-white/5 rounded-lg transition-colors"
+                                                            title="Edit"
+                                                        >
+                                                            <Pencil className="w-[18px] h-[18px]" />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleCopy(msg.id, msg.content)}
+                                                            className="p-2 hover:text-white/80 hover:bg-white/5 rounded-lg transition-colors"
+                                                            title="Copy"
+                                                        >
+                                                            {copiedId === msg.id ? <Check className="w-[18px] h-[18px] text-green-400" /> : <Copy className="w-[18px] h-[18px]" />}
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
 
                                         {msg.role === 'assistant' && msg.status !== 'streaming' && (
                                             <div className="flex items-center gap-1 mt-2 -ml-2">
