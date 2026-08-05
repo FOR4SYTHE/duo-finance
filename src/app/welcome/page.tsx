@@ -4,10 +4,25 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { WelcomeShader } from "@/components/auth/WelcomeShader";
 import { BorderBeam } from "border-beam";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function WelcomePage() {
   const router = useRouter();
+  const { isAuthenticated, householdId, isInitializing } = useAuthStore();
+
+  // If Google Auth Implicit Flow parses the URL hash in the background, 
+  // automatically redirect them to their destination so they aren't stuck on the Welcome page.
+  useEffect(() => {
+    if (isAuthenticated && !isInitializing) {
+      if (householdId) {
+        window.location.href = "/";
+      } else {
+        window.location.href = "/setup";
+      }
+    }
+  }, [isAuthenticated, householdId, isInitializing]);
 
   return (
     <div className="flex flex-col w-full fixed inset-0 z-50 overflow-hidden bg-[#000000] selection:bg-white/10 font-sans">

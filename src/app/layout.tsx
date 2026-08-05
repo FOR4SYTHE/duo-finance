@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Navigation } from "@/components/Navigation";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import "./globals.css";
 import { Hanken_Grotesk, Gloria_Hallelujah } from "next/font/google";
 import { AuthProvider } from "@/components/auth/AuthProvider";
@@ -26,9 +27,26 @@ const gloria = Gloria_Hallelujah({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
-  title: "Duo Finance",
-  description: "Personal finance app for couple relocation",
+  title: "DUO Finance",
+  description: "Budgeting, together. Build better money habits with the person who matters most.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "DUO",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 import { AppLockScreen } from "@/components/security/AppLockScreen";
@@ -45,6 +63,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-hanken">
         <AuthProvider>
+          <ServiceWorkerRegister />
           <AppLockScreen />
           <main className="min-h-[100dvh] w-full bg-[#050505] flex flex-col font-hanken relative print:bg-white print:min-h-0 print:h-auto print:block">
             

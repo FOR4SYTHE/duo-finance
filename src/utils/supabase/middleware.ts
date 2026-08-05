@@ -42,7 +42,8 @@ export async function updateSession(request: NextRequest) {
     !isAuthPage &&
     !path.startsWith('/_next') &&
     !path.startsWith('/api') &&
-    !path.match(/\\.(ico|png|jpg|jpeg|svg)$/)
+    !path.startsWith('/auth/callback') &&
+    !path.match(/\.(ico|png|jpg|jpeg|svg)$/)
   ) {
     const url = request.nextUrl.clone()
     url.pathname = '/welcome'

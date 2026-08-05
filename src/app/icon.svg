@@ -1,20 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
-  <!-- Squircle Background -->
-  <rect width="100" height="100" rx="22" fill="#161618" />
+  <!-- Deep black background for that premium Apple feel -->
+  <rect width="100" height="100" rx="22" fill="#000000" />
   
   <defs>
-    <!-- Sharp 4-pointed star (Apple Intelligence style) -->
-    <!-- Extends from 36 to 64 (width/height 28) -->
-    <path id="star" d="M 50 36 C 50 49 51 50 64 50 C 51 50 50 51 50 64 C 50 51 49 50 36 50 C 49 50 50 49 50 36 Z" />
+    <linearGradient id="chromeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="40%" stop-color="#C0C0C0" />
+      <stop offset="100%" stop-color="#333333" />
+    </linearGradient>
   </defs>
-  
-  <!-- 6 Stars in a Ring -->
-  <!-- We rotate from the center (50,50) and translate upwards to form the circle -->
-  <!-- Increased the translation and star size to make them very prevalent -->
-  <use href="#star" fill="#E07A9E" transform="rotate(0 50 50) translate(0 -25)" />
-  <use href="#star" fill="#E2D2A5" transform="rotate(60 50 50) translate(0 -25)" />
-  <use href="#star" fill="#C89943" transform="rotate(120 50 50) translate(0 -25)" />
-  <use href="#star" fill="#D6CA60" transform="rotate(180 50 50) translate(0 -25)" />
-  <use href="#star" fill="#D5A7B8" transform="rotate(240 50 50) translate(0 -25)" />
-  <use href="#star" fill="#C54E7E" transform="rotate(300 50 50) translate(0 -25)" />
+
+  <!-- DUO Text -->
+  <text 
+    x="52" 
+    y="56" 
+    font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif" 
+    font-size="34" 
+    font-weight="900" 
+    letter-spacing="4" 
+    text-anchor="middle" 
+    dominant-baseline="middle" 
+    fill="url(#chromeGradient)"
+  >
+    DUO
+  </text>
 </svg>
