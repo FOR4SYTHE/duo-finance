@@ -11,7 +11,6 @@ export interface DailyNote {
     color: string;
     font_size: number;
     created_at: string;
-    expires_at: string;
 }
 
 export interface NoteReaction {
@@ -31,7 +30,7 @@ interface DailyNoteState {
 
     // Actions
     fetchNotesAndReactions: (householdId: string) => Promise<void>;
-    sendNote: (householdId: string, caption: string | null, photoFile: File | null, color: string, fontSize: number, existingPhotoUrl?: string | null) => Promise<void>;
+    sendNote: (householdId: string, caption: string | null, photoFile: File | null, color: string, fontSize: number, existingPhotoUrl?: string | null, editingNoteId?: string) => Promise<void>;
     deleteNote: (noteId: string) => Promise<void>;
     addReaction: (noteId: string, emoji: string) => Promise<void>;
     
@@ -39,6 +38,7 @@ interface DailyNoteState {
     handleNoteInsert: (note: DailyNote) => void;
     handleNoteDelete: (noteId: string) => void;
     handleReactionInsert: (reaction: NoteReaction) => void;
+    handleNoteUpdate: (note: DailyNote) => void;
 }
 
 export const useDailyNoteStore = create<DailyNoteState>((set, get) => ({
@@ -53,12 +53,12 @@ export const useDailyNoteStore = create<DailyNoteState>((set, get) => ({
         try {
             const supabase = createClient();
             
-            // Only fetch non-expired notes
+            // Fetch all notes (up to 60 total in the household, due to the 30-per-person cap)
             const { data: notesData, error: notesError } = await supabase
                 .from('partner_notes')
                 .select('*')
                 .eq('household_id', householdId)
-                .gte('expires_at', new Date().toISOString());
+                .order('created_at', { ascending: false });
 
             if (notesError) throw notesError;
 
@@ -86,7 +86,7 @@ export const useDailyNoteStore = create<DailyNoteState>((set, get) => ({
         }
     },
 
-    sendNote: async (householdId: string, caption: string | null, photoFile: File | null, color: string, fontSize: number, existingPhotoUrl?: string | null) => {
+    sendNote: async (householdId: string, caption: string | null, photoFile: File | null, color: string, fontSize: number, existingPhotoUrl?: string | null, editingNoteId?: string) => {
         set({ isLoading: true, error: null });
         try {
             const supabase = createClient();
@@ -113,21 +113,35 @@ export const useDailyNoteStore = create<DailyNoteState>((set, get) => ({
                 photoUrl = existingPhotoUrl;
             }
 
-            const { data, error } = await supabase
-                .from('partner_notes')
-                .insert({
-                    household_id: householdId,
-                    sender_id: user.id,
-                    caption,
-                    photo_url,
-                    color,
-                    font_size: fontSize,
-                    // expires_at is set by DB default (NOW() + 12 hours)
-                })
-                .select()
-                .single();
+            let query = supabase.from('partner_notes');
+            let response;
+            
+            if (editingNoteId) {
+                response = await query
+                    .update({
+                        caption,
+                        photo_url: photoUrl,
+                        color,
+                        font_size: fontSize,
+                    })
+                    .eq('id', editingNoteId)
+                    .select()
+                    .single();
+            } else {
+                response = await query
+                    .insert({
+                        household_id: householdId,
+                        sender_id: user.id,
+                        caption,
+                        photo_url: photoUrl,
+                        color,
+                        font_size: fontSize,
+                    })
+                    .select()
+                    .single();
+            }
 
-            if (error) throw error;
+            if (response.error) throw response.error;
             // Optimistic update handled by realtime subscription usually, 
             // but we can also just let realtime do it.
             set({ isLoading: false });
@@ -194,18 +208,33 @@ export const useDailyNoteStore = create<DailyNoteState>((set, get) => ({
                 }));
                 throw error;
             }
+
+            // Also send a notification to the note sender for the toast
+            const targetNote = get().notes.find(n => n.id === noteId);
+            if (targetNote && targetNote.sender_id !== user.id) {
+                await supabase.from('notifications').insert({
+                    household_id: targetNote.household_id,
+                    from_user_id: user.id,
+                    to_user_id: targetNote.sender_id,
+                    type: 'note_reaction',
+                    message: `Your partner reacted ${emoji} to your note!`,
+                });
+            }
         } catch (err: any) {
             console.error("Error adding reaction:", err);
         }
     },
 
     handleNoteInsert: (note: DailyNote) => set((state) => {
-        // If there's an existing note from the same sender, it will be deleted by the DB trigger,
-        // which will trigger handleNoteDelete. We just add this new one.
-        // Or we can proactively replace it here to avoid race conditions:
-        const filtered = state.notes.filter(n => n.sender_id !== note.sender_id);
-        return { notes: [...filtered, note] };
+        // Simply append the new note to the list so they stack
+        const exists = state.notes.some(n => n.id === note.id);
+        if (exists) return state; // Avoid duplicate inserts from realtime
+        return { notes: [...state.notes, note] };
     }),
+
+    handleNoteUpdate: (updatedNote: DailyNote) => set((state) => ({
+        notes: state.notes.map(n => n.id === updatedNote.id ? updatedNote : n)
+    })),
 
     handleNoteDelete: (noteId: string) => set((state) => ({
         notes: state.notes.filter(n => n.id !== noteId),

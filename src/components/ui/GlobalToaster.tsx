@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/utils/supabase/client";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -10,6 +11,7 @@ export function GlobalToaster() {
   const [mounted, setMounted] = useState(false);
   const [activeNudge, setActiveNudge] = useState<any>(null);
   const user = useAuthStore((state) => state.user);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -29,8 +31,8 @@ export function GlobalToaster() {
           filter: `to_user_id=eq.${user.id}`,
         },
         (payload) => {
-          if (payload.new.type === 'nudge') {
-            // Show nudge toast
+          if (payload.new.type === 'nudge' || payload.new.type === 'note_reaction') {
+            // Show toast
             setActiveNudge(payload.new);
             
             // Try to vibrate if supported
@@ -64,7 +66,15 @@ export function GlobalToaster() {
           transition={{ type: "spring", bounce: 0.4, duration: 0.6 }}
           className="fixed top-0 left-0 right-0 z-[9999] flex justify-center pointer-events-none px-4"
         >
-          <div className="bg-[#1C1C1E]/90 backdrop-blur-xl border-[0.5px] border-white/20 shadow-[0_32px_64px_rgba(0,0,0,0.8)] rounded-full px-6 py-3.5 flex items-center justify-center">
+          <button 
+            onClick={() => {
+              if (activeNudge.type === 'note_reaction') {
+                router.push('/note');
+              }
+              setActiveNudge(null);
+            }}
+            className={`bg-[#1C1C1E]/90 backdrop-blur-xl border-[0.5px] border-white/20 shadow-[0_32px_64px_rgba(0,0,0,0.8)] rounded-full px-6 py-3.5 flex items-center justify-center pointer-events-auto transition-transform ${activeNudge.type === 'note_reaction' ? 'hover:scale-105 active:scale-95 cursor-pointer' : ''}`}
+          >
             <div className="flex flex-col items-center">
               <span className="text-white font-bold text-[14px] leading-tight">
                 {activeNudge.message || "Your partner nudged you! 👋"}
@@ -73,7 +83,7 @@ export function GlobalToaster() {
                 Just now
               </span>
             </div>
-          </div>
+          </button>
         </motion.div>
       )}
     </AnimatePresence>,

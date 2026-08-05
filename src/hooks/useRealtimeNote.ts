@@ -9,6 +9,7 @@ export function useRealtimeNote() {
         fetchNotesAndReactions, 
         handleNoteInsert, 
         handleNoteDelete, 
+        handleNoteUpdate,
         handleReactionInsert,
         isInitialized 
     } = useDailyNoteStore();
@@ -39,6 +40,13 @@ export function useRealtimeNote() {
                 { event: 'DELETE', schema: 'public', table: 'partner_notes' },
                 (payload) => {
                     handleNoteDelete(payload.old.id);
+                }
+            )
+            .on(
+                'postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'partner_notes' },
+                (payload) => {
+                    handleNoteUpdate(payload.new as any);
                 }
             )
             .on(
