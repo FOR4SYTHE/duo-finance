@@ -135,7 +135,7 @@ export default function AIAppPage() {
                                 >
                                     {/* New Chat Button */}
                                     <button 
-                                        onClick={startNewChat}
+                                        onClick={() => startNewChat()}
                                         className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors shrink-0 mr-2"
                                         title="New Chat"
                                     >

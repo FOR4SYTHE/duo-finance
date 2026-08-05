@@ -100,14 +100,14 @@ CRITICAL: You are configured with Google Search grounding. You MUST return ONLY 
                     config: {
                         temperature: 0.3,
                         responseMimeType: "application/json",
-                        tools: [{ googleSearch: {} }],
                     }
                 });
 
                 const text = response.text;
                 if (!text) throw new Error("No response from AI");
 
-                const extractedData = JSON.parse(text);
+                let cleanedText = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+                const extractedData = JSON.parse(cleanedText);
                 return NextResponse.json(extractedData);
 
             } catch (error: any) {

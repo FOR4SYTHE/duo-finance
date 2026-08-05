@@ -383,12 +383,12 @@ export function MyPlansTab({ hasPolicies = false, onAddPlan, onExplore, onEditPl
                                         {policy.coveredMembers?.length > 0 ? policy.coveredMembers.join(', ') : 'MEMBER'}
                                     </span>
                                 </div>
-                                {policy.renewalDate && (
+                                {policy.dueDate && (
                                     <div className="flex gap-4">
                                         <div className="flex flex-col text-right">
                                             <span className={`text-[7px] uppercase tracking-wider font-bold mb-0.5 ${cardTheme.textSecondary}`}>Valid Thru</span>
                                             <span className={`text-[10px] font-mono font-bold ${cardTheme.textBottom}`}>
-                                                {new Date(policy.renewalDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' })}
+                                                {new Date(policy.dueDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' })}
                                             </span>
                                         </div>
                                     </div>

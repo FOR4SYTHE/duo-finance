@@ -9,8 +9,9 @@ import { formatCurrency } from "@/lib/format";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
 
 import { useInsuranceStore } from "@/store/useInsuranceStore";
-import { CoverageStatus } from "@/types/insurance";
-import { MedicalEvent } from "@/types/medical";
+import { MedicalEvent } from "@/types/finance";
+
+export type CoverageStatus = 'Covered' | 'Partial' | 'Out-of-Pocket' | 'Claim Pending';
 
 interface LogVisitSheetProps {
     isOpen: boolean;
@@ -247,7 +248,7 @@ export function LogVisitSheet({ isOpen, onClose, onSave, initialPolicyId }: LogV
                                         return (
                                             <button
                                                 key={opt}
-                                                onClick={() => setStatus(opt)}
+                                                onClick={() => setStatus(opt as CoverageStatus)}
                                                 className={`py-3 px-4 rounded-[16px] text-[13px] font-semibold transition-colors border ${
                                                     status === opt 
                                                         ? activeColor 

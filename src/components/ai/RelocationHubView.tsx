@@ -136,7 +136,7 @@ export function RelocationHubView() {
                                             <span className="text-white/80 font-medium text-sm">{flightConfig.airline}</span>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            {trackError && <AlertCircle className="w-4 h-4 text-red-400" title={trackError} />}
+                                            {trackError && <span title={trackError}><AlertCircle className="w-4 h-4 text-red-400" /></span>}
                                             <button 
                                                 onClick={handleTrackFlight} 
                                                 disabled={isTracking}

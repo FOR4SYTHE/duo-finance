@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, HeartPulse, Stethoscope, Pill, Syringe, Eye, Settings, BriefcaseMedical } from 'lucide-react';
+import { Activity, HeartPulse, Stethoscope, Pill, Syringe, Eye, Settings, BriefcaseMedical, Shield } from 'lucide-react';
 
 export interface DetailedBenefit {
     category: string;

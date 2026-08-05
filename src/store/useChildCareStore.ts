@@ -107,6 +107,7 @@ const INITIAL_DATA: ChildCareData = {
 export const useChildCareStore = create<ChildCareState>()(
   persist(
     (set, get) => ({
+      aiError: null,
       profile: { id: undefined, nickname: '', age: null, gender: null, location: 'Malolos, Bulacan' },
       cachedData: INITIAL_DATA,
       configuration: {

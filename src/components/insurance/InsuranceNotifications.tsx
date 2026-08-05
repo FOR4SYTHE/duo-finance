@@ -24,8 +24,8 @@ export function InsuranceNotifications() {
 
     // Derive Expiring Policies (within 30 days or expired)
     const expiringPolicies = policies.filter(p => {
-        if (!p.renewalDate) return false;
-        const renewal = new Date(p.renewalDate).getTime();
+        if (!p.dueDate) return false;
+        const renewal = new Date(p.dueDate).getTime();
         const now = new Date().getTime();
         const daysUntil = (renewal - now) / (1000 * 60 * 60 * 24);
         return daysUntil <= 30;
@@ -103,7 +103,7 @@ export function InsuranceNotifications() {
                                             <div className="flex flex-col gap-3">
                                                 <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase px-1">Expiring Soon</h3>
                                                 {expiringPolicies.map(policy => {
-                                                    const daysUntil = Math.ceil((new Date(policy.renewalDate!).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                                                    const daysUntil = Math.ceil((new Date(policy.dueDate!).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                                                     const isExpired = daysUntil < 0;
                                                     
                                                     return (

@@ -118,6 +118,15 @@ export interface MedicalEvent {
     coveredAmount: number;
     uncoveredAmount: number;
     spendEntryId?: string; // Optional reference to the created expense entry
-    status?: 'Resolved' | 'Pending Claim' | 'Claimed';
+    status?: 'Resolved' | 'Pending Claim' | 'Claimed' | 'Rejected';
     created_at?: string;
+}
+
+export interface PlanSuggestion {
+    provider: string;
+    name: string;
+    type: string;
+    description: string;
+    coverage: number;
+    premiumEst: number;
 }

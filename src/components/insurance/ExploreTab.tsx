@@ -67,7 +67,11 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                 body: JSON.stringify({ profile, bookmarkedNames })
             });
 
-            if (!res.ok) throw new Error('Failed to generate recommendations');
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                console.error("Backend Error Data:", errData);
+                throw new Error(errData.error || 'Failed to generate recommendations');
+            }
             const data = await res.json();
             setResults(data);
             setStep('results');
@@ -436,7 +440,7 @@ export function ExploreTab({ onLogPlan }: ExploreTabProps) {
                     >
                         <div className="relative w-24 h-24 mb-8">
                             <div className="absolute inset-0 rounded-3xl bg-[#D4AF37]/5" />
-                            <BorderBeam size="md" colorVariant="sunset" strength={1} />
+                            <BorderBeam size="md" colorVariant="sunset" strength={1}><div/></BorderBeam>
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-[13px] font-black uppercase tracking-wider bg-[linear-gradient(110deg,#D4AF37,#E5E4E2,#D4AF37)] text-transparent bg-clip-text animate-pulse">DUO AI</span>
                             </div>
