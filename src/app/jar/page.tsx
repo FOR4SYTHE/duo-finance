@@ -215,13 +215,15 @@ export default function SpendJarPage() {
                     </span>
                 )}
               </h1>
-              <button 
-                  onClick={() => clearEntries()} 
-                  disabled={isPastMonth}
-                  className="px-2 py-1 bg-white/[0.05] text-white/50 rounded-md text-[10px] uppercase font-bold tracking-wider hover:bg-white/[0.1] hover:text-white transition-colors border border-white/[0.1] disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                  Reset Logs
-              </button>
+              {process.env.NODE_ENV === 'development' && (
+                <button 
+                    onClick={() => clearEntries()} 
+                    disabled={isPastMonth}
+                    className="px-2 py-1 bg-white/[0.05] text-white/50 rounded-md text-[10px] uppercase font-bold tracking-wider hover:bg-white/[0.1] hover:text-white transition-colors border border-white/[0.1] disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                    Reset Logs
+                </button>
+              )}
             </div>
             <span className="text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase">Household Budget</span>
         </div>
@@ -411,13 +413,15 @@ export default function SpendJarPage() {
         <div className="w-[85%] mx-auto mt-12 flex flex-col gap-3 relative z-20">
           <div className="flex justify-between items-center mb-3 px-1">
             <h2 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase">Recent Drops ({recentEntries.length})</h2>
-            <button 
-                onClick={() => clearEntries()} 
-                disabled={isPastMonth}
-                className="text-white/20 text-[9px] uppercase font-bold tracking-[0.15em] hover:text-white/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-                Reset
-            </button>
+            {process.env.NODE_ENV === 'development' && (
+              <button 
+                  onClick={() => clearEntries()} 
+                  disabled={isPastMonth}
+                  className="text-white/20 text-[9px] uppercase font-bold tracking-[0.15em] hover:text-white/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                  Reset
+              </button>
+            )}
           </div>
           
           {logsWithColor.map((entry) => (
