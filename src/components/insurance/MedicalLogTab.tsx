@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Stethoscope, Hospital, Building2 } from "lucide-react";
+import { Plus, Stethoscope, Hospital, Building2, RefreshCw } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
@@ -14,11 +14,13 @@ interface MedicalLogTabProps {
 export function MedicalLogTab({ onLogVisit }: MedicalLogTabProps) {
     const { exchangeRate } = useCurrencyStore();
     const { primarySymbol, secondarySymbol, getPrimaryValue, getSecondaryValue } = useDualCurrency();
-    const { medicalEvents, policies, resolveMedicalClaim } = useInsuranceStore();
+    const { medicalEvents, policies, resolveMedicalClaim, resetMedicalEvents } = useInsuranceStore();
     
     const [resolvingClaimId, setResolvingClaimId] = useState<string | null>(null);
     const [refundAmountStr, setRefundAmountStr] = useState<string>('');
     const [isResolving, setIsResolving] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
+    const [confirmReset, setConfirmReset] = useState(false);
 
     const handleResolveSubmit = async (eventId: string) => {
         const amount = refundAmountStr ? parseFloat(refundAmountStr.replace(/,/g, '')) : 0;
@@ -64,13 +66,38 @@ export function MedicalLogTab({ onLogVisit }: MedicalLogTabProps) {
                     </div>
                 </div>
 
-                <button 
-                    onClick={onLogVisit}
-                    className="w-[200px] py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)] flex items-center justify-center gap-2"
-                >
-                    <Plus className="w-4 h-4" />
-                    Log Medical Visit
-                </button>
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={onLogVisit}
+                        className="flex-1 py-4 rounded-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-bold text-[13px] transition-all active:scale-[0.98] shadow-[0_4px_16px_rgba(212,175,55,0.2)] flex items-center justify-center gap-2"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Log Medical Visit
+                    </button>
+                    {medicalEvents.length > 0 && (
+                        confirmReset ? (
+                            <button
+                                disabled={isResetting}
+                                onClick={async () => {
+                                    setIsResetting(true);
+                                    await resetMedicalEvents();
+                                    setIsResetting(false);
+                                    setConfirmReset(false);
+                                }}
+                                className="w-[120px] py-4 rounded-full bg-[#FF453A] hover:bg-[#FF453A]/90 text-white font-bold text-[13px] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shrink-0 shadow-[0_4px_16px_rgba(255,69,58,0.2)]"
+                            >
+                                {isResetting ? "..." : "Confirm"}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => setConfirmReset(true)}
+                                className="px-5 py-4 shrink-0 rounded-full bg-[#1C1C1E] border border-white/10 hover:bg-white/10 text-white/50 hover:text-[#FF453A] font-bold text-[13px] transition-colors flex items-center justify-center shadow-sm"
+                            >
+                                Reset
+                            </button>
+                        )
+                    )}
+                </div>
             </div>
 
             <div className="flex flex-col gap-4">

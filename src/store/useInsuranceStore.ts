@@ -14,6 +14,7 @@ interface InsuranceState {
     medicalEvents: MedicalEvent[];
     addMedicalEvent: (event: Omit<MedicalEvent, 'id'>) => Promise<void>;
     resolveMedicalClaim: (eventId: string, refundedAmount: number) => Promise<void>;
+    resetMedicalEvents: () => Promise<void>;
 }
 
 export const useInsuranceStore = create<InsuranceState>()(
@@ -320,7 +321,7 @@ export const useInsuranceStore = create<InsuranceState>()(
                     currency: 'PHP', // Assuming base currency for medical
                     category: 'Health & Medical',
                     note: `Out-of-pocket: ${newEvent.providerName} - ${newEvent.reason || 'Medical Visit'}`,
-                    timestamp_unix: new Date(newEvent.visitDate).getTime()
+                    timestamp_unix: Date.now()
                 }).select('id').single();
                 
                 if (!spendError && spendRow) {
@@ -428,6 +429,26 @@ export const useInsuranceStore = create<InsuranceState>()(
                 
                 return { pendingOperationIds: newPending };
             });
+        },
+        
+        resetMedicalEvents: async () => {
+            const supabase = createClient();
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user) return;
+            
+            const { data: profile } = await supabase.from('profiles').select('household_id').eq('id', session.user.id).single();
+            if (!profile?.household_id) return;
+
+            // Optimistic clear
+            const oldEvents = get().medicalEvents;
+            set({ medicalEvents: [] });
+
+            const { error } = await supabase.from('medical_events').delete().eq('household_id', profile.household_id);
+            
+            if (error) {
+                console.error("Failed to reset medical events:", error);
+                set({ medicalEvents: oldEvents });
+            }
         }
     })
 );

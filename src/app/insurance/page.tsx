@@ -4,8 +4,11 @@ import Link from "next/link";
 import { ChevronLeft, Bell } from "lucide-react";
 import { InsuranceModule } from "@/components/insurance/InsuranceModule";
 import { InsuranceNotifications } from "@/components/insurance/InsuranceNotifications";
+import { useRealtimeInsurance } from "@/hooks/useRealtimeInsurance";
 
 export default function InsurancePage() {
+    useRealtimeInsurance();
+
     return (
         <div suppressHydrationWarning className="flex flex-col w-full min-h-full px-6 pt-12 pb-6 font-sans">
             {/* Header */}
