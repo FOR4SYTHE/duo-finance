@@ -125,15 +125,23 @@ export const useBudgetStore = create<BudgetState>()(
             setBudget: (targetAmount: number, period: BudgetPeriod) => 
                 set((state) => {
                     const activeMonth = state.config.activeMonth || new Date().toISOString().slice(0, 7);
+                    const newTargetHistory = { ...(state.config.targetHistory || {}) };
+                    
+                    const d = new Date(`${activeMonth}-01`);
+                    d.setMonth(d.getMonth() - 1);
+                    const prevMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                    
+                    if (newTargetHistory[prevMonth] === undefined) {
+                        newTargetHistory[prevMonth] = state.config.targetAmount;
+                    }
+                    newTargetHistory[activeMonth] = targetAmount;
+
                     return {
                         config: {
                             ...state.config,
                             targetAmount,
                             period,
-                            targetHistory: {
-                                ...(state.config.targetHistory || {}),
-                                [activeMonth]: targetAmount
-                            }
+                            targetHistory: newTargetHistory
                         }
                     };
                 }),
@@ -228,14 +236,19 @@ export const useBudgetStore = create<BudgetState>()(
             updateCategory: (id, updates) => 
                 set((state) => {
                     const activeMonth = state.config.activeMonth || new Date().toISOString().slice(0, 7);
+                    const d = new Date(`${activeMonth}-01`);
+                    d.setMonth(d.getMonth() - 1);
+                    const prevMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
                     const newCats = state.categories.map(c => {
                         if (c.id !== id) return c;
                         const newCat = { ...c, ...updates };
                         if (updates.targetAmount !== undefined) {
-                            newCat.targetHistory = {
-                                ...(c.targetHistory || {}),
-                                [activeMonth]: updates.targetAmount
-                            };
+                            newCat.targetHistory = { ...(c.targetHistory || {}) };
+                            if (newCat.targetHistory[prevMonth] === undefined) {
+                                newCat.targetHistory[prevMonth] = c.targetAmount;
+                            }
+                            newCat.targetHistory[activeMonth] = updates.targetAmount;
                         }
                         return newCat;
                     });
@@ -244,16 +257,23 @@ export const useBudgetStore = create<BudgetState>()(
             updateCategoriesTarget: (updates) =>
                 set((state) => {
                     const activeMonth = state.config.activeMonth || new Date().toISOString().slice(0, 7);
+                    const d = new Date(`${activeMonth}-01`);
+                    d.setMonth(d.getMonth() - 1);
+                    const prevMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
                     const newCats = state.categories.map(c => {
                         const match = updates.find(u => u.id === c.id);
                         if (match) {
+                            const newTargetHistory = { ...(c.targetHistory || {}) };
+                            if (newTargetHistory[prevMonth] === undefined) {
+                                newTargetHistory[prevMonth] = c.targetAmount;
+                            }
+                            newTargetHistory[activeMonth] = match.targetAmount;
+                            
                             return { 
                                 ...c, 
                                 targetAmount: match.targetAmount,
-                                targetHistory: {
-                                    ...(c.targetHistory || {}),
-                                    [activeMonth]: match.targetAmount
-                                }
+                                targetHistory: newTargetHistory
                             };
                         }
                         return c;

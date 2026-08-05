@@ -17,12 +17,31 @@ export function getCanonicalValue(displayValue: number, period: BudgetPeriod) {
     return displayValue * periodMultipliers[period];
 }
 
+export function getHistoricalTarget(history: Record<string, number> | undefined, currentTarget: number, requestedMonth: string | undefined): number {
+    if (!history || !requestedMonth) return currentTarget;
+    if (history[requestedMonth] !== undefined) return history[requestedMonth];
+    
+    // Find latest month in history that is <= requestedMonth
+    const pastMonths = Object.keys(history).filter(m => m <= requestedMonth).sort();
+    if (pastMonths.length > 0) {
+        return history[pastMonths[pastMonths.length - 1]];
+    }
+    
+    // If no past months, find the earliest future month in history
+    const futureMonths = Object.keys(history).filter(m => m > requestedMonth).sort();
+    if (futureMonths.length > 0) {
+        return history[futureMonths[0]];
+    }
+    
+    return currentTarget;
+}
+
 export function calculateAllocations(config: BudgetConfig, categories: BudgetCategory[], totalSpent: number, activeMonth?: string) {
-    const historicalTarget = (activeMonth && config.targetHistory?.[activeMonth]) !== undefined ? config.targetHistory![activeMonth as string] : config.targetAmount;
+    const historicalTarget = getHistoricalTarget(config.targetHistory, config.targetAmount, activeMonth);
     const displayTarget = getDisplayValue(historicalTarget, config.period);
     
     const displayAllocated = categories.reduce((sum, cat) => {
-        const catTarget = (activeMonth && cat.targetHistory?.[activeMonth]) !== undefined ? cat.targetHistory![activeMonth as string] : cat.targetAmount;
+        const catTarget = getHistoricalTarget(cat.targetHistory, cat.targetAmount, activeMonth);
         return sum + getDisplayValue(catTarget, config.period);
     }, 0);
     const displayUnallocated = Math.max(0, displayTarget - displayAllocated - totalSpent);
