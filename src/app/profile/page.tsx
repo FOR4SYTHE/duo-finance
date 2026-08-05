@@ -15,6 +15,7 @@ import { processAndCompressImage, getCroppedAvatar } from "@/utils/imageUpload";
 import { useSpendStore } from "@/store/useSpendStore";
 import { PartnerProfileSheet } from "@/components/profile/PartnerProfileSheet";
 import { useDevStore } from "@/store/useDevStore";
+import { useDailyNoteStore } from "@/store/useDailyNoteStore";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -26,6 +27,15 @@ export default function ProfilePage() {
   const { showDevTools, setShowDevTools } = useDevStore();
   
   const isDevAccount = authUser?.email?.includes('jonathanquidlat') ?? false;
+  
+  const { notes, fetchNotesAndReactions } = useDailyNoteStore();
+  const partnerNote = notes.find(n => n.sender_id !== authUser?.id);
+
+  useEffect(() => {
+    if (householdId && authUser) {
+      fetchNotesAndReactions(householdId);
+    }
+  }, [householdId, authUser, fetchNotesAndReactions]);
   
   const [showSignOutPrompt, setShowSignOutPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -412,10 +422,16 @@ export default function ProfilePage() {
           <div className="flex overflow-x-auto gap-3 pb-4 px-2 -mx-2 snap-x hide-scrollbar mb-4">
             {/* 1. Partner Card */}
             <div 
-              onClick={() => authPartner ? setIsPartnerSheetOpen(true) : null}
-              className="w-[140px] h-[155px] shrink-0 bg-[#1C1C1E] rounded-[32px] flex flex-col justify-between p-2 shadow-xl snap-start cursor-pointer hover:bg-[#2C2C2E] transition-colors"
+              onClick={() => {
+                if (partnerNote) {
+                  router.push('/note');
+                } else if (authPartner) {
+                  setIsPartnerSheetOpen(true);
+                }
+              }}
+              className="w-[140px] h-[155px] shrink-0 bg-[#1C1C1E] rounded-[32px] flex flex-col justify-between p-2 shadow-xl snap-start cursor-pointer hover:bg-[#2C2C2E] transition-colors relative"
             >
-               <div className="w-full bg-white rounded-[24px] p-3 flex flex-col items-start justify-between h-[80px]">
+               <div className="w-full bg-white rounded-[24px] p-3 flex flex-col items-start justify-between h-[80px] relative">
                  {authPartner ? (
                    <>
                      <div className="flex -space-x-2.5">
@@ -442,6 +458,9 @@ export default function ProfilePage() {
                        <span className="text-black font-bold text-[15px] leading-none truncate max-w-[100px] mb-0.5">{authPartner.name?.split(' ')[0] || 'Partner'}</span>
                        <span className="text-black/50 text-[9px] font-bold uppercase tracking-wider leading-none">Partner</span>
                      </div>
+                     {partnerNote && (
+                       <div className="absolute top-[-4px] right-[-4px] w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center animate-pulse"></div>
+                     )}
                    </>
                  ) : (
                    <>

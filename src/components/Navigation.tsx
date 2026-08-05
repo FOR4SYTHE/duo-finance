@@ -16,7 +16,7 @@ export function Navigation() {
   const isCartifyTripActive = pathname === '/cartify' && isActive;
   
   // Hide bottom nav on specific routes
-  const hiddenPaths = ['/welcome', '/login', '/signup', '/setup', '/profile', '/insurance'];
+  const hiddenPaths = ['/welcome', '/login', '/signup', '/setup', '/profile', '/insurance', '/note'];
   const isHiddenRoute = isCartifyTripActive || 
                         pathname.startsWith('/childcare') || 
                         hiddenPaths.some(p => pathname.startsWith(p));

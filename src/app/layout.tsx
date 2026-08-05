@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Navigation } from "@/components/Navigation";
 import "./globals.css";
-import { Hanken_Grotesk } from "next/font/google";
+import { Hanken_Grotesk, Gloria_Hallelujah } from "next/font/google";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { GlobalToaster } from "@/components/ui/GlobalToaster";
 
@@ -16,6 +16,13 @@ const geistMono = {
 const hankenGrotesk = Hanken_Grotesk({
   subsets: ["latin"],
   variable: "--font-hanken",
+  display: "swap",
+});
+
+const gloria = Gloria_Hallelujah({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-gloria",
   display: "swap",
 });
 
@@ -34,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${hankenGrotesk.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${hankenGrotesk.variable} ${gloria.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-hanken">
         <AuthProvider>

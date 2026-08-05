@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Activity, ShoppingCart, Star, X, Pointer, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { PremiumIcon } from "@/components/ui/PremiumStarIcon";
 import { createClient } from "@/utils/supabase/client";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -16,6 +17,7 @@ interface PartnerProfileSheetProps {
 }
 
 export function PartnerProfileSheet({ isOpen, onClose, partner, householdId }: PartnerProfileSheetProps) {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [stats, setStats] = useState({ logsCount: 0, cartifyCount: 0, dreamBoardPct: 0 });
   const authUser = useAuthStore(state => state.user);
@@ -285,7 +287,10 @@ export function PartnerProfileSheet({ isOpen, onClose, partner, householdId }: P
               {/* Message Action at bottom */}
               <div className="mt-8 flex justify-center pb-8">
                 <button 
-                  onClick={() => alert('Leave a note feature coming soon')}
+                  onClick={() => {
+                    onClose();
+                    router.push('/note');
+                  }}
                   className="flex items-center gap-2 px-6 py-3.5 bg-white text-black rounded-full shadow-[0_8px_24px_rgba(255,255,255,0.15)] active:scale-95 transition-transform"
                 >
                   <MessageCircle className="w-5 h-5" />

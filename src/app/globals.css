@@ -3,6 +3,7 @@
 @theme {
   --font-sans: var(--font-hanken), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   --font-hanken: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-gloria: var(--font-gloria), cursive;
   
   --color-background: #000000;
   --color-panel: #0A0A0A;
