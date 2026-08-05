@@ -151,8 +151,8 @@ export default function NotePage() {
             <div key={note.id} className="w-full flex flex-col items-center">
                 {/* Sender Avatar & Name */}
                 <div className="w-full max-w-[280px] flex items-center justify-center gap-2 mb-3">
-                    {senderProfile?.avatar_url ? (
-                        <img src={senderProfile.avatar_url} alt="Avatar" className="w-6 h-6 rounded-full object-cover bg-black/5" />
+                    {senderProfile?.avatar ? (
+                        <img src={senderProfile.avatar} alt="Avatar" className="w-6 h-6 rounded-full object-cover bg-black/5" />
                     ) : (
                         <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center">
                             <span className="text-[10px] font-bold text-black/40">
@@ -424,7 +424,7 @@ export default function NotePage() {
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 40 }}
-                        className="absolute bottom-8 right-6 z-20 flex flex-col items-end gap-3"
+                        className="fixed bottom-8 right-6 z-20 flex flex-col items-end gap-3"
                     >
                         <AnimatePresence>
                             {showFabMenu && (

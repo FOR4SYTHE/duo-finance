@@ -58,7 +58,7 @@ export const useDailyNoteStore = create<DailyNoteState>((set, get) => ({
                 .from('partner_notes')
                 .select('*')
                 .eq('household_id', householdId)
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: true });
 
             if (notesError) throw notesError;
 
