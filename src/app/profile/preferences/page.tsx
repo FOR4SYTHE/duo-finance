@@ -7,10 +7,12 @@ import { ChevronLeft, Vibrate, Calendar, Settings2 } from "lucide-react";
 import { PremiumIcon } from "@/components/ui/PremiumStarIcon";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { triggerHaptic } from "@/lib/haptics";
+import { AppTour } from "@/components/tour/AppTour";
 
 export default function PreferencesPage() {
   const router = useRouter();
   const { haptics, setHaptics, startMonday, setStartMonday } = useSettingsStore();
+  const [showTour, setShowTour] = useState(false);
 
   return (
     <div className="w-full h-[100dvh] overflow-hidden bg-[#000000] text-white font-sans selection:bg-white/10 flex flex-col relative pb-4">
@@ -113,7 +115,7 @@ export default function PreferencesPage() {
             <button 
               onClick={() => {
                 triggerHaptic('medium');
-                alert("Tour coming soon!");
+                setShowTour(true);
               }}
               className="w-full p-5 flex items-center justify-between hover:bg-white/[0.03] transition-colors active:bg-white/[0.05]"
             >
@@ -135,6 +137,9 @@ export default function PreferencesPage() {
         </motion.div>
 
       </div>
+
+      {/* App Tour Overlay */}
+      <AppTour isOpen={showTour} onClose={() => setShowTour(false)} />
     </div>
   );
 }

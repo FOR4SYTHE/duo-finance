@@ -16,6 +16,7 @@ import { useSpendStore } from "@/store/useSpendStore";
 import { PartnerProfileSheet } from "@/components/profile/PartnerProfileSheet";
 import { useDevStore } from "@/store/useDevStore";
 import { useDailyNoteStore } from "@/store/useDailyNoteStore";
+import { AppTour } from "@/components/tour/AppTour";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -34,6 +35,7 @@ export default function ProfilePage() {
 
   const [hasUnreadNote, setHasUnreadNote] = useState(false);
   const [isInviteCodeRevealed, setIsInviteCodeRevealed] = useState(false);
+  const [showTour, setShowTour] = useState(false);
   
   useEffect(() => {
     if (partnerNote) {
@@ -852,7 +854,7 @@ export default function ProfilePage() {
           <h3 className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 px-2">Onboarding</h3>
           <div className="bg-[#0A0A0C] border-[0.5px] border-white/10 rounded-[32px] overflow-hidden mb-12 shadow-[0_16px_32px_rgba(0,0,0,0.4)]">
             <button 
-              onClick={() => alert("Tour coming soon!")}
+              onClick={() => setShowTour(true)}
               className="w-full p-5 flex items-center justify-between hover:bg-white/[0.03] transition-all duration-200 active:bg-white/[0.05] active:scale-[0.98]">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-[#1C1C1E] flex items-center justify-center border-[0.5px] border-white/5">
@@ -1113,6 +1115,9 @@ export default function ProfilePage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* App Tour Overlay */}
+      <AppTour isOpen={showTour} onClose={() => setShowTour(false)} />
     </div>
   );
 }

@@ -38,6 +38,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { containerVariants, itemVariants } from "@/utils/animations";
 import { filterEntriesByMonth } from "@/utils/budgetFilters";
 import { useDevStore } from "@/store/useDevStore";
+import { AppTour } from "@/components/tour/AppTour";
+import { WelcomeTourModal } from "@/components/tour/WelcomeTourModal";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -96,6 +98,8 @@ export default function Home() {
   const isInitializing = useAuthStore((state) => state.isInitializing);
   const showDevTools = useDevStore((state) => state.showDevTools);
   const isDevAccount = (user?.email?.startsWith('jonathanquidlat') ?? false) && showDevTools;
+  const [showDevTour, setShowDevTour] = useState(false);
+  const [showDevWelcomeTour, setShowDevWelcomeTour] = useState(false);
 
   useNotificationEngine();
 
@@ -395,6 +399,16 @@ export default function Home() {
               }}
               className="w-3 h-3 rounded-full bg-[#BF5AF2] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(191,90,242,0.5)]"
             />
+            <button 
+              title="Test App Tour"
+              onClick={() => setShowDevTour(true)}
+              className="w-3 h-3 rounded-full bg-[#5AC8FA] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(90,200,250,0.5)]"
+            />
+            <button 
+              title="Test Welcome + Tour"
+              onClick={() => setShowDevWelcomeTour(true)}
+              className="w-3 h-3 rounded-full bg-[#FF9F0A] hover:scale-125 transition-transform shadow-[0_0_8px_rgba(255,159,10,0.5)]"
+            />
           </div>
           )}
           
@@ -572,6 +586,12 @@ export default function Home() {
 
       {/* Massive spacer to guarantee scroll clearance over the bottom nav */}
       <div className="h-40 shrink-0 pointer-events-none" />
+
+      {/* Dev Tour Test Overlays */}
+      <AppTour isOpen={showDevTour} onClose={() => setShowDevTour(false)} />
+      {showDevWelcomeTour && (
+        <WelcomeTourModal forceShow onDismiss={() => setShowDevWelcomeTour(false)} />
+      )}
     </div>
   );
 }
