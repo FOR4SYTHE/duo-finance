@@ -36,6 +36,7 @@ export function WelcomeTourModal({ forceShow = false, onDismiss }: WelcomeTourMo
   };
 
   const handleStartTour = () => {
+    localStorage.setItem("duo-tour-seen", "true");
     setShowWelcome(false);
     setShowTour(true);
   };

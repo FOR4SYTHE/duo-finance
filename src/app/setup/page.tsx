@@ -76,6 +76,7 @@ export default function SetupPage() {
     }
 
     setSuccess(true);
+    localStorage.removeItem("duo-tour-seen");
     setTimeout(() => {
       window.location.href = "/";
     }, 1000);
@@ -118,6 +119,7 @@ export default function SetupPage() {
 
   const handleFinishJoin = async () => {
     await useAuthStore.getState().initialize();
+    localStorage.removeItem("duo-tour-seen");
     window.location.href = "/";
   };
 
