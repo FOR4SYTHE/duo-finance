@@ -11,19 +11,12 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#000000',
     icons: [
       {
-        src: '/icon.svg',
-        sizes: 'any',
-        type: 'image/svg+xml',
-      },
-      // iOS and some Android devices require standard PNG fallbacks for home screen icons.
-      // Next.js automatically maps these if they exist in /public/icons.
-      {
-        src: '/icons/icon-192.png',
+        src: '/api/icons?size=192',
         sizes: '192x192',
         type: 'image/png',
       },
       {
-        src: '/icons/icon-512.png',
+        src: '/api/icons?size=512',
         sizes: '512x512',
         type: 'image/png',
       },
