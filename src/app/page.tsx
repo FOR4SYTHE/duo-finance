@@ -592,6 +592,9 @@ export default function Home() {
       {showDevWelcomeTour && (
         <WelcomeTourModal forceShow onDismiss={() => setShowDevWelcomeTour(false)} />
       )}
+
+      {/* Production Welcome Tour (Runs once per user via localStorage) */}
+      <WelcomeTourModal />
     </div>
   );
 }

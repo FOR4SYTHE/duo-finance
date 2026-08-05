@@ -23,7 +23,7 @@ export default function ProfilePage() {
   const [mounted, setMounted] = useState(false);
   const { primaryCurrency, setPrimaryCurrency, exchangeRate } = useCurrencyStore();
   const { primarySymbol, secondarySymbol } = useDualCurrency();
-  const { user: authUser, partner: authPartner, isInitializing, householdId, updateUser } = useAuthStore();
+  const { user: authUser, partner: authPartner, isInitializing, householdId, updateUser, initialize } = useAuthStore();
   const spendEntries = useSpendStore(state => state.entries);
   const { showDevTools, setShowDevTools } = useDevStore();
   
@@ -69,6 +69,8 @@ export default function ProfilePage() {
   const [household, setHousehold] = useState<any>(null);
 
   const [joinStep, setJoinStep] = useState<'idle' | 'input' | 'verifying' | 'matched' | 'welcome'>('idle');
+  const [joinInviteCode, setJoinInviteCode] = useState('');
+  const [joinError, setJoinError] = useState('');
   const [isEditingAvatar, setIsEditingAvatar] = useState(false);
   const [imageZoom, setImageZoom] = useState(1);
   const [imagePan, setImagePan] = useState({ x: 0, y: 0 });
@@ -132,14 +134,36 @@ export default function ProfilePage() {
     }
   };
 
-  const handleJoinClick = () => {
+  const handleJoinClick = async () => {
+    if (joinInviteCode.length !== 6) {
+      setJoinError('Code must be 6 characters');
+      return;
+    }
+
+    if (joinInviteCode === mockInviteCode) {
+      setJoinError("You can't use your own invite code.");
+      return;
+    }
+    
+    setJoinError('');
     setJoinStep('verifying');
-    setTimeout(() => {
-      setJoinStep('matched');
-    }, 2500);
+    
+    // Call Supabase RPC
+    const { data: joined, error } = await supabase.rpc('join_household', { invite_code_input: joinInviteCode });
+    
+    if (error || !joined) {
+      setJoinError('Invalid or expired invite code.');
+      setJoinStep('input');
+      return;
+    }
+
+    // Success - fetch new partner profile
+    await initialize();
+
+    setJoinStep('matched');
     setTimeout(() => {
       setJoinStep('welcome');
-    }, 5500);
+    }, 3000);
   };
 
   if (!mounted) return null;
@@ -587,35 +611,52 @@ export default function ProfilePage() {
                       className="w-full flex flex-col gap-2"
                     >
                       <BorderBeam size="line" colorVariant="colorful">
-                        <div className="w-full bg-[#121214] rounded-[20px] p-1.5 border-[0.5px] border-white/10 flex items-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] relative overflow-hidden">
-                          <input 
-                            type="text" 
-                            placeholder="ENTER 6-DIGIT CODE" 
-                            className="bg-transparent flex-1 text-white font-mono text-[14px] px-3 outline-none placeholder:text-white/20 tracking-widest uppercase"
-                            maxLength={6}
-                            disabled={joinStep === 'verifying'}
-                          />
-                          <button 
-                            onClick={handleJoinClick}
-                            disabled={joinStep === 'verifying'}
-                            className="relative px-5 py-2 bg-[#232325] rounded-[12px] text-white/90 font-medium text-[13px] hover:bg-[#2C2C2F] active:scale-95 transition-all overflow-hidden flex items-center justify-center min-w-[64px] h-[34px]"
-                          >
-                            <AnimatePresence mode="wait">
-                              {joinStep === 'verifying' ? (
-                                <motion.div key="orb" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.2 }}>
-                                   <ThinkingOrb state="working" size={20} />
-                                </motion.div>
-                              ) : (
-                                <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                                  Join
-                                </motion.span>
-                              )}
-                            </AnimatePresence>
-                          </button>
+                        <div className="w-full bg-[#121214] rounded-[20px] p-1.5 border-[0.5px] border-white/10 flex flex-col shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)] relative overflow-hidden">
+                          <div className="flex items-center">
+                            <input 
+                              type="text" 
+                              placeholder="ENTER 6-DIGIT CODE" 
+                              value={joinInviteCode}
+                              onChange={(e) => setJoinInviteCode(e.target.value.toUpperCase())}
+                              className="bg-transparent flex-1 text-white font-mono text-[14px] px-3 outline-none placeholder:text-white/20 tracking-widest uppercase"
+                              maxLength={6}
+                              disabled={joinStep === 'verifying'}
+                            />
+                            <button 
+                              onClick={handleJoinClick}
+                              disabled={joinStep === 'verifying'}
+                              className="relative px-5 py-2 bg-[#232325] rounded-[12px] text-white/90 font-medium text-[13px] hover:bg-[#2C2C2F] active:scale-95 transition-all overflow-hidden flex items-center justify-center min-w-[64px] h-[34px]"
+                            >
+                              <AnimatePresence mode="wait">
+                                {joinStep === 'verifying' ? (
+                                  <motion.div key="orb" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.2 }}>
+                                     <ThinkingOrb state="working" size={20} />
+                                  </motion.div>
+                                ) : (
+                                  <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                                    Join
+                                  </motion.span>
+                                )}
+                              </AnimatePresence>
+                            </button>
+                          </div>
+                          {joinError && (
+                            <motion.span 
+                              initial={{ opacity: 0, height: 0 }} 
+                              animate={{ opacity: 1, height: 'auto' }}
+                              className="text-red-400 text-[11px] font-medium px-3 pb-1.5 pt-1 block"
+                            >
+                              {joinError}
+                            </motion.span>
+                          )}
                         </div>
                       </BorderBeam>
                       <button 
-                        onClick={() => setJoinStep('idle')}
+                        onClick={() => {
+                          setJoinStep('idle');
+                          setJoinError('');
+                          setJoinInviteCode('');
+                        }}
                         className="text-white/40 text-[11px] font-medium tracking-wide hover:text-white/70 transition-colors py-1"
                         disabled={joinStep === 'verifying'}
                       >
@@ -1012,7 +1053,7 @@ export default function ProfilePage() {
                       {profileImage ? (
                         <img src={profileImage} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-white text-3xl font-bold select-none">{user?.name?.[0]?.toUpperCase() || 'U'}</span>
+                        <span className="text-white text-3xl font-bold select-none">{authUser?.name?.[0]?.toUpperCase() || 'U'}</span>
                       )}
                     </motion.div>
                     <motion.div 
@@ -1024,10 +1065,10 @@ export default function ProfilePage() {
                         scale: { duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 },
                       }}
                     >
-                      {partner?.avatar ? (
-                        <img src={partner.avatar} className="w-full h-full object-cover" />
+                      {authPartner?.avatar ? (
+                        <img src={authPartner.avatar} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-emerald-400 text-3xl font-bold select-none">{partner?.name?.[0]?.toUpperCase() || 'P'}</span>
+                        <span className="text-emerald-400 text-3xl font-bold select-none">{authPartner?.name?.[0]?.toUpperCase() || 'P'}</span>
                       )}
                     </motion.div>
                  </div>
@@ -1049,7 +1090,6 @@ export default function ProfilePage() {
               <motion.button
                 initial={{ opacity: 0, scale: 0.9, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 1.5, type: "spring", bounce: 0.4 }}
                 onClick={() => {
-                  joinHousehold("8K9P2X");
                   setJoinStep('idle');
                 }}
                 className="w-full max-w-[320px] mx-auto py-3.5 bg-[#D1D1D3] text-[#111111] rounded-full font-semibold text-[15px] hover:bg-[#E5E5E5] active:scale-[0.97] transition-all flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),0_4px_20px_rgba(0,0,0,0.4)]"

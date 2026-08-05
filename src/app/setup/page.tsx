@@ -9,7 +9,7 @@ import { BorderBeam } from "border-beam";
 import { ThinkingOrb } from "thinking-orbs";
 import { createClient } from "@/utils/supabase/client";
 import { useAuthStore } from "@/store/useAuthStore";
-import { WelcomeTourModal } from "@/components/tour/WelcomeTourModal";
+
 
 export default function SetupPage() {
   const router = useRouter();
@@ -490,7 +490,6 @@ export default function SetupPage() {
       </AnimatePresence>
 
       {/* One-Time Welcome Tour — self-managed via localStorage */}
-      <WelcomeTourModal />
     </div>
   );
 }

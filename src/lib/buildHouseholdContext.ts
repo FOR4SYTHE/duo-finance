@@ -12,20 +12,20 @@ import { calculateAllocations } from '@/utils/budgetMath';
 
 export function buildHouseholdContext(): string {
     // Read directly from stores
-    const { config, categories, goals: _goals } = useBudgetStore.getState();
+    const { config, categories } = useBudgetStore.getState();
     const { entries: _entries } = useSpendStore.getState();
     const { exchangeRate } = useCurrencyStore.getState();
     const { scratchpadContent, documents, relocationTasks, shippingRateZarPerKg, targetExchangeRate } = usePluginsStore.getState();
     const { user, partner, householdId } = useAuthStore.getState();
     const { bills: _bills } = useBillsStore.getState();
-    const { currentTrip, trips: _trips } = useCartifyStore.getState();
+    const cartify = useCartifyStore.getState();
     const { subscriptions: _subscriptions } = useSubscriptionsStore.getState();
 
     // Safe defaults — stores may not be hydrated yet
-    const goals = _goals || [];
+    const goals: any[] = []; // Goals system temporarily disabled/migrated
     const entries = _entries || [];
     const bills = _bills || [];
-    const trips = _trips || [];
+    const trips = cartify.savedTrips || [];
     const subscriptions = _subscriptions || [];
     const { profile: childProfile, cachedData: childData, configuration: childConfig } = useChildCareStore.getState();
     const settings = useSettingsStore.getState();
@@ -56,14 +56,14 @@ export function buildHouseholdContext(): string {
         return acc;
     }, {} as Record<string, number>);
 
-    const topCategories = Object.entries(spendByCategory)
+    const topCategories = (Object.entries(spendByCategory) as [string, number][])
         .sort((a, b) => b[1] - a[1])
         .slice(0, 3)
         .map(([cat, amount]) => `${cat}: ₱${Math.round(amount).toLocaleString()}`)
         .join(', ');
 
     // 3. Goals Progress
-    const goalsSummary = goals.slice(0, 3).map(g => {
+    const goalsSummary = goals.slice(0, 3).map((g: any) => {
         const pct = g.targetAmount > 0 ? Math.round((g.savedAmount / g.targetAmount) * 100) : 0;
         return `${g.name}: ${pct}% (₱${Math.round(g.savedAmount).toLocaleString()})`;
     }).join(' | ');
@@ -73,13 +73,13 @@ export function buildHouseholdContext(): string {
     const paidBills = bills.filter(b => b.isPaid).length;
 
     // 5. Cartify Summary
-    const activeCartify = currentTrip 
-        ? `Active Trip: ${currentTrip.items.length} items, ₱${currentTrip.items.reduce((s, i) => s + (i.price * i.quantity), 0).toLocaleString()} current total.` 
+    const activeCartify = cartify.isActive
+        ? `Active Trip: ${cartify.items.length} items, ₱${cartify.items.reduce((s, i) => s + (i.unitPrice * i.quantity), 0).toLocaleString()} current total.` 
         : 'No active Cartify trip.';
     const pastTripsCount = trips.length;
 
     // 6. Subscriptions
-    const activeSubs = subscriptions.map(s => `${s.name} (₱${s.amount}/${s.cycle})`).join(', ');
+    const activeSubs = subscriptions.map((s: any) => `${s.name} (₱${s.amount}/${s.cycle})`).join(', ');
 
     // 7. Child Care
     const selectedSchool = childData.schools.find(s => s.id === childConfig.selectedSchoolId);
@@ -90,6 +90,14 @@ export function buildHouseholdContext(): string {
         ? documents.map(d => `- ${d.title} (${d.category}, ${d.date})${d.amount ? ` ₱${d.amount}` : ''} [Tags: ${d.tags.join(', ')}]`).join('\n')
         : '';
     const completedTasks = relocationTasks.filter(t => t.completed).length;
+
+    // 9. Recent Spend History (for itemized visibility)
+    const recentSpendHistory = entries
+        .slice()
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 20)
+        .map(e => `- ₱${e.amount.toLocaleString()} (${e.currency}) on ${new Date(e.timestamp).toLocaleDateString()} | Category: ${e.category || 'None'} ${e.note ? `| Note: "${e.note}"` : ''}`)
+        .join('\n');
 
     // Compile the final context string
     return `
@@ -130,6 +138,9 @@ You DO NOT have access to:
 - Total Lifetime Spent: ₱${Math.round(totalSpentPhp).toLocaleString()}
 ${topCategories ? `- Top Lifetime Categories: ${topCategories}` : ''}
 ${goalsSummary ? `- Goals: ${goalsSummary}` : ''}
+
+=== RECENT SPEND HISTORY (Latest 20 Entries) ===
+${recentSpendHistory || 'No recent spending logged.'}
 
 === BILLS & SHOPPING ===
 - Upcoming Bills: ${upcomingBills || 'None'}

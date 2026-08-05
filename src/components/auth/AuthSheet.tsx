@@ -16,7 +16,7 @@ interface AuthSheetProps {
 export function AuthSheet({ isOpen, onClose, mode }: AuthSheetProps) {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { login } = useAuthStore();
+  // AuthSheet is legacy — auth now handled via /login and /signup pages
   
   // State
   const [email, setEmail] = useState("");
@@ -60,7 +60,7 @@ export function AuthSheet({ isOpen, onClose, mode }: AuthSheetProps) {
       setTimeout(() => inputRefs.current[0]?.focus(), 100);
     } else {
       // Email/Password login
-      login(email);
+      // Legacy: auth now uses Supabase directly via /login page
       setIsLoading(false);
       window.location.href = "/";
       onClose();
@@ -96,7 +96,7 @@ export function AuthSheet({ isOpen, onClose, mode }: AuthSheetProps) {
   const verifyCode = async (fullCode: string) => {
     setIsLoading(true);
     await new Promise(r => setTimeout(r, 1200));
-    login(email);
+    // Legacy: auth now uses Supabase directly via /login page
     setIsLoading(false);
     window.location.href = "/";
     onClose();
