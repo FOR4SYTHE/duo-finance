@@ -11,7 +11,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 export function AIChatView() {
-    const { chats, currentChatId, isStreaming, addUserMessage, startAssistantMessage, appendToMessage, completeMessage, errorMessage, setStreaming, startNewChat, isFirstVisit, userName: defaultUserName, pendingScanContext, setPendingScanContext, truncateMessagesFrom } = useAIChatStore();
+    const { chats, currentChatId, isStreaming, addUserMessage, startAssistantMessage, appendToMessage, completeMessage, errorMessage, setStreaming, startNewChat, isFirstVisit, userName: defaultUserName, pendingScanContext, setPendingScanContext, truncateMessagesFrom, chatOrigin } = useAIChatStore();
     const { user } = useAuthStore();
     const userName = user?.name || defaultUserName;
     const [inputValue, setInputValue] = useState('');
@@ -238,11 +238,29 @@ export function AIChatView() {
         }
     }, [pendingScanContext, isStreaming]);
 
-    const suggestions = [
+    const defaultSuggestions = [
         "How's our budget this month?",
         "What can we save on?",
         "Compare PHP vs ZAR trends"
     ];
+
+    const scratchpadSuggestions = [
+        "Sort my grocery list by aisle.",
+        "Summarize my Scratchpad notes.",
+        "Add up the estimated costs."
+    ];
+
+    const receiptVaultSuggestions = [
+        "Check the warranty on my last receipt.",
+        "Did I pay VAT on the groceries?",
+        "Summarize my recent receipts."
+    ];
+
+    const suggestions = chatOrigin === 'scratchpad' 
+        ? scratchpadSuggestions 
+        : chatOrigin === 'receipt-vault' 
+            ? receiptVaultSuggestions 
+            : defaultSuggestions;
 
     return (
         <div className="flex flex-col h-full bg-[#050505] relative">

@@ -9,7 +9,7 @@ export function PluginsView() {
     const householdPlugins = [
         {
             id: 'scratchpad',
-            name: 'Shared Scratchpad',
+            name: 'Scratchpad',
             description: 'A rich-text notepad synced directly with DUO AI.',
             icon: <FileText className="w-5 h-5 text-white" />,
             color: 'bg-emerald-500',

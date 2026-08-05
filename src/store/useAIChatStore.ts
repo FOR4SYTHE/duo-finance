@@ -31,6 +31,7 @@ interface AIChatState {
     currentChatId: string | null;
     isStreaming: boolean;
     activeTab: 'chat' | 'scanner' | 'scratchpad' | 'plugins' | 'receipt-vault' | 'relocation-hub' | 'exchange-alerts' | 'dream-board';
+    chatOrigin: string | null;
     
     // Settings
     aiSettings: {
@@ -49,7 +50,7 @@ interface AIChatState {
     truncateMessagesFrom: (messageId: string) => void;
     
     // Chat History Actions
-    startNewChat: () => void;
+    startNewChat: (origin?: string) => void;
     loadChat: (id: string) => void;
     deleteChat: (id: string) => void;
     togglePinChat: (id: string) => void;
@@ -80,6 +81,7 @@ export const useAIChatStore = create<AIChatState>()(
             currentChatId: null,
             isStreaming: false,
             activeTab: 'chat',
+            chatOrigin: null,
             aiSettings: {
                 personality: 'general',
                 customInstructions: '',
@@ -207,7 +209,7 @@ export const useAIChatStore = create<AIChatState>()(
                 };
             }),
             
-            startNewChat: () => set({ currentChatId: null, isStreaming: false }),
+            startNewChat: (origin?: string) => set({ currentChatId: null, isStreaming: false, chatOrigin: origin || null }),
             loadChat: (id: string) => set({ currentChatId: id, isStreaming: false }),
             deleteChat: (id: string) => set((state) => {
                 const newChats = state.chats.filter(c => c.id !== id);
@@ -249,6 +251,7 @@ export const useAIChatStore = create<AIChatState>()(
             partialize: (state) => ({ 
                 chats: state.chats, 
                 activeTab: state.activeTab, 
+                chatOrigin: state.chatOrigin,
                 isFirstVisit: state.isFirstVisit,
                 userName: state.userName 
             }),

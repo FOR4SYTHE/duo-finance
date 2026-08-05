@@ -7,7 +7,7 @@ import { DuoAIIcon } from '@/components/ui/DuoAIIcon';
 export function SharedScratchpadView() {
     const editorRef = useRef<HTMLDivElement>(null);
     const { scratchpadContent, setScratchpadContent } = usePluginsStore();
-    const { setActiveTab } = useAIChatStore();
+    const { setActiveTab, startNewChat } = useAIChatStore();
 
     useEffect(() => {
         if (editorRef.current && editorRef.current.innerHTML !== scratchpadContent) {
@@ -42,14 +42,17 @@ export function SharedScratchpadView() {
                         <span className="text-emerald-400 text-xl">📝</span>
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-white tracking-tight">Shared Scratchpad</h2>
+                        <h2 className="text-xl font-bold text-white tracking-tight">Scratchpad</h2>
                         <p className="text-[13px] text-white/50">Your notes are automatically synced with DUO AI.</p>
                     </div>
                 </div>
                 
                 {/* Ask AI shortcut */}
                 <button 
-                    onClick={() => setActiveTab('chat')}
+                    onClick={() => {
+                        startNewChat('scratchpad');
+                        setActiveTab('chat');
+                    }}
                     className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-[13px] font-semibold text-white/80 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                     <DuoAIIcon className="w-[14px] h-[14px] text-emerald-400" forceState="star-idle" />
