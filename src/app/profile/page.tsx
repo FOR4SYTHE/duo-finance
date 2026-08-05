@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { ThinkingOrb } from "thinking-orbs";
-import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, Crown, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, AlertTriangle, Trash2, Pencil, MoreHorizontal, Activity } from "lucide-react";
+import { ChevronLeft, Copy, QrCode, ShieldCheck, ChevronRight, Settings, Crown, LogOut, CheckCircle2, Users, CreditCard, Bell, Camera, ShoppingCart, AlertTriangle, Trash2, Pencil, MoreHorizontal, Activity, StickyNote, Lock } from "lucide-react";
 import { PremiumIcon } from "@/components/ui/PremiumStarIcon";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useDualCurrency } from "@/hooks/useDualCurrency";
@@ -29,7 +29,20 @@ export default function ProfilePage() {
   const isDevAccount = authUser?.email?.includes('jonathanquidlat') ?? false;
   
   const { notes, fetchNotesAndReactions } = useDailyNoteStore();
-  const partnerNote = notes.find(n => n.sender_id !== authUser?.id);
+  const partnerNotes = notes.filter(n => n.sender_id !== authUser?.id);
+  const partnerNote = partnerNotes.length > 0 ? partnerNotes[partnerNotes.length - 1] : undefined;
+
+  const [hasUnreadNote, setHasUnreadNote] = useState(false);
+  const [isInviteCodeRevealed, setIsInviteCodeRevealed] = useState(false);
+  
+  useEffect(() => {
+    if (partnerNote) {
+      const lastSeenId = localStorage.getItem('last_seen_note_id');
+      setHasUnreadNote(lastSeenId !== partnerNote.id);
+    } else {
+      setHasUnreadNote(false);
+    }
+  }, [partnerNote]);
 
   useEffect(() => {
     if (householdId && authUser) {
@@ -397,7 +410,7 @@ export default function ProfilePage() {
             </>
           ) : (
             <div className="flex items-center gap-3.5 opacity-50 px-2">
-               <div className="w-12 h-12 rounded-full overflow-hidden border-[0.5px] border-white/20 shadow-md bg-black/40 backdrop-blur-sm flex items-center justify-center">
+<div className="w-12 h-12 rounded-full overflow-hidden border-[0.5px] border-white/20 shadow-md bg-black/40 backdrop-blur-sm flex items-center justify-center">
                   <span className="text-white/30 font-bold text-[16px]">?</span>
                </div>
                <div className="flex flex-col text-left">
@@ -431,9 +444,27 @@ export default function ProfilePage() {
               }}
               className="w-[140px] h-[155px] shrink-0 bg-[#1C1C1E] rounded-[32px] flex flex-col justify-between p-2 shadow-xl snap-start cursor-pointer hover:bg-[#2C2C2E] transition-colors relative"
             >
-               <div className="w-full bg-white rounded-[24px] p-3 flex flex-col items-start justify-between h-[80px] relative">
+               <div className="w-full bg-white rounded-[24px] p-3 flex flex-col items-start justify-between h-[80px] relative overflow-hidden">
                  {authPartner ? (
                    <>
+                     {hasUnreadNote && (
+                       <motion.div
+                         initial={{ y: '100%' }}
+                         animate={{ y: 0 }}
+                         transition={{ type: "spring", damping: 25, stiffness: 300, delay: 0.1 }}
+                         className="absolute inset-0 z-30 flex flex-col items-center justify-center p-2 text-center bg-white rounded-[24px]"
+                       >
+                         <div className="w-8 h-8 rounded-full bg-[#FF375F]/10 flex items-center justify-center mb-1.5 shadow-[inset_0_1px_4px_rgba(255,55,95,0.2)]">
+                           <StickyNote className="w-4 h-4 text-[#FF375F]" />
+                         </div>
+                         <span className="text-black font-black text-[10px] tracking-wider uppercase leading-none mb-1">
+                           New Note
+                         </span>
+                         <span className="text-[#FF375F] font-bold text-[8px] uppercase tracking-widest">
+                           From {authPartner.name?.split(' ')[0]}
+                         </span>
+                       </motion.div>
+                     )}
                      <div className="flex -space-x-2.5">
                        <div className="w-8 h-8 rounded-full border-[1.5px] border-white overflow-hidden bg-black/10 z-10 relative">
                          {profileImage ? (
@@ -458,9 +489,6 @@ export default function ProfilePage() {
                        <span className="text-black font-bold text-[15px] leading-none truncate max-w-[100px] mb-0.5">{authPartner.name?.split(' ')[0] || 'Partner'}</span>
                        <span className="text-black/50 text-[9px] font-bold uppercase tracking-wider leading-none">Partner</span>
                      </div>
-                     {partnerNote && (
-                       <div className="absolute top-[-4px] right-[-4px] w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center animate-pulse"></div>
-                     )}
                    </>
                  ) : (
                    <>
@@ -470,6 +498,10 @@ export default function ProfilePage() {
                  )}
                </div>
                
+               {hasUnreadNote && (
+                 <div className="absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-[1.5px] border-[#1C1C1E] shadow-sm flex items-center justify-center animate-pulse z-40"></div>
+               )}
+
                <div className="px-2 pb-2 pt-1 flex justify-between items-end">
                  <span className="text-white/50 text-[10px] font-semibold leading-tight">Shared<br/>Account</span>
                  <div className="w-8 h-8 rounded-full bg-[#0A84FF] flex items-center justify-center shadow-none">
@@ -658,18 +690,50 @@ export default function ProfilePage() {
               </div>
             )}
 
-            <BorderBeam size="line" colorVariant="mono">
-              <div className="w-full bg-[#0A0A0C] rounded-[28px] p-5 border-[0.5px] border-white/5 flex items-center justify-between shadow-[0_16px_32px_rgba(0,0,0,0.4)] relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
+            {authPartner && !isInviteCodeRevealed ? (
+              <motion.div 
+                layout
+                onClick={() => setIsInviteCodeRevealed(true)}
+                className="w-full bg-[#0A0A0C] rounded-[24px] p-3 px-4 border-[0.5px] border-white/5 flex items-center justify-between shadow-sm cursor-pointer hover:bg-white/[0.02] transition-colors relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.01] to-transparent pointer-events-none" />
                 <div className="flex flex-col relative z-10">
-                  <span className="text-white/40 text-[10px] uppercase tracking-[0.15em] font-bold mb-1">Household Invite Code</span>
-                  <span className="text-white font-mono text-[22px] tracking-[0.15em] font-medium opacity-90">{mockInviteCode}</span>
+                  <span className="text-white/40 text-[9px] uppercase tracking-[0.15em] font-bold mb-0.5">Household Invite Code</span>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#FF375F] shadow-[0_0_8px_rgba(255,55,95,0.8)]"></div>
+                    <span className="text-white/30 font-mono text-[16px] tracking-[0.2em] font-medium mt-0.5">••••••</span>
+                  </div>
                 </div>
-                <button onClick={handleCopyCode} className="w-12 h-12 relative z-10 bg-[#1C1C1E] hover:bg-white/10 rounded-full border-[0.5px] border-white/5 flex items-center justify-center transition-colors shadow-sm">
-                  {copied ? <CheckCircle2 className="w-5 h-5 text-[#30D158]" /> : <Copy className="w-5 h-5 text-white/60" />}
-                </button>
-              </div>
-            </BorderBeam>
+                <div className="w-9 h-9 relative z-10 bg-[#1C1C1E] rounded-full border-[0.5px] border-white/5 flex items-center justify-center transition-colors shadow-sm group-hover:bg-[#2C2C2E]">
+                  <Lock className="w-4 h-4 text-white/40" />
+                </div>
+              </motion.div>
+            ) : (
+              <BorderBeam size="line" colorVariant="mono">
+                <motion.div 
+                  layout 
+                  onClick={() => {
+                    if (authPartner) setIsInviteCodeRevealed(false);
+                  }}
+                  className={`w-full bg-[#0A0A0C] rounded-[28px] p-5 border-[0.5px] border-white/5 flex items-center justify-between shadow-[0_16px_32px_rgba(0,0,0,0.4)] relative overflow-hidden ${authPartner ? 'cursor-pointer hover:bg-white/[0.01] transition-colors' : ''}`}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
+                  <div className="flex flex-col relative z-10">
+                    <span className="text-white/40 text-[10px] uppercase tracking-[0.15em] font-bold mb-1">Household Invite Code</span>
+                    <span className="text-white font-mono text-[22px] tracking-[0.15em] font-medium opacity-90">{mockInviteCode}</span>
+                  </div>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopyCode();
+                    }} 
+                    className="w-12 h-12 relative z-10 bg-[#1C1C1E] hover:bg-white/10 rounded-full border-[0.5px] border-white/5 flex items-center justify-center transition-colors shadow-sm"
+                  >
+                    {copied ? <CheckCircle2 className="w-5 h-5 text-[#30D158]" /> : <Copy className="w-5 h-5 text-white/60" />}
+                  </button>
+                </motion.div>
+              </BorderBeam>
+            )}
           </div>
         </motion.div>
 

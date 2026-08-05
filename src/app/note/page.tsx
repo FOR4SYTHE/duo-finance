@@ -57,6 +57,17 @@ export default function NotePage() {
         }
     }, [householdId, fetchNotesAndReactions]);
 
+    // Mark the latest partner note as seen
+    useEffect(() => {
+        if (notes.length > 0) {
+            const partnerNotes = notes.filter(n => n.sender_id !== authUser?.id);
+            if (partnerNotes.length > 0) {
+                const latest = partnerNotes[partnerNotes.length - 1];
+                localStorage.setItem('last_seen_note_id', latest.id);
+            }
+        }
+    }, [notes, authUser]);
+
     // Notes for active date (Today only)
     const activeDateNotes = useMemo(() => {
         return notes.filter(n => getLocalYMD(new Date(n.created_at)) === todayYMD);
@@ -426,53 +437,15 @@ export default function NotePage() {
                         exit={{ opacity: 0, y: 40 }}
                         className="fixed bottom-8 right-6 z-20 flex flex-col items-end gap-3"
                     >
-                        <AnimatePresence>
-                            {showFabMenu && (
-                                <motion.div 
-                                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: 20, scale: 0.9 }}
-                                    className="flex flex-col gap-2 bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-[0_16px_32px_rgba(0,0,0,0.1)] border border-black/5 origin-bottom-right"
-                                >
-                                    {myNotes.length > 0 && (
-                                        <button
-                                            onClick={() => {
-                                                setShowFabMenu(false);
-                                                handleEdit(myNotes[0]); // Most recent note
-                                            }}
-                                            className="px-4 py-3 text-sm font-bold text-black/80 hover:bg-black/5 rounded-xl whitespace-nowrap text-left flex items-center gap-2"
-                                        >
-                                            <Edit2 className="w-4 h-4 text-black/40" />
-                                            Replace note
-                                        </button>
-                                    )}
-                                    <button
-                                        onClick={() => {
-                                            setShowFabMenu(false);
-                                            setIsComposing(true);
-                                            setEditingNoteId(null);
-                                        }}
-                                        className="px-4 py-3 text-sm font-bold text-black/80 hover:bg-black/5 rounded-xl whitespace-nowrap text-left flex items-center gap-2"
-                                    >
-                                        <Plus className="w-4 h-4 text-black/40" />
-                                        Make new note
-                                    </button>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-
                         <button
                             onClick={() => {
-                                if (myNotes.length > 0) {
-                                    setShowFabMenu(!showFabMenu);
-                                } else {
-                                    setIsComposing(true);
-                                    setEditingNoteId(null);
-                                }
+                                setIsComposing(true);
+                                setEditingNoteId(null);
+                                setShowFabMenu(false); // Just in case state exists, but we won't need it.
                             }}
                             className="h-14 w-14 bg-black text-white rounded-full font-bold shadow-[0_16px_32px_rgba(0,0,0,0.4)] flex items-center justify-center active:scale-95 transition-transform relative z-30"
                         >
-                            <Plus className={`w-6 h-6 transition-transform duration-300 ${showFabMenu ? 'rotate-45' : ''}`} />
+                            <Plus className="w-6 h-6" />
                         </button>
                     </motion.div>
                 )}
