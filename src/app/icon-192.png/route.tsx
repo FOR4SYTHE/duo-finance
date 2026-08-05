@@ -1,10 +1,11 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const size = { width: 180, height: 180 }
-export const contentType = 'image/png'
 
-export default async function Icon() {
+export async function GET() {
+  const size = 192;
+  
+  // Fetch Hanken Grotesk 900 (Black) WOFF format from jsdelivr/fontsource for Satori
   const fontData = await fetch(
     'https://cdn.jsdelivr.net/npm/@fontsource/hanken-grotesk/files/hanken-grotesk-latin-900-normal.woff'
   ).then((res) => res.arrayBuffer());
@@ -19,15 +20,16 @@ export default async function Icon() {
           alignItems: 'center', 
           justifyContent: 'center', 
           background: '#000000', 
-          borderRadius: '40px' 
+          borderRadius: `${size * 0.22}px` 
         }}
       >
         <div 
           style={{ 
             display: 'flex', 
-            fontSize: 64, 
+            fontSize: size * 0.35, 
             fontWeight: 900, 
-            letterSpacing: '6px', 
+            letterSpacing: `${size * 0.05}px`, 
+            // Exact Welcome Page Gradient and shadow styling
             backgroundImage: "linear-gradient(110deg, #b3b3b3 0%, #ffffff 25%, #4a4a4a 50%, #ffffff 75%, #b3b3b3 100%)",
             backgroundClip: "text",
             color: "transparent",
@@ -39,7 +41,8 @@ export default async function Icon() {
         </div>
       </div>
     ), { 
-      ...size,
+      width: size, 
+      height: size,
       fonts: [
         {
           name: 'Hanken Grotesk',
