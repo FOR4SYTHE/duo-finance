@@ -14,11 +14,13 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/api/icons?size=192',
         sizes: '192x192',
         type: 'image/png',
+        purpose: 'any maskable',
       },
       {
         src: '/api/icons?size=512',
         sizes: '512x512',
         type: 'image/png',
+        purpose: 'any maskable',
       },
     ],
   }
