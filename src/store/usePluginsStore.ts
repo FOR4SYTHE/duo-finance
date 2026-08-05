@@ -12,6 +12,16 @@ export interface VaultDocument {
     currency?: 'PHP' | 'ZAR';
 }
 
+export interface FlightConfig {
+    airline: string;
+    flightNumber: string;
+    origin: string;
+    destination: string;
+    date: string;
+    layover?: string;
+    connectingFlightNumber?: string;
+}
+
 interface PluginsState {
     scratchpadContent: string;
     setScratchpadContent: (content: string) => void;
@@ -28,6 +38,8 @@ interface PluginsState {
     deleteRelocationTask: (id: string) => void;
     shippingRateZarPerKg: number;
     setShippingRateZarPerKg: (rate: number) => void;
+    flightConfig: FlightConfig | null;
+    setFlightConfig: (config: FlightConfig | null) => void;
 
     // Exchange Alerts
     targetExchangeRate: number | null;
@@ -66,6 +78,8 @@ export const usePluginsStore = create<PluginsState>()(
             })),
             shippingRateZarPerKg: 350, // Average rate for airfreight per KG from SA to PH
             setShippingRateZarPerKg: (rate) => set({ shippingRateZarPerKg: rate }),
+            flightConfig: null,
+            setFlightConfig: (config) => set({ flightConfig: config }),
 
             // Exchange Alerts
             targetExchangeRate: null,
