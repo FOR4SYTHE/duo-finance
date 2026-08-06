@@ -43,7 +43,7 @@ export function Calculator() {
     const targetCurrency = isPhpPrimary ? 'ZAR' : 'PHP';
     
     const numericValue = Number(displayValue || 0);
-    const convertedAmount = getSecondaryValue(numericValue);
+    const convertedAmount = isPhpPrimary ? numericValue * exchangeRate : numericValue / exchangeRate;
     const statusColor = isLoadingRate ? "text-status-warn animate-pulse" : "text-status-good";
 
     const handleAction = (label: string) => {
