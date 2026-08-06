@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { BorderBeam } from "border-beam";
@@ -65,7 +65,7 @@ export default function ProfilePage() {
 
   const [isPartnerSheetOpen, setIsPartnerSheetOpen] = useState(false);
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [household, setHousehold] = useState<any>(null);
 
   const [joinStep, setJoinStep] = useState<'idle' | 'input' | 'verifying' | 'matched' | 'welcome'>('idle');
@@ -110,7 +110,7 @@ export default function ProfilePage() {
       }
     }
     loadHousehold();
-  }, [householdId, supabase]);
+  }, [householdId]);
 
   const mockInviteCode = household?.invite_code || "------";
 

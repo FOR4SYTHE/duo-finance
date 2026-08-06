@@ -38,15 +38,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     lastSyncRef.current = now;
     initializingRef.current = true;
-    await initializeAuth();
-    await initializeCurrency();
-    await initializeSettings();
-    await initializeBudget();
-    await initializeSpend();
-    await initializeCartify();
-    await initializeBills();
-    await initializeGoals();
-    await initializeInsurance();
+    await initializeAuth(); // Must run first — other stores depend on auth session
+    await Promise.all([
+      initializeCurrency(),
+      useCurrencyStore.getState().syncRates(), // Fetch live exchange rate from Frankfurter
+      initializeSettings(),
+      initializeBudget(),
+      initializeSpend(),
+      initializeCartify(),
+      initializeBills(),
+      initializeGoals(),
+      initializeInsurance(),
+    ]);
     setTimeout(() => { initializingRef.current = false; }, 100);
   }, [initializeAuth, initializeCurrency, initializeSettings, initializeBudget, initializeSpend, initializeCartify, initializeBills, initializeGoals, initializeInsurance]);
 
