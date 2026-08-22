@@ -1,15 +1,54 @@
 name: Keep Supabase Alive
+
 on:
   schedule:
-    - cron: '0 12 * * 1,4' # Runs every Mon and Thu at 12:00 UTC
-  workflow_dispatch: # Allows you to trigger it manually
+    # Every 3 days at 12:00 UTC — well within the 7-day pause window
+    - cron: '0 12 */3 * *'
+  workflow_dispatch: # Manual trigger
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase
+      - name: Ping Supabase (read query)
         run: |
-          curl -s -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/households?select=id&limit=1" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/households?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          echo "Supabase responded with HTTP $response"
+          if [ "$response" -lt 200 ] || [ "$response" -ge 300 ]; then
+            echo "::error::Supabase ping failed with HTTP $response"
+            exit 1
+          fi
+
+      - name: Write heartbeat to Supabase
+        run: |
+          # Upsert a row into a heartbeat table to guarantee a write operation.
+          # If the table doesn't exist yet, this step will fail gracefully
+          # and the read ping above is still the primary keep-alive.
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/heartbeat" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: resolution=merge-duplicates" \
+            -d "{\"id\": \"keep-alive\", \"pinged_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}")
+          echo "Heartbeat write responded with HTTP $response"
+          # Don't fail the workflow if the table doesn't exist yet
+          if [ "$response" -ge 200 ] && [ "$response" -lt 300 ]; then
+            echo "Heartbeat write successful"
+          else
+            echo "::warning::Heartbeat write returned HTTP $response (table may not exist yet — that's OK)"
+          fi
+
+  # Keep the repo active so GitHub doesn't disable the cron schedule
+  keepalive-commit:
+    runs-on: ubuntu-latest
+    needs: ping
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep workflow alive
+        uses: gautamkrishnar/keepalive-workflow@v2
