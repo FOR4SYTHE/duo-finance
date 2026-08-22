@@ -42,13 +42,3 @@ jobs:
             echo "::warning::Heartbeat write returned HTTP $response (table may not exist yet — that's OK)"
           fi
 
-  # Keep the repo active so GitHub doesn't disable the cron schedule
-  keepalive-commit:
-    runs-on: ubuntu-latest
-    needs: ping
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Keep workflow alive
-        uses: gautamkrishnar/keepalive-workflow@v2
